@@ -1,0 +1,37 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "ttcyRS",
+        "date": "1609332893",
+        "viewed": 216,
+        "name": "oklab - optimized color mix",
+        "username": "iq",
+        "description": "Mixing linear-rgb colors in oklab space, but skipping 3 unnecessary 3x3 matrix transformations. Left: optimized oklab interpolation. Right: rgb interpolation. More info here: [url]https:\/\/bottosson.github.io\/posts\/oklab[\/url]",
+        "likes": 21,
+        "published": 3,
+        "flags": 0,
+        "usePreview": 0,
+        "tags": [
+            "2d",
+            "color",
+            "colorspace",
+            "oklab"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ The MIT License\n\/\/ Copyright \u00a9 2020 Inigo Quilez\n\/\/ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and\/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\/\/ Optimized linear-rgb color mix in oklab space, useful\n\/\/ when our software operates in rgb space but we still\n\/\/ we want to have intuitive color mixing - note the\n\/\/ unexpected purples introduced when blending in rgb\n\/\/ space (right columns) vs the intuitive transitions\n\/\/ produced by the oklab color space (left columns).\n\/\/\n\/\/ Now, when mixing linear rgb colors in oklab space, the\n\/\/ linear transform from cone to Lab space and back can be\n\/\/ omitted, saving three 3x3 transformation per blend!\n\/\/\n\/\/ oklab was invented by Bj\u00f6rn Ottosson: https:\/\/bottosson.github.io\/posts\/oklab\n\/\/\n\/\/ More oklab on Shadertoy: https:\/\/www.shadertoy.com\/view\/WtccD7\n\nvec3 oklab_mix( vec3 colA, vec3 colB, float h )\n{\n    \/\/ https:\/\/bottosson.github.io\/posts\/oklab\n    const mat3 kCONEtoLMS = mat3(                \n         0.4121656120,  0.2118591070,  0.0883097947,\n         0.5362752080,  0.6807189584,  0.2818474174,\n         0.0514575653,  0.1074065790,  0.6302613616);\n    const mat3 kLMStoCONE = mat3(\n         4.0767245293, -1.2681437731, -0.0041119885,\n        -3.3072168827,  2.6093323231, -0.7034763098,\n         0.2307590544, -0.3411344290,  1.7068625689);\n                    \n    \/\/ rgb to cone (arg of pow can't be negative)\n    vec3 lmsA = pow( kCONEtoLMS*colA, vec3(1.0\/3.0) );\n    vec3 lmsB = pow( kCONEtoLMS*colB, vec3(1.0\/3.0) );\n    \/\/ lerp\n    vec3 lms = mix( lmsA, lmsB, h );\n    \/\/ cone to rgb\n    return kLMStoCONE*(lms*lms*lms);\n}\n\n\/\/====================================================\n\n\/\/ example colors\nconst vec3 kCols[6] = vec3[6]( \n    vec3(1.00,1.00,1.00), vec3(0.00,0.00,1.00),\n    vec3(0.00,0.00,1.00), vec3(1.00,0.70,0.01),\n    vec3(0.91,0.14,0.01), vec3(0.01,0.20,1.00) );\n    \nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ normalized pixel coordinates (from 0 to 1)\n    vec2 p = fragCoord\/iResolution.xy;\n\n    \/\/ choose colors to lerp\n    int id = int(floor(p.x*6.0));\n    int ba = id & 6; \/\/ yes, AND!\n    vec3 colA = kCols[ba+0];\n    vec3 colB = kCols[ba+1];\n    \n    \/\/ linear interpolation, left oklab, right rgb\n    vec3 col = ((id&1)==0) ? oklab_mix( colA, colB, p.y ) :\n                                   mix( colA, colB, p.y );\n                                   \n    \/\/ black separators\n    col *= smoothstep(0.01,0.015,abs(fract(p.x*6.0+0.5)-0.5));\n    \n    \/\/ linear to gamma\n    col = pow( col, vec3(0.4545) );\n\n    \/\/ output\n    fragColor = vec4( col, 1.0 );\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

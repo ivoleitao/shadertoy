@@ -1,0 +1,153 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "MsG3Dz",
+        "date": "1453999525",
+        "viewed": 7522,
+        "name": "Three Pass DOF Example",
+        "username": "mu6k",
+        "description": "Use mouse to rotate! My attempt at writing a decent depth of field effect. Well all I can say is that I'm satisfied with it.",
+        "likes": 127,
+        "published": 3,
+        "flags": 32,
+        "tags": [
+            "raymarching",
+            "dof",
+            "bokeh",
+            "hexagon",
+            "depth"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XdfGR8",
+                    "filepath": "\/media\/previz\/buffer03.png",
+                    "previewfilepath": "\/media\/previz\/buffer03.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/*by musk License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n  email: muuuusk at gmail dot com\n\n2016-02-02:\n\n  My attempt at writing a decent depth of field effect.\n  Well all I can say is that I'm satisfied with it.\n\n  My attempt was to get a hexagonal bokeh. Well it's sort of like that.\n  But maybe using it on a scene with a lot of reflection wasnt the best idea...\n\n  So you might ask how come this is three pass when four buffers are used?\n  Well only the depth of field effect uses 3 passes. \n  The rest of the passes handle rendering and post processing.\n  \n  This part here is the post processing.\n*\/\n\n#define DISPLAY_GAMMA 1.8\n#define USE_CHROMATIC_ABBERATION\n\nvec2 uvsToUv(vec2 uvs){\n    return (uvs)*vec2(iResolution.y\/iResolution.x,1.0)+vec2(.5,.5);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy \/ iResolution.xy;\n    vec2 uvs = (fragCoord.xy-iResolution.xy*.5)\/iResolution.yy;\n    \n    \/\/chromatic abberation\n    #ifdef USE_CHROMATIC_ABBERATION\n    vec3 color = vec3(0,0,0);\n    color.x += texture(iChannel0, uvsToUv(uvs)).x*.66;\n    color.xy += texture(iChannel0, uvsToUv(uvs*.995)).xy*.33;\n    color.y += texture(iChannel0, uvsToUv(uvs*.990)).y*.33;\n    color.yz += texture(iChannel0, uvsToUv(uvs*.985)).yz*.33;\n    color.z += texture(iChannel0, uvsToUv(uvs*.980)).z*.66;\n    #else\n    vec3 color = texture(iChannel0, uvsToUv(uvs)).xyz;\n    #endif\n    \n    \/\/tone mapping\n    color = vec3(1.7,1.8,1.9)*color\/(1.0+color);\n    \n    \/\/inverse gamma correction\n\tfragColor = vec4(pow(color,vec3((1.0)\/(DISPLAY_GAMMA))),1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/by musk License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\/\/rendering pass\n\n#define SPHERE 1.0 \n\/\/#define SPHERE 0.0 \n\n#define FOCUS_DISTANCE 7.5\n#define DEFOCUS_PER_UNIT 0.0925\n#define BLUR_LIMIT 1.0\n\n#define RAY_STEPS_PRIMARY 80\n#define RAY_STEPS_SECOND 20\n#define RAY_STEPS_THIRD 10\n#define RAY_STEPS_FOURTH 5\n\nfloat df2obj(vec3 p){\/\/repeated spheres\n    p.x+=iTime-2.0;\n    vec3 op=p;\n    vec3 p2 = p;\n    p.xz=mod(p.xz+vec2(2.0),4.0)-vec2(2.0);\n    float box=max(abs(p.x),max(abs(p.y),abs(p.z)));\n    float sphere = length(p);\n    return (mix(box,sphere,SPHERE)-1.0);\n}\n\nfloat df2floor(vec3 p){\/\/the floor\n\treturn p.y+1.0;\n}\n\nfloat df2(vec3 p){\/\/union(spheres, floor)\n\treturn min(df2obj(p), df2floor(p));\n}\n\n#define nvec3(A,B,C) normalize(vec3(A,B,C))\n#define nvec3a2(A,B) normalize(vec3(A,B))\n\nmat2 matr(float a){\/\/build a 2d rotation matrix\n    float c=cos(a),s=sin(a);\n    return mat2(c,s,-s,c);\n}\n\n#define NF(R,P,F) {vec2 e=vec2(0,0.01);R=nvec3(F(P-e.yxx),F(P-e.xyx),F(P-e.xxy));}\n#define RM(R,P,D,F,S) {R=P+D*.1; for(int i=0; i<S; i++){float t=F(R);R+=t*D;}}\n\n\nvec3 shading(vec3 p, vec3 d, vec3 n){\/\/compute the shade at given position direction surface normal\n    vec3 c = vec3(.0); \/\/object color\n    vec3 bg; \/\/background color\n    bg = (d*.5+.5)*.5;\n    bg+=sin(d.y*4.0)*.5+.5;\n    bg*=max(cos(iTime*0.2-10.0)*.7+.5,.0);\n    if (df2(p)<.1){ \/\/if near surface\n        float lt=iTime-14.0;\n        vec3 l = vec3(sin(lt*.1)*14.0,4.0+cos(lt*.23)*2.0,cos(lt*.13)*14.0);\n        vec3 ldir = normalize(vec3(p-l));\n        float oa = (df2(p-n)+df2(p-n*.5)*2.0+df2(p-n*.25)*4.0)*.5*.3333+.5;\/\/ambient occlusion\n        float od = max(min(min(df2(p-ldir*.3)\/0.3,df2(p-ldir)),df2(p-ldir*0.6)\/.6),.0);\/\/shadow\n        float dist = distance(p,l);\n        c = vec3(.8,.7,.6)*max(.0,dot(n,ldir)*.5)\/(1.0+dist*0.1)*(od*.8+.2)*2.0;\/\/diffuse component\n        float spec = pow(max(.0,dot(normalize(reflect(d,n)),-ldir)*.5+.5),1000.0)*56.0;\/\/specular component\n        c+=vec3(spec*od);\n        c*=oa;\n        c=mix(bg,c,1.0\/(1.0+length(p)*0.01));\/\/fogging\n    } else {\n        c =bg;\n    }\n    return c;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy \/ iResolution.xy;\n    vec2 uvs = (fragCoord.xy-iResolution.xy*.5)\/iResolution.yy*2.0;\n    float ar= iResolution.x \/ iResolution.y;\n    \n    vec3 dir = nvec3a2(uvs, 2.0);\/\/primary ray direction\n    \n    vec3 pos = vec3(.0,.0,-8.0);\/\/primary ray position\n    vec2 muvs = (iMouse.xy-iResolution.xy*.5)\/iResolution.yy;\/\/mouse position\n    \n    \/\/rotate the direction and position based on mouse\n\tmat2 rx = matr(muvs.y*4.0-4.7);\n    mat2 ry = matr(muvs.x*4.0+4.5);\n    vec3 p;\n    dir.yz*=rx;\n    dir.xz*=ry;\n    pos.yz*=rx;\n    pos.xz*=ry;\n    \n    \/\/first ray\n    RM(p,pos,dir,df2,RAY_STEPS_PRIMARY);\n    vec3 norm;\n    NF(norm, p, df2);\n    \n    \/\/fresnel shading\n    float fres = 1.0-dot(dir,norm)*.9;\n    vec3 color = shading(p,dir, norm);\n    \n    if (df2(p)<.1){\/\/did we hit surface?\n        \n        \/\/then shoot the second ray\n        vec3 p2,n2,d2=reflect(dir,norm);\n        RM(p2,p,d2,df2,RAY_STEPS_SECOND);\n        NF(n2,p2,df2);\n        \n        color += shading(p2,d2,n2)*fres;\n        \n        if (df2(p2)<.1){\/\/did we hit surface again?\n\t\t\t\n            \/\/then shoot the third ray\n            float fres2 = 1.0-dot(d2,n2)*.9;\n            vec3 p3,n3,d3=reflect(d2,n2);\n            RM(p3,p2,d3,df2,RAY_STEPS_THIRD);\n            NF(n3,p3,df2);\n\n            color += shading(p3,d3,n3)*fres2*fres;\n\n            if (df2(p3)<.1){\/\/again?\n                \n            \t\/\/then shoot the fourth ray\n                float fres3 = 1.0-dot(d3,n3)*.9;\n                vec3 p4,n4,d4=reflect(d3,n3);\n                RM(p4,p3,d4,df2,RAY_STEPS_FOURTH);\n                NF(n4,p4,df2);\n\n                color += shading(p4,d4,n4)*fres3*fres2*fres;\n            }\n        }\n    }\n    \n    \/\/compute how much this pixel is focused (this math could be improved)\n    float focus = abs(distance(p,pos)-FOCUS_DISTANCE)*DEFOCUS_PER_UNIT;\n    focus = min(BLUR_LIMIT,focus);\n    \n    \/\/store color and focus amount\n\tfragColor = vec4(color,focus);\n}",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/by musk License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\/\/first blur pass\n\nconst vec2 dir = vec2(0.02,0.02);\/\/blur direction\nconst float thresh = .5;\/\/depth threshold\n\nfloat weight(float x){\n\treturn 1.0-x*x*x*x;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy \/ iResolution.xy;\n    vec2 uvs = (fragCoord.xy-iResolution.xy*.5)\/iResolution.yy*2.0;\n    \n    float dist = texture(iChannel0,uv).a;\n    float totalw = .0;\n    \n    vec3 color = vec3(0,0,0);\n    for (int i=0; i<=20; i++){\n        vec2 p = uv;\n        float fi = float(i-10)\/10.0;\n        p.xy+=dir*fi*dist;\n        \n        float w = weight(fi);\n        \n    \tvec4 c = texture(iChannel0,p);\n        if (dist>=c.a){\n            w*=max(.0,1.0-(dist-c.a)\/thresh);\n        }\n        color += c.xyz*w;\n        totalw+=w;\n    }\n    color\/=totalw;\n\tfragColor = vec4(color,dist);\n}",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4sXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/by musk License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\/\/second blur pass\n\nconst vec2 dir = vec2(0.02,-0.02);\/\/blur direction\nconst float thresh = .5;\/\/depth threshold\n\nfloat weight(float x){\n\treturn 1.0-x*x*x*x;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy \/ iResolution.xy;\n    vec2 uvs = (fragCoord.xy-iResolution.xy*.5)\/iResolution.yy;\n\n    float dist = texture(iChannel0,uv).a;\n    float totalw = .0;\n    \n    vec3 color = vec3(0,0,0);\n    for (int i=0; i<=20; i++){\n        vec2 p = uv;\n        float fi = float(i-10)\/10.0;\n        p.xy+=dir*fi*dist;\n        \n        float w = weight(fi);\n        \n    \tvec4 c = texture(iChannel0,p);\n        if (dist>=c.a){\n            w*=max(.0,1.0-(dist-c.a)\/thresh);\n        }\n        color += c.xyz*w;\n        totalw+=w;\n    }\n    color\/=totalw;\n\tfragColor = vec4(color,dist);\n}",
+            "name": "Buffer C",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4sXGR8",
+                    "filepath": "\/media\/previz\/buffer02.png",
+                    "previewfilepath": "\/media\/previz\/buffer02.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XdfGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/by musk License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\/\/third blur pass\n\nconst vec2 dir = vec2(0.00,0.04);\/\/blur direction\nconst float thresh = .5;\/\/depth threshold\n\nfloat weight(float x){\n\treturn 1.0-x*x*x*x;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy \/ iResolution.xy;\n    vec2 uvs = (fragCoord.xy-iResolution.xy*.5)\/iResolution.yy;\n    \n    float dist = texture(iChannel0,uv).a;\n    float totalw = .0;\n    \n    vec3 color = vec3(0,0,0);\n    for (int i=0; i<=20; i++){\n        vec2 p = uv;\n        float fi = float(i-10)\/10.0;\n        p.xy+=dir*fi*dist;\n        \n        float w = weight(fi);\n        \n    \tvec4 c = texture(iChannel0,p);\n        if (dist>=c.a){\n            w*=max(.0,1.0-(dist-c.a)\/thresh);\n        }\n        color += c.xyz*w;\n        totalw+=w;\n    }\n    color\/=totalw;\n\tfragColor = vec4(color,dist);\n}",
+            "name": "Buffer D",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

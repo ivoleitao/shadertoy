@@ -1,0 +1,80 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "MstXWS",
+        "date": "1461313640",
+        "viewed": 5505,
+        "name": "Raymarched reaction-diffusion",
+        "username": "emh",
+        "description": "Ray-marched sphere with reaction diffusion as displacement. Based on https:\/\/www.shadertoy.com\/view\/XsG3z1, original at https:\/\/www.shadertoy.com\/view\/4dcGW2 . Mouse to rotate ball.",
+        "likes": 102,
+        "published": 3,
+        "flags": 32,
+        "usePreview": 0,
+        "tags": [
+            "procedural",
+            "raymarch"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Created by Eivind Magnus Hvidevold emnh\/2016.\n\/\/ Reaction-diffusion by Flexi.\n\/\/ Raymarching by inigo quilez - iq\/2013.\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\nfloat sdSphere( vec3 p, float s )\n{\n    return length(p)-s;\n}\n\n\/\/----------------------------------------------------------------------\n\nmat4 rotationMatrix(vec3 axis, float angle)\n{\n    axis = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n    float oc = 1.0 - c;\n    \n    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,\n                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,\n                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,\n                0.0,                                0.0,                                0.0,                                1.0);\n}\n\nvec3 hsv2rgb(vec3 c)\n{\n    vec4 K = vec4(1.0, 2.0 \/ 3.0, 1.0 \/ 3.0, 3.0);\n    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);\n    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);\n}\n\nfloat hash( float n ) { return fract(sin(n)*753.5453123); }\n\nfloat noise( in vec3 x )\n{\n    vec3 p = floor(x);\n    vec3 f = fract(x);\n    f = f*f*(3.0-2.0*f);\n\t\n    float n = p.x + p.y*157.0 + 113.0*p.z;\n    return mix(mix(mix( hash(n+  0.0), hash(n+  1.0),f.x),\n                   mix( hash(n+157.0), hash(n+158.0),f.x),f.y),\n               mix(mix( hash(n+113.0), hash(n+114.0),f.x),\n                   mix( hash(n+270.0), hash(n+271.0),f.x),f.y),f.z);\n}\n\nvec2 map(in vec3 pos) {    \n    vec3 o = pos;\n    \n    pos = pos - vec3(0.0, -1.5, 0.0);\n    vec2 mo = iMouse.xy\/iResolution.xy;\n    float ms = 3.14 * 2.0;\n    mat4 mrx = rotationMatrix(vec3(1.0, 0.0, 0.0), mo.y * ms);\n    mat4 mry = rotationMatrix(vec3(0.0, 1.0, 0.0), mo.x * ms);\n    mat4 mrt = rotationMatrix(vec3(0.0, 1.0, 0.0), sin(iTime \/ 10.0));\n    \n    pos = (vec4(pos, 1.0) * mrx * mry * mrt).xyz;\n    \n    \/\/ uv mapping\n    vec3 p = normalize(pos);\n    vec2 uv = vec2(0.0);\n    uv.x = 0.5 + atan(p.z, p.x) \/ (2.*3.14159);\n    uv.y = 0.5 - asin(p.y) \/ 3.14159;\n    \n    float y = texture(iChannel0, uv).y;\n    float y2 = 0.1 * y;\n    \n    float ss = 5.0;\n    vec3 sphereO = pos; \/\/ - vec3(0.0, 0.25, 1.0);\n    \n    float sd = 0.0;\n\tsd = sdSphere(sphereO \/ ss, 0.4 + y2) * ss;\n    \n    return vec2(sd, iTime \/ 10.0 + y); \/\/sd + iTime \/ 10.0);\n}\n\nvec2 castRay( in vec3 ro, in vec3 rd )\n{\n    float tmin = 1.0;\n    float tmax = 20.0;\n    \n#if 0\n    float tp1 = (0.0-ro.y)\/rd.y; if( tp1>0.0 ) tmax = min( tmax, tp1 );\n    float tp2 = (1.6-ro.y)\/rd.y; if( tp2>0.0 ) { if( ro.y>1.6 ) tmin = max( tmin, tp2 );\n                                                 else           tmax = min( tmax, tp2 ); }\n#endif\n    \n\tfloat precis = 0.002;\n    float t = tmin;\n    float m = -1.0;\n    for( int i=0; i<50; i++ )\n    {\n\t    vec2 res = map( ro+rd*t );\n        if( res.x<precis || t>tmax ) break;\n        t += res.x;\n\t    m = res.y;\n    }\n\n    if( t>tmax ) m=-1.0;\n    return vec2( t, m );\n}\n\n\nfloat softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax )\n{\n\tfloat res = 1.0;\n    float t = mint;\n    for( int i=0; i<16; i++ )\n    {\n\t\tfloat h = map( ro + rd*t ).x;\n        res = min( res, 8.0*h\/t );\n        t += clamp( h, 0.02, 0.10 );\n        if( h<0.001 || t>tmax ) break;\n    }\n    return clamp( res, 0.0, 1.0 );\n\n}\n\nvec3 calcNormal( in vec3 pos )\n{\n\tvec3 eps = vec3( 0.001, 0.0, 0.0 );\n\tvec3 nor = vec3(\n\t    map(pos+eps.xyy).x - map(pos-eps.xyy).x,\n\t    map(pos+eps.yxy).x - map(pos-eps.yxy).x,\n\t    map(pos+eps.yyx).x - map(pos-eps.yyx).x );\n\treturn normalize(nor);\n}\n\nfloat calcAO( in vec3 pos, in vec3 nor )\n{\n\tfloat occ = 0.0;\n    float sca = 1.0;\n    for( int i=0; i<5; i++ )\n    {\n        float hr = 0.01 + 0.12*float(i)\/4.0;\n        vec3 aopos =  nor * hr + pos;\n        float dd = map( aopos ).x;\n        occ += -(dd-hr)*sca;\n        sca *= 0.95;\n    }\n    return clamp( 1.0 - 3.0*occ, 0.0, 1.0 );    \n}\n\nvec3 render( in vec3 ro, in vec3 rd )\n{ \n    vec3 col = vec3(0.7, 0.9, 1.0) +rd.y*0.8;\n    vec2 res = castRay(ro,rd);\n    float t = res.x;\n\tfloat m = res.y;\n    if( m>-0.5 )\n    {\n        vec3 pos = ro + t*rd;\n        vec3 nor = calcNormal( pos );\n        vec3 ref = reflect( rd, nor );\n        \n        \/\/ material        \n\t\t\/* col = 0.45 + 0.3*sin( vec3(0.05,0.08,0.10)*(m-1.0) );\n        \n\t\t\n        if( m<1.5 )\n        {\n            \n            float f = mod( floor(5.0*pos.z) + floor(5.0*pos.x), 2.0);\n            col = 0.4 + 0.1*f*vec3(1.0);\n        }*\/\n\t\tcol = hsv2rgb(vec3(m, 1.0, 1.0));\n\n        \/\/ lighting        \n        float occ = calcAO( pos, nor );\n\t\tvec3  lig = normalize( vec3(-0.6, 0.7, -0.5) );\n\t\tfloat amb = clamp( 0.5+0.5*nor.y, 0.0, 1.0 );\n        float dif = clamp( dot( nor, lig ), 0.0, 1.0 );\n        float bac = clamp( dot( nor, normalize(vec3(-lig.x,0.0,-lig.z))), 0.0, 1.0 )*clamp( 1.0-pos.y,0.0,1.0);\n        float dom = smoothstep( -0.1, 0.1, ref.y );\n        float fre = pow( clamp(1.0+dot(nor,rd),0.0,1.0), 2.0 );\n\t\tfloat spe = pow(clamp( dot( ref, lig ), 0.0, 1.0 ),16.0);\n        \n        dif *= softshadow( pos, lig, 0.02, 2.5 );\n        dom *= softshadow( pos, ref, 0.02, 2.5 );\n\n\t\tvec3 lin = vec3(0.0);\n        lin += 1.20*dif*vec3(1.00,0.85,0.55);\n\t\tlin += 1.20*spe*vec3(1.00,0.85,0.55)*dif;\n        lin += 0.20*amb*vec3(0.50,0.70,1.00)*occ;\n        lin += 0.30*dom*vec3(0.50,0.70,1.00)*occ;\n        lin += 0.30*bac*vec3(0.25,0.25,0.25)*occ;\n        lin += 0.40*fre*vec3(1.00,1.00,1.00)*occ;\n\t\tcol = col*lin;\n\n    \tcol = mix( col, vec3(0.8,0.9,1.0), 1.0-exp( -0.002*t*t ) );\n\n    }\n\n\treturn vec3( clamp(col,0.0,1.0) );\n}\n\nmat3 setCamera( in vec3 ro, in vec3 ta, float cr )\n{\n\tvec3 cw = normalize(ta-ro);\n\tvec3 cp = vec3(sin(cr), cos(cr),0.0);\n\tvec3 cu = normalize( cross(cw,cp) );\n\tvec3 cv = normalize( cross(cu,cw) );\n    return mat3( cu, cv, cw );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 q = fragCoord.xy\/iResolution.xy;\n    vec2 p = -1.0+2.0*q;\n\tp.x *= iResolution.x\/iResolution.y;\n    vec2 mo = iMouse.xy\/iResolution.xy;\n\t\t \n\tfloat time = 15.0 + iTime;\n\n\t\/\/ camera\t\n\t\/\/ vec3 ro = vec3( -0.5+3.5*cos(0.1*time + 6.0*mo.x), 1.0 + 2.0*mo.y, 0.5 + 3.5*sin(0.1*time + 6.0*mo.x) );\n    \/\/vec3 ro = vec3( -0.5+3.5*cos(6.0*mo.x), 1.0 + 2.0*mo.y, 0.5 + 3.5*sin(6.0*mo.x) );\n    vec3 ro = vec3( 3.5, 1.0, 3.5 );\n\tvec3 ta = vec3( -0.5, -2.0, -1.0 );\n\t\n\t\/\/ camera-to-world transformation\n    mat3 ca = setCamera( ro, ta, 0.0 );\n    \n    \/\/ ray direction\n\tvec3 rd = ca * normalize( vec3(p.xy,2.0) );\n\n    \/\/ render\t\n    vec3 col = render( ro, rd );\n\n\tcol = pow( col, vec3(0.4545) );\n\n    fragColor=vec4( col, 1.0 );\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Reaction-diffusion pass.\n\/\/\n\/\/ Here's a really short, non technical explanation:\n\/\/\n\/\/ To begin, sprinkle the buffer with some initial noise on the first few frames (Sometimes, the \n\/\/ first frame gets skipped, so you do a few more).\n\/\/\n\/\/ During the buffer loop pass, determine the reaction diffusion value using a combination of the \n\/\/ value stored in the buffer's \"X\" channel, and a the blurred value - stored in the \"Y\" channel \n\/\/ (You can see how that's done in the code below). Blur the value from the \"X\" channel (the old \n\/\/ reaction diffusion value) and store it in \"Y\", then store the new (reaction diffusion) value \n\/\/ in \"X.\" Display either the \"X\" value  or \"Y\" buffer value in the \"Image\" tab, add some window \n\/\/ dressing, then repeat the process. Simple... Slightly confusing when I try to explain it, but \n\/\/ trust me, it's simple. :)\n\/\/\n\/\/ Anyway, for a more sophisticated explanation, here are a couple of references below:\n\/\/\n\/\/ Reaction-Diffusion by the Gray-Scott Model - http:\/\/www.karlsims.com\/rd.html\n\/\/ Reaction-Diffusion Tutorial - http:\/\/www.karlsims.com\/rd.html\n\n\/\/ Cheap vec3 to vec3 hash. Works well enough, but there are other ways.\nvec3 hash33(in vec2 p){ \n    float n = sin(dot(p, vec2(41, 289)));    \n    return fract(vec3(2097152, 262144, 32768)*n); \n}\n\n\/\/ Serves no other purpose than to save having to write this out all the time. I could write a \n\/\/ \"define,\" but I'm pretty sure this'll be inlined.\nvec4 tx(in vec2 p){ return texture(iChannel0, p); }\n\n\/\/ Weighted blur function. Pretty standard.\nfloat blur(in vec2 p){\n    \n    \/\/ Used to move to adjoining pixels. - uv + vec2(-1, 1)*px, uv + vec2(1, 0)*px, etc.\n    vec3 e = vec3(1, 0, -1);\n    vec2 px = 1.\/iResolution.xy;\n    \n    \/\/ Weighted 3x3 blur, or a cheap and nasty Gaussian blur approximation.\n\tfloat res = 0.0;\n    \/\/ Four corners. Those receive the least weight.\n\tres += tx(p + e.xx*px ).x + tx(p + e.xz*px ).x + tx(p + e.zx*px ).x + tx(p + e.zz*px ).x;\n    \/\/ Four sides, which are given a little more weight.\n    res += (tx(p + e.xy*px ).x + tx(p + e.yx*px ).x + tx(p + e.yz*px ).x + tx(p + e.zy*px ).x)*2.;\n\t\/\/ The center pixel, which we're giving the most weight to, as you'd expect.\n\tres += tx(p + e.yy*px ).x*4.;\n    \/\/ Normalizing.\n    return res\/16.;     \n    \n}\n\n\/\/ The reaction diffusion loop.\n\/\/ \nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ){\n\n    \n\tvec2 uv = fragCoord\/iResolution.xy; \/\/ Screen coordinates. Range: [0, 1]\n    vec2 pw = 1.\/iResolution.xy; \/\/ Relative pixel width. Used for neighboring pixels, etc.\n    \n    \n    \/\/ The blurred pixel. This is the result that's used in the \"Image\" tab. It's also reused\n    \/\/ in the next frame in the reaction diffusion process (see below).\n\tfloat avgReactDiff = blur(uv);\n\n    \n\t\/\/ The noise value. Because the result is blurred, we can get away with plain old static noise.\n    \/\/ However, smooth noise, and various kinds of noise textures will work, too.\n    vec3 noise = hash33(uv + vec2(53, 43)*iTime)*.6 + .2;\n\n    \/\/ Used to move to adjoining pixels. - uv + vec2(-1, 1)*px, uv + vec2(1, 0)*px, etc.\n    vec3 e = vec3(1, 0, -1);\n    \n    \/\/ Gradient epsilon value. The \"1.5\" figure was trial and error, but was based on the 3x3 blur radius.\n    vec2 pwr = pw*1.5; \n    \n    \/\/ Use the blurred pixels (stored in the Y-Channel) to obtain the gradient. I haven't put too much \n    \/\/ thought into this, but the gradient of a pixel on a blurred pixel grid (average neighbors), would \n    \/\/ be analogous to a Laplacian operator on a 2D discreet grid. Laplacians tend to be used to describe \n    \/\/ chemical flow, so... Sounds good, anyway. :)\n    \/\/\n    \/\/ Seriously, though, take a look at the formula for the reacion-diffusion process, and you'll see\n    \/\/ that the following few lines are simply putting it into effect.\n    \n    \/\/ Gradient of the blurred pixels from the previous frame.\n\tvec2 lap = vec2(tx(uv + e.xy*pwr).y - tx(uv - e.xy*pwr).y, tx(uv + e.yx*pwr).y - tx(uv - e.yx*pwr).y);\/\/\n    \n    \/\/ Add some diffusive expansion, scaled down to the order of a pixel width.\n    uv = uv + lap*pw*3.0; \n    \n    \/\/ Stochastic decay. Ie: A differention equation, influenced by noise.\n    \/\/ You need the decay, otherwise things would keep increasing, which in this case means a white screen.\n    float newReactDiff = tx(uv).x + (noise.z - 0.5)*0.0025 - 0.002; \n    \n    \/\/ Reaction-diffusion.\n\tnewReactDiff += dot(tx(uv + (noise.xy-0.5)*pw).xy, vec2(1, -1))*0.145; \n\n    \n    \/\/ Storing the reaction diffusion value in the X channel, and avgReactDiff (the blurred pixel value) \n    \/\/ in the Y channel. However, for the first few frames, we add some noise. Normally, one frame would \n    \/\/ be enough, but for some weird reason, it doesn't always get stored on the very first frame.\n    if(iFrame>9) fragColor.xy = clamp(vec2(newReactDiff, avgReactDiff\/.98), 0., 1.);\n    else fragColor = vec4(noise, 1.);\n    \n}",
+            "name": "Buf A",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

@@ -1,0 +1,134 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "Ws2GD1",
+        "date": "1548846047",
+        "viewed": 2919,
+        "name": "Atari Pong",
+        "username": "Belocio",
+        "description": "Press SPACE to start playing.\nUse arrow keys to move the left paddle.\nIf you want to play with another friend, uncomment first line of Buffer A and use W and S keys to move the paddle at your right.",
+        "likes": 53,
+        "published": 1,
+        "flags": 48,
+        "usePreview": 0,
+        "tags": [
+            "game",
+            "retro",
+            "pong",
+            "atari"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Postprocess copied with some small modifications from Mattias: https:\/\/www.shadertoy.com\/view\/Ms23DR\n\nvec2 curve(vec2 uv)\n{\n\tuv = (uv - 0.5) * 2.0;\n\tuv *= 1.1;\t\n\tuv.x *= 1.0 + pow((abs(uv.y) \/ 5.0), 3.0);\n\tuv.y *= 1.0 + pow((abs(uv.x) \/ 4.0), 3.0);\n\tuv  = (uv \/ 2.0) + 0.5;\n\tuv =  uv *0.92 + 0.04;\n\treturn uv;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 q = fragCoord.xy \/ iResolution.xy;\n    vec2 uv = curve( q );\n    vec3 oricol = texture( iChannel0, vec2(q.x,q.y) ).xyz;\n    vec3 col;\n\tfloat x =  sin(0.3*iTime+uv.y*21.0)*sin(0.7*iTime+uv.y*29.0)*sin(0.3+0.33*iTime+uv.y*31.0)*0.0005 ;\n\n    col.r = texture(iChannel0,vec2(x+uv.x+0.001,uv.y+0.001)).x+0.05;\n    col.g = texture(iChannel0,vec2(x+uv.x+0.000,uv.y-0.002)).y+0.05;\n    col.b = texture(iChannel0,vec2(x+uv.x-0.002,uv.y+0.000)).z+0.05;\n    col.r += 0.08*texture(iChannel0,0.75*vec2(x+0.025, -0.027)+vec2(uv.x+0.001,uv.y+0.001)).x;\n    col.g += 0.05*texture(iChannel0,0.75*vec2(x+-0.022, -0.02)+vec2(uv.x+0.000,uv.y-0.002)).y;\n    col.b += 0.08*texture(iChannel0,0.75*vec2(x+-0.02, -0.018)+vec2(uv.x-0.002,uv.y+0.000)).z;\n    \n    float vig = (0.0 + 1.0*16.0*uv.x*uv.y*(1.0-uv.x)*(1.0-uv.y));\n\tcol *= vec3(pow(vig,0.15));\n\n    col *= vec3(0.9,1.1,0.9);\n    \n\tfloat scans = clamp( 0.35+0.05*sin(3.5*iTime+uv.y*iResolution.y*1.5), 0.0, 1.0);\n\t\n\tfloat s = pow(scans,0.75);\n\tcol = col *vec3(0.4+0.7*s);\n\n    col *= 1.0+0.035*sin(110.0*iTime);\n\n\tcol*=1.0-0.75*vec3(clamp((mod(fragCoord.x, 2.0)-1.0)*1.0,0.0,1.0));\n\t\n    float comp = smoothstep( 0.1, 0.9, sin(iTime) );\n\n    fragColor = vec4(col,1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGRr",
+                    "filepath": "\/presets\/tex00.jpg",
+                    "previewfilepath": "\/presets\/tex00.jpg",
+                    "type": "keyboard",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/#define TWO_PLAYERS\n\nconst int KEY_SPACE = 32;\nconst int KEY_UP  = 38;\nconst int KEY_DOWN = 40;\nconst int KEY_W  = 87;\nconst int KEY_S = 83;\n\nconst float InputSpeed = 1.0;\nconst float BallSpeed = 1.5;\nconst float BallSpeedIncreasePerSecond = 0.2;\nconst float SpeedLimit = 3.0;\n\nconst float PlayerPaddleXPos = -0.85;\nconst float GpuPaddleXPos = 0.85;\n\nfloat Hash( in float n )\n{\n    return fract(sin(n)*138.5453123);\n}\n\nvoid StoreValue( in ivec2 txPos, in vec4 value, inout vec4 fragColor, in ivec2 fragPos )\n{\n    fragColor = (fragPos==txPos) ? value : fragColor;\n}\n\nbool KeyPressed(int key)\n{ \n    return texelFetch( iChannel1, ivec2(key,0.0), 0 ).x > 0.5;\n}\n\nvoid UpdatePaddlePos(in float moveUp, in float moveDown, float limits, float totalHalfPaddleHeight, inout vec2 paddlePos)\n{\n    paddlePos.y += iTimeDelta * InputSpeed * (moveUp - moveDown);\n    paddlePos.y = clamp(paddlePos.y, -limits + totalHalfPaddleHeight, limits - totalHalfPaddleHeight);\n}\n\nfloat GetSpeed(in float pointStartTime)\n{\n    return clamp(0.0, SpeedLimit, BallSpeed + (iTime - pointStartTime) * BallSpeedIncreasePerSecond);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    ivec2 iCurPixel = ivec2(fragCoord-0.5);\n \n    \/\/ don't compute gameplay outside of the data area\n    if( fragCoord.x > 5.0 || fragCoord.y > 1.0 ) discard;\n    \n    \/\/ load game state\n    vec2 playerPaddlePos = LoadValue(iChannel0, txPlayerPaddlePos).xy;\n    vec2 gpuPaddlePos = LoadValue(iChannel0, txGPUPaddlePos).xy;\n    vec4 ballPosDir = LoadValue(iChannel0, txBallPosDir);\n    vec2 score = LoadValue(iChannel0, txScore).xy;\n    vec3 state = LoadValue(iChannel0, txState).xyz;\n    \n    if(iFrame == 0)\n    {\n        ballPosDir = vec4(0.0, 0.0, 0.0, 0.0);\n\t\tplayerPaddlePos = vec2(PlayerPaddleXPos, 0.0);\n    \tgpuPaddlePos = vec2(GpuPaddleXPos, 0.0);\n    \tstate.x = -1.0;\n        state.z = 1.0;\n        score = vec2(0, 0); \n    }\n    \n    if(state.x < -0.5)\n    {\n        if(KeyPressed(KEY_SPACE))\n        {\n            ballPosDir.xy = vec2(0.0, 0.0);\n            ballPosDir.zw = normalize(vec2(state.z, Hash(float(iFrame) * 1.5) * 0.25));\n            state.x = 0.0;\n            state.y = iTime;    \n            gpuPaddlePos.y = 0.0;\n            playerPaddlePos.y = 0.0;\n        }\n    }\n    else\n    {        \n        float limits = HalfFieldHeight - HalfWallWidth;\n        float totalHalfPaddleHeight = PaddleHalfSize.y;\n        \n        \/\/ Update player paddle position\n        float moveUp = texelFetch(iChannel1, ivec2(KEY_UP, 0), 0).x;\n\t\tfloat moveDown  = texelFetch(iChannel1, ivec2(KEY_DOWN, 0), 0).x;\n        UpdatePaddlePos(moveUp, moveDown, limits, totalHalfPaddleHeight, playerPaddlePos);\n        \n        \/\/ Update GPU paddle position\n        #ifdef TWO_PLAYERS\n        moveUp = texelFetch(iChannel1, ivec2(KEY_W, 0), 0).x;\n\t\tmoveDown  = texelFetch(iChannel1, ivec2(KEY_S, 0), 0).x;\n        #else\n        moveUp = step(0.0, ballPosDir.y - (gpuPaddlePos.y + totalHalfPaddleHeight));\n        moveDown = step(0.0, (gpuPaddlePos.y - totalHalfPaddleHeight) - ballPosDir.y);\n        #endif\n        \n        UpdatePaddlePos(moveUp, moveDown, limits, totalHalfPaddleHeight, gpuPaddlePos);\n        \n        \/\/ Update ball position\n        \/\/@{\n        ballPosDir.xy += ballPosDir.zw * GetSpeed(state.y) * iTimeDelta;\n        \n        \/\/ Bound with limits\n        if(ballPosDir.y + BallRadius >= limits)\n        {\n            ballPosDir.y = limits - BallRadius;\n            ballPosDir.w *= -1.0;\n        }\n        else if(ballPosDir.y - BallRadius <= -limits)\n        {\n            ballPosDir.y = BallRadius - limits;\n            ballPosDir.w *= -1.0;\n        }\n        \n        if(ballPosDir.x + BallRadius >= (gpuPaddlePos.x - PaddleHalfSize.x))\n        {\n            if(abs(ballPosDir.y - gpuPaddlePos.y) <= totalHalfPaddleHeight + BallRadius)\n            {\n                ballPosDir.x = gpuPaddlePos.x - PaddleHalfSize.x - BallRadius;\n                ballPosDir.z *= -1.0;\n                ballPosDir.w += (ballPosDir.y - gpuPaddlePos.y) * 5.0;\n                ballPosDir.zw = normalize(ballPosDir.zw);\n            }\n        }\n        else if(ballPosDir.x - BallRadius <= playerPaddlePos.x + PaddleHalfSize.x)\n        {\n            if(abs(ballPosDir.y - playerPaddlePos.y) <= totalHalfPaddleHeight + BallRadius)\n            {\n                ballPosDir.x = playerPaddlePos.x + PaddleHalfSize.x + BallRadius;\n                ballPosDir.z *= -1.0;\n                ballPosDir.w += (ballPosDir.y - playerPaddlePos.y) * 5.0;\n                ballPosDir.zw = normalize(ballPosDir.zw);\n            }\n        }\n        \/\/@} \n           \n        \/\/ Check score\n        if(ballPosDir.x - BallRadius > gpuPaddlePos.x)\n        {\n            score.x += 1.0;\n            state.x = -1.0;\n            state.z = -1.0;\n        }\n        else if(ballPosDir.x + BallRadius < playerPaddlePos.x)\n        {\n            score.y += 1.0;\n            state.x = -1.0;\n            state.z = 1.0;\n        }\n    }\n    \n    fragColor = vec4(0.0);\n    \n    StoreValue(txPlayerPaddlePos, vec4(playerPaddlePos, 0.0, 0.0), fragColor, iCurPixel);\n    StoreValue(txGPUPaddlePos, vec4(gpuPaddlePos, 0.0, 0.0), fragColor, iCurPixel);\n    StoreValue(txBallPosDir, ballPosDir, fragColor, iCurPixel);\n    StoreValue(txScore, vec4(score, 0.0, 0.0), fragColor, iCurPixel);\n    StoreValue(txState, vec4(state, 0.0), fragColor, iCurPixel);    \n}",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "const ivec2 txPlayerPaddlePos = ivec2(0,0);\nconst ivec2 txGPUPaddlePos = ivec2(1,0);\nconst ivec2 txBallPosDir = ivec2(2,0);\nconst ivec2 txScore = ivec2(3,0);\nconst ivec2 txState = ivec2(4,0);\n\nconst vec2 PaddleHalfSize = vec2(0.015, 0.08);\nconst float HalfWallWidth = 0.01;\nconst float BallRadius = 0.015;\nconst float HalfFieldHeight = 0.53;\n\nvec4 LoadValue( in sampler2D iChannel, in ivec2 re )\n{\n    return texelFetch( iChannel, re, 0 );\n}\n",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "const float Thickness = 0.001;\n\nconst vec3 BallColor = vec3(1.0, 1.0, 1.0);\nconst vec3 PaddleColor = vec3(1.0, 1.0, 1.0);\nconst vec3 BorderColor = vec3(1.0, 1.0, 1.0);\n\n\/\/ Digit data by P_Malin (https:\/\/www.shadertoy.com\/view\/4sf3RN)\nconst int[] font = int[](0x75557, 0x22222, 0x74717, 0x74747, 0x11574, 0x71747, 0x71757, 0x74444, 0x75757, 0x75747);\nconst int[] powers = int[](1, 10, 100, 1000, 10000);\nfloat PrintInt( in vec2 uv, in int value )\n{\n    const int maxDigits = 2;\n    if( abs(uv.y-0.5)<0.5 )\n    {\n        int iu = int(floor(uv.x));\n        if( iu>=0 && iu<maxDigits )\n        {\n            int n = (value\/powers[maxDigits-iu-1]) % 10;\n            uv.x = fract(uv.x);\/\/(uv.x-float(iu)); \n            ivec2 p = ivec2(floor(uv*vec2(4.0,5.0)));\n            return float((font[n] >> (p.x+p.y*4)) & 1);\n        }\n    }\n    return 0.0;\n}\n\nfloat sdSquare(in vec2 p, in vec2 pos, in vec2 size)\n{\n    vec2 d = abs(p - pos) - size;\n  \treturn length(max(d,0.0));\n}\n\nvec3 RenderBall(vec2 pos, vec2 ballPos, vec3 col)\n{\n    float t = sdSquare(pos, ballPos, vec2(BallRadius, BallRadius));\n    return mix(BallColor, col, smoothstep(0.0, Thickness, t));\n}\n\nvec3 RenderPaddle(vec2 pos, vec2 paddlePos, vec3 col)\n{\n    \/\/float t = SegmentMask(pos, paddlePos - vec2(0.0, PaddleHalfSize.y), paddlePos + vec2(0.0, PaddleHalfSize.y), PaddleHalfSize.x);\n    float t = sdSquare(pos, paddlePos, PaddleHalfSize);\n    \n    return mix(PaddleColor, col, smoothstep(0.0, Thickness, t));\n}\n\nvec3 RenderBorders(in vec2 pos, in float distToCenter, in vec3 col)\n{\n    float t = abs(abs(pos.y) - distToCenter) \/ HalfWallWidth;\n    \n    return mix(BorderColor, col, smoothstep(0.0, Thickness, t - 1.0));\n}\n\nvec3 RenderScore(in vec2 score, in vec2 fragCoord, in vec3 col)\n{\n    const vec2 displacement = vec2(0.3, -0.65);\n    vec2 uv = (2.0*fragCoord-iResolution.xy) \/ iResolution.y;\n    \n    col = mix(col, vec3(1.0, 1.0, 1.0), PrintInt((uv + displacement) * vec2(10.0, 7.0), int(score.x)));\n    col = mix(col, vec3(1.0, 1.0, 1.0), PrintInt((uv + displacement * vec2(-0.4, 1.0)) * vec2(10.0, 7.0), int(score.y)));\n    \n    return col;\n}\n\nvec3 RenderCenterLine(in vec2 pos, in float limitsDistToCenter, in vec3 col)\n{\n    float t = abs(pos.x) - 0.003;\n    float dashT = step(0.0, sin(pos.y * 200.0));\n    float limitsT = (abs(pos.y) - limitsDistToCenter);\n    \n    col = mix(vec3(1.0, 1.0, 1.0), col, smoothstep(0.0, Thickness, max(t, limitsT) + dashT));\n    return col;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n  \tvec2 pos = (fragCoord.xy \/ iResolution.xy) * 2.0 - 1.0;\n    pos.y *= iResolution.y \/ iResolution.x;  \n    \n     \/\/ load game state\n    vec2 playerPaddlePos = LoadValue(iChannel0, txPlayerPaddlePos).xy;\n    vec2 gpuPaddlePos = LoadValue(iChannel0, txGPUPaddlePos).xy;\n    vec2 ballPos = LoadValue(iChannel0, txBallPosDir).xy;\n    vec2 score = LoadValue(iChannel0, txScore).xy;\n    \n    vec3 col = vec3(0.0, 0.0, 0.0);\n    \n    col = RenderBall(pos, ballPos, col);\n    col = RenderPaddle(pos, playerPaddlePos, col);\n    col = RenderPaddle(pos, gpuPaddlePos, col);\n    col = RenderBorders(pos, HalfFieldHeight, col);\n    col = RenderCenterLine(pos, HalfFieldHeight, col);\n    col = RenderScore (score, fragCoord, col);\n    \n    \n    fragColor = vec4(col, 1.0);\n}",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

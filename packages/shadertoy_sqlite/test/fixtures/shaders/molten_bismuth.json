@@ -1,0 +1,194 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "WdVXWy",
+        "date": "1574875895",
+        "viewed": 41171,
+        "name": "molten bismuth",
+        "username": "flockaroo",
+        "description": "some self-consistency improvements of ([url]https:\/\/www.shadertoy.com\/view\/MsGSRd[\/url]).\ncornusammonis' latest fluid stuff reminded me to give that another try - also tried to use mipmaps, but looked better without in the end... use mouse to push fluid",
+        "likes": 253,
+        "published": 3,
+        "flags": 48,
+        "usePreview": 0,
+        "tags": [
+            "simulation",
+            "fluid",
+            "flow",
+            "cfd"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XsX3zn",
+                    "filepath": "\/media\/a\/94284d43be78f00eb6b298e6d78656a1b34e2b91b34940d02f1ca8b22310e8a0.png",
+                    "previewfilepath": "\/media\/ap\/94284d43be78f00eb6b298e6d78656a1b34e2b91b34940d02f1ca8b22310e8a0.png",
+                    "type": "cubemap",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "clamp",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ created by florian berger (flockaroo) - 2019\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/\/ single pass CFD - with some self consistency fixes\n\n\/\/ drawing the liquid\n\n\/\/ same fluid as in \"Spilled\" - https:\/\/www.shadertoy.com\/view\/MsGSRd\n\/\/ ...but with self-consistent-ish velocity field\n\/\/ the previous method was just defined implicitely by the rotations on multiple scales\n\/\/ here the calculated velocity field is put back into the stored field\n\n\/\/ use mouse to push fluid, press I to init\n\n#define Res  (iResolution.xy)\n\n#define RandTex iChannel1\n\nvec4 myenv(vec3 pos, vec3 dir, float period)\n{\n    return texture(iChannel2,dir.xzy)+.15;\n}\n\nvec4  getCol(vec2 uv) { return texture(iChannel0,scuv(uv)); }\nfloat getVal(vec2 uv) { return length(getCol(uv).xyz); }\n    \nvec2 getGrad(vec2 uv,float delta)\n{\n    vec2 d=vec2(delta,0); return vec2( getVal(uv+d.xy)-getVal(uv-d.xy),\n                                       getVal(uv+d.yx)-getVal(uv-d.yx) )\/delta;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy \/ iResolution.xy;\n    \n    \/\/ calculate normal from gradient (the faster the higher)\n    vec3 n = vec3(-getGrad(uv,1.4\/iResolution.x)*.02,1.);\n    n=normalize(n);\n\n    \/*vec3 light = normalize(vec3(-1,1,2));\n    float diff=clamp(dot(n,light),0.,1.0);\n    float spec=clamp(dot(reflect(light,n),vec3(0,0,-1)),0.0,1.0); spec=exp2(log2(spec)*24.0)*2.5;*\/\n    \n    \/\/ evironmental reflection\n    vec2 sc=(fragCoord-Res*.5)\/Res.x;\n    vec3 dir=normalize(vec3(sc,-1.));\n    vec3 R=reflect(dir,n);\n    vec3 refl=myenv(vec3(0),R.xzy,1.).xyz;\n    \n    \/\/ slightly add velocityfield to color - gives it a bit of a 'bismuty' look\n    vec4 col=getCol(uv)+.5;\n    col=mix(vec4(1),col,.35);\n    col.xyz*=.95+-.05*n; \/\/ slightly add some normals to color\n    \n\t\/\/fragColor.xyz = col.xyz*(.5+.5*diff)+.1*refl;\n\tfragColor.xyz = col.xyz*refl;\n\tfragColor.w=1.;\n}\n\n",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGRr",
+                    "filepath": "\/presets\/tex00.jpg",
+                    "previewfilepath": "\/presets\/tex00.jpg",
+                    "type": "keyboard",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ created by florian berger (flockaroo) - 2019\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/\/ single pass CFD - with some self consistency fixes\n\n\/\/ ...the actual fluid simulation\n\n\/\/ this is some \"computational flockarooid dynamics\" ;)\n\/\/ the self-advection is done purely rotational on all scales. \n\/\/ therefore i dont need any divergence-free velocity field. \n\/\/ with stochastic sampling i get the proper \"mean values\" of rotations \n\/\/ over time for higher order scales.\n\/\/\n\/\/ try changing \"RotNum\" for different accuracies of rotation calculation\n\/\/ for even RotNum uncomment the line #define SUPPORT_EVEN_ROTNUM\n\n#define RotNum 5\n#define SUPPORT_EVEN_ROTNUM\n\n#define keyTex iChannel2\n#define KEY_I (texture(keyTex,vec2((105.5-32.0)\/256.0,(0.5+0.0)\/3.0)).x)\n\nconst float ang = PI2\/float(RotNum);\nmat2 m = mat2(cos(ang),sin(ang),-sin(ang),cos(ang));\nmat2 mh = mat2(cos(ang*0.5),sin(ang*0.5),-sin(ang*0.5),cos(ang*0.5));\n\nfloat getRot(vec2 pos, vec2 b)\n{\n    float l=log2(dot(b,b))*sqrt(.125)*.0;\n    vec2 p = b;\n    float rot=0.0;\n    for(int i=0;i<RotNum;i++)\n    {\n        rot+=dot(textureLod(iChannel0,((pos+p)\/Res0.xy),l).xy-vec2(0.5),p.yx*vec2(1,-1));\n        p = m*p;\n    }\n    return rot\/float(RotNum)\/dot(b,b);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 pos = fragCoord;\n    vec2 b = cos(float(iFrame)*.3-vec2(0,1.57));  \/\/ vary curl-evaluation-points in time\n    vec2 v=vec2(0);\n    float bbMax=.5*Res0.y; bbMax*=bbMax; \/\/ take curls up to half screen size\n    for(int l=0;l<20;l++)\n    {\n        if ( dot(b,b) > bbMax ) break;\n        vec2 p = b;\n        for(int i=0;i<RotNum;i++)\n        {\n            v+=p.yx*getRot(pos+p,-mh*b);\n            p = m*p;\n        }\n        b*=2.0;\n    }\n    \n    \/\/ perform advection\n    fragColor=textureLod(iChannel0,fract((pos-v*vec2(-1,1)*5.*sqrt(Res0.x\/600.))\/Res0.xy),0.);\n    \n    \/\/ feeding some self-consistency into the velocity field\n    \/\/ (otherwise velocity would be defined only implicitely by the multi-scale rotation sums)\n    fragColor.xy=mix(fragColor.xy,v*vec2(-1,1)*sqrt(.125)*.9,.025);\n    \n    \/\/ add a little \"motor\"\n    vec2 c=fract(scuv(iMouse.xy\/iResolution.xy))*iResolution.xy;\n    vec2 dmouse=texelFetch(iChannel3,ivec2(0),0).zw;\n    if (iMouse.x<1.) c=Res0*.5;\n    vec2 scr=fract((fragCoord.xy-c)\/Res0.x+.5)-.5;\n    \/\/ slowly rotating current in the center (when mouse not moved yet)\n    if (iMouse.x<1.) fragColor.xy += 0.003*cos(iTime*.3-vec2(0,1.57)) \/ (dot(scr,scr)\/0.05+.05);\n    \/\/ feed mouse motion into flow\n    fragColor.xy += .0003*dmouse\/(dot(scr,scr)\/0.05+.05);\n\n    \/\/ add some \"crunchy\" drops to surface\n    fragColor.zw += (texture(iChannel1,fragCoord\/Res1*.35).zw-.5)*.002;\n    fragColor.zw += (texture(iChannel1,fragCoord\/Res1*.7).zw-.5)*.001;\n    \n    \/\/ initialization\n    if(iFrame<=4) fragColor=vec4(0);\n    if(KEY_I>.5 ) fragColor=(texture(iChannel1,uvSmooth(fragCoord.xy\/Res0.xy*.05,Res1))-.5)*.7;\n}\n\n",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ created by florian berger (flockaroo) - 2019\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/\/ just some mouse motion detection\n\nvoid mainImage( out vec4 fragColor, vec2 fragCoord )\n{\n    vec4 c=texelFetch(iChannel0,ivec2(0),0);\n    vec2 m=iMouse.xy;\n    vec2 d=vec2(0);\n    if(iMouse.xy!=iMouse.zw) { d=iMouse.xy-c.xy; }\n    fragColor.xyzw = vec4(m,d);\n}\n\n",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "\/\/ your code here\n#define PI2 6.283185\n\n#define Res0 vec2(textureSize(iChannel0,0))\n#define Res1 vec2(textureSize(iChannel1,0))\n\nvec2 scuv(vec2 uv) {\n    float zoom=1.;\n    #ifdef SHADEROO\n    zoom=1.-iMouseData.z\/1000.;\n    #endif\n    return (uv-.5)*1.2*zoom+.5; \n}\n\nvec2 uvSmooth(vec2 uv,vec2 res)\n{\n    \/\/ no interpolation\n    \/\/return uv;\n    \/\/ sinus interpolation\n    \/\/return uv+.8*sin(uv*res*PI2)\/(res*PI2);\n    \/\/ iq's polynomial interpolation\n    vec2 f = fract(uv*res);\n    return (uv*res+.5-f+3.*f*f-2.0*f*f*f)\/res;\n}\n",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        }
+    ]
+}

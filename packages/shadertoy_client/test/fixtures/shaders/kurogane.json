@@ -1,0 +1,156 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "tl3Sz7",
+        "date": "1581084735",
+        "viewed": 523,
+        "name": "[\u266a]Kurogane",
+        "username": "Catzpaw",
+        "description": "\"Kurogane\"\nComposed by Catzpaw 2020\n\n\n2020-02-22 VR support",
+        "likes": 28,
+        "published": 3,
+        "flags": 41,
+        "tags": [
+            "raymarching",
+            "music",
+            "dof",
+            "vr"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/---Kurogane\n\/\/ by Catzpaw 2020\n\n\/\/Image:post effects and sound indicator\n\n\/\/GRAPHIC\nfloat circle(vec2 p,vec2 s,float r,float w){\n    float d=1.\/iResolution.y,v=(s.x+s.y)*.5,l=length(p);\n    r+=v*r+.01;w+=r;\n    v=clamp((s.x+s.y)*3.,0.,1.);\n    return v>0.?min(smoothstep(r,r+d,l),smoothstep(w+d,w,l))*v:0.;\n}\n\n\/\/TEXTURE\nvec4 tx0(vec2 uv,bool vr){\n    if(vr){\n        return texture(iChannel0,uv);\n    }else{\n        vec4 c=texture(iChannel0,uv);\n        c.g=texture(iChannel0,.99*(uv-.5)+.5).g;\n        c.r=texture(iChannel0,.98*(uv-.5)+.5).r;\n        return c;\n    }\n}\nvec4 tx1(int x){\n    return texture(iChannel1,vec2((float(x)+.5)\/iResolution.x,.5\/iResolution.y))*2.-1.;\n}\n\n\/\/MAIN\nvoid render(out vec4 fragColor,vec2 uv,bool vr){\n  \/\/hsync noise\n    uv.x+=fract(sin(floor(uv.y*64.+iTime*100.)*43.)*47.777)<.01?sin(floor(uv.y*100.+iTime))*.02:0.;\n  \/\/DOF filter\n    vec2 fp=vr?vec2(.25,.5):vec2(.5);\n    mat2 vel=rot(1.);\n    vec2 mul=vec2(0,iResolution.x\/iResolution.y),ang=vec2(0,1)*mul;\n    vec4 acc=vec4(0,0,0,1),tgt=vec4(1),c=tx0(uv,vr);\n    float foc=min(.4,tx0(fp,vr).w),bok=abs(c.w-foc),rad=0.,dis=0.;\n    for(int j=ZERO;j<100;j++){\n        rad+=.01;\n        tgt=tx0(uv+ang*rad*.03,vr);dis=tgt.w;tgt.w=1.;\n        acc+=(((dis<c.w)&&(abs(dis-foc)>=rad))||(bok>=rad))?tgt:vec4(0);\n        ang*=vel;\n    }\n    c.rgb+=acc.rgb;c\/=acc.w;\n    if(!vr){\n    \/\/sound indicator\n      uv-=.5;uv.x*=mul.y;\n      float vol=tx1(0).x*.5+.5;\n      if(length(uv)<.55){\n          for(int i=ZERO;i<6;i++){\n              c.rgb+=pow(circle(uv+vec2(0,-.35*vol)*rot(iTime+float(i)*1.047),tx1(i+1).xy*vol,.06,.02),.5);\n          }\n      }\n    \/\/vignette\n      c.rgb-=length(uv)*.1;\n      c.w=1.;\n    }\n    fragColor=c;\n}\n\n\/\/MAIN\nvoid mainImage(out vec4 fragColor,in vec2 fragCoord){\n    vec2 uv=fragCoord\/iResolution.xy;\n    render(fragColor,uv,(texture(iChannel0,vec2(0))==vec4(1,0,1,0)));\n}\n\n",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4sfGzn",
+                    "filepath": "\/media\/a\/793a105653fbdadabdc1325ca08675e1ce48ae5f12e37973829c87bea4be3232.png",
+                    "previewfilepath": "\/media\/ap\/793a105653fbdadabdc1325ca08675e1ce48ae5f12e37973829c87bea4be3232.png",
+                    "type": "cubemap",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "clamp",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/---Kurogane\n\/\/ by Catzpaw 2020\n\n\/\/BufferA:animation\n\n\/\/SETTINGS\n#define ITER 64\n#define EPS 1e-4\n#define NEAR .1\n#define FAR 40.\n\n\/\/SOUND SYNC\nfloat stime=0.;\nfloat vol=0.;\n#define LATENCY .1\n\n\/\/TEXTURE\nvec4 tx1(int x){\n    return texture(iChannel1,vec2((float(x)+.5)\/iResolution.x,.5\/iResolution.y))*2.-1.;\n}\n\n\/\/SDF\nfloat sdSphere(vec3 p,float r){return length(p)-r;}\nfloat sdCube(vec3 p,float r){p=abs(p)-r;return length(max(p,0.))+min(max(p.x,max(p.y,p.z)),.0)-.06;}\nfloat sdBox(vec3 p,vec3 b){p=abs(p)-b;return length(max(p,0.))+min(max(p.x,max(p.y,p.z)),0.)-.06;}\n\n\/\/MODULATOR\nfloat distsaw(float t){return min(clamp(mod(t*2.,2.),0.,1.),1.-clamp(mod(t*8.,8.)-7.,0.,1.));}\nfloat beatsin(float t){return sin(t*6.283*200.)*clamp(.5-fract(t),0.,.5);}\n\n\/\/SCENE\nfloat map(vec3 p){\n    float d=FAR,t=stime,v=vol,b=t*bpm\/30.,m=sign(-sin(b*6.283\/128.))+1.;\n    p.yz+=mod(floor(p.x*.1),2.)==0.?5.:0.;\n    p=mod(p,10.)-5.;\n    p.xz*=rot(t*.698);\n    p.xy*=rot(t*.742);\n    vec3 q=abs(p);\n    d=min(d,sdSphere(q-2.35,.5+beatsin(b)*.5*v));\n    p.xz*=rot(iTime*1.047+beatsin(b*.50)*0.15*v+sin(b*6.283)*.1*m*v);\n    p.xy*=rot(iTime*0.698-distsaw(b*.25)*1.20*v);\n    q=p;\n    for(int i=ZERO;i<6;i++){\n        q.x =abs(q.x );q.z+=.1;q.xy*=rot(t*.37-float(i)*.3);\n        q.yz=abs(q.zy);q.x+=.1;q.xz*=rot(t*.23-float(i)*.3);\n    }\n    return min(min(d,sdCube(q,2.4)),min(sdBox(q-.2,vec3(3.0,0.1,2.9)),sdBox(q+.2,vec3(3.5,2.6,0.2))));\n}\n\n\/\/RAYMARCHING\nvec3 trace(vec3 ro,vec3 rd){\n    float t=NEAR;\n    for(int i=ZERO;i<ITER;i++){float d=map(ro+rd*t);if(abs(d)<EPS||t>FAR)break;t+=d;}\n    return ro+rd*t;\n}\n\n\/\/NORMAL\nvec3 normal(vec3 p){\n\tvec2 d=vec2(1,-1),e=d*EPS;\n    return normalize(d.xyy*map(p+e.xyy)+d.yxy*map(p+e.yxy)+d.yyx*map(p+e.yyx)+d.xxx*map(p+e.xxx));\n}\n\n\/\/AMBIENT OCCULUSION\nfloat ao(vec3 p,vec3 no){\n\tfloat o=1.,s=1.;\n    for(float i=1.;i<4.;i++){float r=.2*i;o+=(map(no*r+p)-r)*s;s*=.5;}\n    return clamp(o,.2,1.);\n}\n\n\/\/LIGHT\nvec3 light(vec3 ld,vec3 rd,vec3 v,vec3 c,vec3 no){\n    float ph=pow(max(dot(reflect(ld,no),-rd),0.),7.);\n    return v*(c*pow(.5+dot(no,-ld)*.5,2.)+ph)+pow(ph,10.);\n}\n\n\/\/MATERIAL\nvec3 material(vec3 p,vec3 ro,vec3 rd){\n    vec3 no=normal(p);\n    return mix(\n        ao(p,no)*(\n            light(vec3(-.57),rd,vec3(.7,.7,.65),vec3(.6),no)+\n            light(vec3( .57),rd,vec3(.5,.6,.70),vec3(.5),no))*\n            (pow(texture(iChannel0,reflect(rd,no)).g+.5,3.)+.25),\n        vec3(0),\n        clamp(length(p-ro)*.04-.5,0.,1.));    \n}\n\n\/\/MAIN\nvoid mainImage(out vec4 fragColor,in vec2 fragCoord){\n    vec2 uv=(fragCoord.xy-.5*iResolution.xy)\/iResolution.y;\n  \/\/sound sync\n    float t=iTime-LATENCY;\n    t=t<bpm*start\/120.?0.:t-bpm*start\/120.;\n    stime=t;\n    vol=tx1(0).x*.5+.5;\n  \/\/camera\n    vec3 ro=vec3(0);ro.z=-5.+mod(ro.z+iTime*6.,10.);\n    vec3 rd=vec3(uv,-.5);rd.xz*=rot(iTime*.13);rd.xy*=rot(iTime*.3);rd=normalize(rd);\n  \/\/raymarching\n    vec3 p=trace(ro,rd);\n  \/\/color\n    fragColor=clamp(vec4(material(p,ro,rd),length(p-ro)\/FAR),0.,1.);\n}\n\n\/\/VR\nvoid mainVR(out vec4 fragColor,in vec2 fragCoord,in vec3 fragRayOri,in vec3 fragRayDir){\n    vec2 uv=(fragCoord.xy-vec2(.25,.5)*iResolution.xy)\/iResolution.y;\n  \/\/sound sync\n    float t=iTime-LATENCY;\n    t=t<bpm*start\/120.?0.:t-bpm*start\/120.;\n    stime=t;\n    vol=tx1(0).x*.5+.5;\n  \/\/camera\n    vec3 ro=fragRayOri;ro.z=-5.+mod(ro.z+iTime*2.,10.);\n    vec3 rd=fragRayDir;\n    rd=normalize(rd);\n  \/\/raymarching\n    vec3 p=trace(ro,rd);\n  \/\/color\n    fragColor=clamp(vec4(material(p,ro,rd),length(p-ro)\/FAR),0.,1.);\n    fragColor=(fragCoord.x<1.)&&(fragCoord.y<1.)?vec4(1,0,1,0):fragColor;\n}\n",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "\/\/---Kurogane\n\/\/ by Catzpaw 2020\n\n\/\/Common:utilities & music\n\n\/\/UTIL\n#define ZERO min(0,iFrame)\nmat2 rot(float a){return mat2(cos(a),sin(a),-sin(a),cos(a));}\n\/\/vec3 hsv(float h,float s,float v){return ((clamp(abs(fract(h+vec3(0.,.666,.333))*6.-3.)-1.,0.,1.)-1.)*s+1.)*v;}\n\n\/\/---Scale Sequencer 2 by Catzpaw 2020\n\/\/https:\/\/www.shadertoy.com\/view\/3tVGz3\n\n\/\/SETUP\nconst float base =432.;\t\/\/A tuning (Hz)\nconst float bpm  =80.;\t\/\/beats per minute\nconst float steps=240.;\t\/\/block length\nconst float start=1.;   \/\/start count (beats)\nconst float fade =10.;  \/\/fade out time (sec)\nconst float sec  =180.; \/\/performance time (includes fade out time and start count)\nconst float gateseed=2175.;\nconst float noteseed=2695.;\nconst int chord3=2; \/\/3rd tone(default:2)\nconst int chord5=4; \/\/5th tone(default:4)\n\n\/\/SCALE\n\/*\nint key=0; \/\/0:C 1:C+ 2:D 3:D+ 4:E 5:F 6:F+ ... 11:B\nint scale=7;\nconst uint[12] scl=uint[](\n    0xcb975420u, \/\/0:major\n    0xca875320u, \/\/1:natural minor\n    0xcb875320u, \/\/2:harmonic minor\n    0xcb975320u, \/\/3:melodic minor\n    0xa9765320u, \/\/4:blues octatonic\n    0xa9764310u, \/\/5:blues diminished octatonic\n    0xc9974420u, \/\/6:major pentatonic (to heptatonic)\n    0xca775530u, \/\/7:minor pentatonic (to heptatonic)\n    0xcb775540u, \/\/8:ryukyu pentatonic (to heptatonic)\n    0xcb755420u, \/\/9:ryukyu hexatonic (to heptatonic)\n    0xba875410u, \/\/10:maqam hijaz octatonic\n    0xba876320u);\/\/11:gypsy minor octatonic\nint scalenote(int y){\n    return y<0?-999:key+((int(scl[scale])>>(y&7)*4)&15);\n}\n*\/\nint scalenote(int y){\n    return y<0?-999:((0xca775530>>(y&7)*4)&15);\n}\n\n\/\/PATTERN\n\/\/ melodic:range(4),rest(4),seed1(12),seed2(12)\n\/\/ percussive:note(2x16)\nconst uint[32] pat=uint[](\n    0x37000000u,0x39011171u,0x49012172u,0x39011773u,  \/\/00-   melody\n    0x39054c95u,0x37054394u,0x47226166u,0x37617167u,\n    0x37028168u,0x37019119u,0x4401a11au,0x3440417cu,  \/\/  -0B\n    0x37001434u,0x37001491u,0x37001022u,0x37001022u,  \/\/0C-0F backing\n    0x10000000u,0x24143143u,0x34147147u,0x24153153u,  \/\/10-13 chord\n    0x44504789u,0x4461a890u,0x44143327u,0x44957631u,  \/\/14-17 bass\n    0xfa9ab9ebu,0xf99b79efu,0xe79fe79fu,0xe79de797u,  \/\/18-1B sd+hh+bd\n    0x00010001u,0x01010101u,0x01212121u,0x55555555u); \/\/1C-1F bd2\n\n\/\/SEQUENCE\n\/\/ speed(4),degree1(4),pattern1(8),division(4),degree2(4),pattern2(8)\n\/\/ speed    0:0.5x 1:1x 2:2x 3:4x\n\/\/ degree   0:mute 1:I  2:II 3:III 4:IV 5:V 6:VI 7:VII\n\/\/ division 0-f ... timing to switch pattern1 to pattern2 (0:only pattern2)\nconst uint[16] seq1=uint[]( \/\/snare+hihat\n    0x21000118u,0x21188119u,0x21188118u,0x21188119u,\n    0x21000118u,0x21188119u,0x21188118u,0x21188119u,\n    0x211a8118u,0x211a811bu,0x2119811au,0x21188119u,\n    0x211a8118u,0x211a811bu,0x2119811au,0x21188119u);\nconst uint[16] seq2=uint[]( \/\/bassdrum+cymbal\n    0x2100011cu,0x2100011cu,0x211d611cu,0x211dc11fu,\n    0x2100011cu,0x2100011cu,0x211d611cu,0x211dc11fu,\n    0x211e811du,0x211e611cu,0x211ee11cu,0x211ec11fu,\n    0x211e811du,0x211e611cu,0x211ee11cu,0x211ec11fu);\nconst uint[16] seq3=uint[]( \/\/bass\n    0x11000114u,0x11000114u,0x11000314u,0x11000114u,\n    0x11000114u,0x11000114u,0x11000314u,0x11000114u,\n    0x21000114u,0x21000114u,0x21000314u,0x21148516u,\n    0x21000114u,0x21000414u,0x21000214u,0x21148117u);\nconst uint[16] seq4=uint[]( \/\/chord\n    0x11000110u,0x11000110u,0x11000310u,0x11000110u,\n    0x11000110u,0x11000110u,0x11000310u,0x11000110u,\n    0x11000411u,0x11000111u,0x11000312u,0x11000513u,\n    0x11000111u,0x11000411u,0x11000212u,0x11000113u);\nconst uint[16] seq5=uint[]( \/\/backing\n    0x1100010cu,0x1100010eu,0x1100030cu,0x191d810eu,\n    0x1100010cu,0x1100010eu,0x1100030cu,0x111d810fu,\n    0x1100040cu,0x1100010eu,0x1100030cu,0x172d850eu,\n    0x1100010cu,0x1100040eu,0x1100020cu,0x112d810fu);\nconst uint[16] seq6=uint[]( \/\/melody\n    0x11000101u,0x11000102u,0x11000303u,0x11000104u,\n    0x11000101u,0x11000102u,0x11000303u,0x11000105u,\n    0x11000406u,0x11000107u,0x11000308u,0x11000509u,\n    0x11000106u,0x11000407u,0x1100020Au,0x1100010Bu);\n\n\/\/BIT OPERATION\nint imod(int x,int y){return int(x-y*(x\/y));}\nint imod(uint x,uint y){return int(x-y*(x\/y));}\nint get12(uint b,int l){return int(b>>l*4)&4095;}\nint get8(uint b,int l){return int(b>>l*4)&255;}\nint get4(uint b,int l){return int(b>>l*4)&15;}\nint get2(uint b,int l){return int(b>>l*2)&3;}\n\n\/\/NES SOUND GENERATORS(without DPCM)\nfloat osc_duty(float x,float d){return fract(x)<d?1.:-1.;}\nfloat osc_tri4(float x){return abs(floor(fract(x)*15.9999)\/7.5-1.);}\nconst float[16] nt=float[](2.,4.,8.,16.,32.,48.,64.,80.,101.,127.,190.,254.,381.,508.,1017.,2034.);\nfloat osc_nesnoise(float x,int i){return fract(sin(floor(x*1789772.5\/nt[i])*179.2)*204.8);}\n\n\/\/WAVETABLE OSC(namco C30\/N163)\n\/\/sound0:flute  ADFF DA75 4456 9ABB A852 0025\n\/\/sound1:brass  BFED ED93 0378 78CF C621 2104\n\/\/sound2:organ  87D7 F7F7 D7A7 8582 8080 8287\n\/\/sound3:piano  BEFF EBA9 9998 7666 6541 0014\n\/\/sound4:harpsi BDEF 000F EDB9 6421 0fff 0124\n\/\/sound5:bass   0033 2266 0033 CCFF 99DD CCFF\n\/\/sound6:octsqr 0000 00AA AAAA 5555 55FF FFFF\n\/\/sound7:octsaw 0123 4567 89AB 4567 89AB CDEF\nconst uint[24] wt=uint[](\n    0x000bb8bau,0x100de7fdu,0x203efdefu,0x303ff7dfu,0x4020efedu,0x5020b7dau,0x6a60af97u,0x7a6f9735u,\n    0x8a0e9d04u,0x9a0d9734u,0xaa3b9a75u,0xba398786u,0x45c67879u,0x55c4658au,0x65f268cbu,0x75f162fbu,\n    0x859068cau,0x959f5068u,0xafdf4825u,0xbfdf1012u,0xcfc00820u,0xdfc10210u,0xeff21802u,0xfff44745u);\nfloat osc_c30(float x,int i){return(float((wt[int(mod(x*24.,24.))]>>(i*4))&15u)\/15.-.5);}\n\n\/\/AMP\n\/\/  vec3 p( drive, pressure, volume)\nvec2 amp(vec2 i,vec3 p){return sign(i)*pow(clamp(abs(i*p.x),0.,1.),vec2(1.\/p.y))*p.z;}\n\n\/\/FOLDBACK DISTORTION (input,threshould,ratio)\nfloat fbdist(float v,float t,float f){return abs(v)>t?sign(v)+(t-v)*f:v;}\n\n\/\/FREQUENCY FROM MIDI NOTE NUMBER\nfloat freq(float n){return pow(2.,(n-69.)\/12.)*base;}\n\n\/\/ENVELOPE\nfloat env_d(float x,float d){return max(0.,1.-x\/max(d,1e-4));}\n\n\/\/FM INSTRUMENTS (freq,time)\n\/\/float fmbass(float f,float x){f*=6.283;return fbdist(sin(f*2.03)+sin(f*2.+sin(f+sin(f*7.51)*env_d(x,.07))*env_d(x,.2)),1.,.8)*env_d(x,.5);}\n\/\/float fmharpsi(float f,float x){f*=6.283;return (sin(f+sin(f*5.+sin(f*9.))))*env_d(x,.7);}\n\/\/float fmvibe(float f,float x){f*=6.283;return (sin(f+sin(f*9.)))*env_d(x,.9);}\n\/\/float fmep(float f,float x){f*=6.283;return (sin(f+sin(f*15.)*env_d(x,.5)*.6))*env_d(x,.7);}\n\/\/float fmmarimba(float f,float x){f*=6.283;return (sin(f+sin(f*3.99+sin(f*5.3)*env_d(x,.08))*env_d(x,.3)))*env_d(x,.4);}\n\/\/float fmguitar(float f,float x){f*=6.283;return fbdist(sin(f+sin(f*3.01+sin(f*3.49)*env_d(x,.4))*env_d(x,.7)*.6)*1.3*env_d(x,.9));}\n\/\/float fmpad(float f,float x){f*=6.283;return sin(f+sin(f*1.01))*(.9+sin(x*60.)*.1);}\n\n\/\/PERCUSSION INSTRUMENTS (time)\nfloat bd(float x){return sin(x*freq(84.\/(1.+x*.7)))*env_d(x,.5);}\nfloat sd(float x){return (osc_nesnoise(x,10)*.8*env_d(x,.4)+sin(x*freq(82.\/(1.+x*.05)))*env_d(x,.5));}\n\/\/float hh(float x,float d){return osc_nesnoise(x,3)*env_d(x,d);}\n\n\/\/CHIPTUNE INSTRUMENTS (freq,time)\nconst float detune =.0025;\nvec2 dutybass(float f,float x){return vec2(osc_duty(f*(.5+detune),.5),osc_duty(f*(.5-detune),.5))*env_d(x,.5);}\n\/\/vec2 tri4bass(float f,float x){return vec2(osc_tri4(f*(.5+detune)),osc_tri4(f*(.5-detune)));}\nvec2 tri4lead(float f,float x){return vec2(osc_tri4(f*(1.-detune)),osc_tri4(f*(1.+detune)));}\nvec2 c30bass(float f,float x){return vec2(osc_c30(f*(1.+detune),5),osc_c30(f*(1.-detune),5))*env_d(x,.5);}\nvec2 c30chord(float f,float x){return vec2(osc_c30(f*(1.-detune),7),osc_c30(f*(1.+detune),7));}\nvec2 c30bell(float f,float x){return vec2(osc_c30(f*(1.-detune),1),osc_c30(f*(1.+detune),1))*env_d(x,.6);}\n\/\/vec2 c30lead(float f,float x){return vec2(osc_c30(f*(1.-detune),3),osc_c30(f*(1.+detune),3))*env_d(x,.5);}\n\n\/\/CHIPTUNE PERCUSSION (time)\n\/\/float nessd(float x){return osc_nesnoise(x,11)*env_d(x,.2);}\nfloat neshh(float x,float d){return osc_nesnoise(x,5)*env_d(x,d);}\nfloat nesbd(float x){return osc_duty(2.\/(x*.5+.08),.5)*env_d(x,.2);}\n\/\/float neslc(float x){return osc_duty(10.\/(x*.3+.1),.25)*env_d(x,.05);}\n\/\/float neshc(float x){return osc_duty(12.\/(x*.3+.1),.25)*env_d(x,.05);}\n\n\/\/LPF\n#define LPFI 96\n#define LPF(fn) float b=0.,o=0.;c+=1e-10;n=freq(n);for(int i=0;i<LPFI;i++){float f=n*(x+float(i)\/iSampleRate);b+=c*((fn)+q*(b-o)\/(1.-c)-o);o+=c*(b-o);}return o;\n\n\/\/SAW WITH LPF (note,time,cutoff,lpq)\nfloat lpfsaw(float n,float x,float c,float q){LPF(mod(f,2.)-1.)}\n\n\/\/C30 WITH LPF (note,time,cutoff,lpq,sound)\nfloat lpfc30(float n,float x,float c,float q,int s){LPF(osc_c30(f,s))}\n\n\/\/SAW-TRI MORPH (note,time,progression)\n\/\/float sawtri(float n,float x,float a){x=mod(freq(n)*x,1.);a=clamp(a*.5,1e-5,1.-1e-5);return min(x\/a,(x-1.)\/(a-1.))*2.-1.;}\n\n\/\/GET PATTERN FROM SEQUENCE\nfloat mp=0.; \/\/note length multiplier(from speed)\nint   dg=0;  \/\/degree now playing\nuint  pt=0u;  \/\/pattern now playing\nint   st=0;  \/\/step now playing\nbool getpattern(float t,uint sq){\n    \/\/ speed(4),degree1(4),pattern1(8),division(4),degree2(4),pattern2(8)\n    mp=pow(2.,float(get4(sq,7)-1))*16.;\n    st=int(mod(t*bpm*mp\/steps,16.));\n    bool di=int(mod(t*bpm*16.\/steps,16.))<get4(sq,3);\n    dg=di?get4(sq,6):get4(sq,2);\n    pt=di?pat[get8(sq,4)]:pat[get8(sq,0)];\n    return dg==0?false:true;\n}\n\n\/\/GET NOTE FROM PATTERN\nint notegen(int s,int s1,int s2){\n    return fract(sin(float(s+s1)+float(s1*20)*gateseed)*50.)<(float(get4(pt,6))*.0625)?-1:\n    imod(int(abs(sin(float(s+s1+s*s2)*noteseed)*float(s2))),get4(pt,7));\n}\nvec4 getnote(float t,float l){\n    \/\/ melodic:range(4),rest(4),seed1(12),seed2(12)\n    int s1=get12(pt,3),s2=get12(pt,0),n=notegen(st,s1,s2);\n    float x=mod(t,l\/mp);\n    if((st>=1)&&(n<0)){n=notegen(st-1,s1,s2);x+=l\/mp;}\n    n+=n<0?0:dg-1;\n    return (dg<1)||(n<0)?vec4(x,-1,-1,-1):vec4(x,scalenote(n),scalenote(n+chord3),scalenote(n+chord5));\n}\nvec4 getgate(float t,float l){\n    \/\/ percussive:note(2x16)\n    int n=get2(pt,st);\n    float x=mod(t,l\/mp);\n    if((st>=1)&&(n==0)){n=get2(pt,st-1);x+=l\/mp;}\n    return dg<1?vec4(x,-1,-1,-1):vec4(x,n,n,n);\n}\n\n\/\/RENDERER\nvec2 track1(float t,float l,int s){\/\/TRACK 1 snaredrum,closehh,kickdrum\n    vec2 o=vec2(0);\n    getpattern(t,seq1[imod(s,16)]);\n    vec4 n=getgate(t,l);\n    o+=(n.y==1.)?sd(n.x)*.7:0.;\n    o+=(n.y==2.)?neshh(n.x,.1)*.5:0.;\n    o+=(n.y==3.)?bd(n.x)*.7:0.;\n    return o;\n}\nvec2 track2(float t,float l,int s){\/\/TRACK 2 bassdrum,cymbal\n    vec2 o=vec2(0);\n    getpattern(t,seq2[imod(s,16)]);\n    vec4 n=getgate(t,l);\n    o+=(n.y==1.)?nesbd(n.x)*.55:0.;\n    o+=(n.y==2.)?neshh(n.x+.001,.4)*.3:0.;\n\/\/    o+=(n.y==3.)?neshc(n.x)*.3:0.;\n    return o;\n}\nvec2 track3(float t,float l,int s){\/\/TRACK 3 bass\n    vec2 o=vec2(0);\n    getpattern(t,seq3[imod(s,16)]);\n    vec4 n=getnote(t,l);\n    o+=(n.y>=0.)?dutybass(freq(n.y+36.)*n.x,n.x)*vec2(.4):vec2(0);\n    o+=(n.y>=0.)?lpfsaw(n.y+36.,n.x,sin(t*bpm*3.142\/180.)*.3+.34,.92)*vec2(.27)*env_d(n.x,.6):vec2(0);\n    return o;\n}\nvec2 track4(float t,float l,int s){\/\/TRACK 4 chord\n    vec2 o=vec2(0);\n    getpattern(t,seq4[imod(s,16)]);\n    vec4 n=getnote(t,l);\n    o+=(n.y>=0.)?(\n        c30chord(freq(n.y+60.03)*n.x,n.x)+\n        c30chord(freq(n.z+48.02)*n.x,n.x)+\n        c30chord(freq(n.w+48.01)*n.x,n.x)\n    )*.2:vec2(0);\n    o+=(n.y>=0.)?lpfsaw(n.w+48.,n.x,sin(t*bpm*6.283\/60.)*.3+.45,.95)*vec2(.1)*env_d(n.x,.45):vec2(0);\n    return o;\n}\nvec2 track5(float t,float l,int s){\/\/TRACK 5 backing\n    vec2 o=vec2(0);\n    getpattern(t,seq5[imod(s,16)]);\n    vec4 n=getnote(t,l);\n    o+=(n.y>=0.)?c30bell(freq(n.y+84.05)*n.x,n.x)*.15:vec2(0);\n    return o;\n}\nvec2 track6(float t,float l,int s){\/\/TRACK 6 melody\n    vec2 o=vec2(0);\n    getpattern(t,seq6[imod(s,16)]);\n    vec4 n=getnote(t,l);\n    o+=(n.y>=0.)?tri4lead(freq(n.y+60.)*n.x,n.x)*.5:vec2(0);\n    o+=(n.y>=0.)?lpfc30(n.y+48.,n.x,sin(t*bpm*3.142\/30.)*.35+.4,.95,3)*vec2(.6)*env_d(n.x,.6):vec2(0);\n    return o;\n}\nvoid render(float t,float l,inout vec2 o,bool e){\n    float c=0.;       \/\/render target\n    int   s=int(t\/l); \/\/sequence number now playing\n    vec4  n=vec4(0);  \/\/chord info x:gate yzw:notes\n    o+=e?track1(t,l,s):vec2(0); \/\/TRACK 1 snaredrum,closehh,kickdrum\n    o+=  track2(t,l,s);         \/\/TRACK 2 bassdrum\n    o+=e?track3(t,l,s):vec2(0); \/\/TRACK 3 bass\n    o+=  track4(t,l,s);         \/\/TRACK 4 chord\n    o+=  track5(t,l,s);         \/\/TRACK 5 backing\n    o+=  track6(t,l,s);         \/\/TRACK 6 melody\n}\n\n\/\/MASTER SECTION\n#define MASTER_DRIVE    0.4\n#define MASTER_PRESSURE 1.0\n#define DELAY_REPEAT    5\n#define DELAY_WET       0.3\n#define DELAY_FEEDBACK  0.9\n#define DELAY_TIME      0.07\nfloat mvol=0.; \/\/for indicator\nvec2 mainSound(float time){\n    float l=steps\/bpm,vol=1.,d=DELAY_WET,r=DELAY_TIME;\n    vec2 o=vec2(0);\n    if(time>sec-fade){vol=(sec-min(time,sec))\/fade;}\n    time-=start*60.\/bpm;\n    if(time<0.)return o;\n    render(time,l,o,true);\n    for(int i=0;i<DELAY_REPEAT;i++){\n        time-=r;\n        if(time<0.)continue;\n        vec2 a=vec2(0);\n        render(time,l,a,false);\n        d*=DELAY_FEEDBACK;\n        r+=DELAY_TIME;\n        o+=a*d;\n    }\n    mvol=vol;\n    return amp(o,vec3(MASTER_DRIVE,MASTER_PRESSURE,vol));\n}\n",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "\/\/ see \"Common\" tab",
+            "name": "Sound",
+            "description": "",
+            "type": "sound"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/---Scale Sequencer 2 by Catzpaw 2020\n\/\/https:\/\/www.shadertoy.com\/view\/3tVGz3\n\n\/\/BufferB:samples for level indicator\n\nvoid mainImage(out vec4 fragColor,in vec2 fragCoord){\n    vec2 p=fragCoord;\n    int x=int(p.x),y=int(p.y);\n    if((x>6)||(y>0))discard;\n    vec2 o=vec2(0);\n    float t=iTime,l=steps\/bpm,vol=1.;\n    if(t>sec-fade){vol=(sec-min(t,sec))\/fade;}\n    t-=start*60.\/bpm;\n    if(t>0.){\n        int s=int(t\/l);\n        if(x==0){o=vec2(vol,0);}\n        if(x==1){o=track1(t,l,s)*.5+.5;}\n        if(x==2){o=track2(t,l,s)*.5+.5;}\n        if(x==3){o=track3(t,l,s)*.5+.5;}\n        if(x==4){o=track4(t,l,s)*.5+.5;}\n        if(x==5){o=track5(t,l,s)*.5+.5;}\n        if(x==6){o=track6(t,l,s)*.5+.5;}\n    }    \n    vec2 b=texture(iChannel1,fragCoord\/iResolution.xy).xy;\n    fragColor = vec4(o,b);\n}\n",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

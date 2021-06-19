@@ -1,0 +1,94 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "3tGSR3",
+        "date": "1583187696",
+        "viewed": 4090,
+        "name": "Day 74",
+        "username": "jeyko",
+        "description": "Another day of daily creative coding challenge",
+        "likes": 66,
+        "published": 3,
+        "flags": 32,
+        "usePreview": 0,
+        "tags": [
+            "mdtmjvm"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\n\/\/ I fixed up the shader a bit, compared to the original and added tome color toning\n\n\/\/ It is basically just two perpendicular planes which are rotated depending on the position of the viewer.\n\/\/ Materials are reflective\n\/\/ Then some glowy lines are added on top\n\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord\/iResolution.xy;\n\tvec2 uvn = (fragCoord - 0.5*iResolution.xy)\/iResolution.xy;\n    \n    \/\/ Radial blur and chromatic abberation\n    float steps = 40.;\n    float scale = 0.00 + pow(length(uv - 0.5),3.4)*0.1;\n    float chromAb = pow(length(uv - 0.5),1.)*1.5;\n    vec2 offs = vec2(0);\n    vec4 radial = vec4(0);\n    for(float i = 0.; i < steps; i++){\n    \n        scale *= 0.98;\n        vec2 target = uv + offs;\n        offs -= normalize(uvn)*scale\/steps;\n    \tradial.r += texture(iChannel0, target + chromAb*1.\/iResolution.xy).x;\n    \tradial.g += texture(iChannel0, target).y;\n    \tradial.b += texture(iChannel0, target - chromAb*1.\/iResolution.xy).z;\n    }\n    radial \/= steps;\n    \n    fragColor = radial*1.5; \n    \n    \/\/ mimap glow\n    \/\/fragColor += texture(iChannel0,uv, 6.)*0.1;\n    \n    \/\/ color correction\n    fragColor = mix(fragColor,smoothstep(0.,1.,fragColor), 0.14); \n    \n    fragColor *= 1.;\n    fragColor.g *= 1.1;\n    fragColor.r *= 0.95 + uvn.x*0.7;\n    fragColor.g *= 0.95 + uvn.y*0.3;\n    fragColor = max(fragColor, 0.);\n    \/\/ vignette\n    fragColor = pow(fragColor, vec4(0.545 + dot(uvn,uvn)*2.)); \n\t\n}\n",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "nearest",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\n#define iTime (iTime - 7.4)\n\n#define SPEED 0.3\n#define FL_H 0.3\n\n\n#define mx (10.*iMouse.x\/iResolution.x)\n#define rot(x) mat2(cos(x),-sin(x),sin(x),cos(x))\n#define pal(a,b,c,d,e) ((a) + (b)*sin(6.28*((c)*(d) + (e))))\n\nvec3 glowB = vec3(0);\n\nvec3 reflAtten = vec3(1);\n\n\nvec3 path (float z){\n    z *= 0.5;\n\treturn vec3(\n    \tsin(z + cos(z*0.7))*0.7,\n    \tcos(z + cos(z*1.2))*0.6,\n        0.\n    )*2.;\n}\n\n#define pmod(p,x) mod(p,x) - x*0.5\nfloat map(vec3 p){\n\tfloat d = 10e6;\n    \n    \/\/ w is used for the lines \n    \/\/ and p is used for the tunnel\n    \n    vec3 w = p; \n    w = abs(w);\n    \n    \/\/ the tunnel is made by the next two lines, otherwise it's just to planes\n\tp -= path(p.z);\n    \n    p.xy *= rot(\n        sin(w.z*2.9 + p.z*0.7 + sin( w.x*2. + w.z*4. + iTime*0. + 0.5) + w.z*0.1)*1.6\n    ); \n    \n    float flTop =(-p.y + FL_H )*0.3;\n    float flBot =(p.y + FL_H )*0.3;\n    float floors = min(flBot, flTop);\n    d = min(d,floors);\n    \n    const float sep = 0.2; \/\/ seperation between glowy lines\n    \n    w.y = pmod(w.y,sep);\n    \n    \n    vec3 z = p;\n    \/\/ random attenuation to feed to the glowy lines\n    float atten = pow(abs(sin(z.z*0.2 + iTime*0.1)), 50.);\n    float attenC = pow(abs(sin(z.z*0.1  + sin(z.x + iTime)*0.2 + sin(z.y*3.)*4. + iTime*0.2)), 100.);\n    float attenB = pow(abs(sin(w.z*0.2  + sin(w.x + iTime)*0.2 + sin(w.y*0.7)*4. + w.y*20. + iTime*0.2)), 10.);\n    vec3 col = pal(0.1,0.6 - attenC*0.5,vec3(1.7  - atten*0.6,1.1,0.8),0.2 - atten*0.4 ,0.5 - attenB*0.6 );\n\tcol = max(col, 0.);\n    \n    float sc = 60. - atten*55.;\n    \n    \/\/ distance to the glowy lines\n    float dGlowzers = max(floors,-abs(w.y) + sep*0.5) - 0.02;\n    \n    \/\/ glow\n    glowB += exp(-dGlowzers*(70.))*reflAtten*col*40.;\n    d *= 0.65;\n    return d;\n}\nfloat march(vec3 ro, vec3 rd, inout vec3 p, inout float t, inout bool hit){\n\tfloat d = 10e6;\n\tp = ro; t = 0.; hit = false;\n    for (int i = 0; i < 180 ; i++){\n    \td = map(p);\n        \/\/glow += exp(-d.x*20.)*0.001;\n        if(d < 0.001){\n        \thit = true;\n            break;\n        }\n    \tt += d;\n        p = ro + rd*t;        \n    }\n\n    return d;\n}\n\nvec3 getRd(vec3 ro, vec3 lookAt, vec2 uv){\n\tvec3 dir = normalize(lookAt - ro);\n    vec3 right = normalize(cross(vec3(0,1,0), dir));\n    vec3 up = normalize(cross(dir, right));\n\treturn normalize(dir + right*uv.x + up*uv.y);\n}\n\n\nvec3 getNormal(vec3 p){\n\tvec2 t = vec2(0.001,0);\n    return normalize(\n    \tvec3(\n        \tmap(p - t.xyy) - map(p + t.xyy),\n        \tmap(p - t.yxy) - map(p + t.yxy),\n        \tmap(p - t.yyx) - map(p + t.yyx)\n        )\n    );\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = (fragCoord - 0.5*iResolution.xy)\/iResolution.y;\n\n    uv *= 1. - dot(uv,uv)*-0.2;\n    \n    \n    \n    \/\/uv.xy *= rot(0.1)\n    vec3 col = vec3(0);\n    \n    vec3 ro = vec3(0);\n    \n    ro.z += mx*2.;\n    ro.z += iTime*SPEED - sin(iTime)*SPEED*0.3;\n    ro += path(ro.z);\n    \n    vec3 lookAt = vec3(0,0,ro.z + 1.);\n    \n    lookAt += path(lookAt.z);\n    \n    vec3 rd = getRd(ro, lookAt, uv);\n    \n    rd.xy *= rot(sin(iTime)*0.05);\n    \n    bool hit; float t; vec3 p;\n    \n    float bounce;\n    \n    float firstT = 0.;\n    float d;\n    for(int i = 0; i < 2 ; i++){\n        d = march(ro, rd, p, t, hit);\n        vec3 n = getNormal(p);\n        if(i == 0)\n        \n        reflAtten *= vec3(0.2);\n        \n        rd = reflect(rd, n);\n        ro = p + rd*0.2;\n    }\n    \n\t\n    \n    glowB = max(glowB, 0.);\n    col += glowB*0.0006;\n    \n    col = clamp(col,0., 1.);\n    col = pow(col, vec3(1.3));\n    \n    fragColor = vec4(col,1.0);\n}",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

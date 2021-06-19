@@ -1,0 +1,49 @@
+{
+  "ver": "0.1",
+  "info": {
+    "id": "3l2Xzm",
+    "date": "1565449675",
+    "viewed": 204,
+    "name": "Prince Necklace",
+    "username": "Del",
+    "description": "symbol",
+    "likes": 3,
+    "published": 3,
+    "flags": 0,
+    "tags": [
+      "sdf",
+      "symbol"
+    ],
+    "hasliked": 0
+  },
+  "renderpass": [
+    {
+      "name": "Image",
+      "type": "image",
+      "description": "",
+      "code": "// copy of Ikuto's 'Cross Necklace' - https://www.shadertoy.com/view/tlSGRz\n// replaced the cross with a prince symbol :)\n//\n// reference: \n// 3D distance functions: http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm\n// Chain Reaction: https://www.shadertoy.com/view/wtX3W7\n\n\n#define\tAA 2\n#define PI 3.1415926\n#define TAO (2.0*PI)\n\nstruct Material {\n\tvec3 albedo;\n    float roughness;\n    float metallic;\n};\n\nMaterial shape_materials[] = Material[] (\n    Material(vec3(0.85, 0.7, 0.2), 0.3, 0.9),\n    Material(vec3(1.0, 1.0, 1.0), 0.3, 0.9)\n);\n\nvec2 rotate(vec2 v, float a) { return cos(a)*v + sin(a)*vec2(v.y,-v.x); }\n\nmat3 lookAt(vec3 eye, vec3 center, vec3 up) {\n\tvec3 f = normalize(center - eye);\n\tvec3 s = normalize(cross(f, up));\n\tvec3 u = cross(s, f);\n    return mat3(s, u, -f);\n}\n\nvec2 opU(vec2 a, vec2 b) { return a.x < b.x ? a : b; }\n\nfloat sdRoundBox(vec3 p, vec3 b, float r) { return length(max(abs(p) - b, 0.0)) - r; }\n\nfloat sdTorus(vec3 p, vec2 t) {\n  vec2 q = vec2(length(p.xz)-t.x,p.y);\n  return length(q) - t.y;\n}\n\nfloat sdLink(vec3 p, float le, float r1, float r2) {\n    vec3 q = vec3(p.x, max(abs(p.y)-le,0.0), p.z);\n    return length(vec2(length(q.xy)-r1,q.z)) - r2;\n}\n\nfloat smin( float a, float b, float k )\n{\n    float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );\n    return mix( b, a, h ) - k*h*(1.0-h);\n}\nmat2 rotate(float a)\n{\n\tfloat c = cos(a);\n\tfloat s = sin(a);\n\treturn mat2(c, s, -s, c);\n}\n// simple bend(Y) mod\nvec2 opBendTest( vec2 p, float angle, float xmod )\n{\n    p.x += xmod;\n    p = rotate( angle * p.x ) * p.xy;\n    p.x -= xmod;\n    return p;\n}\n\n// simple spriral(x) mod\nfloat spiral(vec2 p, float sa, float b)\n{\n  float a = atan(p.y, p.x);\n  float l = length(p);\n  float n = (log(l/sa)/b - a) / (2.*PI);\n  float upper_ray = sa * exp(b *(a + 2.*PI*ceil(n)));\n  float lower_ray = sa * exp(b *(a + 2.*PI*floor(n)));\n  return min(abs(upper_ray - l), abs(l-lower_ray));\n}\n\n// 2D-shapes (Trapezoid, Ring, Box, Triangle)\nfloat dot2(in vec2 v ) { return dot(v,v); }\nfloat sdTrapezoid( in vec2 p, in float r1, float r2, float he )\n{\n    vec2 k1 = vec2(r2,he);\n    vec2 k2 = vec2(r2-r1,2.0*he);\n\n\tp.x = abs(p.x);\n    vec2 ca = vec2(p.x-min(p.x,(p.y < 0.0)?r1:r2), abs(p.y)-he);\n    vec2 cb = p - k1 + k2*clamp( dot(k1-p,k2)/dot2(k2), 0.0, 1.0 );\n    \n    float s = (cb.x < 0.0 && ca.y < 0.0) ? -1.0 : 1.0;\n    \n    return s*sqrt( min(dot2(ca),dot2(cb)) );\n}\n\nfloat ring(vec2 uv, float rad, float thickness)\n{\n    return abs(rad - length(uv)) - thickness;\n}\n\nfloat sdBox( in vec2 p, in vec2 b ) \n{\n    vec2 q = abs(p) - b;\n    return min(max(q.x,q.y),0.0) + length(max(q,0.0));\n}    \n\n// signed distance to a 2D triangle\nfloat sdTriangle( in vec2 p0, in vec2 p1, in vec2 p2, in vec2 p )\n{\n\tvec2 e0 = p1 - p0;\n\tvec2 e1 = p2 - p1;\n\tvec2 e2 = p0 - p2;\n\n\tvec2 v0 = p - p0;\n\tvec2 v1 = p - p1;\n\tvec2 v2 = p - p2;\n\n\tvec2 pq0 = v0 - e0*clamp( dot(v0,e0)/dot(e0,e0), 0.0, 1.0 );\n\tvec2 pq1 = v1 - e1*clamp( dot(v1,e1)/dot(e1,e1), 0.0, 1.0 );\n\tvec2 pq2 = v2 - e2*clamp( dot(v2,e2)/dot(e2,e2), 0.0, 1.0 );\n    \n    float s = sign( e0.x*e2.y - e0.y*e2.x );\n    vec2 d = min( min( vec2( dot( pq0, pq0 ), s*(v0.x*e0.y-v0.y*e0.x) ),\n                       vec2( dot( pq1, pq1 ), s*(v1.x*e1.y-v1.y*e1.x) )),\n                       vec2( dot( pq2, pq2 ), s*(v2.x*e2.y-v2.y*e2.x) ));\n\n\treturn -sqrt(d.x)*sign(d.y);\n}\n\n// 1xTriangle, 4xTrapezoid, 3xBox, 1xRing\n// 1xBend distort modifier\n// 1xSpiral distor modifier\n// 5xCircle cuts\nfloat NewSymbol(vec2 uv)\n{\n    vec2 p = uv+vec2(0.27,0.09);\n\tfloat s1 = length(p)-0.2;\t\t\t\t\t\t// circle1\n  \tfloat s2 = length(p+vec2(-0.22,-0.01))-0.18;\t// circle2\n\tp.x = spiral(p.xy, PI*0.5, -0.33);\t\t\t\t// Spiral distort\n    float d = sdTrapezoid(p,0.015,0.015,0.08);\t\t// could just be a box...\n\td = max(d, s1);\t\t\t\t\t\t\t\t\t// subtract circle\n\td = max(d,-s2);\t\t\t\t\t\t\t\t\t// subtract circle\n\n    p = vec2(abs(uv.x),uv.y);\n    //\td = min(d,sdTriangle(vec2(-0.155,0.1),vec2(-0.055,0.1),vec2(-0.105,0.05),p.yx)); // mid-cross tri\n    d = min(d, sdTrapezoid(p.yx+vec2(0.105,-0.075),0.0,0.05,0.025));   \t\t\t// mid-cross trapeziod!\n    d = min(d,sdBox(p+vec2(-0.05,0.105),vec2(0.025,0.025)));\t\t\t\t\t\t// mid-cross bar\n    d = min(d,sdTriangle(vec2(0.0, -0.425),vec2(0.1, -0.25),vec2(-0.025, -0.35),p.xy)); // bottom triangle\n    \n\tp = opBendTest(uv+vec2(0.16, -0.088),radians(77.0),-0.103);\n    d = smin(d, sdTrapezoid(p.yx,0.018,0.025,0.19), 0.012); // bent arm (attempted to smooth the join, needs work)\n\n    d = min(d,ring(uv+vec2(0.0,-0.26),0.13,0.028));\t\t\t// top-ring\n    d = min(d,sdBox(uv+vec2(0.0,0.13),vec2(0.032,0.2)));\t// main body\n    d = min(d,sdBox(uv+vec2(-0.08,-0.085),vec2(0.09,0.025))); // horn1 (bar)\n\n    float cuts = length( uv+vec2(-0.17,-0.32))-0.21;\n    cuts = min(cuts,length( uv+vec2(-0.17,0.15))-0.21);\n    cuts = min(cuts,length( uv+vec2(-0.73,-0.085))-0.4);\n    p = uv+vec2(-0.26,-0.085);\n    d = min(max(sdTrapezoid(p.yx,0.025,0.13,0.09),-cuts),d); // horn2 (cutout)\n    return d;\n}\n\n\nvec2 mapScene(vec3 p) { \n    float shapeIndex = 0.0;\n    \n    p.y += 0.8;\n    vec3 p1 = p - vec3(0, 6.06, 0), p2 = p1;\n    float d = TAO/32.0, a = atan(p1.x, -p1.y)*1.0/d;\n \tp1.xy = rotate(p1.xy, floor(0.5+a)*d) + vec2(0, 4.0);\n    p2.xy = rotate(p2.xy, (floor(a)+0.5)*d) + vec2(0, 4.0);\n    \n    vec2 res = vec2(sdLink(p1.yxz, 0.125, 0.1, 0.03), shapeIndex);\n    res = opU(res, vec2(sdLink(p2.zxy, 0.125, 0.1, 0.03), shapeIndex++));\n    \n    float dist = NewSymbol((p.xy*0.15)+vec2(0.0,0.1));\n    float dep = 0.2;\n    vec2 e = vec2( dist, abs(p.z) - dep );\n    dist = min(max(e.x,e.y),0.0) + length(max(e,0.0));\n    dist -= 0.01;\n    res = opU(res, vec2(dist,shapeIndex++));\n    \n    \n    return res;\n}\n\nfloat sdScene(vec3 pos) { return mapScene(pos).x; }\n\nvec3 calculateNormal(in vec3 point) {\n    const vec3 step = vec3(0.01, 0.0, 0.0);\n    float gradX = sdScene(point + step.xyy) - sdScene(point - step.xyy);\n    float gradY = sdScene(point + step.yxy) - sdScene(point - step.yxy);\n    float gradZ = sdScene(point + step.yyx) - sdScene(point - step.yyx);\n    \n    vec3 normal = vec3(gradX, gradY, gradZ);\n    return normalize(normal);\n}\n\nvec2 rayMarch(vec3 ray_origin, vec3 ray_direction) {\n    const float MAX_TRACE_DISTANCE = 35.0;\n    \n    float totalDistance = 0.0, shapeIndex = -1.0;\n    for (int i = 0; i < 60; ++i) {\n        vec2 res = mapScene(ray_origin + totalDistance * ray_direction);\n        float minHitDistance = 0.0005 * totalDistance;\n        if (res.x < minHitDistance) {\n            shapeIndex = res.y; break; \n        }\n        if (totalDistance > MAX_TRACE_DISTANCE) break;\n        totalDistance += res.x;\n    }\n    \n\treturn vec2(totalDistance, shapeIndex);\n}\n\nvec3 render(vec3 ray_origin, vec3 ray_direction) {\n\tvec3 color = vec3(0.05,0.07,0.1)*ray_origin.y;\n    \n    vec2 res = rayMarch(ray_origin, ray_direction);\n    int shapeIndex = int(res.y);\n    if (shapeIndex >= 0) {\n    \tcolor = pow(texture(iChannel0, ray_direction).rgb, vec3(2.2));\n        \n        vec3 p = ray_origin + ray_direction * res.x;\n        vec3 N = calculateNormal(p);\n\t\tvec3 L = normalize(vec3(1, 1, 1));\n\t\tfloat NdotL = max(0.0, dot(N, L));\n        \n\t\tvec3 ambient = mix(vec3(0.07), vec3(0.05, 0.1, 0.15), N.y * 0.5 + 0.5);\n\t\tvec3 lightCol = vec3(1.0 ,0.9, 0.8);\n\n        Material mat = shape_materials[shapeIndex];\n\t\tcolor = mat.albedo * (NdotL * lightCol + ambient);\n       \n\t\tvec3 reflection = reflect(ray_direction, N);\n\t\tvec3 refMap = pow(texture(iChannel0, reflection).rgb, vec3(2.2));\n        vec3 F0 = mix(vec3(0.04), mat.albedo, mat.metallic);\n\t\tvec3 fresnel = mix(F0, vec3(1.0 - mat.roughness), pow(dot(N, ray_direction) + 1.0, 5.0));\n\t\tcolor = mix(color.rgb, refMap, fresnel);\n    }\n    \n    return color;\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec3 totalColor = vec3(0.0);\n    \n    float angle = sin(iTime);\n    \n    vec3 rayOrigin = 9.0*vec3(sin(angle), 0.3, cos(angle));\n    mat3 viewMat = lookAt(rayOrigin, vec3(0.0), vec3(0.0, 1.0, 0.0));\n    \n    for (int i = 0; i < AA; ++i)  {\n    \tfor (int k = 0; k < AA; ++k)  {\n        \tvec2 offset = vec2(float(i) + .5, float(k) + .5) / float(AA) - .5;\n        \tvec2 uv = (fragCoord + offset - iResolution.xy * 0.5) / iResolution.y;\n    \t\tvec3 rayDirection = normalize(viewMat * vec3(uv, -1.0));\n        \ttotalColor += render(rayOrigin, rayDirection);\n            totalColor = totalColor * (1.0 - dot(uv, uv) * 0.5);\n        }\n    }         \n    \n\ttotalColor /= float(AA * AA);\n    totalColor = pow(totalColor, vec3(0.4545));\n    \n\tfragColor = vec4(totalColor, 1.0);\n}",
+      "inputs": [
+        {
+          "id": "4sX3zn",
+          "src": null,
+          "ctype": null,
+          "channel": 0,
+          "sampler": {
+            "filter": "mipmap",
+            "wrap": "clamp",
+            "vflip": "false",
+            "srgb": "false",
+            "internal": "byte"
+          },
+          "published": 1
+        }
+      ],
+      "outputs": [
+        {
+          "id": "4dfGRr",
+          "channel": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "4sKSzt",
+        "date": "1466044200",
+        "viewed": 490,
+        "name": "Rapping Fractal",
+        "username": "vox",
+        "description": "Rapping Fractal\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNobody could have biggy around... he was too hard to compete with B)",
+        "likes": 1,
+        "published": 3,
+        "flags": 96,
+        "tags": [
+            "rappingfractal"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/*\nCopyright (c) 2016, CrazedCoding@gmail.com.\nPermission is hereby REVOKED and\/or DENIED, with prejudice \n(lol f*** you), from\/to anyone\/everyone \nobtaining a copy of this software and associated \ndocumentation files (the \"Software\"), to deal in the \nSoftware without restriction, including without limitation\nthe rights to use, copy, modify, merge, publish, distribute, \nsublicense, and\/or sell copies of the Software, \nsubject to the following conditions: DO NOT EVEN CONTINUE\nREADING THIS COPYRIGHT; DO NOT LOOK AT THIS SOFTWARE; IF\nYOU FOUND THIS SOFTWARE BY FOLLOWING LINKS IN MY POSTS\n(SPREAD THROUGHOUT CYBERSPACE) THEN QUIT WASTING TIME ON\nFACEBOOK\/YOUTUBE STALKING ME AND SPEND MORE TIME LEARNING \nBASIC CALCULUS AND COMPUTER SCIENCE SO YOU CAN WRITE YOUR \nOWN F***ING CODE; BETTER YET, CONTACT ME AND I WILL TUTOR\nYOU AT A RATE OF $12.50 AN HOUR IN THOSE SUBJECTS...\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY \nKIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE \nWARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR \nPURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS \nOR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR \nOTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR \nOTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE \nSOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n*\/\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord\/iResolution.xy;\n    vec4 sample = texture(iChannel0, uv);\n    fragColor = sample; return;\n    fragColor = vec4(sample.a); return;\n}\n ",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "MdX3WX",
+                    "filepath": "https:\/\/soundcloud.com\/germanbrewer\/the-notorious-b-i-g-party-and",
+                    "previewfilepath": "https:\/\/soundcloud.com\/germanbrewer\/the-notorious-b-i-g-party-and",
+                    "type": "musicstream",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/*\nCopyright (c) 2016, CrazedCoding@gmail.com.\nPermission is hereby REVOKED and\/or DENIED, with prejudice \n(lol f*** you), from\/to anyone\/everyone \nobtaining a copy of this software and associated \ndocumentation files (the \"Software\"), to deal in the \nSoftware without restriction, including without limitation\nthe rights to use, copy, modify, merge, publish, distribute, \nsublicense, and\/or sell copies of the Software, \nsubject to the following conditions: DO NOT EVEN CONTINUE\nREADING THIS COPYRIGHT; DO NOT LOOK AT THIS SOFTWARE; IF\nYOU FOUND THIS SOFTWARE BY FOLLOWING LINKS IN MY POSTS\n(SPREAD THROUGHOUT CYBERSPACE) THEN QUIT WASTING TIME ON\nFACEBOOK\/YOUTUBE STALKING ME AND SPEND MORE TIME LEARNING \nBASIC CALCULUS AND COMPUTER SCIENCE SO YOU CAN WRITE YOUR \nOWN F***ING CODE; BETTER YET, CONTACT ME AND I WILL TUTOR\nYOU AT A RATE OF $12.50 AN HOUR IN THOSE SUBJECTS...\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY \nKIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE \nWARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR \nPURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS \nOR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR \nOTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR \nOTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE \nSOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n*\/\n\n\n\n#define PI 3.14159265359\n#define E 2.7182818284\n#define GR 1.61803398875\n\n#define time ((saw(float(__LINE__))*1.25+.3)*iTime+100.0)\n#define saw(x) (acos(cos(x))\/PI)\n#define sphereN(uv) (clamp(1.0-length(uv*2.0-1.0), 0.0, 1.0))\n#define clip(x) (smoothstep(0.25, .75, x))\n#define TIMES_DETAILED (1.25)\n\nfloat angle(vec2 uv)\n{\n    return atan(uv.y, uv.x);\n}\n\nfloat angle_percent(vec2 uv)\n{\n    return (angle(uv)\/PI+1.0)\/2.0;\n}\n\nvec2 cmul(vec2 v1, vec2 v2) {\n\treturn vec2(v1.x * v2.x - v1.y * v2.y, v1.y * v2.x + v1.x * v2.y);\n}\n\nvec2 cdiv(vec2 v1, vec2 v2) {\n\treturn vec2(v1.x * v2.x + v1.y * v2.y, v1.y * v2.x - v1.x * v2.y) \/ dot(v2, v2);\n}\n\nvec2 map(vec2 uv, vec2 multa, vec2 offa, vec2 multb, vec2 offb)\n{\n    return saw(cdiv(cmul(uv, multa) + offa, cmul(uv, multb) + offb)*PI)*2.0-1.0;\n}\n\nvec2 iterate(vec2 uv, vec2 dxdy, out float magnification, vec2 multa, vec2 offa, vec2 multb, vec2 offb)\n{\n    vec2 a = uv+vec2(0.0, \t\t0.0);\n    vec2 b = uv+vec2(dxdy.x, \t0.0);\n    vec2 c = uv+vec2(dxdy.x, \tdxdy.y);\n    vec2 d = uv+vec2(0.0, \t\tdxdy.y);\/\/((fragCoord.xy + vec2(0.0, 1.0)) \/ iResolution.xy * 2.0 - 1.0) * aspect;\n\n    vec2 ma = map(a, multa, offa, multb, offb);\n    vec2 mb = map(b, multa, offa, multb, offb);\n    vec2 mc = map(c, multa, offa, multb, offb);\n    vec2 md = map(d, multa, offa, multb, offb);\n    \n    float da = length(mb-ma);\n    float db = length(mc-mb);\n    float dc = length(md-mc);\n    float dd = length(ma-md);\n    \n\tfloat stretch = max(max(max(da\/dxdy.x,db\/dxdy.y),dc\/dxdy.x),dd\/dxdy.y);\n    \n    magnification = stretch;\n    \n    return map(uv, multa, offa, multb, offb);\n}\nvec3 phase(float map)\n{\n    return vec3(saw(map),\n                saw(4.0*PI\/3.0+map),\n                saw(2.0*PI\/3.0+map));\n}\n\nfloat lowAverage()\n{\n    const int iters = 32;\n    float product = 1.0;\n    float sum = 0.0;\n    \n    float smallest = 0.0;\n    \n    for(int i = 0; i < iters; i++)\n    {\n        float sound = texture(iChannel0, vec2(float(i)\/float(iters), 0.5)).r;\n        smallest = \n        \n        product *= sound;\n        sum += sound;\n    }\n    return max(sum\/float(iters), pow(product, 1.0\/float(iters)));\n}\n\nfloat last_height = 0.0;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy \/ iResolution.xy;\n    vec4 sample = texture(iChannel1, uv);\n    float height = max(lowAverage(), last_height)-1.0\/30.0;\n    float beat = clip(height);\n    float scale = (1.0+3.0*sin(time\/PI))*PI-beat*PI;\n    uv = uv*scale-scale\/2.0;\n    uv.x *= iResolution.x\/iResolution.y;\n    \n    float r = length(uv);\n\n    \n    float map = time;\n    float sum = 0.0;\n    float noise = 1.0;\n    float spounge = time*4.0*PI;\n\tconst int max_iterations = 12;\n    int target = max_iterations;\/\/-int(saw(spounge)*float(max_iterations)\/2.0);\n    \n    vec2 multa, multb, offa, offb;\n    \n    float antispeckle = 1.0; \n    float magnification = 1.0;\n  \n\tvec3 color = vec3(1.0);\n\tvec3 accum = vec3(0.0);\n    float anticolor = beat;\n    float last_i = 0.0;\n    for(int i = 0; i < max_iterations; i++)\n    {\n        last_i = float(i);\n        float iteration = float(i)\/float(max_iterations)+beat;\n        \n        multa = cos(vec2(time*1.1, time*1.2)+iteration*PI);\n        offa = cos(vec2(time*1.3, time*1.4)+iteration*PI)*PI;\n        multb = cos(vec2(time*1.5, time*1.6)+iteration*PI);\n        offb = cos(vec2(time*1.7, time*1.8)+iteration*PI);\n        \n        uv = iterate(uv, .5\/iResolution.xy, magnification, multa, offa, multb, offb);\n        float weight = smoothstep(0.0, 0.125, magnification);\n        antispeckle *= smoothstep(0.0, 1.0\/TIMES_DETAILED, sqrt(1.0\/(1.0+magnification)));\n        vec2 circular = vec2(saw(angle(uv*2.0-1.0)*4.0), .5);\n        float sound = sqrt(clip(texture(iChannel0, circular).r)*beat\/TIMES_DETAILED+1.0\/TIMES_DETAILED);\n        \n        if(i < target)\n        {\n            map += (sphereN(uv)+saw(beat*2.0*PI+time+angle(uv*2.0-1.0)))*antispeckle;\n            float shift = time;\n\n            float stripes = map*5.0*PI;\/\/*floor(log(max(iResolution.x, iResolution.y))\/log(2.0));\n            float black = smoothstep(0.0, .75, saw(stripes-shift))*beat;\n            float white = smoothstep(0.75, 1.0, saw(stripes-shift))*black;\n\n\n            vec3 final = (\n                vec3(saw(map*PI*2.0+shift),\n                     saw(4.0*PI\/3.0+map*PI*2.0+shift),\n                     saw(2.0*PI\/3.0+map*PI*2.0+shift)\n                    )\n            )*black\n                +white;\n            \n            color *= smoothstep(0.0, 1.0\/float(i+1), final*beat)+antispeckle;\n            accum += final*antispeckle;\n            sum += antispeckle;\n            anticolor *= smoothstep(0.0, 1.0\/float(i+1), (sound)\/antispeckle);\n            \n        }\n        else\n            break;\n    }\n    antispeckle = pow(antispeckle, GR\/float(max_iterations));\n    anticolor *= antispeckle;\n    anticolor = sqrt(anticolor);\n    \/\/fragColor = vec4(anticolor); return;\n    \/\/fragColor = vec4(antispeckle); return;\n    \n    color.r = pow(color.r, 1.0\/float(max_iterations));\n    color.g = pow(color.g, 1.0\/float(max_iterations));\n    color.b = pow(color.b, 1.0\/float(max_iterations));\n    \n    accum \/= float(max_iterations);\n    \n    \/\/anticolor = clamp(1.0+beat*anticolor-antispeckle, 0.0, 1.0);\n    \n    fragColor.rgb = clamp((color+accum)*anticolor*(1.0+beat*GR)+sample.rgb*(1.0-anticolor), 0.0, 1.0);\n    fragColor.a = anticolor;\n}\n",
+            "name": "Buf A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/*\nCopyright (c) 2016, CrazedCoding@gmail.com.\nPermission is hereby REVOKED and\/or DENIED, with prejudice \n(lol f*** you), from\/to anyone\/everyone \nobtaining a copy of this software and associated \ndocumentation files (the \"Software\"), to deal in the \nSoftware without restriction, including without limitation\nthe rights to use, copy, modify, merge, publish, distribute, \nsublicense, and\/or sell copies of the Software, \nsubject to the following conditions: DO NOT EVEN CONTINUE\nREADING THIS COPYRIGHT; DO NOT LOOK AT THIS SOFTWARE; IF\nYOU FOUND THIS SOFTWARE BY FOLLOWING LINKS IN MY POSTS\n(SPREAD THROUGHOUT CYBERSPACE) THEN QUIT WASTING TIME ON\nFACEBOOK\/YOUTUBE STALKING ME AND SPEND MORE TIME LEARNING \nBASIC CALCULUS AND COMPUTER SCIENCE SO YOU CAN WRITE YOUR \nOWN F***ING CODE; BETTER YET, CONTACT ME AND I WILL TUTOR\nYOU AT A RATE OF $12.50 AN HOUR IN THOSE SUBJECTS...\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY \nKIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE \nWARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR \nPURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS \nOR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR \nOTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR \nOTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE \nSOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n*\/\n\n\/\/-----------------USEFUL-----------------\n\n#define PI 3.14159265359\n#define E 2.7182818284\n#define GR 1.61803398875\n\n#define time ((saw(float(__LINE__))+.5)*(iTime+12345.12345))\n#define saw(x) (acos(cos(x))\/PI)\n\n\n\/\/-----------------SIMPLEX-----------------\n\nvec3 random3(vec3 c) {\n    float j = 4096.0*sin(dot(c,vec3(17.0, 59.4, 15.0)));\n    vec3 r;\n    r.z = fract(512.0*j);\n    j *= .125;\n    r.x = fract(512.0*j);\n    j *= .125;\n    r.y = fract(512.0*j);\n    return r-0.5;\n}\n\nfloat simplex3d(vec3 p) {\n    const float F3 =  0.3333333;\n    const float G3 =  0.1666667;\n    \n    vec3 s = floor(p + dot(p, vec3(F3)));\n    vec3 x = p - s + dot(s, vec3(G3));\n    \n    vec3 e = step(vec3(0.0), x - x.yzx);\n    vec3 i1 = e*(1.0 - e.zxy);\n    vec3 i2 = 1.0 - e.zxy*(1.0 - e);\n    \n    vec3 x1 = x - i1 + G3;\n    vec3 x2 = x - i2 + 2.0*G3;\n    vec3 x3 = x - 1.0 + 3.0*G3;\n    \n    vec4 w, d;\n    \n    w.x = dot(x, x);\n    w.y = dot(x1, x1);\n    w.z = dot(x2, x2);\n    w.w = dot(x3, x3);\n    \n    w = max(0.6 - w, 0.0);\n    \n    d.x = dot(random3(s), x);\n    d.y = dot(random3(s + i1), x1);\n    d.z = dot(random3(s + i2), x2);\n    d.w = dot(random3(s + 1.0), x3);\n    \n    w *= w;\n    w *= w;\n    d *= w;\n    \n    return dot(d, vec4(52.0));\n}\n\n\/\/-----------------RENDER-----------------\n\nvec2 spiral(vec2 uv)\n{\n    float turns = 2.0;\/\/+saw(time*1.1234)*4.0;\n    float r = pow(log(length(uv)+1.), 1.175);\n    float theta = atan(uv.y, uv.x)*turns-r*PI;\n    return vec2(saw(r*PI+iTime), saw(theta));\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv0 = fragCoord\/iResolution.xy;\n    vec4 sample0 = texture(iChannel0, uv0);\n    \n    vec2 uv = uv0;\n    \n    float scale = 2.0*PI;\n    \n    float wavvy = simplex3d(vec3(uv*1.0, time))*PI*2.0;\n    \n    vec2 variety = vec2(cos(wavvy), sin(wavvy));\n    \n    float effect = time;\n    \n    float effect1 = clamp(cos(effect), 0.0, 1.0);\n    float effect2 = clamp(cos(effect+2.0\/3.0*PI), 0.0, 1.0);\n    float effect3 = clamp(cos(effect+4.0\/3.0*PI), 0.0, 1.0);\n    \n    uv =  effect1*((spiral(scale*(spiral(scale*((uv)*2.0-1.0))*2.0-1.0))*2.0-1.0)+\n         +effect2*(uv*2.0-1.0))\n         +effect3*variety;\n    \n    vec2 direction = uv*iResolution.xy\/30.0;\n    \n    vec4 sample = texture(iChannel0, saw(PI*(uv0+direction\/iResolution.xy*sample0.a)));\n    \n    fragColor = sample*(1.0-sample0.a)+sample0*sample0.a;\n    fragColor.rgb -= 3.0\/255.0;\n}\n",
+            "name": "Buf B",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

@@ -1,0 +1,52 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "wl2SRK",
+        "date": "1566673282",
+        "viewed": 3066,
+        "name": "Neon Tunnel",
+        "username": "holtsetio",
+        "description": "Quick and dirty sketch for a project at work which never got the green lights",
+        "likes": 77,
+        "published": 1,
+        "flags": 0,
+        "usePreview": 0,
+        "tags": [
+            "raymarching",
+            "tunnel",
+            "neon"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/quick and dirty code for prototyping\n\n#define MAXSTEPS 256\n#define MAXDIST 30.0\n#define PI 3.1415926535898\n#define TWOPI 6.28318530718\n#define FUZZ 0.7\n#define PHASELENGTH 30.0\n#define PHASE mod(iTime\/PHASELENGTH,1.0)\n#define CUBENUM 50.0\n#define DISTANCEPERPHASE 150.0\n#define EPSILON 0.005\n\nvec3 glow = vec3(0);\nvec3 lastglow = vec3(0);\nvec3 cubeColor = vec3(0);\nfloat ringOffset = +0.6;\n\nmat4 rotationX( in float angle ) {\n\treturn mat4(\t1.0,\t\t0,\t\t\t0,\t\t\t0,\n\t\t\t \t\t0, \tcos(angle),\t-sin(angle),\t\t0,\n\t\t\t\t\t0, \tsin(angle),\t cos(angle),\t\t0,\n\t\t\t\t\t0, \t\t\t0,\t\t\t  0, \t\t1);\n}\n\nmat4 rotationY( in float angle ) {\n\treturn mat4(\tcos(angle),\t\t0,\t\tsin(angle),\t0,\n\t\t\t \t\t\t\t0,\t\t1.0,\t\t\t 0,\t0,\n\t\t\t\t\t-sin(angle),\t0,\t\tcos(angle),\t0,\n\t\t\t\t\t\t\t0, \t\t0,\t\t\t\t0,\t1);\n}\n\nmat4 rotationZ( in float angle ) {\n\treturn mat4(\tcos(angle),\t\t-sin(angle),\t0,\t0,\n\t\t\t \t\tsin(angle),\t\tcos(angle),\t\t0,\t0,\n\t\t\t\t\t\t\t0,\t\t\t\t0,\t\t1,\t0,\n\t\t\t\t\t\t\t0,\t\t\t\t0,\t\t0,\t1);\n}\n\nvec3 displacement(float p) {\n    p *= 8.0*TWOPI\/DISTANCEPERPHASE;\n    return vec3(sin(p),cos(p*0.5+PI+PHASE*TWOPI*3.0)*0.37,0)*1.7;\n}\n\n\n\/\/sdf functions taken from iq\nfloat opSmoothUnion( float d1, float d2, float k ) {\n    float h = clamp( 0.5 + 0.5*(d2-d1)\/k, 0.0, 1.0 );\n    return mix( d2, d1, h ) - k*h*(1.0-h); }\n\n\nfloat sdBox( vec3 p, vec3 b )\n{    \n\tfloat interval = DISTANCEPERPHASE\/CUBENUM;\n  \tvec3 offset = displacement(round(p.z \/ interval +0.5)*interval - ringOffset);\n  \tp -= offset;\n    \n    float num = mod(floor(p.z\/interval)+1.0,DISTANCEPERPHASE\/interval)*4.0;\n    cubeColor = normalize(texture(iChannel0, vec2((num+0.5)\/256.0,0.2\/256.0)).xyz);\n  \tp.z = mod(p.z,interval) - interval*0.5;\n    p = mat3(rotationX(PHASE*TWOPI*5.0) * rotationZ(PHASE*TWOPI*18.0))*p;\n    \n  \tvec3 d = abs(p) - b;\n  \tfloat res = length(max(d,0.0)) + min(max(d.x,max(d.y,d.z)),0.0);\n\n    lastglow = pow(max(0.0,(1.0-(res\/2.0))),4.0) * cubeColor * 0.1;\n    glow += lastglow;\n    \n    return res;\n}\nfloat sdTube(vec3 p, float r)\n{\n    p.y += 0.8;\n    p -= displacement(p.z);\n    return length(p.xy)-r;\n}\n\nfloat sdTube2(vec3 p, float r)\n{\n    p -= displacement(p.z+1.5 - ringOffset);\n    return min(length(p.xy - vec2(0,0.9)),min(length(p.xy + vec2(0.9,0)),length(p.xy- vec2(0.9,0))))-r;\n}\n\nfloat sdTorus( vec3 p, float r1, float r2 )\n{\n    float interval = DISTANCEPERPHASE\/CUBENUM;\n    vec3 offset = displacement(round(p.z \/ interval+0.5)*interval - ringOffset);\n    p -= offset;\n    p.z = mod(p.z,interval) - interval*0.5;\n    return length( vec2(length(p.xy)-r1,p.z) )-r2;\n}\n\nfloat map(vec3 pos)\n{\n    vec3 p=pos;\n    float d0 = sdTube(pos, 0.501);\n    float d1 = sdTorus(pos, 0.9, 0.05);\n    float d2 = sdTube2(pos,0.05);\n    d0 = opSmoothUnion(d0,d1,0.5);\n    d0 = opSmoothUnion(d0,d2,0.1);\n    d1 = sdBox(pos, vec3(0.05));\n    return min(d0,d1);\n}\n\nvoid intersect(vec3 ro, vec3 rd)\n{\n    float res;\n    float d = 0.01;\n    for(int i = 0; i < MAXSTEPS; i++)\n    {\n        vec3 p = ro + rd * d;\n        res = map(p);\n        if(res < EPSILON * d || res > MAXDIST) {\n            break;\n        }\n        d += res*FUZZ;\n    }\n    glow += lastglow*6.0;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = (fragCoord.xy - iResolution.xy * 0.5)\/ iResolution.xy;\n    uv.x *= iResolution.x \/ iResolution.y;\n\n    float fov = 0.25 * PI;\n    vec3 origin = vec3(0,0, PHASE*DISTANCEPERPHASE);\n    vec3 target = origin -vec3(0.0, 0.001, -0.05);\n    \n    target += displacement(target.z*1.0);\n    origin += displacement(origin.z*1.0);\n\n\tvec3 forward = normalize(target - origin);\n \tvec3 right = normalize(cross(forward, vec3(0.0, 1.0, 0.0)));   \n    vec3 up = cross(right, forward);\n    vec3 dir = normalize(uv.x * right + uv.y * up + fov * forward);\n    \n    intersect(origin, dir);\n\tfragColor = vec4(glow, 1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

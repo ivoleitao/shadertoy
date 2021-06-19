@@ -1,0 +1,3 @@
+GET {{baseUrl}}/{{imgPath}}/profile.jpg
+###
+GET {{baseUrl}}/{{imgPath}}/profilex.jpg

@@ -1,0 +1,38 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "MdXyzX",
+        "date": "1489076833",
+        "viewed": 131364,
+        "name": "Very fast procedural ocean",
+        "username": "afl_ext",
+        "description": "It's fast because it doesn't use noise but rather sin waves",
+        "likes": 332,
+        "published": 3,
+        "flags": 0,
+        "tags": [
+            "waves",
+            "sea",
+            "water",
+            "ocean",
+            "seascape",
+            "scape"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/afl_ext 2017-2019\n\n#define DRAG_MULT 0.048\n#define ITERATIONS_RAYMARCH 13\n#define ITERATIONS_NORMAL 48\n\n#define Mouse (iMouse.xy \/ iResolution.xy)\n#define Resolution (iResolution.xy)\n#define Time (iTime)\n\nvec2 wavedx(vec2 position, vec2 direction, float speed, float frequency, float timeshift) {\n    float x = dot(direction, position) * frequency + timeshift * speed;\n    float wave = exp(sin(x) - 1.0);\n    float dx = wave * cos(x);\n    return vec2(wave, -dx);\n}\n\nfloat getwaves(vec2 position, int iterations){\n\tfloat iter = 0.0;\n    float phase = 6.0;\n    float speed = 2.0;\n    float weight = 1.0;\n    float w = 0.0;\n    float ws = 0.0;\n    for(int i=0;i<iterations;i++){\n        vec2 p = vec2(sin(iter), cos(iter));\n        vec2 res = wavedx(position, p, speed, phase, Time);\n        position += normalize(p) * res.y * weight * DRAG_MULT;\n        w += res.x * weight;\n        iter += 12.0;\n        ws += weight;\n        weight = mix(weight, 0.0, 0.2);\n        phase *= 1.18;\n        speed *= 1.07;\n    }\n    return w \/ ws;\n}\n\nfloat raymarchwater(vec3 camera, vec3 start, vec3 end, float depth){\n    vec3 pos = start;\n    float h = 0.0;\n    float hupper = depth;\n    float hlower = 0.0;\n    vec2 zer = vec2(0.0);\n    vec3 dir = normalize(end - start);\n    for(int i=0;i<318;i++){\n        h = getwaves(pos.xz * 0.1, ITERATIONS_RAYMARCH) * depth - depth;\n        if(h + 0.01 > pos.y) {\n            return distance(pos, camera);\n        }\n        pos += dir * (pos.y - h);\n    }\n    return -1.0;\n}\n\nfloat H = 0.0;\nvec3 normal(vec2 pos, float e, float depth){\n    vec2 ex = vec2(e, 0);\n    H = getwaves(pos.xy * 0.1, ITERATIONS_NORMAL) * depth;\n    vec3 a = vec3(pos.x, H, pos.y);\n    return normalize(cross(normalize(a-vec3(pos.x - e, getwaves(pos.xy * 0.1 - ex.xy * 0.1, ITERATIONS_NORMAL) * depth, pos.y)), \n                           normalize(a-vec3(pos.x, getwaves(pos.xy * 0.1 + ex.yx * 0.1, ITERATIONS_NORMAL) * depth, pos.y + e))));\n}\nmat3 rotmat(vec3 axis, float angle)\n{\n\taxis = normalize(axis);\n\tfloat s = sin(angle);\n\tfloat c = cos(angle);\n\tfloat oc = 1.0 - c;\n\treturn mat3(oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s, \n\toc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s, \n\toc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c);\n}\n\nvec3 getRay(vec2 uv){\n    uv = (uv * 2.0 - 1.0) * vec2(Resolution.x \/ Resolution.y, 1.0);\n\tvec3 proj = normalize(vec3(uv.x, uv.y, 1.0) + vec3(uv.x, uv.y, -1.0) * pow(length(uv), 2.0) * 0.05);\t\n    if(Resolution.x < 400.0) return proj;\n\tvec3 ray = rotmat(vec3(0.0, -1.0, 0.0), 3.0 * (Mouse.x * 2.0 - 1.0)) * rotmat(vec3(1.0, 0.0, 0.0), 1.5 * (Mouse.y * 2.0 - 1.0)) * proj;\n    return ray;\n}\n\nfloat intersectPlane(vec3 origin, vec3 direction, vec3 point, vec3 normal)\n{ \n    return clamp(dot(point - origin, normal) \/ dot(direction, normal), -1.0, 9991999.0); \n}\n\nvec3 extra_cheap_atmosphere(vec3 raydir, vec3 sundir){\n\tsundir.y = max(sundir.y, -0.07);\n\tfloat special_trick = 1.0 \/ (raydir.y * 1.0 + 0.1);\n\tfloat special_trick2 = 1.0 \/ (sundir.y * 11.0 + 1.0);\n\tfloat raysundt = pow(abs(dot(sundir, raydir)), 2.0);\n\tfloat sundt = pow(max(0.0, dot(sundir, raydir)), 8.0);\n\tfloat mymie = sundt * special_trick * 0.2;\n\tvec3 suncolor = mix(vec3(1.0), max(vec3(0.0), vec3(1.0) - vec3(5.5, 13.0, 22.4) \/ 22.4), special_trick2);\n\tvec3 bluesky= vec3(5.5, 13.0, 22.4) \/ 22.4 * suncolor;\n\tvec3 bluesky2 = max(vec3(0.0), bluesky - vec3(5.5, 13.0, 22.4) * 0.002 * (special_trick + -6.0 * sundir.y * sundir.y));\n\tbluesky2 *= special_trick * (0.24 + raysundt * 0.24);\n\treturn bluesky2 * (1.0 + 1.0 * pow(1.0 - raydir.y, 3.0)) + mymie * suncolor;\n} \nvec3 getatm(vec3 ray){\n \treturn extra_cheap_atmosphere(ray, normalize(vec3(1.0))) * 0.5;\n    \n}\n\nfloat sun(vec3 ray){\n \tvec3 sd = normalize(vec3(1.0));   \n    return pow(max(0.0, dot(ray, sd)), 528.0) * 110.0;\n}\nvec3 aces_tonemap(vec3 color){\t\n\tmat3 m1 = mat3(\n        0.59719, 0.07600, 0.02840,\n        0.35458, 0.90834, 0.13383,\n        0.04823, 0.01566, 0.83777\n\t);\n\tmat3 m2 = mat3(\n        1.60475, -0.10208, -0.00327,\n        -0.53108,  1.10813, -0.07276,\n        -0.07367, -0.00605,  1.07602\n\t);\n\tvec3 v = m1 * color;    \n\tvec3 a = v * (v + 0.0245786) - 0.000090537;\n\tvec3 b = v * (0.983729 * v + 0.4329510) + 0.238081;\n\treturn pow(clamp(m2 * (a \/ b), 0.0, 1.0), vec3(1.0 \/ 2.2));\t\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy \/ iResolution.xy;\n \t\n\tfloat waterdepth = 2.1;\n\tvec3 wfloor = vec3(0.0, -waterdepth, 0.0);\n\tvec3 wceil = vec3(0.0, 0.0, 0.0);\n\tvec3 orig = vec3(0.0, 2.0, 0.0);\n\tvec3 ray = getRay(uv);\n\tfloat hihit = intersectPlane(orig, ray, wceil, vec3(0.0, 1.0, 0.0));\n    if(ray.y >= -0.01){\n        vec3 C = getatm(ray) * 2.0 + sun(ray);\n        \/\/tonemapping\n    \tC = aces_tonemap(C);\n     \tfragColor = vec4( C,1.0);   \n        return;\n    }\n\tfloat lohit = intersectPlane(orig, ray, wfloor, vec3(0.0, 1.0, 0.0));\n    vec3 hipos = orig + ray * hihit;\n    vec3 lopos = orig + ray * lohit;\n\tfloat dist = raymarchwater(orig, hipos, lopos, waterdepth);\n    vec3 pos = orig + ray * dist;\n\n\tvec3 N = normal(pos.xz, 0.001, waterdepth);\n    vec2 velocity = N.xz * (1.0 - N.y);\n    N = mix(vec3(0.0, 1.0, 0.0), N, 1.0 \/ (dist * dist * 0.01 + 1.0));\n    vec3 R = reflect(ray, N);\n    float fresnel = (0.04 + (1.0-0.04)*(pow(1.0 - max(0.0, dot(-N, ray)), 5.0)));\n\t\n    vec3 C = fresnel * getatm(R) * 2.0 + fresnel * sun(R);\n    \/\/tonemapping\n    C = aces_tonemap(C);\n    \n\tfragColor = vec4(C,1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

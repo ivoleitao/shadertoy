@@ -1,0 +1,51 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "ldl3W8",
+        "date": "1369238474",
+        "viewed": 66572,
+        "name": "Voronoi - distances",
+        "username": "iq",
+        "description": "Mathematically correct Voronoi cell interior distances and hence correct cell borders. Seems nobody out there is doing this correctly... So here. More info [url=http:\/\/www.iquilezles.org\/www\/articles\/voronoilines\/voronoilines.htm]in this article[\/url]",
+        "likes": 373,
+        "published": 3,
+        "flags": 0,
+        "tags": [
+            "2d",
+            "voronoi",
+            "worley"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "nearest",
+                        "wrap": "repeat",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ The MIT License\n\/\/ Copyright \u00a9 2013 Inigo Quilez\n\/\/ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and\/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\/\/ I've not seen anybody out there computing correct cell interior distances for Voronoi\n\/\/ patterns yet. That's why they cannot shade the cell interior correctly, and why you've\n\/\/ never seen cell boundaries rendered correctly. \n\/\/\n\/\/ However, here's how you do mathematically correct distances (note the equidistant and non\n\/\/ degenerated grey isolines inside the cells) and hence edges (in yellow):\n\/\/\n\/\/ http:\/\/www.iquilezles.org\/www\/articles\/voronoilines\/voronoilines.htm\n\/\/\n\/\/ More Voronoi shaders:\n\/\/\n\/\/ Exact edges:  https:\/\/www.shadertoy.com\/view\/ldl3W8\n\/\/ Hierarchical: https:\/\/www.shadertoy.com\/view\/Xll3zX\n\/\/ Smooth:       https:\/\/www.shadertoy.com\/view\/ldB3zc\n\/\/ Voronoise:    https:\/\/www.shadertoy.com\/view\/Xd23Dh\n\n#define ANIMATE\n\nvec2 hash2( vec2 p )\n{\n\t\/\/ texture based white noise\n\treturn textureLod( iChannel0, (p+0.5)\/256.0, 0.0 ).xy;\n\t\n    \/\/ procedural white noise\t\n\t\/\/return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);\n}\n\nvec3 voronoi( in vec2 x )\n{\n    vec2 n = floor(x);\n    vec2 f = fract(x);\n\n    \/\/----------------------------------\n    \/\/ first pass: regular voronoi\n    \/\/----------------------------------\n\tvec2 mg, mr;\n\n    float md = 8.0;\n    for( int j=-1; j<=1; j++ )\n    for( int i=-1; i<=1; i++ )\n    {\n        vec2 g = vec2(float(i),float(j));\n\t\tvec2 o = hash2( n + g );\n\t\t#ifdef ANIMATE\n        o = 0.5 + 0.5*sin( iTime + 6.2831*o );\n        #endif\t\n        vec2 r = g + o - f;\n        float d = dot(r,r);\n\n        if( d<md )\n        {\n            md = d;\n            mr = r;\n            mg = g;\n        }\n    }\n\n    \/\/----------------------------------\n    \/\/ second pass: distance to borders\n    \/\/----------------------------------\n    md = 8.0;\n    for( int j=-2; j<=2; j++ )\n    for( int i=-2; i<=2; i++ )\n    {\n        vec2 g = mg + vec2(float(i),float(j));\n\t\tvec2 o = hash2( n + g );\n\t\t#ifdef ANIMATE\n        o = 0.5 + 0.5*sin( iTime + 6.2831*o );\n        #endif\t\n        vec2 r = g + o - f;\n\n        if( dot(mr-r,mr-r)>0.00001 )\n        md = min( md, dot( 0.5*(mr+r), normalize(r-mr) ) );\n    }\n\n    return vec3( md, mr );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 p = fragCoord\/iResolution.xx;\n\n    vec3 c = voronoi( 8.0*p );\n\n\t\/\/ isolines\n    vec3 col = c.x*(0.5 + 0.5*sin(64.0*c.x))*vec3(1.0);\n    \/\/ borders\t\n    col = mix( vec3(1.0,0.6,0.0), col, smoothstep( 0.04, 0.07, c.x ) );\n    \/\/ feature points\n\tfloat dd = length( c.yz );\n\tcol = mix( vec3(1.0,0.6,0.1), col, smoothstep( 0.0, 0.12, dd) );\n\tcol += vec3(1.0,0.6,0.1)*(1.0-smoothstep( 0.0, 0.04, dd));\n\n\tfragColor = vec4(col,1.0);\n}\n",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

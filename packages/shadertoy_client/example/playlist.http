@@ -1,0 +1,8 @@
+
+GET {{baseUrl}}/{{playlistPath}}/week
+###
+GET {{baseUrl}}/{{playlistPath}}/week?from=15&num=15
+###
+GET {{baseUrl}}/{{playlistPath}}/week?from=30&num=15
+###
+GET {{baseUrl}}/{{playlistPath}}/XcdBzH

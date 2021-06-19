@@ -1,0 +1,38 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "Xd23Dh",
+        "date": "1389822885",
+        "viewed": 58885,
+        "name": "Voronoise",
+        "username": "iq",
+        "description": "Patterns such as cell-noise, perlin noise and voronoi can be seen as particular cases of a more general pattern, which I call \"voronoise\". More info [url= http:\/\/iquilezles.org\/www\/articles\/voronoise\/voronoise.htm]in this article[\/url]. ",
+        "likes": 206,
+        "published": 3,
+        "flags": 0,
+        "tags": [
+            "procedural",
+            "2d",
+            "voronoi",
+            "noise",
+            "perlin",
+            "worley"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ The MIT License\n\/\/ Copyright \u00a9 2014 Inigo Quilez\n\/\/ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and\/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\n\/\/ This is a procedural pattern that has 2 parameters, that generalizes cell-noise, \n\/\/ perlin-noise and voronoi, all of which can be written in terms of the former as:\n\/\/\n\/\/ cellnoise(x) = pattern(0,0,x)\n\/\/ perlin(x) = pattern(0,1,x)\n\/\/ voronoi(x) = pattern(1,0,x)\n\/\/\n\/\/ From this generalization of the three famouse patterns, a new one (which I call \n\/\/ \"Voronoise\") emerges naturally. It's like perlin noise a bit, but within a jittered \n\/\/ grid like voronoi):\n\/\/\n\/\/ voronoise(x) = pattern(1,1,x)\n\/\/\n\/\/ Not sure what one would use this generalization for, because it's slightly slower \n\/\/ than perlin or voronoise (and certainly much slower than cell noise), and in the \n\/\/ end as a shading TD you just want one or another depending of the type of visual \n\/\/ features you are looking for, I can't see a blending being needed in real life.  \n\/\/ But well, if only for the math fun it was worth trying. And they say a bit of \n\/\/ mathturbation can be healthy anyway!\n\/\/\n\/\/ More info here: http:\/\/iquilezles.org\/www\/articles\/voronoise\/voronoise.htm\n\n\/\/ More Voronoi shaders:\n\/\/\n\/\/ Exact edges:  https:\/\/www.shadertoy.com\/view\/ldl3W8\n\/\/ Hierarchical: https:\/\/www.shadertoy.com\/view\/Xll3zX\n\/\/ Smooth:       https:\/\/www.shadertoy.com\/view\/ldB3zc\n\/\/ Voronoise:    https:\/\/www.shadertoy.com\/view\/Xd23Dh\n\n\nvec3 hash3( vec2 p )\n{\n    vec3 q = vec3( dot(p,vec2(127.1,311.7)), \n\t\t\t\t   dot(p,vec2(269.5,183.3)), \n\t\t\t\t   dot(p,vec2(419.2,371.9)) );\n\treturn fract(sin(q)*43758.5453);\n}\n\nfloat voronoise( in vec2 p, float u, float v )\n{\n\tfloat k = 1.0+63.0*pow(1.0-v,6.0);\n\n    vec2 i = floor(p);\n    vec2 f = fract(p);\n    \n\tvec2 a = vec2(0.0,0.0);\n    for( int y=-2; y<=2; y++ )\n    for( int x=-2; x<=2; x++ )\n    {\n        vec2  g = vec2( x, y );\n\t\tvec3  o = hash3( i + g )*vec3(u,u,1.0);\n\t\tvec2  d = g - f + o.xy;\n\t\tfloat w = pow( 1.0-smoothstep(0.0,1.414,length(d)), k );\n\t\ta += vec2(o.z*w,w);\n    }\n\t\n    return a.x\/a.y;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord \/ iResolution.xx;\n\n    vec2 p = 0.5 - 0.5*cos( iTime*vec2(1.0,0.5) );\n    \n\tif( iMouse.w>0.001 ) p = vec2(0.0,1.0) + vec2(1.0,-1.0)*iMouse.xy\/iResolution.xy;\n\t\n\tp = p*p*(3.0-2.0*p);\n\tp = p*p*(3.0-2.0*p);\n\tp = p*p*(3.0-2.0*p);\n\t\n\tfloat f = voronoise( 24.0*uv, p.x, p.y );\n\t\n\tfragColor = vec4( f, f, f, 1.0 );\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

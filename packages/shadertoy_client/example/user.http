@@ -1,0 +1,13 @@
+GET {{baseUrl}}/{{userPath}}/shaderflix
+###
+GET {{baseUrl}}/{{userPath}}/bonzaj
+###
+GET {{baseUrl}}/{{userPath}}/iq&sort=popular&filter=multipass&filter=musicstream
+###
+GET {{baseUrl}}/{{userPath}}/iq
+###
+GET {{baseUrl}}/{{userPath}}/iq&from=8&num=8
+###
+GET {{baseUrl}}/{{userPath}}/iq&from=16&num=8
+###
+GET {{baseUrl}}/{{userPath}}/XXXXXX

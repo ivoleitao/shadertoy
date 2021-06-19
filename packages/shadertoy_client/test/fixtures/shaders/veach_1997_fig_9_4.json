@@ -1,0 +1,156 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "lsV3zV",
+        "date": "1460529301",
+        "viewed": 4480,
+        "name": "Veach 1997 Fig 9.4",
+        "username": "mplanck",
+        "description": "A playpen for understanding Veach's ground breaking paper on multiple importance sampling: https:\/\/graphics.stanford.edu\/papers\/veach_thesis\/ with PBRT second edition as my bible. Use Keys 1,2,3,4 and Space",
+        "likes": 113,
+        "published": 1,
+        "flags": 48,
+        "usePreview": 0,
+        "tags": [
+            "raymarching",
+            "mis",
+            "progressive",
+            "pbrt"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Final gather \n\n\/\/ INPUTS\n\n\/\/ 1 := select brdf importance sampling only\n\/\/ 2 := select light importance sampling only\n\/\/ 3 := select multiple importance sampling\n\/\/ 4 := turn on green coloring of brdf importance samples, red coloring of light importance samples\n\/\/ SPACE := reset to no coloring and multiple importance sampling\n\n\/\/ **************************************************************************\n\/\/ GLOBALS\n\nfloat g_frame = 0.;\n\nvoid setup_globals()\n{\n    g_frame = float(iFrame) - texture(iChannel1, vec2(0., 0.), -100.).r ;\n}\n\n\/\/ **************************************************************************\n\/\/ MAIN COLOR\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    setup_globals();\n    vec2 uv = fragCoord.xy \/ iResolution.xy;\n        \n    vec3 scol = vec3(0.);\n    if (g_frame > .5)\n    {\n\t\tscol = texture( iChannel0, uv ).xyz;\n        scol \/= g_frame;\n        scol = pow( scol, vec3(0.4545) );\n    }\n    \n    fragColor = vec4(scol, 1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGRr",
+                    "filepath": "\/presets\/tex00.jpg",
+                    "previewfilepath": "\/presets\/tex00.jpg",
+                    "type": "keyboard",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Buffer A is used to store persistent state in one pixel\n\n\/\/ r = start frame\n\/\/ g = sampling type (brdf, light, multiple)\n\/\/ b = color samples? (green for brdf importance samples, red for light importance samples)\n\n\/\/ INPUTS\n\n\/\/ 1 := select brdf importance sampling only\n\/\/ 2 := select light importance sampling only\n\/\/ 3 := select multiple importance sampling\n\/\/ 4 := turn on green coloring of brdf importance samples, red coloring of light importance samples\n\/\/ SPACE := reset to no coloring and multiple importance sampling\n\n\/\/ **************************************************************************\n\/\/ CONSTANTS\n\nconst float KEY_SPACE = 32.5\/256.0;\nconst float KEY_ONE = 49.5\/256.0;\nconst float KEY_TWO = 50.5\/256.0;\nconst float KEY_THREE = 51.5\/256.0;\nconst float KEY_FOUR = 52.5\/256.0;\n\nconst float BRDF_IMPORTANCE_SAMPLING = 2.;\nconst float LIGHT_IMPORTANCE_SAMPLING = 1.;\nconst float MULTIPLE_IMPORTANCE_SAMPLING = 0.;\n\nbool this_pixel_is_being_rendered(vec2 fragCoord, vec2 r)\n{\n    return (step(r.y-.2, fragCoord.y) * step(fragCoord.y, r.y+1.2) * \n            step(r.x-.2, fragCoord.x) * step(fragCoord.x, r.x+1.2)) > .5;\n}\n\nbool this_pixel_is_in_the_range(vec2 fragCoord, vec2 r0, vec2 r1)\n{\n    return (step(r0.y-.2, fragCoord.y) * step(fragCoord.y, r1.y+1.2) * \n            step(r0.x-.2, fragCoord.x) * step(fragCoord.x, r1.x+1.2)) > .5;\n}\n\n\/\/ **************************************************************************\n\/\/ MAIN COLOR\n\nvec3 process_inputs(vec2 fragCoord)\n{\n    \n\tvec3 resultingColor = vec3(0.);\n    \n    vec3 storedState = texture(iChannel0, vec2(0., 0.), -100.).rgb;\n\n    float initialFrame = storedState.r;\n    float samplingType = storedState.g;\n    float colorSamples = storedState.b;\n\n    \/\/ space bar resets coloring and sampling to default\n    float pressSpace = texture( iChannel1, vec2(KEY_SPACE,0.25) ).x;\n    if (pressSpace > .5 || iFrame == 0) \n    { \n        initialFrame = float(iFrame);         \n        samplingType = MULTIPLE_IMPORTANCE_SAMPLING; \n        colorSamples = 0.;\n    }\t\n\n    \/\/ one enables brdf sampling only\n    float pressOne = texture( iChannel1, vec2(KEY_ONE,0.25) ).x;\n    if (pressOne > .5) { \n        initialFrame = float(iFrame); \n        samplingType = BRDF_IMPORTANCE_SAMPLING; \n    }\t\n\n    \/\/ two enables lighting sampling only\n    float pressTwo = texture( iChannel1, vec2(KEY_TWO,0.25) ).x;\n    if (pressTwo > .5) { \n        initialFrame = float(iFrame); \n        samplingType = LIGHT_IMPORTANCE_SAMPLING; \n    }\t\n\n    \/\/ three enables multiple importance sampling\n    float pressThree = texture( iChannel1, vec2(KEY_THREE,0.25) ).x;\n    if (pressThree > .5) { \n        initialFrame = float(iFrame); \n        samplingType = MULTIPLE_IMPORTANCE_SAMPLING; \n    }\t\n\n    \/\/ four enables color sampling - green for brdf, red for light\n    float pressFour = texture( iChannel1, vec2(KEY_FOUR,0.25) ).x;\n    if (pressFour > .5) { \n        initialFrame = float(iFrame); \n        colorSamples = 1.;\n    }\n    \n    \n    if (this_pixel_is_being_rendered(fragCoord, vec2(0., 0.)))\n    {        \n\t\tresultingColor = vec3(initialFrame, samplingType, colorSamples);\n    }\n                \n    return resultingColor;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{    \n\n    if (!this_pixel_is_in_the_range(fragCoord, vec2(0., 0.), vec2(1., 0.)))\n    {\n        discard;\n    }\n    \n    vec3 finalColor = process_inputs(fragCoord);\n    \n    fragColor = vec4(finalColor,1.0);\n}",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Buffer B does the sampling and accumulation work \n\n\/\/ **************************************************************************\n\/\/ DEFINES\n\n#define PI 3.14159\n#define TWO_PI 6.28318\n#define INV_TWO_PI .159155\n#define PI_OVER_TWO 1.570796\n\n#define REALLY_SMALL_NUMBER 0.0001\n#define REALLY_BIG_NUMBER 1000000.\n\n#define MIRROR_ID 1.\n#define SEMI_MIRROR_ID 2.\n#define SEMI_ROUGH_ID 3.\n#define ROUGH_ID 4.\n#define LIGHT_ID 5.\n\n#define BACKDROP_ID 6.\n#define ENVIRONMENT_ID 7.\n\n\/\/ **************************************************************************\n\/\/ CONSTANTS\n\nconst int BRDF_IMPORTANCE_SAMPLING = 2;\nconst int LIGHT_IMPORTANCE_SAMPLING = 1;\nconst int MULTIPLE_IMPORTANCE_SAMPLING = 0;\n\n\/\/ **************************************************************************\n\/\/ INLINE MACROS\n\n#define MATCHES_ID(id1, id2) (id1 > (id2 - .5)) && (id1 < (id2 + .5))\n\n\n\/\/ **************************************************************************\n\/\/ GLOBALS\n\nfloat g_frame        = 0.;\nint g_samplingType = MULTIPLE_IMPORTANCE_SAMPLING;\nfloat g_colorSamples = 0.;\n\n\nvec4 g_light0 = vec4(-2.,1.8, -3., .1);\nvec4 g_light1 = vec4(-.666,1.8, -3., .2);\nvec4 g_light2 = vec4(.666,1.8, -3., .3);\nvec4 g_light3 = vec4(2.,1.8, -3., .4);\n\n\/\/ **************************************************************************\n\/\/ MATH UTILITIES\n\n\/\/ Rotate the input point around the y-axis by the angle given as a cos(angle)\n\/\/ and sin(angle) argument.  There are many times where I want to reuse the\n\/\/ same angle on different points, so why do the heavy trig twice. Range of\n\/\/ outputs := ([-1.,-1.,-1.] -> [1.,1.,1.])\nvec3 rotate_yaxis( vec3 point, float cosa, float sina )\n{\n    return vec3(point.x * cosa  + point.z * sina,\n                point.y,\n                point.x * -sina + point.z * cosa);\n}\n\n\/\/ Rotate the input point around the x-axis by the angle given as a cos(angle)\n\/\/ and sin(angle) argument.  There are many times where  I want to reuse the\n\/\/ same angle on different points, so why do the  heavy trig twice. Range of\n\/\/ outputs := ([-1.,-1.,-1.] -> [1.,1.,1.])\nvec3 rotate_xaxis( vec3 point, float cosa, float sina )\n{\n    return vec3(point.x,\n                point.y * cosa - point.z * sina,\n                point.y * sina + point.z * cosa);\n}\n\n\n\/\/ --------------------------------------\n\/\/ from dave hoskins: https:\/\/www.shadertoy.com\/view\/4djSRW\n\n#define HASHSCALE3 vec3(.1031, .1030, .0973)\nvec2 hash21(float p)\n{\n    vec3 p3 = fract(vec3(p) * HASHSCALE3);\n    p3 += dot(p3, p3.yzx + 19.19);\n    return fract(vec2((p3.x + p3.y)*p3.z, (p3.x+p3.z)*p3.y));\n}\n\n#define HASHSCALE1 .1031\nfloat hash12(vec2 p)\n{\n    vec3 p3  = fract(vec3(p.xyx) * HASHSCALE1);\n    p3 += dot(p3, p3.yzx + 19.19);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\/\/ --------------------------------------\n\nfloat dist_squared(vec3 v1, vec3 v2)\n{\n    return (v1.x - v2.x) * (v1.x - v2.x) + \n        (v1.y - v2.y) * (v1.y - v2.y) + \n        (v1.z - v2.z) * (v1.z - v2.z);\n}\n\nvec4 intersect_sphere(vec3 ro, vec3 rd, vec3 sphc, float sphr)\n{\n    if (dist_squared(ro,sphc) < sphr * sphr) \n    { \n        return vec4(-1., vec3(0.)); \n    }\n    \n    vec3 sphro = ro - sphc; \n    float a = dot(rd, rd);\n    float b = dot(sphro, rd);\n    float c = dot(sphro, sphro) - sphr * sphr;\n    float sign = mix(-1., 1., step(0., a));\n    float t = (-b + sign * sqrt(b*b - a*c))\/a; \n    \n    vec3 n = normalize(ro + t * rd - sphc);\n    return vec4(step(0., t), n);    \n    \n}\n\nvec3 polar_to_cartesian(float sinTheta, \n                        float cosTheta, \n                        float sinPhi,\n                        float cosPhi)\n{\n    return vec3(sinTheta * cosPhi,\n                sinTheta * sinPhi,\n                cosTheta);\n}\n\n\n\/\/ **************************************************************************\n\/\/ DISTANCE FIELDS\n\nfloat sphere_df( vec3 p, float r) \n{ \n    return length(p) - r; \n}\n\nfloat envsphere_df ( vec3 p, float r) \n{ \n    return r - length(p); \n}\n\nfloat roundbox_df ( vec3 p, vec3 b, float r ) \n{\n    return length(max(abs(p-vec3(0., .5*b.y, 0.))-.5*b,0.))-r; \n}\n\n\/\/ **************************************************************************\n\/\/ INFORMATION HOLDERS (aka DATA STRUCTURES)\n\nstruct RaySampleInfo\n{\n    vec3 origin;\n    vec3 direction;\n    vec2 imagePlaneUV;\n};\n\n#define INIT_RAY_INFO() RaySampleInfo(vec3(0.) \/* origin *\/, vec3(0.) \/* direction *\/, vec2(0.) \/* imagePlaneUV *\/)\n\nstruct SurfaceInfo\n{\n    float id;\n    vec3 incomingRayDir;\n    vec3 point;\n    vec3 normal;\n    float incomingRayLength;\n    float rayDepth;\n    \n};\n#define INIT_SURFACE_INFO(incomingRayDir) SurfaceInfo(-1. \/* id *\/, incomingRayDir \/* incomingRayDir *\/, vec3(0.) \/* point *\/, vec3(0.) \/* normal *\/, 0. \/* incomingRayLength *\/, 0. \/* rayDepth *\/)\n\nstruct MaterialInfo\n{\n    float seed;\n    float specExponent;\n    float specIntensity;\n    vec3  baseColor;\n};\n#define INIT_MATERIAL_INFO(seed) MaterialInfo(seed, 1. \/* specExponent *\/, 1. \/* specIntensity *\/, vec3(.8) \/* baseColor *\/)\n\n\/\/ **************************************************************************\n\/\/ SETUP WORLD\n\nvoid setup_globals()\n{\n    \n    vec3 storedState = texture(iChannel1, vec2(0., 0.), -100.).rgb;\n    g_frame = float(iFrame) - storedState.r ;\n    g_samplingType = int(storedState.g + .5);\n    g_colorSamples = storedState.b;\n}\n\nvec4 get_light(int i)\n{\n    if (i == 0) { return g_light0; }\n    if (i == 1) { return g_light1; }\n    if (i == 2) { return g_light2; }\n    else { return g_light3; }\n}\n\nRaySampleInfo setup_cameraRay(vec2 aaoffset)\n{\n    \n    vec3 origin = vec3(0.0, 2., 6.0);\n    vec3 cameraPointsAt = vec3(0., .5, 0.);\n\n    float invAspectRatio = iResolution.y \/ iResolution.x;\n    vec2 imagePlaneUV = (gl_FragCoord.xy + aaoffset) \/ iResolution.xy - .5;\n    imagePlaneUV.y *= invAspectRatio;\n\n    vec3 iu = vec3(0., 1., 0.);\n\n    vec3 iz = normalize( cameraPointsAt - origin );\n    vec3 ix = normalize( cross(iz, iu) );\n    vec3 iy = cross(ix, iz);\n\n    vec3 direction = normalize( imagePlaneUV.x * ix + imagePlaneUV.y * iy + .8 * iz );\n\n    return RaySampleInfo(origin, direction, imagePlaneUV);\n\n}\n\n\/\/ **************************************************************************\n\/\/ MARCH\n\nvec2 union_obj(vec2 o1, vec2 o2)\n{\n    return (o1.x < o2.x) ? o1 : o2;\n}\n\nvec2 map(float depth, vec3 p)\n{\n    vec2 roughObj =       vec2(roundbox_df(rotate_xaxis(p - vec3(0., -.4,  1.2), cos( 0.0), sin( 0.0)), vec3(5., .02, 1.), .01), ROUGH_ID);\n    vec2 semiroughObj =   vec2(roundbox_df(rotate_xaxis(p - vec3(0., -.38,  0.), cos(-0.12), sin(-0.12)) , vec3(5., .02, 1.), .01), SEMI_ROUGH_ID);\n    vec2 semimirrorObj =  vec2(roundbox_df(rotate_xaxis(p - vec3(0., -.2, -1.2), cos(-0.26), sin(-0.26)) , vec3(5., .02, 1.), .01), SEMI_MIRROR_ID);\n    vec2 mirrorObj =      vec2(roundbox_df(rotate_xaxis(p - vec3(0., .2, -2.4), cos(-0.5), sin(-0.5)) , vec3(5., .02, 1.), .01), MIRROR_ID);    \n    \n    \n    vec2 resultObj = union_obj(mirrorObj, semimirrorObj);\n    resultObj = union_obj(resultObj, semiroughObj);\n    resultObj = union_obj(resultObj, roughObj);    \n    \n    float backdropDF = roundbox_df(p + vec3(0., 1., 0.), vec3(20.,.2,10.), 0.);\n    backdropDF = min(backdropDF, roundbox_df(rotate_xaxis(p - vec3(0., -3.8, -3.2), cos(.5), sin(.5)), vec3(20., 10., .2), 0.));\n    vec2 backdropObjs = vec2(backdropDF, BACKDROP_ID);    \n    resultObj = union_obj(resultObj, backdropObjs);\n    \n    if (depth < .5)\n    {\n        vec4 l = get_light(0);\n        float lightDF = sphere_df(p - l.xyz, l.w);\n        l = get_light(1);\n        lightDF = min(lightDF, sphere_df(p - l.xyz, l.w));\n        l = get_light(2);\n        lightDF = min(lightDF, sphere_df(p - l.xyz, l.w));\n        l = get_light(3);\n        lightDF = min(lightDF, sphere_df(p - l.xyz, l.w));\n        \n        vec2 lightObjs =       vec2(lightDF, LIGHT_ID);\n        resultObj = union_obj(resultObj, lightObjs);\n    }\n    \n    resultObj = union_obj(resultObj, vec2( envsphere_df(p, 11.), ENVIRONMENT_ID) );\n        \n    return resultObj;\n}\n\nvec3 calc_normal(vec3 p)\n{\n \n    vec3 epsilon = vec3(0.001, 0., 0.);\n    \n    vec3 n = vec3(map(1., p + epsilon.xyy).x - map(1., p - epsilon.xyy).x,\n                  map(1., p + epsilon.yxy).x - map(1., p - epsilon.yxy).x,\n                  map(1., p + epsilon.yyx).x - map(1., p - epsilon.yyx).x);\n    \n    return normalize(n);\n}\n\nSurfaceInfo dist_march(float depth, vec3 ro, vec3 rd)\n{\n    SurfaceInfo surface = INIT_SURFACE_INFO(rd); \n    \n    float t = 0.;\n    vec3 p = ro;    \n    vec2 obj = vec2(0.);\n    float d = REALLY_BIG_NUMBER;\n    \n    for (int i = 0; i < 64; i++)\n    {\n        obj = map(depth, p);\n        d = obj.x;\n        \n        t += d;\n        p += rd * d;\n        \n        if (d < .001) { break; }\n        obj.y = 0.;\n        \n    }\n\n    surface.id = obj.y;        \n    surface.point = p;\n    surface.normal = calc_normal(surface.point);\n    surface.incomingRayLength = t;\n    surface.rayDepth = depth;\n    \n    return surface;\n}\n\nvoid calc_binormals(vec3 normal,\n                    out vec3 tangent,\n                    out vec3 binormal)\n{\n    if (abs(normal.x) > abs(normal.y))\n    {\n        tangent = normalize(vec3(-normal.z, 0., normal.x));\n    }\n    else\n    {\n        tangent = normalize(vec3(0., normal.z, -normal.y));\n    }\n    \n    binormal = cross(normal, tangent);\n}\n \nvec3 uniform_sample_cone(vec2 u12, \n                         float cosThetaMax, \n                         vec3 xbasis, vec3 ybasis, vec3 zbasis)\n{\n    float cosTheta = (1. - u12.x) + u12.x * cosThetaMax;\n    float sinTheta = sqrt(1. - cosTheta * cosTheta);\n    float phi = u12.y * TWO_PI;\n    vec3 samplev = polar_to_cartesian(sinTheta, cosTheta, sin(phi), cos(phi));\n    return samplev.x * xbasis + samplev.y * ybasis + samplev.z * zbasis;\n}\n             \nvec3 brdf(vec3 wi, \n          vec3 wo, \n          vec3 n,\n          MaterialInfo material)\n{\n    \n    float cosThetaN_Wi = abs(dot(n, wi));\n    float cosThetaN_Wo = abs(dot(n, wo));\n    vec3 wh = normalize(wi + wo);\n    float cosThetaN_Wh = abs(dot(n, wh));   \n    \n    \/\/ Compute geometric term of blinn microfacet      \n    float cosThetaWo_Wh = abs(dot(wo, wh));\n    float G = min(1., min((2. * cosThetaN_Wh * cosThetaN_Wo \/ cosThetaWo_Wh),\n                           (2. * cosThetaN_Wh * cosThetaN_Wi \/ cosThetaWo_Wh)));\n    \n    \/\/ Compute distribution term\n    float D = (material.specExponent+2.) * INV_TWO_PI * pow(max(0., cosThetaN_Wh), material.specExponent);\n    \n    \/\/ assume no fresnel\n    float F = 1.;\n    \n    return material.baseColor * D * G * F \/ (4. * cosThetaN_Wi * cosThetaN_Wo);\n}\n \n\nvec3 light_emission(vec3 p, vec3 lp, vec3 ln)\n{\n    return 20. * vec3(1., .98, .95) \/ dist_squared(p, lp);\n}\n\nfloat calc_visibility( vec3 ro, vec3 rd, float ray_extent )\n{\n    \n    SurfaceInfo surface = dist_march(1., ro, rd);\n    return step(ray_extent, surface.incomingRayLength);\n    \n}\n\nfloat light_pdf( vec4 light,\n                SurfaceInfo surface )\n{\n    \n    float sinThetaMax2 = light.w * light.w \/ dist_squared(light.xyz, surface.point);\n    float cosThetaMax = sqrt(max(0., 1. - sinThetaMax2));\n    return 1. \/ (TWO_PI * (1. - cosThetaMax));\n    \n}\n\nvec3 sample_light( SurfaceInfo surface,\n                   MaterialInfo material,\n                   vec4 light,\n                 out float pdf )\n{\n    vec2 u12 = hash21(material.seed);\n    \n    vec3 tangent = vec3(0.), binormal = vec3(0.);\n    vec3 ldir = normalize(light.xyz - surface.point);\n    calc_binormals(ldir, tangent, binormal);\n    \n    float sinThetaMax2 = light.w * light.w \/ dist_squared(light.xyz, surface.point);\n    float cosThetaMax = sqrt(max(0., 1. - sinThetaMax2));\n    vec3 light_sample = uniform_sample_cone(u12, cosThetaMax, tangent, binormal, ldir);\n    \n    pdf = -1.;\n    if (dot(light_sample, surface.normal) > 0.)\n    {\n        pdf = 1. \/ (TWO_PI * (1. - cosThetaMax));\n    }\n    \n    return light_sample;\n    \n}\n \nfloat brdf_pdf( vec3 wi, vec3 wo, \n                SurfaceInfo surface, \n                MaterialInfo material )\n{\n    vec3 wh = normalize(wi + wo);    \n    float cosTheta = abs(dot(wh, surface.normal));\n        \n    float pdf = -1.;\n    if (dot(wo, wh) > 0.)\n    {\n        pdf = ((material.specExponent + 1.) * pow(max(0., cosTheta), material.specExponent))\/(TWO_PI * 4. * dot(wo, wh));\n    }\n    \n    return pdf;\n}\n\n\nvec3 sample_brdf( SurfaceInfo surface,\n                 MaterialInfo material,\n                out float pdf)\n{\n           \n    vec2 u12 = hash21(material.seed);\n    \n    float cosTheta = pow(max(0., u12.x), 1.\/(material.specExponent+1.));\n    float sinTheta = sqrt(max(0., 1. - cosTheta * cosTheta));\n    float phi = u12.y * TWO_PI;\n    \n    vec3 whLocal = polar_to_cartesian(sinTheta, cosTheta, sin(phi), cos(phi));\n\n    vec3 tangent = vec3(0.), binormal = vec3(0.);\n    calc_binormals(surface.normal, tangent, binormal);\n    \n    vec3 wh = whLocal.x * tangent + whLocal.y * binormal + whLocal.z * surface.normal;\n    \n    vec3 wo = -surface.incomingRayDir;    \n    if (dot(wo, wh) < 0.)\n    {\n       wh *= -1.;\n    }\n            \n    vec3 wi = reflect(surface.incomingRayDir, wh);\n    \n    pdf = ((material.specExponent + 1.) * pow(clamp(abs(dot(wh, surface.normal)),0.,1.), material.specExponent))\/(TWO_PI * 4. * dot(wo, wh));\n    return wi;\n}    \n\nfloat power_heuristic(float nf, \n                      float fPdf, \n                      float ng, \n                      float gPdf)\n{\n    float f = nf * fPdf;\n    float g = ng * gPdf;\n    return (f*f)\/(f*f + g*g);\n}\n\nvec3 integrate_lighting( SurfaceInfo surface,\n                       MaterialInfo material,\n                       vec3 wi)\n{\n    vec3 lcol = vec3(0.);\n    for (int i = 0; i < 4; i += 1)\n    {\n        \n        vec4 light = get_light(i); \n                \n        if (g_samplingType == LIGHT_IMPORTANCE_SAMPLING ||\n            g_samplingType == MULTIPLE_IMPORTANCE_SAMPLING)\n        {\n            \/\/ sample light        \n            float lpdf = -1.;\n            vec3 lightSample = sample_light(surface, material, light, lpdf);\n\n            \n            if (lpdf > 0.)\n            {\n                vec4 r = intersect_sphere(surface.point, lightSample, light.xyz, light.w);\n                if (r.x > .0)\n                {\n                    vec3 colorSamples = mix(vec3(1.), vec3(1., .4, .4), g_colorSamples);\n                    float bpdf = brdf_pdf(wi, lightSample, surface, material);\n                    float misWeight = power_heuristic(1., lpdf, 1., bpdf);\n                    if (g_samplingType == LIGHT_IMPORTANCE_SAMPLING)\n                    {\n                        misWeight = 1.;\n                    }\n\n                    float visibility = calc_visibility( surface.point + lightSample * .01, lightSample, r.x);\n                    vec3 le = light_emission(surface.point, surface.point + lightSample * r.x, r.yzw);\n                    \/\/ specular\n                    lcol += material.specIntensity * colorSamples * visibility * brdf(wi, lightSample, surface.normal, material) * \n                                le * abs(dot(lightSample, surface.normal)) *\n                                (misWeight\/lpdf);\n\n                    \/\/ diffuse - cheated lambertian\n                    \/\/ reuse visibility\n                    lcol += material.baseColor * visibility * abs(dot(surface.normal, lightSample)) * le * INV_TWO_PI*\n                        (misWeight\/lpdf);\n\n\n                }\n            }\n        }\n\n            \n        \n        if (g_samplingType == BRDF_IMPORTANCE_SAMPLING ||\n            g_samplingType == MULTIPLE_IMPORTANCE_SAMPLING)\n        {\n            \/\/ sample brdf        \n            float bpdf = -1.;\n            vec3 brdfSample = sample_brdf(surface, material, bpdf);\n            if (bpdf > 0.)\n            {              \n                vec4 r = intersect_sphere(surface.point, brdfSample, light.xyz, light.w);\n                if (r.x > 0.)\n                {               \n                    vec3 colorSamples = mix(vec3(1.), vec3(.4, 1., .4), g_colorSamples);\n\n                    float lpdf = light_pdf(light, surface);\n                    float misWeight = power_heuristic(1., bpdf, 1., lpdf);\n                    if (g_samplingType == BRDF_IMPORTANCE_SAMPLING)\n                    {\n                        misWeight = 1.;\n                    }\n\n                    float visibility = calc_visibility( surface.point + brdfSample * .01, brdfSample, r.x);\n\n                    vec3 le = light_emission(surface.point, surface.point + brdfSample * r.x, r.yzw);\n                    \/\/ specular\n                    lcol += material.specIntensity * colorSamples * visibility * brdf(wi, brdfSample, surface.normal, material) *\n                        le *\n                        abs(dot(brdfSample, surface.normal)) *\n                        (misWeight\/bpdf);\n\n                    \/\/ diffuse - cheated lambertian\n                    \/\/ reuse visibility\n                    lcol += material.baseColor * visibility * abs(dot(surface.normal, brdfSample)) * le * INV_TWO_PI *\n                        (misWeight\/bpdf);\n\n                }\n            }\n        }\n\n        \n    }\n    \n    return lcol;\n}\n\nvec3 calc_pixelColor( float seed )\n{\n        \n    vec3 pcol = vec3(0.);    \n\n    RaySampleInfo currSample = setup_cameraRay( sin(.712 * seed) * vec2(.6 * cos(.231 * seed), .6 * sin(.231 * seed)) );\n    \n    \n    for (float depth = 0.; depth < 1.; depth+=1.)\n    {\n        SurfaceInfo surface = dist_march(depth,\n                                         currSample.origin, \n                                         currSample.direction);\n        \n        MaterialInfo material = INIT_MATERIAL_INFO(seed);\n        float roughness = 1.;\n\n        if (surface.id < .5)\n        {\n            break;\n        }        \n        else if (MATCHES_ID(surface.id, LIGHT_ID))\n        {\n            pcol = 1. * vec3(1., 1., 1.);\n            break;\n        }\n        else if (MATCHES_ID(surface.id, MIRROR_ID))\n        {\n            roughness = 0.;\n            material.baseColor = vec3(.005);\n        }\n        else if (MATCHES_ID(surface.id, SEMI_MIRROR_ID))\n        {\n            roughness = .4;\n            material.baseColor = vec3(.005);\n        }\n        else if (MATCHES_ID(surface.id, SEMI_ROUGH_ID))\n        {\n            roughness = .8;\n            material.baseColor = vec3(.005);\n        }\n        else if (MATCHES_ID(surface.id, ROUGH_ID))\n        {\n            roughness = .95;\n            material.baseColor = vec3(.005);\n        }\n                   \n        \n        else if (MATCHES_ID(surface.id, BACKDROP_ID))\n        {\n            roughness = 1.;\n            material.baseColor = vec3(.015, .012, .012);\n        }\n         \n        else\n        {\n            break;\n        }\n        \n        material.specExponent = floor(max(1., (1. - pow(roughness, .15)) * 40000.));    \n        material.specIntensity = 15.;\n        \n        pcol += integrate_lighting(surface, material, -surface.incomingRayDir);\n        \n        currSample.direction = reflect(surface.incomingRayDir, surface.normal);\n        currSample.origin = surface.point + .01 * currSample.direction;\n        \n    }\n    \n    return pcol;   \n}\n\n\/\/ **************************************************************************\n\/\/ MAIN COLOR\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \n    setup_globals();\n    vec2 uv = fragCoord.xy \/ iResolution.xy;        \n        \n    \/\/ ----------------------------------\n    \/\/ SAMPLING \n    \n    float seed = g_frame + hash12( uv );\n    \/\/float seed = float(floor(float(g_frame)\/10.));\n    \n    vec3 currPixelColor = calc_pixelColor( seed );    \n\n    \/\/ ----------------------------------\n    \/\/ FINAL GATHER \n\n    vec3 finalColor = vec3(0.);\n    \n    if (g_frame > .5)\n    {\n        finalColor = texture(iChannel0, uv).rgb;\n    }\n    \n    finalColor += currPixelColor;\n    \n    fragColor = vec4(finalColor,1.0);\n}",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

@@ -1,0 +1,26 @@
+{
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    },
+    "rest-client.rememberCookiesForSubsequentRequests": false,
+    "rest-client.environmentVariables": {
+        "prod": {
+            "baseUrl": "https://www.shadertoy.com",
+            "apiPath": "api/v1",
+            "shadersPath": "shaders",
+            "queryPath": "shaders/query",
+            "shadertoyPath": "shadertoy",
+            "browsePath": "shaders/browse",
+            "resultsPath": "results",
+            "mediaPath": "media",
+            "mediaShadersPath": "media/shaders",
+            "imgPath": "img",
+            "userPath": "user",
+            "signinPath": "signin",
+            "signoutPath": "signout",
+            "playlistPath": "playlist",
+            "commentPath": "comment",
+            "viewPath": "view"
+        }
+    }
+}

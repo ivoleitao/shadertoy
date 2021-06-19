@@ -1,0 +1,98 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "4tySDW",
+        "date": "1485002916",
+        "viewed": 3500,
+        "name": "Blueprint of the Architekt",
+        "username": "s23b",
+        "description": "took a shot at cheap edge detection and post-processing. mouse enabled as usual :)\n\nmusic by [url=https:\/\/www.youtube.com\/watch?v=cUvEZgQC-tY]Arms and Sleepers[\/url]",
+        "likes": 130,
+        "published": 3,
+        "flags": 96,
+        "tags": [
+            "raymarching",
+            "fractal",
+            "postprocessing",
+            "edgedetection",
+            "kifs",
+            "blueprint"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "#define SPEED .1\n#define FOV 3.\n\n#define MAX_STEPS 80\n#define EPS .001\n#define RENDER_DIST 5.\n#define AO_SAMPLES 4.\n#define AO_RANGE 100.\n\n#define PI 3.14159265359\n#define saturate(x) clamp(x, 0., 1.)\n\n\/\/ precomputed globals\nfloat _house = 0.;\nfloat _boat = 0.;\nfloat _spaceship = 0.;\nfloat _atmosphere = 0.;\nmat3 _kifsRot = mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);\nfloat _kifsOffset = 0.;\n\n\/\/ rotate 2d space with given angle\nvoid tRotate(inout vec2 p, float angel) {\n    float s = sin(angel), c = cos(angel);\n\tp *= mat2(c, -s, s, c);\n}\n\n\/\/ divide 2d space into s chunks around the center\nvoid tFan(inout vec2 p, float s) {\n    float k = s \/ PI \/ 2.;\n    tRotate(p, -floor((atan(p.y, p.x)) * k + .5) \/ k);\n}\n\n\/\/ rectangle distance\nfloat sdRect(vec2 p, vec2 r) {\n    p = abs(p) - r;\n\treturn min(max(p.x, p.y), 0.) + length(max(p, 0.));\n}\n\n\/\/ box distance\nfloat sdBox(vec3 p, vec3 r) {\n    p = abs(p) - r;\n\treturn min(max(p.x, max(p.y, p.z)), 0.) + length(max(p, 0.));\n}\n\n\/\/ sphere distance\nfloat sdSphere(vec3 p, float r) {\n\treturn length(p) - r;\n}\n\n\/\/ 3d cross distance\nfloat sdCross(vec3 p, vec3 r) {\n    p =abs(p) - r;\n    p.xy = p.x < p.y ? p.xy : p.yx;\n    p.yz = p.y < p.z ? p.yz : p.zy;\n    p.xy = p.x < p.y ? p.xy : p.yx;\n    return length(min(p.yz, 0.)) - max(p.y, 0.);\n}\n\n\/\/ union\nfloat opU(float a, float b) {\n    return min(a, b);\n}\n\n\/\/ intersection\nfloat opI(float a, float b) {\n    return max(a, b);\n}\n\n\/\/ substraction\nfloat opS(float a, float b) {\n    return max(a, -b);\n}\n\n\/\/ smooth union\nfloat opSU(float a, float b, float k)\n{\n    float h = clamp(.5 + .5 * (b - a) \/ k, 0., 1.);\n    return mix(b, a, h) - k * h * (1. - h);\n}\n\n\/\/ house distance\nfloat sdHouse(vec3 p) {\n    p.y += .075;\n    vec3 boxDim = vec3(.2, .15, .2);\n    \n    \/\/ add the walls\n    float d = sdBox(p, boxDim);\n    \n    \/\/ add the windows\n    vec3 q = abs(p);\n    vec3 windSize = vec3(.04, .04, .06);\n    q -= windSize + vec3(.005);\n    d = opI(d, opU(sdCross(q, windSize), .11 - abs(p.y)));\n    \n    \/\/ add the roof\n    q = p;\n    q.y -= .38;\n    tFan(q.xz, 4.);\n    tRotate(q.xy, PI\/4.);\n    d = opU(d, sdBox(q, vec3(.35, .01, .35)));\n    \n    \/\/ make it hollow\n    d = opS(d, sdBox(p, boxDim - vec3(.02)));\n    return d;\n}\n\n\/\/ boat distance\nfloat sdBoat(vec3 p) {\n    \n    \/\/ add the mast (a word I learned today :P)\n    float d = sdBox(p + vec3(0, .05, 0), vec3(.01, .2, .01));\n    \n    \/\/ add the sail\n    vec3 q = p + vec3(0, -.05, .12);\n    float a = sdSphere(q, .2);\n\ta = opS(a, sdSphere(q, .195));\n    q.x = abs(q.x);\n    tRotate(q.yx, .1);\n    a = opI(a, sdBox(q - vec3(0, 0, .1), vec3(.1)));\n    d = opU(d, a);\n    \n    \/\/ add the body of the boat\n    p.x = abs(p.x);\n    p.x += .1;\n    a = sdSphere(p, .3);\n    a = opS(a, sdSphere(p, .29));\n    a = opI(a, p.y + .15);\n    d = opU(d,a);\n    return d;\n}\n\n\/\/ spaceship distance\nfloat sdSpaceship(vec3 p) {\n    tFan(p.xz, 6.);\n    p.x += .3;\n    \n    \/\/ add the cap\n    float d = sdSphere(p, .4);\n    d = opS(d, p.y - .12);\n    \n    \/\/ add the body\n    d = opU(d, sdSphere(p, .39));\n    \n    \/\/ add the fins (another word I learned, thanks google :P)\n    d = opU(d, opI(sdSphere(p + vec3(0, .24, 0), .41), sdRect(p.zx, vec2(.005, .5))));\n    d = opS(d, sdSphere(p + vec3(0, .3, 0), .37));\n    d = opS(d, p.y + .25);\n    return d;\n}\n\n\/\/ atmosphere distance\nfloat sdAtmosphere(vec3 p) {\n    float time = iTime;\n    tRotate(p.yz, time);\n    vec3 q = p;\n    tFan(q.xz, 12.);\n    float d = sdBox(q - vec3(.3, 0, 0), vec3(.01));\n    tRotate(p.yx, time);\n    q = p;\n    tFan(q.yz, 12.);\n    d = opU(d, sdBox(q - vec3(0, .23, 0), vec3(.01)));\n    tRotate(p.xz, time);\n    q = p;\n    tFan(q.yx, 12.);\n    d = opU(d, sdBox(q - vec3(0, .16, 0), vec3(.01)));\n    \n    return d;\n}\n\n\/\/ distance estimation of everything together\nfloat map(vec3 p) {\n    float d = _house <= 0. ? 5. : sdHouse(p) + .1  - _house * .1;\n    if (_boat > 0.) d = opU(d, sdBoat(p) + .1  - _boat * .1);\n    if (_spaceship > 0.) d = opU(d, sdSpaceship(p) + .1  - _spaceship * .1);\n    if (_atmosphere > 0.) d = opU(d, sdAtmosphere(p) + .1 - _atmosphere * .1);\n    \n    \/\/return d;\n    float s = 1.;\n    for (int i = 0; i < 4; ++i) {\n        tFan(p.xz, 10.);\n        p = abs(p);\n        p -= _kifsOffset;\n        \n        p *= _kifsRot;\n        s *= 2.;\n    }\n    \n    return opSU(d, sdBox(p * s, vec3(s \/ 17.)) \/ s, .1);\n}\n\n\/\/ trace the scene from ro (origin) to rd (direction, normalized)\n\/\/ until hit or reached maxDist, outputs distance traveled, the number of steps\n\/\/ and the closest distance achieved during marching (used of cheap edge detection)\nfloat trace(vec3 ro, vec3 rd, float maxDist, out float steps, out float nt) {\n    float total = 0.;\n    steps = 0.;\n    nt = 100.;\n    \n    for (int i = 0; i < MAX_STEPS; ++i) {\n        ++steps;\n        float d = map(ro + rd * total);\n        nt = min(d, nt);\n        total += d;\n        if (d < EPS || maxDist < total) break;\n    }\n    \n    return total;\n}\n\n\/\/ calculate the normal vector\nvec3 getNormal(vec3 p) {\n    vec2 e = vec2(.0001, 0);\n    return normalize(vec3(\n        map(p + e.xyy) - map(p - e.xyy),\n        map(p + e.yxy) - map(p - e.yxy),\n        map(p + e.yyx) - map(p - e.yyx)\n\t));\n}\n\n\/\/ ambient occlusion\nfloat calculateAO(vec3 p, vec3 n) {\n    \n    float r = 0., w = 1., d;\n    \n    for (float i = 1.; i <= AO_SAMPLES; i++){\n        d = i \/ AO_SAMPLES \/ AO_RANGE;\n        r += w * (d - map(p + n * d));\n        w *= .5;\n    }\n    \n    return 1.-saturate(r * AO_RANGE);\n}\n\n\/\/ a lovely function that goes up and down periodically between 0 and 1, pausing at the extremes\nfloat pausingWave(float x, float a, float b) { \/\/    ___          ___          ___\n    x = abs(fract(x) - .5) * 1. - .5 + a;      \/\/   \/   \\        \/   \\        \/   \\ \n    return smoothstep(0., a - b, x);           \/\/ --     --------     --------     ------\n}\t\t\t\t\t\t\t\t\t\t\t   \/\/ basically like this :P\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    \/\/ transform screen coordinates\n\tvec2 uv = fragCoord.xy \/ iResolution.xy;\n    uv = uv * 2. - 1.;\n    uv.x *= iResolution.x \/ iResolution.y;\n    \n    \/\/ transform mouse coordinates\n\tvec2 mouse = iMouse.xy \/ iResolution.xy * 2. - 1.;\n    mouse.x *= iResolution.x \/ iResolution.y;\n    mouse *= 2.;\n    \n    \/\/ set time dependent constants\n    float speed = .25 \/ 10.5;\n    float time = mod(iTime, 290.);\n    time -= 10.5;\n    if (time > 167.) time -= 167.; else\n    if (time > 63.) time -= 63.;\n    time -= 5.25;\n\ttime *= speed;\n    \n    \/\/ these determine which object to show\n    _house = pausingWave(time, .15, .125);\n    _boat = pausingWave(time - .125 \/ .1, .15, .125);\n    _spaceship = pausingWave(time - .25 \/ .1, .15, .125);\n    _atmosphere = pausingWave(time - .375 \/ .1, .15, .125) * step(10., iTime);\n    \n    \/\/ set up kifs rotation matrix\n    float a = -texture(iChannel0, vec2(.5, .25)).x + sin(iTime) * .2 + .9;\n    float s = sin(a), c = cos(a);\n    _kifsRot *= mat3(c, -s, 0, s, c, 0, 0, 0, 1);\n    _kifsRot *= mat3(1, 0, 0, 0, c, -s, 0, s, c);\n    _kifsRot *= mat3(c, 0, s, 0, 1, 0, -s, 0, c);\n    \n    \/\/ set up kifs offset\n    _kifsOffset = .07 + texture(iChannel0, vec2(.1, .25)).x * .06;\n    \n    \/\/ set up camera position\n    vec3 rd =  normalize(vec3(uv, FOV));\n    vec3 ro = vec3(0, 0, -2);\n    \n    \/\/ light is relative to the camera\n    vec3 light = vec3(-1., .5, 0);\n    \n    vec2 rot = vec2(0);\n    if (iMouse.z > 0. && iMouse.x > 0. && iMouse.y > 0.) {\n    \t\/\/ rotate the scene using the mouse\n        rot = -mouse;\n    } else {\n        \/\/ otherwise rotate constantly as time passes\n        rot = vec2(\n            iTime * SPEED * PI,\/\/had to slightly modify \\\/ this value due to an issue reported by Fabrice\n            mix(sin(iTime * SPEED) * PI \/ 8., PI \/ 2. - 1e-5, saturate(exp(-iTime + 10.5))));\n    }\n    \n    tRotate(rd.yz, rot.y);\n    tRotate(rd.xz, rot.x);\n    tRotate(light.xz, rot.x);\n    tRotate(ro.yz, rot.y);\n    tRotate(ro.xz, rot.x);\n    \n    \/\/ march\n    float steps, outline, dist = trace(ro, rd, RENDER_DIST, steps, outline); \n    \n    \/\/ calculate hit point coordinates\n    vec3 p = ro + rd * dist;\n    \n    \/\/ calculate normal\n    vec3 normal = getNormal(p);\n    \n    \/\/ light direction\n    vec3 l = normalize(light - p);\n    \n    \/\/ ambient light\n    float ambient = .1;\n    \n    \/\/ diffuse light\n    float diffuse = max(0., dot(l, normal));\n    \n    \/\/ specular light\n    float specular = pow(max(0., dot(reflect(-l, normal), -rd)), 4.);\n    \n    \/\/ \"ambient occlusion\"\n    float ao = calculateAO(p, normal);\n    \n    \/\/ create the background grid\n    vec2 gridUv = fragCoord.xy - iResolution.xy \/ 2.;\n    float grid = dot(step(mod(gridUv.xyxy, vec4(20, 20, 100, 100)), vec4(1)), vec4(.1, .1, .2, .2));\n    \n    \/\/ create blue background\n    vec3 bg = vec3(0, .1, .3) * saturate(1.5 - length(uv) * .5);\n    \n    \/\/ find the edges in the geometry\n    float edgeWidth = .0015;\n    float edge = smoothstep(1., .0, dot(normal, getNormal(p - normal * edgeWidth))) * step(length(p), 1.);\n    \n    \/\/ get the outline of the shapes\n    outline = smoothstep(.005, .0, outline) * step(1., length(p));\n    \n    \/\/ diagonal strokes used for shading\n    vec2 strokes = sin(vec2(uv.x + uv.y, uv.x - uv.y) * iResolution.y * PI \/ 4.) * .5 - .5;\n    \n    \/\/ first part of the shading: ao + marching steps\n    float highlights = (steps \/ float(MAX_STEPS) + sqrt(1. - ao)) * step(length(p), 1.) * .5;\n    highlights = floor(highlights * 5.) \/ 10.;\n    \n    \/\/ second part of the shading: ambient + diffuse + specular light\n    float fog = saturate(length(ro) - dist * dist * .25);\n    float lightValue = (ambient + diffuse + specular) * fog;\n    lightValue = floor(lightValue * 5.) \/ 10.;\n    \n    fragColor.rgb = mix(bg, vec3(1., .9, .7),\n                        max(max(max(saturate(highlights + strokes.x), saturate(lightValue + strokes.y)) * fog,\n                                (edge + outline) * 2. + strokes.y), grid));\n    \n    \/\/ gamma correction\n    fragColor = pow(saturate(fragColor), vec4(1. \/ 2.2)) * step(abs(uv.y), 1.);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "ldfXDl",
+                    "filepath": "https:\/\/soundcloud.com\/fakechapter\/the-architekt",
+                    "previewfilepath": "https:\/\/soundcloud.com\/fakechapter\/the-architekt",
+                    "type": "musicstream",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 0
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ the purpose of this buffer is too smooth out the sudden changes in the fft\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy \/ iResolution.xy;\n    float old = texture(iChannel1, uv).x;\n    float new = texture(iChannel0, uv).x;\n    fragColor = vec4(mix(old, new, new > old ? .4 : .04));\n}",
+            "name": "Buf A",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

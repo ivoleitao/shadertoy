@@ -1,0 +1,53 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "tdBGWD",
+        "date": "1548860455",
+        "viewed": 3016,
+        "name": "Mist by Ohno! - OctaHydra",
+        "username": "Flopine",
+        "description": "There are the scenes I worked on for a 4k demo at Cookie Demoparty 2018 with a music by Triace from Desire.\nThe other part was made by Lsdlive and you can find his work here : https:\/\/www.shadertoy.com\/view\/wdBGWD\nLink to pouet and youtube in the code. \n",
+        "likes": 47,
+        "published": 1,
+        "flags": 64,
+        "usePreview": 0,
+        "tags": [
+            "raymarching",
+            "4k",
+            "demoscene",
+            "animation"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "llfGD8",
+                    "filepath": "https:\/\/soundcloud.com\/deejay-arvy\/mist-4k-intro-by-ohno?fbclid=IwAR2910wt7ol87XCiJmkp3QqxEvfwXhobrnmhbZvtYOFMYst5EUTRWXr8B7s",
+                    "previewfilepath": "https:\/\/soundcloud.com\/deejay-arvy\/mist-4k-intro-by-ohno?fbclid=IwAR2910wt7ol87XCiJmkp3QqxEvfwXhobrnmhbZvtYOFMYst5EUTRWXr8B7s",
+                    "type": "musicstream",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 0
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Code by Flopine\n\n\/\/ From Mist by Ohno!\n\/\/ 4k demo released at Cookie 2018 with a music by Triace from Desire\n\/\/ Pouet : http:\/\/www.pouet.net\/prod.php?which=79350\n\/\/ Youtube : https:\/\/www.youtube.com\/watch?v=UUtU3WVB144&t=3s\n\n\/\/ Thanks to wsmind, leon, XT95, lsdlive, lamogui, Coyhot and Alkama for teaching me\n\/\/ Thanks LJ for giving me the love of shadercoding :3\n\n\/\/ Cookie Collective rulz\n\n\nfloat time = 0.;\n#define PI 3.141592\n#define tempo_sin (time * 2.62)\n#define tempo (mix(4.5\/6., 9.\/6., step(87., time)))\n\n\nvec2 hash(vec2 x)\n{\n\tvec2 k = vec2(0.3183099, 0.3678794);\n\tx = x * k + k.yx;\n\treturn -1.0 + 2.0 * fract(16.0 * k * fract(x.x * x.y * (x.x + x.y)));\n}\n\n\nfloat random(vec2 uv)\n{return fract(sin(dot(uv, vec2(12.2544, 35.1571)))*5418.548416);}\n\n\nfloat noise(in vec2 p)\n{\n\tvec2 i = floor(p);\n\tvec2 f = fract(p);\n\n\tvec2 u = f * f * (3.0 - 2.0 * f);\n\n\treturn mix(mix(dot(hash(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0)),\n\t\tdot(hash(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),\n\t\tmix(dot(hash(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)),\n\t\t\tdot(hash(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x),\n\t\tu.y);\n}\n\n\nfloat fbm(vec2 uv)\n{\n\tfloat f;\n\tmat2 m = mat2(1.6, 1.2, -1.2, 1.6);\n\tf = 0.5000 * noise(uv);\n\tuv = m * uv;\n\tf += 0.2500 * noise(uv);\n\tuv = m * uv;\n\tf += 0.1250 * noise(uv);\n\treturn f;\n}\n\n\nmat2 r2d(float a) \n{\n\tfloat c = cos(a), s = sin(a);\n\treturn mat2(c, s, -s, c);\n}\n\n\nfloat smin(float a, float b, float k)\n{\n\tfloat h = clamp(0.5 + 0.5*(b - a) \/ k, 0.0, 1.0);\n\treturn mix(b, a, h) - k * h*(1.0 - h);\n}\n\n\nvec3 re(vec3 p, float d) \n{return mod(p - d * .5, d) - d * .5;}\n\n\nvoid amod(inout vec2 p, float d) \n{\n\tfloat a = re(vec3(atan(p.y, p.x)), d).x;\n\tp = vec2(cos(a), sin(a)) * length(p);\n}\n\n\nvec3 get_cam(vec3 ro, vec3 ta, vec2 uv)\n{\n\tvec3 fwd = normalize(ta - ro);\n\tvec3 right = normalize(cross(fwd, vec3(0, 1, 0)));\n\treturn normalize(fwd + right * uv.x + cross(right, fwd) * uv.y);\n}\n\n\nfloat sphe(vec3 p, float r)\n{return length(p) - r;}\n\n\nfloat od(vec3 p, float d)\n{return dot(p, normalize(sign(p))) - d;}\n\n\nfloat sc(vec3 p, float d) {\n\tp = abs(p);\n\tp = max(p, p.yzx);\n\treturn min(p.x, min(p.y, p.z)) - d;\n}\n\n\nfloat torus(vec3 p, vec2 d)\n{\n\tvec2 q = vec2(length(p.xz) - d.x, p.y);\n\treturn length(q) - d.y;\n}\n\n\n\n\/\/\/\/\/\/\/\/\/\/ SCENE CONSTRUCTION \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\nfloat pool(vec3 p)\n{return abs(p.y + fbm(p.xz*0.1 + time * 0.1 + fbm(p.xz*0.1 - time * 0.2)) + 0.5) - 0.05;}\n\n\nfloat g1 = 0.;\nfloat g2 = 0.;\nfloat tubes(vec3 p)\n{\n\tp.xz = re(p.xzz + 9., 18.).xy;\n\tp.xz *= r2d(time*0.4);\n\tp.xz *= r2d(p.y*0.3);\n\tamod(p.xz, 2.*PI \/ 5.);\n\tp.x -= 2.;\n\tp.x += sin(p.y*0.5 + time);\n\tfloat d = length(p.xz) - 0.2;\n\n\tg2 += (0.01 \/ (0.01 + d * d))*0.15;\n\n\treturn d;\n}\n\n\nfloat ball(vec3 p)\n{\n\tp.y -= mix(-2., 5., smoothstep(4., 10., time) * (1. - smoothstep(112., 115., time)));\n\tfloat d = sphe(p, .8 + sin(tempo_sin)*0.1);\n\tg1 += 0.01 \/ (0.01 + d * d);\n\treturn d;\n}\n\n\nfloat cage(vec3 p)\n{\n\tp.y -= 5.;\n\tp.xz *= r2d(time);\n\tp.yz *= r2d(time*0.5);\n\tfloat od_size = mix(-.1, 1., smoothstep(14., 19., time));\n\tfloat sphe_r1 = mix(1.14, 0.1, smoothstep(41., 42., time));\n\tfloat sphe_r = mix(sphe_r1, 3., pow(fract(time), 6.) * step(110., time) + (step(111., time)));\n\treturn max(-sphe(p, sphe_r), od(p, od_size));\n}\n\n\nfloat ring(vec3 p)\n{\n\tfloat anim = (PI \/ 2.)*(floor(time*tempo) + pow(fract(time*tempo), 3.));\n\n\tvec2 torus_size1 = mix(vec2(1.5, -0.5), vec2(2., 0.05), smoothstep(25., 28., time)*(1. - smoothstep(109., 110., time)));\n\tvec2 torus_size2 = mix(vec2(2.5, -0.5), vec2(3., 0.09), smoothstep(31., 34., time)*(1. - smoothstep(109., 110., time)));\n\n\n\tp.y -= 5.;\n\tp.xy *= r2d(PI \/ 4.);\n\tp.xz *= r2d(PI \/ 4.);\n\n\tvec3 pp = p;\n\tp.xz *= r2d(-anim);\n\tfloat r1 = max(-sc(p, 1.), torus(p, torus_size1));\n\n\tp = pp;\n\tp.xy *= r2d(anim);\n\tp.yz *= r2d(PI \/ 2.);\n\tfloat d = min(r1, max(-sc(p, 1.), torus(p, torus_size2)));\n\tg1 += 0.01 \/ (0.01 + d * d);\n\treturn d;\n}\n\n\nfloat balls(vec3 p)\n{\n\tfloat d = sphe(vec3(p.x, p.y + 2., p.z), 0.5);\n\tp.y += mix(2., (sin(time) + 1.), smoothstep(35., 37., time));\n\tif (time > 88.) p.y = mix(2., 0., smoothstep(89., 92., time) * (1. - smoothstep(113., 115., time)));\n\n\tfor (int i = 0; i < 3; i++)\n\t{\n\t\tamod(p.xz, 2.*PI \/ 5.);\n\t\tp.x -= mix(6., 0.1, clamp(pow(fract(time), 3.) * step(95., time) + step(96., time), 0., 1.));\n\t\td = min(d, sphe(p, 0.5));\n\t}\n\tg1 += 0.01 \/ (0.01 + d * d);\n\treturn d;\n}\n\n\nfloat SDF(vec3 p)\n{\n\treturn time < 24. ? smin(tubes(p), smin(pool(p), min(ball(p), cage(p)), 2.), 1.5) :\n\t\tmin(min(ring(p), min(cage(p), ball(p))), smin(tubes(p), smin(pool(p), balls(p), 2.), 1.5));\n}\n\n\n\n\/\/\/\/\/\/\/\/\/\/ RAYMARCHING FUNCTION \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\nvec3 raymarch_flopine(vec3 ro, vec3 rd, vec2 uv)\n{\n\tvec3 col;\n\tfloat dither = random(uv);\n\tfloat t = 0.;\n\tvec3 p;\/\/ = ro;\n\tfor (float i = 0.; i < 80.; i++)\n\t{\n\t\tp = ro + t * rd;\n\t\tfloat d = SDF(p);\n\t\tif (d < 0.001)\n\t\t{\n\t\t\tcol = vec3(i \/ 80.);\n\t\t\tbreak;\n\t\t}\n\t\td *= 1. + dither * 0.1;\n\n\t\tt += d * .8;\n\t}\n\n\tfloat g2_force = mix(0., 0.8, smoothstep(10., 14., time) * (1. - smoothstep(116., 120., time)));\n\tcol += g1 * vec3(0.2, 0.4, 0.);\n\tcol += (g2* g2_force) * vec3(0., 0.5, 0.5);\n\tcol = mix(col, vec3(0., 0.3, 0.4), 1. - exp(-0.001*t*t));\n\n\treturn col;\n}\n\n\n\/\/ Glitch function borrowed from mmerchante shader : https:\/\/www.shadertoy.com\/view\/MltcWs\nvoid glitch(inout vec2 uv, float start_time_stamp, float end_time_stamp)\n{\n\tint offset = int(floor(time)*2.) + int((uv.x + uv.y) * 8.0);\n\tfloat res = mix(10., 100.0, random(vec2(offset)));\n\n\t\/\/ glitch pixellate\n\tif (time > start_time_stamp && time <= end_time_stamp) uv = floor(uv * res) \/ res;\n\n\tint seedX = int(gl_FragCoord.x + time) \/ 32;\n\tint seedY = int(gl_FragCoord.y + time) \/ 32;\n\tint seed = mod(time, 2.) > 1. ? seedX : seedY;\n\n\n\t\/\/ glitch splitter\n\tuv.x += (random(vec2(seed)) * 2.0 - 1.0)\n\t\t* step(random(vec2(seed)), pow(sin(time * 4.), 7.0))\n\t\t* random(vec2(seed))\n\t\t* step(start_time_stamp, time)\n\t\t* (1. - step(end_time_stamp, time));\n}\n\n\n\n\/\/\/\/\/\/\/\/\/ MAIN FUNCTION \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n\n\tvec2 q = fragCoord.xy \/ iResolution.xy;\n\tvec2 uv = q - .5;\n\tuv.x *= iResolution.x \/ iResolution.y;\n    \n    \n\t\/* just code for the shadertoy port *\/\n\ttime = mod(iTime, 45. + 10.6 + 17.);\n    if (time > 45. && time <= 88.)\n\t\ttime += 43.;\n    if (time > 98.6)\n\t\ttime += 10.4;\n   \n\tglitch(uv, 0., 2.);\n\tglitch(uv, 91., 92.);\n\tglitch(uv, 94.5, 95.5);\n\tglitch(uv, 98., 99.);\n\n\tvec3 flo_ro1 = vec3(-20. * cos(time*0.06), 10., -20.*sin(time*0.06));\n\tvec3 flo_ro2 = vec3(-5., 18., 0.);\n\tvec3 flo_ro3 = vec3(-5., 20., 12.);\n\tvec3 flo_ro = mix(mix(flo_ro1, flo_ro2, step(24., time)), flo_ro3, step(88., time));\n\tvec3 flo_target = vec3(0.);\n\tvec3 flo_cam = get_cam(flo_ro, flo_target, uv);\n\n\n\tvec3 col = vec3(0.);\n\tif (time <= 45.)\n\t\tcol = raymarch_flopine(flo_ro, flo_cam, uv);\n\tif (time > 88. && time <= 98.6) \/\/ 98.\n\t\tcol = raymarch_flopine(flo_ro, flo_cam, uv);\n\tif (time > 109. && time <= 126.)\n\t\tcol = raymarch_flopine(flo_ro, flo_cam, uv);\n\n\n\t\/\/ vignetting from iq\n\tcol *= 0.5 + 0.5*pow(16.0*q.x*q.y*(1.0 - q.x)*(1.0 - q.y), 0.25);\n\n\t\/\/ fading out - end of the demo\n\tcol *= 1. - smoothstep(120., 125., time);\n\n\tfragColor = vec4(col, 1.);\n}\n",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

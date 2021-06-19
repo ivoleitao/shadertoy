@@ -1,0 +1,66 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "3s2BWV",
+        "date": "1591015192",
+        "viewed": 4224,
+        "name": "Fly On, Buckaroo",
+        "username": "blackle",
+        "description": "this time more cuter :3\n\nbuckaroo is flying to his boyfriend's house\n\nmusic is: [url]https:\/\/soundcloud.com\/h4ck4y473m32\/rave-3000[\/url]\n\noriginal: [url]https:\/\/www.shadertoy.com\/view\/3sSBDV[\/url]",
+        "likes": 78,
+        "published": 3,
+        "flags": 64,
+        "usePreview": 0,
+        "tags": [
+            "ufo",
+            "buckaroo"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4sXGRn",
+                    "filepath": "\/media\/a\/95b90082f799f48677b4f206d856ad572f1d178c676269eac6347631d4447258.jpg",
+                    "previewfilepath": "\/media\/ap\/95b90082f799f48677b4f206d856ad572f1d178c676269eac6347631d4447258.jpg",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "Mtj3RV",
+                    "filepath": "https:\/\/soundcloud.com\/h4ck4y473m32\/rave-3000",
+                    "previewfilepath": "https:\/\/soundcloud.com\/h4ck4y473m32\/rave-3000",
+                    "type": "musicstream",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 0
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/CC0 1.0 Universal https:\/\/creativecommons.org\/publicdomain\/zero\/1.0\/\n\/\/To the extent possible under law, Blackle Mori has waived all copyright and related or neighboring rights to this work.\n\n\/\/antialising. increasing to 8 looks pretty good, but will be 8x slower\n#define AA_SAMPLES 1\n\nconst int BLM[17] = int[17](\n    0x19B12B,0x1AB56B,0x18B167,0x1AB56B,0x18952B,0x1FFFFF,\n    0x1DAA4F,0x1DAADF,0x1DAA4F,0x1DAAEF,0x1CB64F,0x1FFFFF,\n    0xA2048,0x2B6DA,0x236C9,0xAB6DA,0xAB6CA\n);\n\nfloat box(vec2 p, vec2 d) {\n    vec2 q = abs(p)-d;\n    return length(max(q,0.)) + min(0.,max(q.x,q.y));\n}\n\nvec3 erot(vec3 p, vec3 ax, float ro) {\n  return mix(dot(ax,p)*ax, p, cos(ro))+sin(ro)*cross(ax,p);\n}\n\nfloat comp(vec3 p, vec3 ax, float ro) {\n  \n  p = erot(p,ax,ro);\n  p = asin(sin(p));\n  return length(p)-1.;\n}\n\nfloat cloudssdf(vec3 p) {\n  p.y += iTime*.2;\n  float d1 = comp(p, normalize(vec3(1,2,5)), 0.5);\n  p.y += iTime*.2;\n  float d3 = comp(p*2., normalize(vec3(3,1,1)), 2.5)\/2.;\n  p.y += iTime*.2;\n  float d4 = comp(p*3., normalize(vec3(4,-2,5)), 3.5)\/3.;\n  return (d1+d3+d4)\/3.;\n}\n\nfloat linedist (vec3 p, vec3 a, vec3 b) {\n  float k = dot(p-a,b-a)\/dot(b-a,b-a);\n  return distance(p,mix(a,b,clamp(k,0.,1.)));\n}\n\nfloat smin(float a, float b, float k) {\n    float h = max(0.,k-abs(b-a))\/k;\n    return min(a,b)-h*h*h*k\/6.;\n}\n\nfloat body;\nfloat beamm;\nvec3 locl;\nfloat rm;\nfloat scene(vec3 p) {\n  p.z += sin(iTime);\n  p = erot(p, vec3(0,1,0), cos(iTime)*.2);\n  beamm = 0.9*(linedist(p, vec3(0), vec3(0,0,-10))-.3-sin(p.z*3.+iTime*4.)*.05 - sin(iTime)*.2);\n  locl = p;\n  vec3 p2 =p;\n  p2.z = sqrt(p2.z*p2.z+0.02);\n  p2.z+=3.;\n  vec3 p3 =p;\n  p3.z = sqrt(p3.z*p3.z+0.02);\n  p3.z+=8.1;\n  body = length(p2)-3.8;\n  body += smoothstep(0.8,.9,sin(atan(p2.x,p2.y)*10.))*.02;\n  body += smoothstep(0.9,1.,sin(atan(p2.x,p2.y)*45.))*.003;\n  rm=length(p3)-8.525;\n  body = smin(body, rm,.01);\n  float hat = length(p-vec3(0,0,0.8))-0.7;\n  return min(min(body,hat), beamm);\n}\nfloat bpm = 124.;\nfloat eye;\nfloat buckaroo(vec3 p) {\n  float bpmt = iTime\/60.*bpm;\n  float t = pow(sin(fract(bpmt)*3.14\/2.), 20.);\n  p.z += sin(iTime);\n  p = erot(p, vec3(0,1,0), cos(iTime)*.2);\n  p-=vec3(0,0,0.9);\n  p.z += t*.1;\n  p.x = abs(p.x);\n  float b =  length(p)-0.2;\n  float scl = cos(bpmt*3.1415)*.05+.95;\n  b = smin(b, linedist(p, vec3(0), vec3(.3,0,.3)*scl)-.03, 0.05);\n  b = smin(b, length(p-vec3(.3,0,.3)*scl)-.07, 0.1);\n  b = smin(b, linedist(p, vec3(0), vec3(0,0,-.5))-.15, .1);\n  eye = length(p-vec3(.1,.18,.0))-.03;\n  return min(b, eye);\n}\n\nvec3 norm(vec3 p) {\n  mat3 k = mat3(p,p,p)-mat3(0.01);\n  return normalize(scene(p)-vec3(scene(k[0]), scene(k[1]), scene(k[2])));\n}\n\nvec3 norm2(vec3 p) {\n  mat3 k = mat3(p,p,p)-mat3(0.01);\n  return normalize(buckaroo(p)-vec3(buckaroo(k[0]), buckaroo(k[1]), buckaroo(k[2])));\n}\n\nvec3 srgb(float r, float g, float b) {\n  return vec3(r*r,g*g,b*b);\n}\n\nvec3 clouds(inout vec3 p, vec3 cam, vec3 init, int depth) {\n  p = init;\n  for (int i = 0; i < depth; i++) {\n    float dist = min(scene(p),cloudssdf(p));\n    dist = sqrt(dist*dist+0.05);\n    p += dist*cam;\n  }\n  float f1 = length(sin(p)*.5+.5)\/sqrt(3.);\n  float f2 = smoothstep(0., 30., distance(p,init));\n  vec3 sun = max(0.,dot(vec3(1.\/sqrt(3.)), cam))*vec3(1);\n  sun = pow(sun,vec3(9)) + pow(sun,vec3(4))*srgb(0.7,0.5,0.2);\n  return mix(srgb(0.2,0.3,0.7), srgb(0.8,0.3,0.3), f1) + mix(srgb(0.2,0.4,0.7), srgb(0.7,0.7,0.7), f2) + sun;\n}\n\n\nvec3 pixel_color( vec2 uv )\n{\n  \/\/we have the moral obligation to use every platform to speak out against injustice\n  \/\/if you're financially comfortable, donate to bail funds or charities\n  \/\/pick a number that makes you as uncomfortable as the police brutality\n  vec2 uv2 = uv + vec2(cos(iTime)*0.03, sin(iTime)*.1);\n  ivec2 id = ivec2(floor(vec2(55,28)-uv2*100.));\n  float blm = 1.;\n  if (id.x >= 0 && id.x < 21 && id.y >= 0 && id.y < 17) {\n    blm = (BLM[id.y] >> id.x) % 2 == 0 ? 0. : 1.;\n  }\n  float bubble = sqrt(length(pow(uv2-vec2(.44,.2),vec2(2.))))-.14;\n  uv2 = uv2 - vec2(0.38,0.2);\n  uv2 = erot(vec3(uv2,0),vec3(0,0,1),1.3-sin(iTime)*.1).xy;\n  float arrow = box((vec2(2,1)*uv2)*mat2(.71,-.71,.71,.71), vec2(.1))-.01;\n  bubble = min(bubble,arrow\/1.7);\n    \n    \n  vec3 cam = normalize(vec3(1,uv));\n  \n  float bpmt = iTime\/60.*bpm;\n  float t = mix(floor(bpmt) + pow(sin(fract(bpmt)*3.14\/2.), 20.), bpmt, 0.8);\n  vec3 init = vec3(-8.+sin(t)*2.,0,0.1);\n  cam = erot(cam, vec3(0,0,1), t*.2);\n  init = erot(init, vec3(0,0,1), t*.2);\n  vec3 clp;\n  vec3 p = init;\n  bool hit = false;\n  float dist;\n  float glow = 0.;\n  for (int i = 0; i < 180 && !hit; i++) {\n    dist = scene(p);\n    if (!isnan(beamm)) glow += .5\/(1.+beamm*100.);\n    hit = dist*dist < 1e-6;\n    p+=dist*cam;\n    if(distance(p,init)>20.)break;\n  }\n  float stmp = smoothstep(-.05,.05,dist-rm);\n  vec3 lllocl = locl;\n  glow = min(glow,1.);\n  bool bdy = (dist == body);\n  vec3 n = norm(p);\n  vec3 obj = hit ? sin(n)*.5+.5 : vec3(0);\n  vec3 clds = clouds(clp, cam, init, 20);\n  if (hit) {\n    vec3 p2 = p+n*.1;\n    float ao = smoothstep(-.1,.1,scene(p2));\n    vec3 r = reflect(cam,n);\n    float tex = smoothstep(.4,.6,texture(iChannel0, lllocl.xy*.5).x);\n    tex=mix(tex,1.,stmp);\n    float fres = 1.-abs(dot(cam,n))*.98*(tex*.25+.5);\n    vec3 rflcld = clouds(p2, r, p2, 15-int(tex*5.));\n    obj = rflcld*fres*ao;\n    if (!bdy) {\n      p2 = p+cam;\n      r = refract(cam,n,1.1);\n      vec3 p5 = p;\n      bool hhit = false;\n      float bb;\n      for (int i = 0; i < 50 && !hhit; i++) {\n        bb = buckaroo(p5);\n        hhit = bb*bb< 1e-6;\n        p5+=bb*r;\n        if(distance(p5,p)>2.)break;\n      }\n      bool ey = eye==bb;\n      if (hhit) {\n        vec3 n5 = norm2(p5);\n        vec3 r5 = reflect(cam,n5);\n        float ss = smoothstep(-.05,.05,buckaroo(p5+.05));\n        float fk = length(sin(n5*vec3(.5,.5,2)+.2)*.5+.5)\/sqrt(3.)*.5 + ss*.5;\n        float spec = length(sin(r5*vec3(.5,.5,2)+.2)*.5+.5)\/sqrt(3.);\n        obj = fk*mix(ey ? srgb(0.1,0.1,0.1) : srgb(0.3,0.75,0.3), rflcld, 0.3) + obj*.5 + pow(spec, 8.)*(ey?1.:.15);\n      } else {\n      \tobj = obj*.5 + clouds(p2, r, p2, 20)*.9;\n      }\n    }\n  }\n  obj = obj  + srgb(0.2,0.4,0.6)*glow;\n  float fctr = smoothstep(-3.,1., distance(clp,init)-distance(p,init));\n  vec3 coll = mix(clds, obj, fctr) + glow*glow*.9*sqrt(fctr*.5+.5);\n  coll = abs(erot(sqrt(coll), normalize(sin(clp*.3+t)), 0.15));\n\n  blm =  mix(0.,blm,smoothstep(0.,.003,abs(bubble)-.01));\n  return mix(vec3(blm),coll*coll, smoothstep(0.,.003,bubble));\n}\n\nvec2 weyl_2d(int n) {\n    return fract(vec2(n*12664745, n*9560333)\/exp2(24.));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = (fragCoord-.5*iResolution.xy)\/iResolution.y;\n    fragColor = vec4(0);\n    for (int i = 0; i < AA_SAMPLES+int(min(0,iFrame)); i++) {\n        vec2 uv2 = uv + weyl_2d(i)\/iResolution.y*1.25;\n        fragColor += vec4(pixel_color(uv2), 1.);\n    }\n\tfragColor.xyz = sqrt(fragColor.xyz\/fragColor.w);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

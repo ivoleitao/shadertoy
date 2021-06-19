@@ -1,0 +1,119 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "wllczX",
+        "date": "1592686869",
+        "viewed": 5105,
+        "name": "Phyllotaxes",
+        "username": "tdhooper",
+        "description": "4k executable graphics entry for Nova 2020",
+        "likes": 100,
+        "published": 3,
+        "flags": 32,
+        "usePreview": 1,
+        "tags": [
+            "plant",
+            "phyllotaxis",
+            "succulent",
+            "exegfx",
+            "nova2020"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\n\/*\n\n    Phyllotaxes\n    -----------\n\n\t4k executable graphics entry for Nova 2020\n\n\tModel from my earlier succulent shaders:\n\n\t    Bloom [skull] https:\/\/www.shadertoy.com\/view\/WdScDG\n\t    Echeveria II https:\/\/www.shadertoy.com\/view\/WtGXWm\n\t    Echeveria https:\/\/www.shadertoy.com\/view\/wlVGRz\n\n\tLighting and tracing loop adapted from yx's Primitive Portrait:\n\n\t    https:\/\/www.shadertoy.com\/view\/ts2cWm\n\n*\/\n\n\nvec3 aces(vec3 x) {\n  const float a = 2.51;\n  const float b = 0.03;\n  const float c = 2.43;\n  const float d = 0.59;\n  const float e = 0.14;\n  return clamp((x * (a * x + b)) \/ (x * (c * x + d) + e), 0.0, 1.0);\n}\n\n\/\/ colour grading from tropical trevor's scripts\n\/\/ https:\/\/github.com\/trevorvanhoof\/ColorGrading\nfloat Luma(vec3 color) { return dot(color, vec3(0.2126, 0.7152, 0.0722)); }\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n\tvec3 col = texelFetch(iChannel0, ivec2(fragCoord.xy), 0).rgb \/ float(iFrame + 1);\n    col *= 2.;\n    vec3 uGain = vec3(1.8);\n    vec3 uLift = vec3(.002,-.003,.007);\n    vec3 uOffset = vec3(.00,.00,.00);\n    vec3 uGamma = vec3(-.3);\n    \n\tcol = mix(col, vec3(Luma(col)), .25);\n    col = pow(max(vec3(0.0), col * (1.0 + uGain - uLift) + uLift + uOffset), max(vec3(0.0), 1.0 - uGamma));\n\tcol = max(col, vec3(0));\n    col = pow( col, vec3(0.4545) );\n    col = aces(col);\n\tfragColor.rgb = col;\n}\n",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\n\/\/ HG_SDF\n\n#define PI 3.1415926\n\nvoid pR(inout vec2 p, float a) {\n    p = cos(a)*p + sin(a)*vec2(p.y, -p.x);\n}\n\nfloat smin(float a, float b, float k){\n    float f = clamp(0.5 + 0.5 * ((a - b) \/ k), 0., 1.);\n    return (1. - f) * a + f  * b - f * (1. - f) * k;\n}\n\nfloat smax(float a, float b, float k) {\n    return -smin(-a, -b, k);\n}\n\n\n\/\/ hash function by Blackle\n\/\/ https:\/\/suricrasia.online\/demoscene\/functions\/\n\/\/#define FK(k) floatBitsToInt(cos(k))^floatBitsToInt(k)\n#define FK(k) floatBitsToInt(k*k\/7.)^floatBitsToInt(k)\nfloat hash(vec2 p) {\n  int x = FK(p.x); int y = FK(p.y);\n  return (float((x-y*y)*(x*x+y)-x)\/2.14e9) * .5 + .5;\n}\n\nvec2 hash22(vec2 p){\n    return vec2(hash(p), hash(p + vec2(1)));\n}\n\nvec2 hash12(float n) {\n\treturn hash22(vec2(n));\n}\n\nfloat hash31(vec3 p) {\n  return hash(p.xy + p.z * 1.6453);\n}\n\nvec3 hash33(vec3 p){\n    return vec3(\n        hash31(p),\n        hash31(p + vec3(0.3183099, 0.3678794, 0.5376431)),\n        hash31(p + vec3(0.167348, 0.665734, 0.84331))\n    );\n}\n\n\/\/ noise function by IQ\n\/\/ https:\/\/www.shadertoy.com\/view\/4sfGzS\nfloat noise31(const in vec3 x ) {\n    vec3 p = floor(x);\n    vec3 f = fract(x);\n    f = f*f*(3.0-2.0*f);\n\t\n    return mix(mix(mix( hash31(p+vec3(0,0,0)), \n                        hash31(p+vec3(1,0,0)),f.x),\n                   mix( hash31(p+vec3(0,1,0)), \n                        hash31(p+vec3(1,1,0)),f.x),f.y),\n               mix(mix( hash31(p+vec3(0,0,1)), \n                        hash31(p+vec3(1,0,1)),f.x),\n                   mix( hash31(p+vec3(0,1,1)), \n                        hash31(p+vec3(1,1,1)),f.x),f.y),f.z);\n}\n\nfloat fbm(const in vec3 p, const in int octaves) {\n    float accum = 0.;\n    vec3 temp_p = p;\n    float weight = 1.;\n    for (int i=0; i<octaves; i++) {\n        accum += weight * noise31(temp_p);\n        weight *= .5;\n        temp_p *= 2.;\n    }\n    return abs(accum);\n}\n\nfloat voronoi3( in vec3 x )\n{\n    vec3 cell = floor(x);\n    float d = 1e12;\n    for( int k=-1; k<=1; k++ )\n    for( int j=-1; j<=1; j++ )\n    for( int i=-1; i<=1; i++ )\n    {\n        vec3 offset = vec3(float(i),float(j),float(k));\n        vec3 pos = hash33( cell + offset );\n        vec3 r = cell + offset + pos;\n        d = min(d, length(x - r));\n    }\n    return d;\n}\n\n\/\/========================================================\n\/\/ Modelling\n\/\/========================================================\n\nstruct Model {\n    float d;\n    int id;  \n    vec3 pos;\n    vec2 uv;\n    vec2 cell;\n    float cellt;\n    float wedges;\n    float slice;\n    float len;\n    float edge;\n    float point;\n};\n\nModel newModel() {\n    return Model(1e12, 0, vec3(0), vec2(0), vec2(0), 0., 0., 0., 0., 0., 0.);\n}\n\nModel opU(Model a, Model b) {\n    Model m = a;\n    if (b.d < a.d) {\n        m = b;\n    }\n    return m;\n}\n\nfloat hitEps = .001;\n\nstruct BloomSpec {\n    float stretch;\n    vec2 minmax;\n    float size;\n    float boundSize;\n    float width;\n    float thickness;\n    float pointy;\n    float cutback;\n    vec3 color;\n};\n\nfloat rangec(float vmin, float vmax, float value) {\n  return clamp((value - vmin) \/ (vmax - vmin), 0., 1.);\n}\n\n\/\/ Adapted from https:\/\/www.shadertoy.com\/view\/WdScDG\nModel leaf(vec3 p, vec3 cellData, BloomSpec spec) {\n    \n    float scale = spec.size * .78;\n    p \/= scale;\n    \n    float thickness = spec.thickness;\n    float width = spec.width;\n    float pointy = spec.pointy;\n    \n    vec2 cell = cellData.xy;\n    float cellTime = cellData.z * 2.;\n    \n    float d = 1e12;\n    float d2 = 1e12;\n    float slice = 1e12;\n    float wedge, wedges;\n\n    vec3 pp = p;\n\n    float core = length(p) - .1;\n\n    float len = cellTime;\n\n    len *= mix(1., mix(.2, 1., rangec(.8, .6, cellTime\/2.)), spec.cutback);\n    \n  \tlen = pow(len, .33);\n\n    float llen = len;\n\n    Model model = newModel();\n\n    float top = p.y - len * .5;\n    float curve = smoothstep(0., .6, cellTime);\n    float lenCurve = len * mix(1.5, .65, curve);\n    pR(p.zy, -mix(.2, .7, curve));\n    slice = length(p - vec3(0,lenCurve,0)) - lenCurve;\n\n    p = pp;\n    float point = (p.z \/ len - .8) * 5. * (.5 - slice \/ thickness);\n\n    \/\/ wedge\n    float ins = .25;\n    p.z += ins;\n    vec3 n = normalize(vec3(1,0,.35));\n    wedge = -dot(p, n);\n    wedge = smax(wedge, dot(p, n * vec3(1,1,-1)), clamp((slice \/ thickness \/ 2.) + .25, 0., 1.) * .1);\n    wedge = smax(wedge, p.z - len*1.12 - ins, len);\n    p.z -= ins;\n\n    \/\/ wedge2\n    ins = .2;\n    p.z += ins;\n    n = normalize(vec3(1,0,width));\n    float wedge2 = -dot(p, n);\n    wedge2 = smax(wedge2, dot(p, n * vec3(1,1,-1)), .1);\n    wedge2 = smax(wedge2, p.z - len*.95 - ins, len*.6);\n    p.z -= ins;\n\n    float r = len \/ 8.;\n\n    d2 = abs(slice) - thickness;\n    d2 = max(d2, top);\n\n    float wedgeT = smax(d2, wedge, thickness);\n    float wedgeT2 = smax(d2, wedge2, thickness);\n    d = mix(wedgeT2, smin(wedgeT, wedgeT2, .01), pointy);\n    wedges = mix(wedge2, wedge2, pointy);\n\n    p = pp;\n    vec2 uv = p.xz \/ len;\n\n    model.pos = p;\n    model.d = d * scale;\n    model.uv = uv;\n    model.cell = cell;\n    model.cellt = cellData.z;\n    model.wedges = mix(wedge2, smin(wedge, wedge2, .01), pointy);\n    model.slice = slice;\n    model.len = len;\n    model.edge = distance(model.wedges*1.5, (slice + thickness \/ 2.));\n    model.point = point;\n\n    return model;\n}\n\nmat2 phyllotaxis;\nvoid calcPhyllotaxis() {\n    vec2 cc = vec2(5., 8.);\n    float aa = atan(cc.x \/ cc.y);\n    float scale = (PI*2.) \/ sqrt(cc.x*cc.x + cc.y*cc.y);\n    mat2 mRot = mat2(cos(aa), -sin(aa), sin(aa), cos(aa));\n    mat2 mScale = mat2(1.\/scale,0,0,1.\/scale);\n    phyllotaxis = mRot * mScale;\n}\n\nvec3 calcCellData(\n    vec2 cell,\n    vec2 offset,\n    mat2 worldToGrid,\n    mat2 gridToWorld,\n    BloomSpec spec\n) {\n    \/\/ Snap to cell center and move to neighbour\n    cell = gridToWorld * (round(worldToGrid * cell) + offset);\n\n    \/\/ Clamp first and last cell\n    float o = .5 \/ spec.stretch;\n    cell.y = clamp(cell.y, spec.minmax.x + o, spec.minmax.y - o);\n    cell = gridToWorld * round(worldToGrid * cell);\n\n    \/\/ Calc cell time\n    float t = 1. - (cell.y - spec.minmax.x) \/ (spec.minmax.y - spec.minmax.x);\n\n    return vec3(cell, t);\n}\n\nModel mBloom(\n    vec3 p,\n    int id,\n    BloomSpec spec\n) {\n    Model model = newModel();\n    float bound = length(p) - spec.boundSize;\n\n    if (bound > hitEps * 2.) {\n        model.d = bound;\n        return model;\n    }\n    vec3 pp = p;\n    vec2 cell = vec2(\n        atan(p.x, p.z),\n        atan(p.y, length(p.xz))\n    );\n    spec.minmax = spec.minmax * PI \/ 2.;\n    mat2 worldToGrid = phyllotaxis * mat2(1,0,0,spec.stretch);\n    mat2 gridToWorld = inverse(worldToGrid);    \n    for( int m=-1; m<=1; m++ )\n    for( int n=-1; n<=1; n++ )\n    {\n        vec3 cellData = calcCellData(cell, vec2(m,n), worldToGrid, gridToWorld, spec);\n        p = pp;\n        pR(p.xz, -cellData.x);\n        pR(p.zy, cellData.y);\n        model = opU(model, leaf(p, cellData, spec));\n    }\n    model.id = id;\n    return model;\n}\n\nModel map(vec3 p) {\n\n    Model model = newModel();\n\n    float bound = p.y - .7;\n    if (bound > hitEps * 2.) {\n        model.d = bound;\n        return model;\n    }\n    \n    vec3 pp = p;\n       \n    pR(p.xz, .49);\n    model = opU(model, mBloom(p, 1, BloomSpec(2.5, vec2(-.25, 1.), 1., .85, .37, .045, 1., .6, vec3(.5))));\n    \n   \tp = pp;\n    p -= vec3(-1.1,.06,0.15);\n    pR(p.xz, 8.1);\n    float f = dot(p, normalize(vec3(1.2,0,1)));\n\tmodel = opU(model, mBloom(p, 2, BloomSpec(1.9, vec2(.2, 1.), 1.3, .8, .13, .03, 0., smoothstep(.5, -.1, f) * 1.0, vec3(.5))));\n\n   \tp = pp;\n    p -= vec3(-.7,.1,.8);\n    pR(p.xz, 1. + 2.6);\n    model = opU(model, mBloom(p, 3, BloomSpec(1.05, vec2(-.25, 1.), .45, .45, .41, .15, .5, -.5, vec3(.5))));\n\n    return model;\n}\n\n\/\/========================================================\n\/\/ Rendering\n\/\/========================================================\n\n\/\/ compile speed optim from IQ https:\/\/www.shadertoy.com\/view\/Xds3zN\nvec3 calcNormal(vec3 pos){\n    vec3 n = vec3(0.0);\n    for( int i=0; i<4; i++ )\n    {\n        vec3 e = 0.5773*(2.0*vec3((((i+3)>>1)&1),((i>>1)&1),(i&1))-1.0);\n        n += e*map(pos+0.0005*e).d;\n    }\n    return normalize(n);\n}\n\n\/\/ tracing\/lighting setup from yx\n\/\/ https:\/\/www.shadertoy.com\/view\/ts2cWm\nvec3 ortho(vec3 a){\n    vec3 b=cross(vec3(-1,-1,.5),a);\n    \/\/ assume b is nonzero\n    return (b);\n}\n\n\/\/ re-borrowed from yx from\n\/\/ http:\/\/blog.hvidtfeldts.net\/index.php\/2015\/01\/path-tracing-3d-fractals\/\nvec3 getSampleBiased(vec3  dir, float power, vec2 seed) {\n\tdir = normalize(dir);\n\tvec3 o1 = normalize(ortho(dir));\n\tvec3 o2 = normalize(cross(dir, o1));\n\tvec2 r = seed;\n\tr.x=r.x*2.*PI;\n\tr.y=pow(r.y,1.0\/(power+1.0));\n\tfloat oneminus = sqrt(1.0-r.y*r.y);\n\treturn cos(r.x)*oneminus*o1+sin(r.x)*oneminus*o2+r.y*dir;\n}\n\nvec3 getConeSample(vec3 dir, float extent, vec2 seed) {\n\tdir = normalize(dir);\n\tvec3 o1 = normalize(ortho(dir));\n\tvec3 o2 = normalize(cross(dir, o1));\n\tvec2 r =  seed;\n\tr.x=r.x*2.*PI;\n\tr.y=1.0-r.y*extent;\n\tfloat oneminus = sqrt(1.0-r.y*r.y);\n\treturn cos(r.x)*oneminus*o1+sin(r.x)*oneminus*o2+r.y*dir;\n}\n\nmat3 basisMatrix(vec3 forward, vec3 up) {\n    vec3 ww = normalize(forward);\n    vec3 uu = normalize(cross(up,ww));\n    vec3 vv = normalize(cross(ww,uu));\n    return mat3(-uu, vv, ww);\n}\n\nstruct Hit {\n    Model model;\n    vec3 pos;\n    float len;\n    bool sky;\n};\n\nHit march(vec3 origin, vec3 rayDir, float maxDist) {\n    vec3 p;\n    float len = 0.;\n    float dist = 0.;\n    bool sky = false;\n    Model model;\n\n    for (float i = 0.; i < 150.; i++) {\n        len += dist;\n        p = origin + len * rayDir;\n        model = map(p);\n        dist = model.d;\n        if (dist < hitEps) {\n            break;\n        }\n        if (len >= maxDist) {\n            sky = true;\n            break;\n        }\n    }   \n\n    return Hit(model, p, len, sky);\n}\n\n\/\/ bokeh offset from yx\n\/\/ https:\/\/www.shadertoy.com\/view\/ts2cWm\nvec2 bokeh(vec2 seed){\n\tvec2 a=seed;\n    if(a.y>a.x)\n        a=1.-a;\n    a.y*=PI*2.\/a.x;\n    return a.x*vec2(cos(a.y),sin(a.y));\n}\n\n\/\/ texturing, this is pretty messy :\/\nvec4 shade(Hit hit) {\n    Model model = hit.model;\n    vec3 p = hit.pos;\n\n    vec3 col;\n\n    float vor = 1. - voronoi3(p * 150.);\n    float vor2 = 1. - voronoi3(p * 50.);\n    float v1 = smoothstep(.7, .0, (mix(vor, vor * vor2, .5))\/2. + .8 - model.edge * 20.);\n\n    vec3 mp = model.pos*30.;\n\n    if (model.id == 2) {\n        mp *= 2.5;\n    }\n    if (model.id == 1) {\n        mp *= 1.25;\n    }\n\n    float f = fbm(mp, 7);\n    float v = smoothstep(.4, .8, noise31(p * 8.));\n    \n    if (model.id == 1) {\n        col = vec3(.15,.16,.22);\n        col = mix(col, col * vec3(.8,1.4,.9), 1.-smoothstep(.0, .05, model.slice+.025));\n        \/\/col = mix(col, col * vec3(1,1.2,1.5), smoothstep(.0, .05, model.edge) * step(vor2, .8) * smoothstep(1.3, .6, model.cell.y));\n        col = mix(col, col *  vec3(1,1.2,1.5), smoothstep(.0, .05, model.edge) * step(vor2, .8) * smoothstep(.1, .52, model.cellt));\n        col = mix(col, col * .7, (1. - step(vor2, .8)) * smoothstep(.0, .05, model.edge));\n        \/\/col = mix(col, col * vec3(3.,1.,1.), (1.-v1) * smoothstep(.05, 0., model.edge) * smoothstep(.6, 1., model.uv.y) * smoothstep(1.3, .6, model.cell.y));\n        col = mix(col, col * vec3(3.,1.,1.), (1.-v1) * smoothstep(.05, 0., model.edge) * smoothstep(.6, 1., model.uv.y) * smoothstep(.1, .52, model.cellt));\n        \/\/col = mix(col, vec3(.08,.02,.07), (1.-v1) * smoothstep(-.1, 0., model.wedges) * smoothstep(.9, 1., model.uv.y) * smoothstep(2., 1., model.cell.y));\n        col = mix(col, vec3(.08,.02,.07), (1.-v1) * smoothstep(-.1, 0., model.wedges) * smoothstep(.9, 1., model.uv.y) * smoothstep(-.2, .3, model.cellt));\n        col = max(col, vec3(0));\n        col = pow(col * vec3(1,1,1.6), vec3(1,1.1,1.3));      \n    }\n\n    if (model.id == 2) {\n        col = vec3(.2,.3,.25);\n        col = mix(col, vec3(.1,.25,.3), smoothstep(.7, .1, model.uv.y));\n        col = mix(col, vec3(.7,.9,1), .5 * smoothstep(.4, 1., model.uv.y));\n        col = mix(col, col * vec3(2.,3.,3.5), smoothstep(.8, .1, model.uv.y) * clamp(sin(f * 2. + 10. + v * 5.), 0., 1.) );\n    }\n\n    if (model.id == 3) {\n        col = vec3(.125,.15,.3);\n        col = mix(col, vec3(.3,.17,.3), smoothstep(.6, .2, model.cellt));\n        col = mix(col, vec3(.2,.05,.12), smoothstep(.0, 1., model.point+.2));\n        col = mix(col, col * vec3(.45,.4,.55), .7 * (1. - step(vor * (1.-vor2), .35)) * smoothstep(.0, .05, model.edge));\n        col = mix(col, vec3(.2,.05,.12) * .5, .8 * smoothstep(.4, .0, vor2 * vor * (model.edge * 100. - model.point - .5)));\n    }\n\n    float dust = (sin(f * 4. + 3. + mp.x * .25) * .5 + .5);\n    dust = pow(dust, 2.);\n    dust = max(0., v - dust);\n    dust = dust * .5 + pow(dust*.79, 3.);\n    \n    if (model.id == 1) {\n\t    dust *= smoothstep(.008, .1, model.edge);\n        dust *= .66;\n    }\n    \n    if (model.id == 3) {\n\t    dust *= smoothstep(.0, .05, model.edge);\n        dust *= .2;\n    }\n    \n    dust *= mix(1., smoothstep(.4, .6, 1.-vor), .5);\n    col = mix(col, col * 3., dust);\n\n    return vec4(col, 1.);\n}\n\n\/\/ main path tracing loop, based on yx's\n\/\/ https:\/\/www.shadertoy.com\/view\/ts2cWm\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    calcPhyllotaxis();\n\n    vec2 uv = fragCoord.xy \/ iResolution.xy;\n    vec4 sampl = vec4(0);\n    \n    #ifdef PREVIEW\n        sampl = vec4(0);\n    #endif\n\n    vec2 p = (-iResolution.xy + 2.* fragCoord) \/ iResolution.y;\n\n    vec2 seed = hash22(uv * 200. + iTime * .01);\n    vec2 seed2 = hash22(uv * 300. + iTime * .02);\n\n    \/\/ jitter for antialiasing\n    #ifndef PREVIEW\n        p += 2. * (seed - .5) \/ iResolution.xy;\n    #endif\n\n    vec3 camPos = vec3(.025,2.4,1.025);\n    vec3 camTar = vec3(-.475,-.2,.025);\n\n    camTar = mix(camTar, camPos, .25);\n    \n    #ifndef PREVIEW\n        mat3 bokehMat = basisMatrix(camTar - camPos, vec3(1,0,0));\n    \tcamPos += bokehMat * vec3(bokeh(seed2) * .02, 0);\n    #endif\n\n    mat3 camMat = basisMatrix(camTar - camPos, vec3(-1,1,-2));\n    vec3 rayDir = normalize(camMat * vec3(p.xy, 4.));\n\n    vec3 origin = camPos;\n\n    Hit hit;\n    vec3 col = vec3(0);\n    vec3 nor, ref;\n\n    vec3 sunPos = vec3(5,5,-5);\n    vec3 accum = vec3(1);\n    vec3 sunColor = vec3(8.10,6.00,4.20)\/5.;\n    vec3 skyColor = vec3(0.50,0.70,1.00);\n    vec3 bgCol = skyColor * .001 * vec3(.75,.75,1.);\n    \n    Hit firstHit;\n\n    #ifdef PREVIEW\n        const int MAX_BOUNCE = 1;\n    #else\n        const int MAX_BOUNCE = 4;\n    #endif\n    \n    for (int bounce = 0; bounce < MAX_BOUNCE; bounce++) {\n        hit = march(origin, rayDir, 15.);\n        \n        if (bounce == 0) {\n            firstHit = hit;\n            \n            if (hit.sky) {\n            \tcol = bgCol;\n                break;\n            }\n        }\n        \n        if (hit.sky) {\n            nor = normalize(hit.pos);\n            col += max(nor.y, 0.) * accum * skyColor;\n           \tcol += smoothstep(.2, 1., dot(nor, normalize(sunPos))) * sunColor * accum;\n            break;\n        }\n        \n       \tvec4 material = shade(hit);\n        accum *= material.rgb;\n        nor = calcNormal(hit.pos);\n\n        #ifdef PREVIEW\n            col += max(nor.y + .3, 0.) * accum * skyColor * .5;\n           \tcol += smoothstep(.2, 1., dot(nor, normalize(sunPos))) * sunColor * accum * .5;\n        #endif\n        \n        \/\/ shoot randomly perturbed ray towards sun,\n        \/\/ if it doesn't hit geo, add to result\n        vec3 sunDirection = sunPos - hit.pos;\n        vec3 sunSampleDir = getConeSample(sunDirection, .005, seed);\n        float sunLight = dot(nor, sunSampleDir);\n        vec3 shadowOrigin = hit.pos + nor * .01;\n        bool hitSun = sunLight > 0. && march(shadowOrigin, sunSampleDir, 5.).sky;\n        \n        if (hitSun) {\n            col += accum * sunColor * sunLight;\n        }\n\n        \/\/ set new origin and direction for dffuse bounce\n        origin = hit.pos + nor * .002;\n        rayDir = getSampleBiased(nor, 1., seed);\n\n        seed = hash12(seed.x);\n    }\n    \n    float fog = 1. - exp((firstHit.len - 1.9) * - 5.);\n    col = mix(col, bgCol, clamp(fog, 0., 1.)); \n\n    col \/= 2.;\n    \n    fragColor = vec4(col,1);\n}\n",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec4 col = texelFetch(iChannel0, ivec2(fragCoord.xy), 0);\n    #ifdef TRACE_PREVIEW\n\t\tfragColor = col * float(iFrame + 1); return;\n    #endif\n    #ifdef PREVIEW\n\t\tfragColor = col * float(iFrame + 1); return;\n    #endif\n\tvec4 last = texelFetch(iChannel1, ivec2(fragCoord.xy), 0);\n    fragColor = last + col;\n}\n",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "\/\/#define PREVIEW;\n\/\/#define TRACE_PREVIEW;",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        }
+    ]
+}

@@ -1,0 +1,126 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "3ttyRj",
+        "date": "1609500038",
+        "viewed": 34,
+        "name": "Second order pixel sorter",
+        "username": "andrinr",
+        "description": "Attempt at programming a pixel sorter without looking at any resources.",
+        "likes": 3,
+        "published": 3,
+        "flags": 32,
+        "usePreview": 0,
+        "tags": [
+            "pixel",
+            "sorting",
+            "binarysearch",
+            "sortingtree"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord\/iResolution.xy;\n\n    \/\/ Time varying pixel color\n    vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));\n\n    vec3 buffer = texture(iChannel0,uv).xyz;\n    \/\/ Output to screen\n    fragColor = vec4(buffer,1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XdfGRn",
+                    "filepath": "\/media\/a\/e6e5631ce1237ae4c05b3563eda686400a401df4548d0f9fad40ecac1659c46c.jpg",
+                    "previewfilepath": "\/media\/ap\/e6e5631ce1237ae4c05b3563eda686400a401df4548d0f9fad40ecac1659c46c.jpg",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Sorting step 1\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{   \n    \/\/ Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord\/iResolution.xy;\n    float du = 1. \/ iResolution.x;\n    float dv = 1. \/ iResolution.y;\n    \n    vec3 y = texture(iChannel0,uv).xyz;\n    \n    vec3 y_l = texture(iChannel0,uv - vec2(du, 0.)).xyz;\n    vec3 y_r = texture(iChannel0,uv + vec2(du, 0.)).xyz;\n    \n    \/\/ Modulo\n    if (fract(float(fragCoord.x)\/2.0) > 0.5){\n        if (length(y_l) > length(y)){\n            y = y_l;\n        }\n    }\n    \n    \/\/ Modulo\n    if (fract(float(fragCoord.x)\/2.0) < 0.5){\n        if (length(y) > length(y_r)){\n            y = y_r;\n        }\n    }\n\n    fragColor = vec4(y,1.0);\n    \n    if (iFrame < 4){\n        \n        fragColor = texture(iChannel1,uv);\n    }\n}",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Sorting step 2\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{   \n    \/\/ Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord\/iResolution.xy;\n    float du = 1. \/ iResolution.x;\n    float dv = 1. \/ iResolution.y;\n    \n    vec3 y = texture(iChannel0,uv).xyz;\n    \n    vec3 y_l = texture(iChannel0,uv - vec2(du, 0.)).xyz;\n    vec3 y_r = texture(iChannel0,uv + vec2(du, 0.)).xyz;\n    \n    \/\/ Modulo\n    if (fract(float(fragCoord.x)\/2.0) > 0.5){\n        if (length(y_r) < length(y)){\n            y = y_r;\n        }\n    }\n    \n    \/\/ Modulo\n    if (fract(float(fragCoord.x)\/2.0) < 0.5){\n        if (length(y_l) > length(y)){\n            y = y_l;\n        }\n    }\n\n    fragColor = vec4(y,1.0);\n}",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

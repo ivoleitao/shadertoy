@@ -1,0 +1,131 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "3tBGzW",
+        "date": "1559210825",
+        "viewed": 3106,
+        "name": "Ball Room Dance",
+        "username": "shau",
+        "description": "Raytracing 20 spheres. An obvious nod to the awesome demo \"Newton Protocol\" by 1\/2 bit cheese. ",
+        "likes": 71,
+        "published": 1,
+        "flags": 32,
+        "usePreview": 0,
+        "tags": [
+            "3d"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Created by SHAU - 2019\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/*\n    Still playing with concepts from Peter Shirley ray tracing in one weekend\n    https:\/\/github.com\/petershirley\/raytracinginoneweekend\n    This one is more of a ray tracer than a path tracer\n\n    Some nice examples\n\n    Reinder\n    https:\/\/www.shadertoy.com\/view\/MtycDD\n    https:\/\/www.shadertoy.com\/view\/XlycWh\n\n    IQ\n    https:\/\/www.shadertoy.com\/view\/MsdGzl\n    https:\/\/www.shadertoy.com\/view\/Xtt3Wn\n    https:\/\/www.shadertoy.com\/view\/Xd2fzR\n\n    I like the reprojection technique of the latter but it didn't seem work\n    too well with moving balls (for me). I need to research this more as it seems the demo\n    also took this approach\n\n      \n    Reflecting balls by dr2\n    https:\/\/www.shadertoy.com\/view\/Xsy3WR\n\n    Ben-Hur balls. One of my favourites again from dr2\n    https:\/\/www.shadertoy.com\/view\/MsVfRW\n\n    A fun mashup by iapafoto\n    https:\/\/www.shadertoy.com\/view\/XdGGWz\n*\/\n\n#define R iResolution.xy\n#define T mod(iTime, DURATION)\n\nvoid mainImage(out vec4 C, vec2 U) {\n\n    vec4 buf = texture(iChannel0, U\/R);    \n    vec3 pc = buf.xyz;\n    \n    \/\/IQ\n    pc = pow(pc, vec3(0.4545));\n    pc = pow(pc, vec3(0.8,0.85,0.9));\n    \n    \/\/gamma correction\n    pc = pow(pc, vec3(1.0\/1.6));\n\n    C = vec4(pc, 1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "\/\/ Created by SHAU - 2019\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n#define BUF(C, P, R) texture(C, P\/R)\n#define POS 10.5\n#define VEL 20.5\n#define NBALLS 20\n\n#define DURATION 60.\n\n#define RAYS 4\n#define BOUNCES 3\n\n#define LAMBERTIAN 1\n#define METAL 2\n#define DIFFUSE_LIGHT 3\n#define PANEL_LIGHT 4\n\n#define PI 3.141592\n#define FAR 10000.\n#define EPS 0.005\n\n#define UI0 1597334673U\n#define UI1 3812015801U\n#define UI2 uvec2(UI0, UI1)\n#define UI3 uvec3(UI0, UI1, 2798796415U)\n#define UIF (1.0 \/ float(0xffffffffU))\n\nstruct Material {\n    int type;\n    vec3 albedo;\n    vec3 emit;\n    float v; \n}; \nconst Material MISS_MATERIAL = Material(0, vec3(0), vec3(0), 0.0);\n\nstruct HitSphere {\n    float t; \n    vec3 p;\n    vec3 n; \n    vec3 c;\n    float r;\n    float id;\n    Material mat;\n};\nHitSphere HIT_MISS = HitSphere(FAR,\n                               vec3(0),\n                               vec3(0),\n                               vec3(0), \n                               0.0, \n                               0.0, \n                               MISS_MATERIAL); \/\/miss\n\n    \nstruct Ray {\n    vec3 o;\n    vec3 d;\n};\n    \n\/\/compact rotation - Fabrice\nmat2 rot(float x) {return mat2(cos(x), sin(x), -sin(x), cos(x));}\n\n\/\/IQ cosine palattes\n\/\/http:\/\/www.iquilezles.org\/www\/articles\/palettes\/palettes.htm\nvec3 palette1(float t) {return vec3(.5) + vec3(.5) * cos(6.28318 * (vec3(1) * t * 0.1 + vec3(0, .33, .67)));}    \nvec3 palette2(float t) {return vec3(.5) + vec3(.5) * cos(6.28318 * (vec3(1.0, 0.7, 0.4) * t * 0.1 + vec3(0.00, 0.15, 0.20)));}    \n    \n\/\/Dave Hoskins - improved hash without sin\n\/\/https:\/\/www.shadertoy.com\/view\/XdGfRR\nvec3 hash33(vec3 p) {\n\tuvec3 q = uvec3(ivec3(p)) * UI3;\n\tq = (q.x ^ q.y ^ q.z) * UI3;\n\treturn vec3(q) * UIF;\n}\n\nvec2 hash22(vec2 p) {\n\tuvec2 q = uvec2(ivec2(p))*UI2;\n\tq = (q.x ^ q.y) * UI2;\n\treturn vec2(q) * UIF;\n}\n\nfloat hash12(vec2 p) {\n\tuvec2 q = uvec2(ivec2(p)) * UI2;\n\tuint n = (q.x ^ q.y) * UI0;\n\treturn float(n) * UIF;\n}\n\n\/\/TODO: change to ivec2\nvec4 load(sampler2D channel, vec2 R, int idx, float type) {\n     return BUF(channel, vec2(float(idx)+.5, type), R);\n}\n\n\n",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Created by SHAU - 2019\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n#define R iResolution.xy\n#define T mod(iTime, DURATION)\n\n\/\/Physics from dr2 & iapafoto \n\/\/https:\/\/www.shadertoy.com\/view\/Xsy3WR\nvoid animate(int idx, \/\/current ball index  \n             inout vec4 bp,  \/\/current ball position\n             inout vec4 bv) { \/\/current ball velocity\n\n    vec3 rn = vec3(0),\n         dr = vec3(0), \n         f = vec3(0);\n    \n    float fOvlap = 1000.,\n          fDamp = 3.0, \/\/reduced damping from 7 as per iapafotos suggestion :)\n          grav = 70.,\n          rSep = 0.0,\n          rr = 0.;\n    \n    \/\/test ball to ball collisions\n    for (int i=7; i<NBALLS; i++) {\n        vec4 ball = load(iChannel0, R, i, POS);\n        dr = bp.xyz - ball.xyz;\n        rSep = length(dr);\n        rr = bp.w + ball.w;\n        if (i != idx && rSep < rr) {\n            f += fOvlap * (rr \/ rSep - 1.) * dr;\n        }\n    }\n\n    \/\/gravity direction animation\n    vec3 bd = normalize(-bp.xyz) * (step(T, 11.) + step(48., T));\n    if (T<10. || T>48.) bd = -bd;    \n    vec3 dg = vec3(0.0, 1.0, 0.0) * step(13.,T) * step(T, 48.);\n    dg.xy *= rot(max(0.0, T-13.)*0.2);\n    dg += bd;\n    \n    \/\/walls\n    dr = vec3(8.6, 4.8, 3.0) - abs(bp.xyz) + bp.w;\n    \n    \/\/update forces\n    f -= step(dr, vec3(1.)) * fOvlap*sign(bp.xyz) * (1.\/ abs(dr) - 1.) * dr +\n                        grav*dg + fDamp*bv.xyz;\n    \n    \/\/update velocity and position\n    float dt = 0.01;\n    bv.xyz += dt * f;\n    bp.xyz += dt * bv.xyz;\n}\n\n\nvoid mainImage(out vec4 C, vec2 U) {\n    \n    vec3 hash = (hash33(vec3(U,float(iFrame)))-.5)*2.; \/\/hash -1 to 1\n    int idx = int(U.x-.5); \/\/ball index\n    float fidx = float(idx), \/\/float version of ball index\n          type = U.y; \/\/data type\n    \n    vec4 bp = load(iChannel0, R, idx, POS);\n    vec4 bv = load(iChannel0, R, idx, VEL);\n    \n    if (iFrame < 2) {\n\n        \/\/fixed balls\n        if (idx==0) {\n            \/\/right wall\n            bp = vec4(40.0, 0.0, 0.0, 30.0);\n        } else if (idx==1) {\n            \/\/left wall\n            bp = vec4(-40.0, 0.0, 0.0, 30.0);\n        } else if (idx==2) {\n            \/\/back wall\n            bp = vec4(0.0, 0.0, 40.0, 30.0);\n        } else if (idx==3) {\n            \/\/floor\n            bp = vec4(0.0, 60.0, 0.0, 54.0);\n        } else if (idx==4) {\n            \/\/ceiling\n            bp = vec4(0.0, -60.0, 0.0, 54.0);\n        } else if (idx==5) {\n            \/\/right fill\n            bp = vec4(50.0, 0.0, 50.0, 56.0);\n        } else if (idx==6) {\n            \/\/left fill\n            bp = vec4(-50.0, 0.0, 50.0, 56.0);\n        } else if (idx>6) {\n            vec3 bc = vec3(4.6, 0.0, 0.0);\n            bc.xy *= rot(float(idx-6) * 0.483);\n            bp = vec4(bc, 1.0);\n        }\n        \n        bv = vec4(hash.xy, hash.z*0.4, 1.0) * 2.0;\n        \n    } else {        \n        if (idx>6) {\n            animate(idx, bp, bv);   \n        }\n    }\n    \n    \/\/save\n    if (type==POS) {\n        C = bp; \/\/ball position    \n    } else if (type==VEL) {\n        C = bv; \/\/ball velocity\n    }\n}\n",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Created by SHAU - 2019\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n#define R iResolution.xy\n#define T mod(iTime, DURATION)\n\n#define LIGHT1 vec4( 11.3, 0.0, 11.3, 5.0)\n#define LIGHT2 vec4(-11.3, 0.0, 11.3, 6.0)  \n\nfloat g_seed = 0.0;\n\n\/\/\n\/\/ Hash functions by Nimitz:\n\/\/ https:\/\/www.shadertoy.com\/view\/Xt3cDn\n\/\/\n\nuint base_hash(uvec2 p) {\n    p = 1103515245U*((p >> 1U)^(p.yx));\n    uint h32 = 1103515245U*((p.x)^(p.y>>3U));\n    return h32^(h32 >> 16);\n}\n\nfloat hash1(inout float seed) {\n    uint n = base_hash(floatBitsToUint(vec2(seed+=.1,seed+=.1)));\n    return float(n)\/float(0xffffffffU);\n}\n\nvec2 hash2(inout float seed) {\n    uint n = base_hash(floatBitsToUint(vec2(seed+=.1,seed+=.1)));\n    uvec2 rz = uvec2(n, n*48271U);\n    return vec2(rz.xy & uvec2(0x7fffffffU))\/float(0x7fffffff);\n}\n\nvec3 hash3(inout float seed) {\n    uint n = base_hash(floatBitsToUint(vec2(seed+=.1,seed+=.1)));\n    uvec3 rz = uvec3(n, n*16807U, n*48271U);\n    return vec3(rz & uvec3(0x7fffffffU))\/float(0x7fffffff);\n}\n\n\/\/reinder    \nvec2 randomInUnitDisk(inout float seed) {\n    vec2 h = hash2(seed) * vec2(1.,6.28318530718);\n    float phi = h.y;\n    float r = sqrt(h.x);\n\treturn r * vec2(sin(phi),cos(phi));\n}\n\n\/\/reinder    \nvec3 randomInUnitSphere(inout float seed) {\n    vec3 h = hash3(seed) * vec3(2.,6.28318530718,1.)-vec3(1,0,0);\n    float phi = h.y;\n    float r = pow(h.z, 1.\/3.);\n\treturn r * vec3(sqrt(1.-h.x*h.x)*vec2(sin(phi),cos(phi)),h.x);\n}\n\n\/\/IQ - Intesectors, sphere and box functions\n\/\/https:\/\/iquilezles.org\/www\/index.htm\nfloat sphIntersect(vec3 ro, vec3 rd, vec4 sph) {\n\tvec3 oc = ro - sph.xyz;\n\tfloat b = dot(oc, rd);\n\tfloat c = dot(oc, oc) - sph.w*sph.w;\n\tfloat h = b*b - c;\n\tif (h<0.) return -1.0;\n\treturn -b - sqrt(h);\n}\n\nfloat sphDensity(vec3 ro, vec3 rd, vec4 sph) {\n    float ndbuffer = FAR\/sph.w;\n    vec3  rc = (ro - sph.xyz)\/sph.w;\n\t\n    float b = dot(rd,rc);\n    float c = dot(rc,rc) - 1.0;\n    float h = b*b - c;\n    if( h<0.0 ) return 0.0;\n    h = sqrt( h );\n    float t1 = -b - h;\n    float t2 = -b + h;\n\n    if( t2<0.0 || t1>ndbuffer ) return 0.0;\n    t1 = max( t1, 0.0 );\n    t2 = min( t2, ndbuffer );\n\n    float i1 = -(c*t1 + b*t1*t1 + t1*t1*t1\/3.0);\n    float i2 = -(c*t2 + b*t2*t2 + t2*t2*t2\/3.0);\n    return (i2-i1)*(3.0\/4.0);\n}\n\nvec3 sphNormal(vec3 pos, vec4 sph) {\n    return normalize(pos - sph.xyz);\n}\n\nvec4 uvWall(HitSphere sphere) {\n\n    float AT = floor(T*0.1);\n    \n    \/\/vec2 hash = hash22(sphere.id);\n    vec3 q = sphere.p - sphere.c;\n    \n    float rep = 40.0;\n    float hRep = 3.0;\n    \n    \/\/left, right and rear walls\n    vec3 o = q.xzy;\n    if (sphere.id==3.0 || sphere.id==4.0) {\n        \/\/floor and ceiling\n        o = q.yzx;\n        rep = 80.0;\n    }\n\n    \/\/panels\n    float a = (atan(o.x, o.y) + PI)\/PI*0.5;\n    float ia = fract(a*rep);\n    float t = step(ia, 0.94) * step(0.06, ia);    \n    \n    float h = mod(o.z, hRep) \/ hRep;\n    t *= step(0.06, h) * step(h, 0.96);\n    \n    float id = hash12(AT+vec2(floor(a*rep), AT+floor(o.z\/hRep)));\n   \n    \/\/panel lights\n    float lc = step(length(vec2(0.8) - vec2(ia, h)), 0.06) +\n               step(length(vec2(0.2) - vec2(ia, h)), 0.06);\n    \n    float lt = length(vec2(0.5) - vec2(ia, h));\n    \n    return vec4(t, lc, id, lt);\n}\n\nvec3 uvFill(HitSphere sphere) {\n    \n    float h = mod(sphere.p.y, 4.0) \/ 4.0;\n    float t = step(0.2, h) * step(h, 0.8);    \n    t *= sin((sphere.p.y + T * .4) * 10.0) * 0.4 + 0.36;\n\n    return vec3(1.0, t, 0.0);\n}\n\nvoid assignMaterial(inout HitSphere hit) {\n\n    vec4 uvw = uvWall(hit);\n    vec3 uvf = uvFill(hit);\n    float atdl = step(0.8, uvw.z); \/\/dotted light panel\n    float atpl = step(uvw.z, 0.1) * step(16., T); \/\/panel light\n    vec3 panelColour = palette2(uvw.z*3.0);\n    float lt = 1.0 \/ (1.0 + uvw.w*uvw.w*10.0);\n    float roughness = max(0.02, 0.92 - T*0.0625);\n    if (hit.id<5.0) {\n        \n        \/\/WALL PANELS\n        if (uvw.x>0.0) {\n            \n            \/\/*\n            if (atpl*(uvw.x-uvw.y)==1.0) {\n                \/\/wall panel light\n                hit.mat = Material(PANEL_LIGHT, \n                                          panelColour, \n                                          panelColour * 2.0 * lt, \n                                          0.0);\n            } else if (atdl*uvw.y==1.0) {    \n                \/\/wall panel dot light\n                hit.mat = Material(DIFFUSE_LIGHT, \n                                   vec3(0.0), \n                                   panelColour * 2.0, \n                                   0.0);\n            } else if (atdl*uvw.x==1.0) {    \n                \/\/wall panel\n                hit.mat = Material(LAMBERTIAN, \n                                         panelColour, \n                                         vec3(0.0), \n                                         0.02);\n            } else {\n                \/\/wall panel\n                hit.mat = Material(LAMBERTIAN, \n                                         panelColour, \n                                         vec3(0.0), \n                                         roughness);\n            }\n\n        }\n    } else if (hit.id==5.0 || hit.id==6.0) {\n        \n        \/\/SIDE FILLS\n        if (uvf.y>0.0) {\n            \/\/wall fill light\n            hit.mat = Material(DIFFUSE_LIGHT, \n                                  vec3(0.0), \n                                  vec3(1.0,0.9, 0.6)*uvf.y, \n                                  1.0);\n        } else {\n            \/\/wall fill\n            hit.mat = Material(LAMBERTIAN, \n                                  vec3(0.0), \n                                  vec3(0.0), \n                                  1.0);\n        }\n    } else {\n        \n        vec3 ballCol = mix(vec3(1), \n                           palette1(hit.id-6.0\/2.0), \n                           clamp(T*0.5-5., 0.0, 1.0));\n        ballCol = mix(ballCol, \n                      vec3(1), \n                      clamp(T*0.5-25., 0.0, 1.0));\n        \n        \/\/animated sphere\n        hit.mat = Material(METAL, \n                           ballCol, \n                           vec3(0.0), \n                           0.02);\n    }\n}\n\nbool materialScatter(\n        Ray rayIn, \n        HitSphere sphere, \n        inout Ray scattered) {\n\n    if (sphere.mat.type==LAMBERTIAN) {\n        vec3 rd = reflect(rayIn.d, sphere.n);\n        scattered = Ray(sphere.p, normalize(rd + sphere.mat.v*randomInUnitSphere(g_seed)*0.3));\n        return true;        \n    } else if (sphere.mat.type==METAL) {\n        vec3 rd = reflect(rayIn.d, sphere.n);\n        scattered = Ray(sphere.p, normalize(rd + sphere.mat.v*randomInUnitSphere(g_seed)));\n        return true;        \n    } else if (sphere.mat.type==PANEL_LIGHT) {\n        vec3 rd = reflect(rayIn.d, sphere.n);\n        scattered = Ray(sphere.p, normalize(rd + sphere.mat.v*randomInUnitSphere(g_seed)*0.3));\n        return false;        \n    }\n\n    return false;\n}\n\nbool traceScene(Ray ray, inout HitSphere ns) {\n    \n    bool hit = false;\n    \n    for (int i=0; i<NBALLS; i++) {\n        vec4 sphere = load(iChannel1, R, i, POS);\n        float si = sphIntersect(ray.o, ray.d, sphere);\n        if (si>0.0 && si<ns.t) {\n            \/\/nearest sphere so far\n            \/\/do all the surface calcs here as it's only a small scene\n            hit = true;\n            vec3 p = ray.o + ray.d*si;\n            ns = HitSphere(si,\n                           p,\n                           sphNormal(p, sphere),\n                           sphere.xyz, \n                           sphere.w, \n                           float(i), \n                           MISS_MATERIAL);     \n            assignMaterial(ns);\n        }\n    }\n\n    return hit;\n}\n\nvec3 fillLight(vec4 light,\n              vec3 lightCol,\n              Ray ray,\n              HitSphere hit) {\n \n    vec3 colour = vec3(0);\n    \n    vec3 lightDir = normalize(light.xyz - hit.p);\n    vec3 fuzzyLightDir = normalize(light.xyz + 0.6*randomInUnitSphere(g_seed) - hit.p);\n    lightDir.y *= 0.3;\n    fuzzyLightDir.y *= 0.3;\n    \n    float lightDist = length(light.xyz - hit.p);\n    float diffuse = max(0.05, dot(lightDir, hit.n));\n    float atten = 1.0 \/ (1. + lightDist*lightDist*0.1);\n    float spec = pow(max(dot(reflect(-fuzzyLightDir, hit.n), -ray.d), 0.0), 16.);\n    float fre = pow(clamp(dot(ray.d, hit.n) + 1.0, 0.0, 1.0), 32.0);\n\n    colour = hit.mat.albedo * lightCol * diffuse * atten;\n    colour += lightCol * (spec+fre) * atten;\n    \n    float sh = 1.0;\n    HitSphere shadowHit = HIT_MISS;\n    Ray shadowRay = Ray(hit.p + hit.n*EPS, fuzzyLightDir); \n    if (traceScene(shadowRay, shadowHit)) {\n        if (shadowHit.id!=light.w) {\n            sh =  0.0;\n        } else {\n            if (length(shadowHit.mat.emit)==0.0) sh = 0.0;\n        }\n    }\n    colour *= sh;\n    \n    return colour;\n}\n\n\nvec3 directLight(Ray ray, HitSphere hit) {\n \n    if (hit.mat.type==0) return vec3(0.0);\n    if (hit.mat.type==DIFFUSE_LIGHT) return hit.mat.emit; \n\n    vec3 colour = fillLight(LIGHT1,\n                            vec3(1.0),\n                            ray,\n                            hit);\n    colour += fillLight(LIGHT2,\n                        vec3(1.0),\n                        ray,\n                        hit);\n\n    return colour;\n}\n\nvec3 render(Ray ray) {\n\n    vec3 colourMask = vec3(1.0);\n    vec3 accCol = vec3(0.0);\n\n    float reflectionTerm = 1.0;\n    \n    for (int i=0; i<BOUNCES; i++) {\n        \n        HitSphere hit = HIT_MISS; \/\/miss\n        if (traceScene(ray, hit)) {\n            \n            \/\/hit scene                \n            Ray scattered;\n            if (materialScatter(\n                ray, \n                hit, \n                scattered)) {\n                \n                colourMask = mix(colourMask,\n                                 colourMask * hit.mat.albedo,\n                                 reflectionTerm);\n                \n                \/\/direct light\n                vec3 iColour = directLight(ray, hit);\n                \n                accCol = mix(accCol,\n                             accCol + colourMask * iColour,\n                             reflectionTerm);\n                \n                ray = scattered;\n                    \n            } else {\n                \n                \/\/hit a light\n                accCol += colourMask * hit.mat.emit * reflectionTerm;\n                if (hit.mat.type==PANEL_LIGHT) {\n                    ray = scattered;\n                } else {\n                    break;\n                }\n            }\n            \n            float fre = pow(clamp(dot(ray.d, hit.n) + 1.0, 0.0, 1.0), 32.0);\n            reflectionTerm = (1.0 - hit.mat.v) * fre;\n            \n        } else {\n            \/\/missed scene\n            break;\n        }\n        \/\/optimised break condition from Reinder\n        if (dot(colourMask, colourMask) < 0.0001) break; \n    }\n    \n    return accCol;\n}\n\n\/\/IQ\nmat3 setCamera(vec3 ro, vec3 ta, float cr) {\n\tvec3 cw = normalize(ta-ro);\n\tvec3 cp = vec3(sin(cr), cos(cr),0.0);\n\tvec3 cu = normalize(cross(cw, cp));\n\tvec3 cv =          (cross(cu, cw));\n    return mat3(cu, cv, -cw);\n}\n\nvoid mainImage(out vec4 C, vec2 U) {\n        \n    g_seed = float(base_hash(floatBitsToUint(U))) \/ float(0xffffffffU) + iTime;\n\tvec2 off = hash2(g_seed) - 0.5;\n\n    vec3 lookFrom = vec3(sin(iTime*0.2)*3.0, cos(iTime*0.097)*2.0, -14.0),\n         lookAt = vec3(0.0, 0.0, 0.0),\n         pixelColour = vec3(0.0);\n    \n    vec2 p = (2.0*(U+off)-R.xy)\/R.y;\n    \n    float focalLength = 2.;\n    mat3 camIQ = setCamera(lookFrom, lookAt, 0.0);\n    vec3 rd = normalize(camIQ * vec3(p, -focalLength));\n    \n    vec3 accColour = vec3(0.0);\n    float t = 0.0;\n    for (int i=0; i<RAYS; i++) {\n        accColour += render(Ray(lookFrom, rd));\n    }\n    pixelColour = accColour \/ float(RAYS);\n    \n    C = vec4(pixelColour, 1.0);    \n}",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

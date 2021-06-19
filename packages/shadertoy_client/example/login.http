@@ -1,0 +1,14 @@
+
+POST {{baseUrl}}/{{signinPath}}
+Content-Type: application/x-www-form-urlencoded
+Referer: {{baseUrl}}/{{signinPath}} 
+
+user={{$dotenv USER}}
+&password={{$dotenv PASSWORD}}
+###
+POST {{baseUrl}}/{{signinPath}}
+Content-Type: application/x-www-form-urlencoded
+Referer: {{baseUrl}}/{{signinPath}} 
+
+user={{$dotenv USER}}
+&password=password

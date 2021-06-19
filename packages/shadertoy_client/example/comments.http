@@ -1,0 +1,11 @@
+POST {{baseUrl}}/{{commentPath}}
+Content-Type: application/x-www-form-urlencoded
+Referer: {{baseUrl}}/{{viewPath}} 
+
+s=ldB3Dt
+###
+POST {{baseUrl}}/{{commentPath}}
+Content-Type: application/x-www-form-urlencoded
+Referer: {{baseUrl}}/{{viewPath}} 
+
+s=xXxXx

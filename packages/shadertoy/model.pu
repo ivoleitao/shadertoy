@@ -1,0 +1,146 @@
+@startuml model
+
+hide methods
+
+class User {
+ +String id
+ +String picture
+ +String memberSince
+ +int following
+ +int followers
+ +String about
+}
+
+class Comment {
+    +String id
+    +String shaderId
+    +String userId
+    +String picture
+    +DateTime date
+    +String text
+    +boolean hidden
+}
+
+enum ShaderPrivacy {
+    private
+    unlisted
+    public
+    public_api
+}
+
+class Info {
+    +String id
+    +DateTime date
+    +int views 
+    +String name
+    +String userId
+    +String description
+    +int likes
+    +ShaderPrivacy privacy
+    +int flags
+    +List<String> tags
+    +bool hasLiked
+}
+
+enum FilterType {
+    none
+    nearest
+    linear
+    mipmap
+}
+
+enum WrapType {
+    none
+    clamp
+    repeat
+    mirror
+}
+
+class Sampler {
+    +FilterType filter
+    +WrapType wrap
+    +bool vflip
+    +bool srgb
+    +String internal
+}
+
+enum InputType {
+    texture
+    volume
+    cubemap
+    music
+    musicstream
+    mic
+    buffer
+    keyboard
+    video
+    webcam
+}
+
+class Input {
+    +String id
+    +String src
+    +String filePath
+    +String previewFilePath
+    +InputType type
+    +int channel
+    +Sampler sampler
+    +int published
+}
+
+class Output {
+    +String id
+    +int channel
+}
+
+enum RenderPassType {
+    sound
+    common
+    image
+    buffer
+    cubemap
+}
+
+class RenderPass {
+    +String name
+    +RenderPassType type
+    +String description
+    +String code
+    +List<Input> inputs
+    +List<Output> outputs
+
+}
+
+class Shader {
+    +String version
+    +Info Info
+    +List<RenderPass> renderPasses
+}
+
+class Playlist {
+    +String id
+    +String userId
+    +String name
+    +String description
+}
+
+Info  .. ShaderPrivacy
+Sampler .. FilterType
+Sampler .. WrapType
+Input .. InputType
+RenderPass .. RenderPassType
+
+Shader "             info" o-- "1" Info
+Shader "     renderPasses" o-- "1..*  " RenderPass
+RenderPass "inputs  " o-- "1..*" Input
+RenderPass "outputs" o-- "1..*" Output
+Input "sampler " o-- "1" Sampler
+
+Info -- User
+Playlist -- Info
+Playlist -- User
+Comment -- Info
+Comment -- User
+
+
+@enduml

@@ -1,0 +1,137 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "3sBGRt",
+        "date": "1549740593",
+        "viewed": 3320,
+        "name": "After...",
+        "username": "Dave_Hoskins",
+        "description": "I ran out of steam after 2 days -  I wanted to do proper burnt tree branches but my landscape design prevented proper positioning.\ud83d\ude22\nI promise I'll do a happy one next!!  \ud83d\ude0a \ud83d\ude0a",
+        "likes": 69,
+        "published": 3,
+        "flags": 40,
+        "tags": [
+            "3d",
+            "raymarching",
+            "after",
+            "burnt"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": 257,
+                    "src": "\/media\/previz\/buffer00.png",
+                    "ctype": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": 37,
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ After...\n\/\/ by David Hoskins.\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/\/----------------------------------------------------------------------------------------\nvoid mainImage( out vec4 colour, in vec2 coord )\n{\n    vec2 q = coord \/ iResolution.xy;\n    \n    vec3 col  = min(texture(iChannel0, q)*1.4, 1.0).xyz;\t\t\t\/\/ ...Brightness.\n    col  = col*col*(3.0-2.0*col)*1.2;\t\t\t\t\t  \t\t\t\t\/\/ ...Contrast.\n    col *= 0.6 + 0.6*pow( 100.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.6);  \/\/ ...Vignette.\n    col *= smoothstep(.0,4.0, iTime);\t\t\t\t\t\t\t\t\/\/ ...Fade in.\n    colour = vec4(min(sqrt(col),1.0),1.);\t\t\t\t\t\t\t\t\/\/ ...Gamma and alpha 1 out.\n  \n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "\/\/ After...\n\/\/ by David Hoskins.\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/\/----------------------------------------------------------------------------------------\n#define FAR 12000.\n#define TAU 6.28318530718\n#define SUN_COLOUR vec3(1., .7, .5)\n#define FOG_COLOUR vec3(.48, .49, .53)\n\nvec3 sunLight, crowPos;\n\n\/\/----------------------------------------------------------------------------------------\nvec3 cameraPath( float z )\n{\n\treturn vec3(4110.+sin(z*.0004)*2500.0,\n                900.0+cos(z*.00063)*600.,\n                z);\n}\n\n\/\/----------------------------------------------------------------------------------------\nmat3 setCamMat( in vec3 ro, in vec3 ta, float cr )\n{\n\tvec3 cw = normalize(ta-ro);\n\tvec3 cp = vec3(sin(cr), cos(cr),0.0);\n\tvec3 cu = normalize( cross(cw,cp) );\n\tvec3 cv = normalize( cross(cu,cw) );\n    return mat3( cu, cv, cw );\n}\n\n#define HASHSCALE1 .1031\n#define HASHSCALE3 vec3(.1031, .1030, .0973)\n\n\/\/----------------------------------------------------------------------------------------\nfloat hash11(float p)\n{\n\tvec3 p3  = fract(vec3(p) * HASHSCALE1);\n    p3 += dot(p3, p3.yzx + 19.19);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\/\/----------------------------------------------------------------------------------------\nfloat hash12(vec2 p)\n{\n\tvec3 p3  = fract(vec3(p.xyx) * HASHSCALE1);\n    p3 += dot(p3, p3.yzx + 19.19);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec2 hash22(vec2 p)\n{\n\tvec3 p3 = fract(vec3(p.xyx) * HASHSCALE3);\n    p3 += dot(p3, p3.yzx+19.19);\n    return fract((p3.xx+p3.yz)*p3.zy);\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat noise( in vec2 n )\n{\n    vec2 p = floor(n);\n    n = fract(n);\n    n = n*n*(3.0-2.0*n);\n    \n    float res = mix(mix( hash12(p), hash12(p+vec2(1.0 ,0.0)),n.x),\n                    mix( hash12(p + vec2(0.0,1.0)), hash12(p + vec2(1.0,1.0)),n.x),n.y);\n    return res;\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec2 noise2D( in vec2 n )\n{\n    vec2 p = floor(n);\n    n = fract(n);\n    n = n*n*(3.0-2.0*n);\n    \n    vec2 res = mix(mix( hash22(p), hash22(p+vec2(1.0 ,0.0)),n.x),\n                    mix( hash22(p + vec2(0.0,1.0)), hash22(p + vec2(1.0,1.0)),n.x),n.y);\n    return res;\n}\n\n\n\/\/----------------------------------------------------------------------------------------\n\/\/Thanks iq...\nfloat sMax(float a, float b, float s)\n{\n    \n    float h = clamp( 0.5 + 0.5*(a-b)\/s, 0., 1.);\n    return mix(b, a, h) + h*(1.0-h)*s;\n}",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        },
+        {
+            "inputs": [
+                {
+                    "id": 3,
+                    "src": "\/media\/a\/95b90082f799f48677b4f206d856ad572f1d178c676269eac6347631d4447258.jpg",
+                    "ctype": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": 10,
+                    "src": "\/media\/a\/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+                    "ctype": "texture",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": 39,
+                    "src": "\/media\/a\/27012b4eadd0c3ce12498b867058e4f717ce79e10a99568cca461682d84a4b04.bin",
+                    "ctype": "volume",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": 257,
+                    "src": "\/media\/previz\/buffer00.png",
+                    "ctype": "buffer",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": 257,
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ After...\n\/\/ by David Hoskins.\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/\/----------------------------------------------------------------------------------------\n\n\/\/#define OFF_LINE\n\nfloat time;\nvec3 sun_Dir;\nmat3 m = mat3(.5, .6, -.02,\n              -1., 0.7, .02,\n\t          .02, .01, 1.0)*2.0;\t\/\/ ...3D spinner matrix includes doubling\nfloat specAmount = .4;\n#define HIGH 11\t\t\t\t\t \t\/\/ ...Do high fractal.\n#define LOW  5\t\t\t\t\t\t\/\/ ...Do low fractal.\n#define BLUR\t\t\t\t\t\t\/\/ ...Do a cheapo blur.\n\n\/\/----------------------------------------------------------------------------------------\nvec3 getSky(vec3 ro, vec3 rd)\n{\n    \/\/ Wrapped horizon colour...\n    vec3 col = vec3(.4, .25, .2) *pow(abs(1.0-rd.y), 2.0);\n    col += vec3(.01, .01, .01);\n    return col;\n}\n\n\/\/----------------------------------------------------------------------------------------\n\/\/ The landscape is just added sine waves which is then subtracted from a plane...\nfloat landscape(vec3 p, const int frac)\n{\n    p *= 0.003;\t\t\t\t\/\/ ...Make it smaller and more manageable.\n    \n    float a = 800.;\t\t\t\/\/ ...Init amplitude.\n    float r = 0.0;\t\t\t\n    for (int i = 0; i< frac; i++)\t\/\/ ...Changeable levels number (LOW & HIGH).\n    {\n        float h = dot(sin(p.xy*.183),(cos(p.xz*.211)));\t\/\/ ...Use out of phase sine and cosine waves.\n        h =1.0-abs(h);\t\t\/\/ ...Make it peaky.\n        r += pow(h, 2.)*a;\t\/\/ ...More peaky!\n        \n        p = m * p;\t\t\t\/\/ ...Rotate & double.\n        a *= 0.525;\t\t\t\/\/ ...Lower amplitude & repeat.\n    }\n    \n  \treturn r;\n}\nfloat redMistMulti(vec3 p)\n{\n    p.y -= time*.65;\n   \n    return texture(iChannel1, p*0.0003).x+.5;\n    \n}\n\n\/\/----------------------------------------------------------------------------------------\nmat2 rotate(const float a)\n{\n\tfloat si = sin(a);\n\tfloat co = cos(a);\n\treturn mat2(co, si, -si, co);\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat cylinder(const vec3 p, const vec2 h )\n{\n  vec2 d = abs(vec2(length(p.xz),p.y)) - h;\n  return min(max(d.x,d.y),0.0) + length(max(d,0.0));\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat roundBox( vec3 p, vec3 b, float r )\n{\n\n\treturn length(max(abs(p)-b,0.0))-r;\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat trees(vec3 p)\n{\n    float d;\n    vec3 b = p;\n    b.xz = floor(p.xz \/ 2000.0)*2000.0+1000.;\n\n    vec2 ro = (noise2D(b.xz*.003224)-.5) * .4;\n    \n    mat2 mx2 = rotate(ro.x);\n    \n\tb.y  = 0.0+ro.y*800.0;\n    \n    p.xz = mod(p.xz, 2000.0)-1000.0;\n    p.xy = mx2 * p.xy;\n    p.y -= b.y;\n    p.xz += noise(b.xy+p.xy*.008+ro.xy)*70.;\n    d = cylinder(p, vec2(40.+abs(ro.y)*200.0-p.y*.03,1200.+abs(ro.x)*1000.0) ); \n \n    return d;\n}\n\/\/----------------------------------------------------------------------------------------\nfloat bricks(vec3 p)\n{\n\tp.x -= 1400.0;\n    float d;\n    vec3 b = p;\n    b.xz = floor(p.xz \/ 4100.0)*4100.0+2050.;\n  \tvec2 ro = (hash22(b.xz)-.5);\n\tmat2 mx2 = rotate(ro.x);\n\n    b.y  = 800.-landscape(vec3(b.xz, 00.0), LOW);\n\tp.y -= b.y;\n    \n    p.xz = mx2 * mod(p.xz, 4100.0)-2050.0;\n    p.z += noise(b.xy-p.xy*.005+ro.xy)*50.;\n    \n    d = roundBox(p, vec3(50.0, 800.0, 100. + ro.y*450.), ro.y*30.0);\n    return d;\n}\n\n\/\/----------------------------------------------------------------------------------------\n\/\/ Map the entire scene...\nvec2 map(vec3 p, int depth)\n{ \n    float h = p.y-landscape(p, depth);\n\n    float tunnel = (330.0-length(p.xy - cameraPath(p.z).xy+ vec2(50,100)));\n\th = sMax(h, tunnel, 1000.);\n    float id = 0.0;\n    \n    \/\/h = trees(p);\n    float g = trees(p);\n    if (g < h)\n    {h = g; id = 1.0;}\n    \n    g = bricks(p);\n    \n    if (g < h)\n    {h = g; id = 2.0;}\n    return vec2(h, id);\n}\n\n\/\/----------------------------------------------------------------------------------------\n\/\/ Split ray either side of object then home in on it by halving furthest side length...\nfloat BinarySubdivision(in vec3 ro, in vec3 rd, vec2 t)\n{\n    float halfwayT;\n  \n    for (int i = 0; i < 6; i++)\n    {\n        halfwayT = dot(t, vec2(.5));\n        float d = map(ro + halfwayT*rd, LOW).x; \n        t = mix(vec2(t.x, halfwayT), vec2(halfwayT, t.y), step(0.0, d));\n    }\n\n\treturn halfwayT;\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec2 rayMarch(vec3 ro, vec3 rd, vec2 co, inout float fg)\n{\n    \n    float t = 70.*hash12(co);\n    float oldT = 0.;\n\tvec2 dist = vec2(FAR);\n\tvec3 p;\n    fg = 0.0;\n    bool hit = false;\n    float id = 0.;\n\n    for( int j=0; j < 150; j++ )\n\t{\n\t\tif (t >= FAR) break;\n\t\tp = ro + t*rd;\n\n\t\tvec2 h = map(p, LOW);\n \t\tif (h.x < 0.0)\n\t\t{\n            dist = vec2(oldT, t);\n            id = h.y;\n            break;\n\t     }\n        oldT = t;\n        fg+= max(smoothstep(1200., 0., p.y),0.0) * redMistMulti(p);\n\n        t += h.x * .5 + t*0.001+4.0;\n\t}\n    if (dist.x < FAR) \n    {\n       t = BinarySubdivision(ro, rd, dist);\n    }\n    fg = min(fg*.02, .5);\n    return vec2(t, id);\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat shadow(in vec3 ro, in vec3 rd)\n{\n\tfloat res = 1.0;\n    float t = .1;\n    for( int i = 0; i < 20; i++ )\n    {\n\t\tfloat h = map(ro + rd*t, LOW).x;\n\n        res = min( res, 3.*h\/t );\n        t += h + t*.01;\n        \/\/if (res < .1) break;\n    }\n    return clamp( res, 0.1, 1.0 );\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec3 getNormal(vec3 p, float e)\n{\n    e = e * .5 \/ iResolution.y;\n    \n    return normalize( vec3( map(p+vec3(e,0.0,0.0), HIGH).x - map(p-vec3(e,0.0,0.0), HIGH).x,\n                            map(p+vec3(0.0,e,0.0), HIGH).x - map(p-vec3(0.0,e,0.0), HIGH).x,\n                            map(p+vec3(0.0,0.0,e), HIGH).x - map(p-vec3(0.0,0.0,e), HIGH).x) );\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec3 texCube(sampler2D sam, in vec3 p, in vec3 n )\n{\n\tvec3 x = texture(sam, p.yz).xyz;\n\tvec3 y = texture(sam, p.zx).xyz;\n\tvec3 z = texture(sam, p.xy).xyz;\n\treturn (x*abs(n.x) + y*abs(n.y) + z*abs(n.z))\/(abs(n.x)+abs(n.y)+abs(n.z));\n}\n\n\n\/\/----------------------------------------------------------------------------------------\nvec3 diffuseMat(vec3 p, vec3 nor, float id)\n{\n    vec3 mat;\n    \/\/ All materials are quite simple...\n    if (id  > 1.5)\t\/\/ Ground....\n    {\n\t\tmat = texCube(iChannel0, p*.001,nor);\n        mat= mat*mat*mat;\n    }else\n    if (id  > 0.5)\t\/\/ Trees.\n    {\n        mat = (texCube(iChannel2, p*.001,nor) + vec3(.4,.2,.2))*.25;\n        mat= mat*mat;\n        specAmount = .1;\n    }else\t\t\t\/\/ Wall remains...\n    {\n\t   \tvec3 fir = texture(iChannel0, p.xz*.000207).xyz;\n    \tmat = fir*texture(iChannel0, p.xz*.001131).xyz;\n\t    mat = mat*mat*mat*6.0;\n    \tmat = min(mat, 1.0);\n    }\n\n    return mat;\n}\n\n\/\/----------------------------------------------------------------------------------------\nvoid getLighting(inout vec3 col, vec3 pos, vec3 dir, vec2 d, vec3 nor, vec3 sky)\n{\n    float sh = shadow(pos+nor*8.0, sun_Dir);\n    col = diffuseMat(pos, nor, d.y) * SUN_COLOUR*(max(dot(sun_Dir,nor), 0.0)) * sh;\n\n    vec3 ref = reflect(dir, nor);\n    float fre = clamp(1.+dot(nor,dir), 0.0, 1.0 ) * specAmount;\n    col += pow((max(dot(ref,sun_Dir), 0.0)), 10.0)*fre  * sh * SUN_COLOUR;\n}\n\t\n\/\/----------------------------------------------------------------------------------------\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ Normalized pixel coordinates (from -1 to 1 with aspect ratio changing x)\n    vec2 uv = (-iResolution.xy + 2.0 * fragCoord ) \/ iResolution.y;\n    if (abs(uv.y) > .75)\n\t{\n\t\t\/\/ Top and bottom cine-crop - what a waste! :)\n\t\tfragColor=vec4(0,0,0,1);\n\t\treturn;\n\t}\n \n    time = iTime*200.0+1500.;\n    #ifndef OFF_LINE\n    time+= iMouse.x*4000.0\/iResolution.x;\n    #endif\n    sun_Dir = normalize(vec3(6., 5., -3.));\n\n    vec3 col;\n    \n    vec3 ro = cameraPath(time);\n    vec3 ta = cameraPath(time+20.0);\n    float roll = (ro.x-ta.x)*.01;\n    float t = mod(time+4400.,12000.0);\n    ta.x+= (smoothstep(0.0,1000.0, t) * smoothstep(2000.0,1200.0, t)) * 100.0;\n    ta.x-= (smoothstep(3000.0,4000.0, t) * smoothstep(5000.0,4200.0, t)) * 100.0;\n    ta.y+= (smoothstep(5000.0,6000.0, t) * smoothstep(7000.0,6000.0, t)) * 20.0;\n    ta.y-= (smoothstep(10000.0,11000.0, t) * smoothstep(12000.0,11000.0, t)) * 20.0;\n\n    mat3 camM = setCamMat(ro, ta, roll);\n    vec3 dir  =  camM * normalize( vec3(uv, cos((length(uv*.5)))));\n    float fog;\n    vec2 r = rayMarch(ro, dir, fragCoord, fog);\n    float d = r.x;\n    float id = r.y;\n    vec3 sky = getSky(ro,dir);\n    float sunDot = max(dot(sun_Dir,dir), 0.0);\n    if (d < FAR)\n    {\n        vec3 pos = ro + dir * d;\n        vec3 nor = getNormal(pos, d);\n        \/\/ Do some standard lighting...\n     \tgetLighting(col, pos, dir, r, nor, sky);\n        \n        \/\/ Fog...\n        d = d*0.00011;\n        float f = exp(-d*d);\n        \n        col = mix(sky, col,  min(f, 1.0));\n       \tcol = mix(col, vec3(.2,.0,.0),  min(fog, 1.0)); \/\/ ..Accumulated red floor fog.\n    }else\n    {\n        \n\t\tfloat sun = pow(sunDot, 80.)*.5 ;   \n        sky += SUN_COLOUR  * sun;\n        col = mix(sky, vec3(.2,.01,.0),  min(fog, 1.0));\n\t}\n    \n  \tcol += SUN_COLOUR * .2 *pow( sunDot, 5.0 );\n    col = clamp(col, 0.0, 1.0);\n\n    \/\/ Output to screen\n    \n    \/\/ Running average for a cheap blur....\n    #ifdef BLUR\n    float blur = (iTimeDelta\/.06);\n#ifdef OFF_LINE\n    blur = .6;\n#else\n    blur = clamp(blur, 0.1, .9);\n#endif\n    fragColor = texelFetch(iChannel3,ivec2(fragCoord), 0)*(1.0-blur);\n    fragColor += vec4(col,1.0)*blur;\n    #else\n    fragColor += vec4(col,1.0);\n    #endif\n}\n",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "\/\/ After...\n\/\/ by David Hoskins.\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/\/----------------------------------------------------------------------------------------\nvec2 bell(float time)\n{\n    \n    float w = floor(time);\n    \n    float t = mod(time, 5.);\n    float p = floor(time \/ 5.);\n    float n = floor(hash11(p*151.0)*48.0)+69.0;\n    \n    \/\/ Random volume. Half the time there is no sound...\n    float v = hash11(p*500.0);\n   \tv = max(v - .5, 0.0) * 2.0;\n    \n\tfloat freq = pow (2.0, n \/ 12.0);\n    float b = sin(6.2831*freq *t);\n    \/\/ Pong volume....\n    b*= smoothstep(120.,69.,n); \/\/ Higher pitch are quieter because \"eh - too annoying!\"\n    b = b*exp(-.7*t)*v* smoothstep(0.0, .05, t);\n    \/\/ Random stereo position....\n    float st = hash11(p*13.0);\n    return vec2(b*st, b*(1.0-st));\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec2 mainSound( float time )\n{\n    \/\/ The bells are at regular times and 6 can play at once...\n \tvec2 b = bell(time)\t\t+ bell(time+177.);\n    b += bell(time+13.) \t+ bell(time+59.);\n    b += bell(time+112.5) \t+ bell(time+153.);\n    \n\t\/\/ Some pitched backgound noise.\n    vec2 noi =  noise2D(vec2(time*110.0))*.4-.2;\n    noi *= noise2D(vec2(time*.3));\n    noi +=  noise2D(vec2(time*220.0))*.2-.1;\n    noi *= noise2D(vec2(time*.3+20.0));\n    noi +=  noise2D(vec2(time*440.0))*.1-.05;\n    noi *= noise2D(vec2(time*.3+100.0));\n    \n    \/\/ MIDI C2 note hum....\n    noi += (sin(6.2831 * 65.4 * time)+sin(6.2831 * 65.41 * time))*.3;\n    \n    b = b*.5 +noi;\n    b *= smoothstep(0.0, 4.0,time) * smoothstep(180.0, 170.0,time);\n    return b;\n}",
+            "name": "Sound",
+            "description": "",
+            "type": "sound"
+        }
+    ]
+}

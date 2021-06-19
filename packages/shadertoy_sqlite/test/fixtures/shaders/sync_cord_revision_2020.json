@@ -1,0 +1,89 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "Ws2cDD",
+        "date": "1586781510",
+        "viewed": 6397,
+        "name": "[4k] Sync Cord - Revision 2020",
+        "username": "NuSan",
+        "description": "Sync Cord, PC 4k intro released at Revision 2020\nby NuSan & Valden\n\nNuSan: Concept, visual, code\nValden: Music\n\nhttps:\/\/www.pouet.net\/prod.php?which=85222\n\nhttps:\/\/www.pouet.net\/prod.php?which=85222",
+        "likes": 142,
+        "published": 1,
+        "flags": 96,
+        "usePreview": 0,
+        "tags": [
+            "raytracing",
+            "intro",
+            "4k",
+            "dof"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "nearest",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "ll2GWh",
+                    "filepath": "https:\/\/soundcloud.com\/valden_music\/awakening",
+                    "previewfilepath": "https:\/\/soundcloud.com\/valden_music\/awakening",
+                    "type": "musicstream",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 0
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ if sound doesn't start or seems desynchronised:\n\/\/ try clicking pause\/start button in the \"soundcloud\" square in the bottom right\n\/\/ then press rewind just under the shader picture on the left\n\n\/*\n----     Sync Cord     ----\n---- by NuSan & Valden ----\n\n4th place at Revision 2020 - PC 4k intro\n\nNuSan: Concept, visual, code\nValden: Music\n\nOriginal Tools: Leviathan 2.0, 4klang, Shader Minifier\n\nhttps:\/\/www.pouet.net\/prod.php?which=85222\nhttps:\/\/www.youtube.com\/watch?v=f3VSeLyooXA\n*\/\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{    \t\n\tvec2 uv=fragCoord.xy\/iResolution.xy;\n\tvec4 value = texture(iChannel0, uv);\n\tvec3 col = value.xyz;\n\n   \tfloat time=iTime+StartOffset;\n    \/\/ bloom\n    \/\/ take random samples in a disk\n\tvec3 a0=rnd23(gl_FragCoord.xy+fract(time));\n    for(int i=0; i<25; ++i) {\n\t\tfloat an = (float(i\/5)+a0.x)*1.25;\n\t\tfloat ad = float(i%5)+1.+a0.y;\n\t\tvec4 cur = texture(iChannel0, uv + vec2(cos(an),sin(an)) * ad*ad * 6.\/iResolution.xy);\n        \/\/ we use a threshold to only bloom very bright parts\n\t\tcol += cur.xyz * smoothstep(.8,1.,dot(cur.xyz,vec3(.33))) * .05;\n    }\n\n    \/\/ super basic tone mapping\n    col=pow(smoothstep(0.,1.,col), vec3(0.4545));\n    \n    \/\/ fade in at the beginning\n\tcol*=c01((time-2.8)*2.);\n    \/\/ fade out at the end\n    col*=c01((118.6-time)*.35);\n\t\n\tfragColor = vec4(col,1.);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\n\/\/ Lower that if it's too slow\n#define SAMPLE_COUNT 40.\n\nfloat time,bpm;\nint section,scene,light;\n\n\/\/ we use globals for most parameters, it save space\n\/\/ s is starting position, r is ray direction\n\/\/ n is normal at intersection point and d is distance to the intersection\nvec3 s,r,n=vec3(0);\nfloat d=10000.;\n\n\/\/ id of intersected box, to use when repeating boxes\nvec3 boxid=vec3(0);\n\n\/\/ 2d rotation\nmat2 rot(float a) {return mat2(cos(a),sin(a),-sin(a),cos(a));}\n\n\/*\nvoid plane(vec3 pn, float dist) {\n  float cur=(dist-dot(pn,s))\/dot(pn,r);\n  if(cur>0 && cur<d) {\n    d=cur;\n    n=-pn;\n  }\n}\n*\/\n\n\/\/ analytical box intersection\nvoid box(vec3 basepos, float side) {\n  \n  \/\/ we will repeat the box using a grid of those sizes\n  vec3 rep = vec3(1,13,3);\n  if(scene==2) rep = vec3(20,20,6);\n  else if(scene==3) rep = vec3(sin(floor(basepos.z*0.3)+0.523)*2.+2.3);\n  else if(scene==4) rep = vec3(50,50,15);\n  else if(scene==5) rep = vec3(50,50,3);\n  \n  \/\/ unique vec3 cell id for each instance of the repeated box\n  boxid = floor(basepos\/rep+0.5)*rep;\n\n  \/\/ angle of rotation of the box\n  float a = sin(boxid.z)*0.2;\n  vec3 size = rep*0.4;\n  vec3 pos=vec3(0);\n\n  \/\/ changing rotation, position, size of the box\n  if(scene==2) {\n\ta=boxid.z*.09+time*.4;\n\tsize = vec3(5.2,2,2.);\n  }\n  else if(scene==3) {\n\ta = time;\n  }\n  else if(scene==4) {\n\ta=boxid.z;\n\tpos = (rnd23(vec2(boxid.z,0))-0.5)*vec3(10,20,0);\n\tsize = vec3(15,5,6.5);\n  }\n  else if(scene==5) {\n\ta=sin(rnd11(boxid.z)*6. + time*0.2)*6.;\n\tsize = vec3(5,4,1);\n  }\n  \n  \/\/ put everything in the box axis aligned space\n  vec3 vr = r;  \n  vr.xy *= rot(a);\n  pos=s-pos-boxid;\n  pos.xy *= rot(a);\n  \n  \/\/ finally the real box intersection computation\n  vec3 box=max((size-pos)\/vr,(-size-pos)\/vr);\n  float bd = min(min(box.x,box.y),box.z);\n  \/\/ if we have an intersection in from of use, that faces the selected side\n  if(bd>0. && bd>d*side) {\n    vec3 cur = step(abs(pos+vr*d),size);\n    \/\/ for the starting box, we only take intersection if it's not inside the cylinder\n    \/\/ for the ending box, we only take intersection if we are actually inside the box\n    if(side>0. ? (min(cur.x,min(cur.y,cur.z))>0.) : length((s+r*bd).xy)>5.) {\n      \/\/ set new nearest distance\n      d=bd;\n      \/\/ compute normal of an axis aligned box\n      n=-step(box-bd,vec3(0))*sign(pos+vr*d);\n      \/\/ then rotate the normal\n      n.xy*=rot(-a);\n    }\n  }\n}\n\n\/\/ analytical cylinder intersection\nvoid cyl(float size, float side) {\n  float da = dot(r.xy,r.xy);\n  float db = dot(r.xy,s.xy);\n  float delta = db*db-da*(dot(s.xy,s.xy)-size*size);\n  if(delta<0.0001) return;\n  \n  float t = (-db+side*sqrt(delta))\/da;\n  if(t<0.0001 || t>d) return;\n    \n  d=t;\n  n=-side*normalize((s+r*d)*vec3(1,1,0));\n}\n\n\/\/ find intersection of a ray starting at s and going in r direction\n\/\/ with our scene\nvoid trace() {\n  d=100000.;\n  \n  \/\/ intersect with a box in case the ray start outside the cylinder\n  box(s,-1.);\n  \n  \/\/ intersect with the main cylinder\n  cyl(5., 1.);\n \n  \/\/ intersect with a box in cases the ray end outside the cylinder\n  box(s+r*d,1.);\n  \n  \/\/ a central pillar that was planed but finally removed\n  \/\/cyl(3., -1.);\n  \n  \/\/plane(vec3(0,0.7,0.7), s.z*0.7+15.5);\n    \n  \/\/ switch to the new intersection position\n  s = s + r * d;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 res = iResolution.xy;\n\n\tvec2 frag = fragCoord.xy;\n\tvec2 uv = (frag-res*0.5)\/res.y;\n\t\n\tfloat ttime=iTime+StartOffset;\n    \/\/ symmetry on one part of the demo\n\tif(ttime>64. && ttime<69.) uv.x=abs(uv.x)-0.4;\n\n\tvec3 col=vec3(0);\n\t\n    \/\/ Main path tracing loop, do many samples to reduce the noise\n    float ZERO=min(0.,iTime); \/\/ this is a trick to force the GPU to keep the loop\n    \/\/ instead of trying to compile a giant shader by duplicating what's inside\n\tfor(float i=ZERO; i<SAMPLE_COUNT; ++i) {\n    \n        \/\/ motion blur by offsetting time for each sample a little bit\n\t\tfloat basetime = ttime + i*(0.0005 + smoothstep(7.5,4.5,abs(ttime-77.))*0.008);\n\t\tbpm = basetime*170.\/60.-8.;\n        \/\/ extract a camera shot index every 16 bpm\n\t\tsection = int(bpm\/16.);\n\t\tscene = 1;\n\t\tlight = 1;\n\t\tfloat changespeed = 0.125;\n\t\tbool special = false;\n        \/\/ switch camera parameters randomly each 8 beats\n\t\tvec3 pcam = rnd23(vec2(floor(bpm*changespeed)));\n        \/\/ scene geometry \/ light selection\n        \/\/ Sorry for that messy code inside the loop\n        \/\/ Didn't have time to find a better way\n\t\tif(section<1) { \/\/ intro\n\t\t\t\/\/scene = 1;\n\t\t\t\/\/light = 1;\n\t\t\t\/\/cam = 1;\n\t\t} else if(section<4) { \/\/ section A\n            scene = section<2?2:1;\n            light = 2;\n\t\t} else if(section<6) {\n            scene = 3;\n            \/\/cam = section==5?1:0;\n            light = section<5?1:1;\n\t\t} else if(section<12) { \/\/ break + B\n            scene = section<8?1:3;\n            light = 3;\n            special=section>9;\n\t\t} else if(section<14) { \/\/ break 2\n            scene = 5;\n            light = 0;\n\t\t} else if(section<16) { \/\/ end\n            scene = 5;\n            light = 0;\n            special=bpm>248.;\n\t\t} else if(section<20) { \/\/ end\n            scene = 4;\n            light = 4;\n\t\t}\n\t\t\n        \/\/ randomly offset time for each shot to add variety\n\t\ttime = basetime + rnd11(float(section))*123.427;\n\n        \/\/ s is camera starting position\n\t\ts=vec3(-4,0,-0.5);\n\t\ts.xy *= rot(time*pow(pcam.x-.5,3.)*4.);\n        \n        \/\/ t is camera target position\n\t\tvec3 t = vec3(0,0,0);\n    \n        \/\/ camera forward motion\n\t\tfloat adv = time*(pcam.y-.1)*10.;\n\t\tif(scene==4) adv = adv*10. + time*pcam.z*30.;\n\t\t\n\t\ts.z += adv;\n\t\tt.z += adv;\n\t\t\n\t\tvec3 up = vec3(0,1,0);\n\n        \/\/ camera type selection\n\t\tif(section==0 || section==5 || section==14 || section==15) {\n            \/\/ plunging\n\t\t\tup = vec3(0,0,1);\n\t\t\tt += vec3(s.yx*vec2(1,-1),sin(bpm*.25)*9.+10.);\n\t\t} else {\n\t\t\t\/\/ looking forward\n\t\t\tt.x += sin(time)*3.-3.;\n\t\t\tt.z +=scene==4?pcam.y*80.:30.;\n\t\t}\t\t\n\t\t\t\t\n        \/\/ computing camera space vectors to point toward the target\n\t\tvec3 cz=normalize(t-s);\n\t\tvec3 cx=normalize(cross(cz,up));\n\t\tvec3 cy=cross(cz,cx);\n    \n\t\tfloat fov = .3+pcam.z*.7;\n\t\t\n        \/\/ Depth of field \n        \/\/ we take a random position in a disk in view space\n        float dof = 0.2;\n\t\tvec2 h = rnd23(frag-13.6-i*184.7).xy;\n\t\tvec3 voff = sqrt(h.x)*(cx*sin(h.y*6.283)+cy*cos(h.y*6.283))*dof;\n\t\ts-=voff;\n        float focusdistance = (section==5 ? 7. : length(t-s)*fov);\n\t\tr=normalize(uv.x*cx+uv.y*cy+fov*cz + voff*fov\/focusdistance);\n\t\t\t\t\n        \/\/ 3 pathtracing bounces\n\t\tvec3 bs = s;\n\t\tfor(float j=0.; j<3.; ++j) {\n            \/\/ find intersection starting from s in r direction (goes to variable s)\n\t\t\ttrace();\n\t\t\t\n\t\t\tif(d>10000.) break;\n\t\t\n\t\t\tvec3 id = floor(s*1.5-.01);\n\t\t\tvec3 grid = step(fract(s*1.5-.01),vec3(.8));\n\t\t\tfloat middle = step(5.1,length(s.xy));\n\t\t\tfloat r3d = rnd31(id*27.33);\n\t\t\t\n\t\t\tvec3 val=vec3(0);\n\t\t\t\n            \/\/ Lights switchs\n\t\t\tif(light==0) {\n\t\t\t\tval = 2. * vec3(rnd11(floor(s.z*0.04)),rnd11(floor(s.z*0.05)),0.5) * step(s.y+4.,0.);\n\t\t\t\tval *= smoothstep(.8,.9,rnd11(floor(s.z*0.7+floor(bpm)*19.37)));\n\t\t\t}\n\t\t\t\t\t\t\n\t\t\tif(light==1) val += middle * vec3(0.2,0.5,0.9) * step(0.7,rnd11(boxid.z+floor(section<1?0.:time)*0.1));\n\t\t\tif(light==2 || special) val += middle * vec3(0.2,0.5,0.9)*max(0.,fract(.2-bpm*0.125+boxid.z*0.01)*3.-1.5);\n\t\t\tif(light==3) val += vec3(.8+sin(time*.7)*.4,1.8,1.+sin(time*.4)*.6) * smoothstep(1.+sin(-s.z*0.07+sin(s.z*0.04+bpm*4.)+bpm*3.)*.6 + sin(time*17.)*.2,0.,abs(s.x)) * step(s.y,0.5);\n\t\t\tif(light==4) val = 2.*step(6.,abs(s.x)) * (sin(boxid.z*vec3(27.81,12.42,49.7))*.5+.5)*grid.y*grid.z*step(0.85,fract(r3d+bpm*0.1));\n\t\t\t\n            \/\/ avoid negative lights\n\t\t\tval=max(vec3(0),val);\n\n\t\t\tcol += val;\n\t\t\t            \n            \/\/ roughness switchs\n\t\t\tfloat rough = 0.45*r3d;\n\t\t\tif(scene==4 || light==3 || light==0) rough = mix(1.,rough,min(grid.x,min(grid.y,grid.z)));\n\t\t\tif(light<3 || light==4) if(abs(abs(s.x)-3.)>0.9 && fract(id.z*0.01)<0.5) rough=1.;\n\t\t\tif(light==3 && middle>0.0) rough = c01(r3d-.5);\n\t\t\t\n            \/\/ jitter reflection ray randomly, according to roughness\n            \/\/ mainly taken from newton protocol\n            \/\/ roughness change the size of a cone around a pure reflection vector\n\t\t\tr=normalize(reflect(r,n) + normalize(rnd23(frag+vec2(i*277.,j*375.)+fract(time))-.5)*rough);\n\t\t\t\n            \/\/ slight offset to get out of geometry\n\t\t\ts+=n*0.01;\n\t\t\t\n\t\t}\n\t}\n\tcol \/= SAMPLE_COUNT;\n\n\tfragColor = vec4(col, ttime);\n}",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "\/\/ offset to sync the music with the demo timing\n#define StartOffset (48.\/17.)\n\n\/\/DAVE HOSKINS' HASH FUNCTIONS\n\/\/ we use them mainly because they don't contain any sin\/cos and so should be more consistent accross hardware\nfloat rnd11(float p)\n{\n    p = fract(p * .1031);\n    p *= p + 33.33;\n    return fract(2.*p*p);\n}\n\nvec3 rnd23(vec2 p)\n{\n\tvec3 p3 = fract(p.xyx * vec3(.1031, .1030, .0973));\n    p3 += dot(p3, p3.yxz+33.33);\n    return fract((p3.xxy+p3.yzz)*p3.zyx);\n}\n\nfloat rnd31(vec3 p3)\n{\n\tp3  = fract(p3 * .1031);\n    p3 += dot(p3, p3.yzx + 33.33);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nfloat c01(float a) {return clamp(a,0.,1.);}",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        }
+    ]
+}

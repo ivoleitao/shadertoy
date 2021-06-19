@@ -1,0 +1,3 @@
+GET {{baseUrl}}/{{apiPath}}/{{shadersPath}}/NslGRN?key={{$dotenv API_KEY}}
+###
+GET {{baseUrl}}/{{apiPath}}/{{shadersPath}}?key={{$dotenv API_KEY}}

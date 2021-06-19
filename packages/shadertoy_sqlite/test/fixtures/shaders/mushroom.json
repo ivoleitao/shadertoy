@@ -1,0 +1,80 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "3lGGWK",
+        "date": "1593815097",
+        "viewed": 1939,
+        "name": "mushroom",
+        "username": "zxxuan1001",
+        "description": "mushroom",
+        "likes": 48,
+        "published": 3,
+        "flags": 0,
+        "usePreview": 0,
+        "tags": [
+            "mushroom"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4sf3Rn",
+                    "filepath": "\/media\/a\/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+                    "previewfilepath": "\/media\/ap\/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+                    "type": "texture",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4sX3zn",
+                    "filepath": "\/media\/a\/0681c014f6c88c356cf9c0394ffe015acc94ec1474924855f45d22c3e70b5785.png",
+                    "previewfilepath": "\/media\/ap\/0681c014f6c88c356cf9c0394ffe015acc94ec1474924855f45d22c3e70b5785.png",
+                    "type": "cubemap",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "clamp",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4sf3Rr",
+                    "filepath": "\/media\/a\/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+                    "previewfilepath": "\/media\/ap\/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "#define MAX_DISTANCE 80.0\n#define MAX_STEP 120\n#define EPSILON 0.0001\n#define PI 3.1415\n#define RIM_COLOR vec3(0.1,0.05,0.2)\n#define LIGHT_COLOR vec3(0.15,0.1,0.3)\n#define LIGHT_DIR vec3(cos(iTime),1.0,sin(iTime))\n#define SPHERE_COLOR vec3(0.2, 0.6, 1.0)\n#define GLOW vec3(0.1, 0.8, 1.0)\n\n\/\/http:\/\/iquilezles.org\/www\/articles\/smin\/smin.htm\nvec3 sdMin (vec3 d1, vec3 d2)\n{\n    return d1.x < d2.x ? d1 : d2;\n}\n\nvec3 sdMax (vec3 d1, vec3 d2)\n{\n    return d1.x > d2.x ? d1 : d2;\n}\n\nfloat sdSmoothMin( float d1, float d2, float k ) {\n    float h = clamp( 0.5 + 0.5*(d2-d1)\/k, 0.0, 1.0 );\n    return mix( d2, d1, h ) - k*h*(1.0-h); \n}\n\n\nfloat smin(in float a, in float b, in float k)\n{\n    float h = max( k - abs(a-b), 0.0);\n    return min(a,b) - h*h*0.25\/k;\n}\n\nfloat smax(in float a, in float b, in float k)\n{\n    float h = max( k - abs(a-b), 0.0);\n    return max(a,b) + h*h*0.25\/k;\n}\n\nfloat sphereSDF(vec3 p, float r) \n{\n    return length(p) - r;\n}\n\nfloat sdVerticalCapsule( vec3 p, float h, float r )\n{\n  p.y -= clamp( p.y, 0.0, h );\n  return length( p ) - r;\n}\n\nfloat disp (vec3 p) \n{\n    float n = texture(iChannel2, p.xy+p.yz+p.xz).r;\n    return  (sin(p.z * 25.2 + 10.0*n) + sin(p.x * 28.9 + 10.0*n));\n}\n\nfloat disp1 (vec3 p)\n{\n    \/\/return (sin(p.x) + sin(p.z)) * sin(p.y);\n    return texture(iChannel1, p.xz*0.1).r;\n}\n\nfloat leg(vec3 p, float h, float r) \n{\n    vec3 q = p-vec3(0.0,-1.0,0.0) ;\n    q.xz += 0.5*sin(q.y*0.3);\n    float scale = mix(1.0, 2.2, smoothstep(h-10.0,h, q.y));\n    r *= scale;\n    float d = sdVerticalCapsule(q, h, r);\n    d += 0.008*disp(q*0.5);\n    return d;\n}\n\nfloat shell(vec3 p, float r) \n{\n    float t = iTime*0.1;\n    float scale = mix(0.6+0.2*sin(t), 2.2+0.8*sin(t), smoothstep(-1.2,2.5, -0.6*p.y));\n    r *= scale;\n    float s1 = sphereSDF(p , r);\n    s1 = abs(s1)-0.1;\n    \n    s1 += 0.18*disp1(p*2.3)*(0.5+0.5*sin(t)); \/\/ holes\n    s1 *= 0.5;\n    \n    float plane = dot(p, normalize(vec3(0.0,-1.0,0.0)))-3.65;\n    \n    \/\/plane -= 0.08*disp1(p*8.0);;\n    float d = s1 > plane ? s1 : plane;\n    \n    return d;\n}\n\nmat3 getCamera( in vec3 ro, in vec3 ta) \n{\n\tvec3 cw = normalize(ta-ro);\n\tvec3 cp = vec3(0.0, 1.0, 0.0);\n\tvec3 cu = normalize( cross(cw,cp) );\n\tvec3 cv =          ( cross(cu,cw) );\n    return mat3( cu, cv, cw );\n}\n\n\nfloat noise(in vec2 uv) {\n    return texture(iChannel1, uv\/64.0).r;\n}\n\nfloat smoothNoise(in vec2 uv) {\n    vec2 luv = fract(uv); \/\/range from 0.0 to 1.0\n    vec2 id = floor(uv); \/\/the integer part of uv, 0, 1, 2\n    luv = luv*luv*(3.0 - 2.0*luv); \/\/similar to smoothstep\n    \n    \/\/get values from the cordinates of a square\n    float bl = noise(id);\n    float br = noise(id + vec2(1.0, 0.0));\n    float tl = noise(id + vec2(0.0, 1.0));\n    float tr = noise(id + vec2(1.0, 1.0));\n    \n    float b = mix(bl, br, luv.x); \/\/interpolate between bl and br\n    float t = mix(tl, tr, luv.x); \/\/interpolate between tl and tr\n    \n    return mix(b, t, luv.y);\n}\n\nfloat hash21(vec2 p) {\n    p = fract(p*vec2(133.7, 337.1));\n    p += dot(p, p+vec2(37.1,17.33));\n    return fract(p.x*p.y);\n}\n\nvec3 offset = vec3(0.0);\nvec4 sceneSDF(vec3 p) \n{\n    \n    vec3 q = p; \/\/ org pos\n    \n    \/\/head\n    float d1 = shell(q, 3.5);\n    \n    \/\/leg\n    float h = 15.0;\n    float r = 0.9;\n    vec3 q1 = q - vec3(0.0, -h, 0.0);\n    float d2 = leg(q1, h, r);\n    \n    \/\/ground\n    float d3 = q1.y + 2.0*texture(iChannel1, q1.xz*0.01).r;\n    \n    float d = sdSmoothMin(d1, d2, 0.5);\n    d = sdSmoothMin(d, d3, 2.0);\n    vec3 rst = vec3(d, 1.0, 0.0);\n    \n    \/\/glow\n    float v = 0.2;\n    vec3 npos = v*(p-vec3(0.0, -h-1.0, 0.0));\n    vec2 nid = floor(vec2(npos.x+0.5, npos.z+0.5));\n    vec3 fid = vec3(fract(npos.x+0.5)-0.5, npos.y, fract(npos.z+0.5)-0.5);\n    float nn = hash21(nid*3.0);\n    vec3 fpos = fid + 0.2*vec3(sin(nn*112.33), 0.0, cos(nn*171.3));\n    float rr = pow(nn,3.0);\n    fpos.y += 0.08*sin(nid.x * nid.y + iTime*5.0);\n    float s2 = sphereSDF(fpos, 0.02+0.2*rr)\/v;\n    rst = sdMin(rst, vec3(s2, 2.0, 0.0));\n    return vec4(rst, s2);\n}\n\nvec4 marching( in vec3 ro, in vec3 rd )\n{\n    vec4 rst = vec4(0.0);\n    float t = 0.01;\n    float minDist = MAX_DISTANCE;\n    for ( int i = 0; i < MAX_STEP; ++i )\n    {\n        vec3 p = ro + t * rd;\n        vec4 dist = sceneSDF(p);\n        minDist = min(minDist, dist.w\/t);\n        rst = vec4(t, dist.y, minDist, dist.w);\n        if ( abs(dist.x)< EPSILON || t>MAX_DISTANCE) break;\n        t += dist.x; \n    }\n    \n    if ( t>MAX_DISTANCE )\n    {\n        rst = vec4(MAX_DISTANCE, -1.0, minDist, MAX_DISTANCE);\n    }\n    \n    return rst;\n}\n\nvec3 getNormal(vec3 p) \n{\n    return normalize(\n            vec3(\n                sceneSDF(vec3(p.x + EPSILON, p.y, p.z)).x - sceneSDF(vec3(p.x - EPSILON, p.y, p.z)).x,\n                sceneSDF(vec3(p.x, p.y + EPSILON, p.z)).x - sceneSDF(vec3(p.x, p.y - EPSILON, p.z)).x,\n                sceneSDF(vec3(p.x, p.y, p.z  + EPSILON)).x - sceneSDF(vec3(p.x, p.y, p.z - EPSILON)).x\n            )\n    \t);\n}\n\nvec3 testSurf(vec2 p)\n{\n    float f0 = mod(floor(p.x*2.0) + floor(p.y*2.0), 4.0);\n    float f1 = mod(floor(p.x*4.0) + floor(p.y*4.0), 2.0);\n    vec3 col = mix(vec3(0.8, 0.5, 0.4), vec3(0.5, 0.3, 0.7), f0);\n    col = mix(col, vec3(0.2, 0.4, 0.3), f1);\n    \n    return col;\n}\n\nvec3 shading(vec4 hit, vec3 ro, vec3 rd) \n{\n    vec3 p = ro + hit.x * rd;\n    vec3 nor = getNormal(p);\n    \n    vec3 col = vec3(0.0);\n    vec3 surfCol = vec3(0.0);\n    vec3 coeff = vec3(0.04, 1.0, 1.0); \/\/ambient, diffuse, specular\n    vec3 p1 = p - offset;\n    float n = texture(iChannel2, p.xz*0.2).r;\n    float nf = texture(iChannel2, floor(p1.xz)).r;\n    vec2 polar = vec2(atan(p1.z, p1.x), 0.5+0.1*n);\n    float detail = texture(iChannel1,  polar).r;\n    vec3 w0 = nor * nor;\n    vec3 p2 = 0.2*p1;\n    vec3 noiseTex = w0.xxx * texture(iChannel2, p2.yz).rgb \n        \t\t\t+ w0.yyy * texture(iChannel2, p2.xz).rgb\n        \t\t\t+ w0.zzz * texture(iChannel2, p2.xy).rgb;\n    float rimPow = 8.0;\n    float t = iTime;\n    if (hit.y < 1.5)\n    {\n        float h = 0.5+0.5*sin(p.y*0.5+1.3); \n        surfCol = mix(vec3(0.1,0.58,0.85), vec3(0.0), h);\n        surfCol *= detail;\n        float tk = 0.5+0.5*(sin(length(p)+t*3.0)*cos(length(p)+t*2.0));\n        surfCol += pow(n,64.0)*vec3(0.0, 100.0,100.0)*tk;\n        surfCol *= smoothstep(-10.0, 0.0, p1.y);   \n        \n        vec3 lightDir = normalize(LIGHT_DIR); \n        vec3 viewDir = normalize(-rd);\n        vec3 reflectDir = normalize(reflect(-viewDir, nor));\n        float spec = pow(max(dot(reflectDir, viewDir), 0.0), 32.0); \n        float diff = max( dot(nor, lightDir), 0.0);\n\n        float rim = 1.0-max(dot(nor, viewDir), 0.0);\n        float rimS = pow(rim, rimPow);\n        vec3 rimCol = RIM_COLOR*rimS;\n        vec3 refCol = texture(iChannel0, reflectDir).rgb;\n\n        surfCol = coeff.x*surfCol + (coeff.y*surfCol*diff + coeff.z*spec)*LIGHT_COLOR;\n        surfCol += rimCol;\n    } \n    else if (hit.y < 2.5)\n    {\n        surfCol = vec3(0.01);\n    }\n    return surfCol;\n}\n\nvec3 render(in vec2 fragCoord) \n{\n    vec2 uv = fragCoord\/iResolution.xy;\n    uv -= 0.5; \n    uv.x *= iResolution.x\/iResolution.y; \n    vec2 mo = vec2(0.01) + iMouse.xy  \/ iResolution.xy ;\n    mo = -1.0 + 2.0 * mo;\n    \n    vec3 ro = vec3(25.0 * cos(mo.x * 2.0 * PI), 0.0, 25.0 * sin(mo.x * 2.0 * PI));\n    vec3 ta = vec3(0.0, -5.0, 0.0);\n    mat3 cam = getCamera(ro, ta);\n    vec3 rd = normalize(cam * vec3(uv, 1.0));\n    vec4 hit = marching(ro, rd);\n    vec3 col = vec3(0.0,0.001,0.003);\n    if (hit.x < MAX_DISTANCE) \n    {\n       col = shading(hit, ro, rd);\n    }\n   \n    \/\/glow\n    vec3 p = ro + rd * hit.x;\n    hit.z = clamp(hit.z, 0.0, 3.0);\n    float glow0 = exp(-180.0*hit.z);\n    float glow1 = min(pow(0.0013\/hit.z, 32.0), 1.0);\n    vec3 glowCol = vec3(0.0);\n    \n    float v = 0.2;\n    vec3 npos = v*p;\n    vec3 nid = floor(npos+0.5);\n    float vc = hash21(nid.xz);\n    vec3 vCol = vec3(0.0,1.0,4.0)*vec3(0.0,1.0,4.0);\n    vCol.r += 3.0*vc;\n    vCol.g += 1.0*fract(vc*111.77);\n    glowCol += 0.4*vCol*glow0;  \n    glowCol += vCol*glow1; \n    float t = sin(iTime+vc*5.0);\n    float y = 3.0*t*(1.0-t); \n    glowCol *= 0.5+0.5*y;\n    col += glowCol;\n    \/\/ fog\n    col = mix( col, vec3(0.0), 1.0-exp( -0.001*hit.x*hit.x ) );\n    return col;\n    \n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec3 col = render(fragCoord);\n    \n    col = pow(col, vec3(1.0\/2.2));  \n\n    \/\/ Output to screen\n    fragColor = vec4(col,1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

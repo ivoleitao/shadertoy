@@ -1,0 +1,33 @@
+  {
+    "ver": "0.1",
+    "info": {
+      "id": "llt3R4",
+      "date": "1468282135",
+      "viewed": 137478,
+      "name": "Ray Marching: Part 1",
+      "username": "jlfwong",
+      "description": "Part 1 of a ray marching tutorial http:\/\/jamie-wong.com\/2016\/07\/15\/ray-marching-signed-distance-functions\/",
+      "likes": 149,
+      "published": 1,
+      "flags": 0,
+      "tags": [
+        "raymarching"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "4dfGRr",
+            "channel": 0
+          }
+        ],
+        "code": "\/**\n * Part 1 Challenges\n * - Make the circle yellow\n * - Make the circle smaller by decreasing its radius\n * - Make the circle smaller by moving the camera back\n * - Make the size of the circle oscillate using the sin() function and the iTime\n *   uniform provided by shadertoy\n *\/\n\nconst int MAX_MARCHING_STEPS = 255;\nconst float MIN_DIST = 0.0;\nconst float MAX_DIST = 100.0;\nconst float EPSILON = 0.0001;\n\n\/**\n * Signed distance function for a sphere centered at the origin with radius 1.0;\n *\/\nfloat sphereSDF(vec3 samplePoint) {\n    return length(samplePoint) - 1.0;\n}\n\n\/**\n * Signed distance function describing the scene.\n * \n * Absolute value of the return value indicates the distance to the surface.\n * Sign indicates whether the point is inside or outside the surface,\n * negative indicating inside.\n *\/\nfloat sceneSDF(vec3 samplePoint) {\n    return sphereSDF(samplePoint);\n}\n\n\/**\n * Return the shortest distance from the eyepoint to the scene surface along\n * the marching direction. If no part of the surface is found between start and end,\n * return end.\n * \n * eye: the eye point, acting as the origin of the ray\n * marchingDirection: the normalized direction to march in\n * start: the starting distance away from the eye\n * end: the max distance away from the ey to march before giving up\n *\/\nfloat shortestDistanceToSurface(vec3 eye, vec3 marchingDirection, float start, float end) {\n    float depth = start;\n    for (int i = 0; i < MAX_MARCHING_STEPS; i++) {\n        float dist = sceneSDF(eye + depth * marchingDirection);\n        if (dist < EPSILON) {\n\t\t\treturn depth;\n        }\n        depth += dist;\n        if (depth >= end) {\n            return end;\n        }\n    }\n    return end;\n}\n            \n\n\/**\n * Return the normalized direction to march in from the eye point for a single pixel.\n * \n * fieldOfView: vertical field of view in degrees\n * size: resolution of the output image\n * fragCoord: the x,y coordinate of the pixel in the output image\n *\/\nvec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {\n    vec2 xy = fragCoord - size \/ 2.0;\n    float z = size.y \/ tan(radians(fieldOfView) \/ 2.0);\n    return normalize(vec3(xy, -z));\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec3 dir = rayDirection(45.0, iResolution.xy, fragCoord);\n    vec3 eye = vec3(0.0, 0.0, 5.0);\n    float dist = shortestDistanceToSurface(eye, dir, MIN_DIST, MAX_DIST);\n    \n    if (dist > MAX_DIST - EPSILON) {\n        \/\/ Didn't hit anything\n        fragColor = vec4(0.0, 0.0, 0.0, 0.0);\n\t\treturn;\n    }\n    \n    fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }

@@ -1,0 +1,119 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "tltyRB",
+        "date": "1609409041",
+        "viewed": 17,
+        "name": "Caves (made with ... textures)",
+        "username": "sdfgeoff",
+        "description": "Fly through a cave. The cave is more detailed than my Sphere Fractal caves.",
+        "likes": 0,
+        "published": 1,
+        "flags": 48,
+        "usePreview": 0,
+        "tags": [
+            "game",
+            "cave",
+            "flythrough"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XdXGzr",
+                    "filepath": "\/media\/a\/8979352a182bde7c3c651ba2b2f4e0615de819585cc37b7175bcefbca15a6683.jpg",
+                    "previewfilepath": "\/media\/ap\/8979352a182bde7c3c651ba2b2f4e0615de819585cc37b7175bcefbca15a6683.jpg",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/*\nI continue on my quest to render high-detail caves at 60FPS on my\nintegrated-GPU laptop. This method is to sample a texture for\neach point in world, and treat the result as an SDF. This isn't\naccurate, so there's a bunch of over\/under stepping, but for\nsome textures it seems to be \"good enough\". Effectively this\nreads a 2D texture as a 3D texture by projecting it along the cardinal\naxis and averaging the values.\n\nCurrently this uses Abstract3 texture, which contains high frequency noise\nbut is 1024px square. Using a smaller texture that fits in the GPU's\ncache may allow repeated sampling to create \"octaves\" of noise. \n\nOf interest is that with many textures you can't really tell that the\ntexture is sampled along the cardinal axis (ie there is no clear\n\"structure\" other than that defined in the texture).\n\nI think this method will work for the game I am planning to build\nas it allows artistic control, renders nice and fast and is simple.\n\nThe only downside is that physics will be a little awkward because\nit isn't a \"true\" SDF. I'm sure I'll think of something.\n*\/\n\n\n#define WORLD_TEX iChannel0\n#define BUFFER_STATE iChannel1\n\nfloat sample_tex(vec3 coord) {\n    \/\/ Pretend our texture contains a SDF in each axis.\n    \/\/ Munge some of the sample coordinates to reduce periodicity\n    float t1 = textureLod(WORLD_TEX, coord.xy, 0.0).r;\n    float t2 = textureLod(WORLD_TEX, coord.yz * 0.76, 0.0).g;\n    float t3 = textureLod(WORLD_TEX, coord.xz * 1.23, 0.0).b;\n    \n    return (t1 + t2 + t3) \/ 3.0;\n}\n\n\nfloat map(vec3 coord) {\n    \/\/ Make there be a \"ground\" and \"sky\" by there being less rocks\n    \/\/ when you go higher.\n    \n    vec3 tex_coord = coord * vec3(0.3, 1.0, 0.3) * 0.2;\n    \n    float rocks = 0.5 + coord.y * 0.0 - sample_tex(tex_coord);\n    return rocks;\n}\n\n\n\n\/\/\/ Traces a specified number of steps between two points in 3d space\nvec4 trace_steps(vec3 start_point, vec3 direction, int steps, float dist) {\n    vec3 end_vec = direction * dist;\n    for (int i=0; i<steps; i++) {\n        float percent = float(i) \/ float(steps);\n        vec3 point = start_point + percent * end_vec;\n        \n        float df = map(point);\n        if (df < 0.0) {\n            return vec4(point, percent);\n        }\n    }\n    return vec4(start_point + direction*dist, 1.0);\n}\n\n\n\/\/\/ Raymarch by the distance field each step until the step count or\n\/\/\/ the maximum distance is reached.\nvec4 raymarch(vec3 start_point, vec3 direction, int steps, float max_dist) {\n    vec3 position = start_point;\n    \n    float dist = 0.0;\n    \n    for (int i=0; i<steps; i++) {\n        float df = map(position);\n        \n        float threshold = 0.002 * dist;\n        float step_size = df * 0.9; \/\/ This helps because it isn't a true SDF\n        \n        if ((df < threshold)) {\n            return vec4(position, dist \/ max_dist);\n        }\n        if  (dist > max_dist) {\n            return vec4(position, 1.0);\n        }\n        dist += step_size;\n        position += direction * step_size;\n    }\n    return vec4(position, dist\/max_dist);\n}\n\n\nvec3 calc_normal(vec3 sample_point) {\n    const float h = 0.01; \/\/ replace by an appropriate value\n    const vec2 k = vec2(1,-1);\n    \n    vec3 normal = normalize(\n\t\tk.xyy * map( sample_point + k.xyy*h ) + \n\t\tk.yyx * map( sample_point + k.yyx*h ) + \n\t\tk.yxy * map( sample_point + k.yxy*h ) + \n\t\tk.xxx * map( sample_point + k.xxx*h ) );\n    normal = normal.zyx;\n    return normal;\n}\n\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord\/iResolution.xy;\n    uv = (uv - 0.5) * 2.0;\n    uv.x *= iResolution.x \/ iResolution.y;\n\n    \/\/ Time varying pixel color\n    \n    mat4 camera_transform = quat_to_transform(\n        read_data(BUFFER_STATE, ADDR_CAMERA_ORIENTATION),\n        read_data(BUFFER_STATE, ADDR_CAMERA_POSITION).xyz\n    );\n    \n    vec3 start_point = camera_transform[3].xyz;\n    \n    vec3 direction = normalize(vec3(uv * LENS, 1.0));\n    direction = (camera_transform * vec4(direction, 0.0)).xyz;\n    \/\/direction = vec3(0.0, 0.0, 1.0);\n    \n    int steps = 200;\n    float dist = 10.0;\n    \n    vec4 data = raymarch(start_point, direction, steps, dist);\n    \n    vec3 surface_normal = calc_normal(data.xyz);\n    \n    float lighting = dot(surface_normal, vec3(0.5)) * 0.5 + 0.5;\n    \n    float fog = pow(data.a, 0.5) * 1.5;\/\/pow(dist, 2.0);\n    \n    vec3 col = vec3(0.5, 0.6, 0.9);\n    col *= lighting;\n    col = mix(col, vec3(1.0, 0.9, 0.8), fog);\n    \n    \/\/vec3 col = vec3(normal);\n\n    \/\/ Output to screen\n    fragColor = vec4(col,1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGRr",
+                    "filepath": "\/presets\/tex00.jpg",
+                    "previewfilepath": "\/presets\/tex00.jpg",
+                    "type": "keyboard",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ STATE\n\n#define BUFFER_STATE iChannel0\n#define BUFFER_KEYBOARD iChannel1\n\n\n\/\/ Return the state of a key\nfloat get_key(int key_code) {\n    return texelFetch(BUFFER_KEYBOARD, ivec2(key_code,0), 0).x;\n}\n\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    ivec2 address = ivec2(fragCoord);\n    \n    if (address == ADDR_CAMERA_POSITION) {\n        \/\/ Move the camera based on keypress\n    \tvec4 camera_position = read_data(BUFFER_STATE, ADDR_CAMERA_POSITION);\n        \n        if (iTime < 0.1) {\n            camera_position = vec4(0.0, 0.0, 1.0, 0.0);\n        }\n        \n        \n        vec3 translation = read_data(BUFFER_STATE, ADDR_CAMERA_LIN_VELOCITY).xyz;\n        \n        \/\/ Convert to local coordinate system\n        mat4 orientation = quat_to_transform(\n            read_data(BUFFER_STATE, ADDR_CAMERA_ORIENTATION),\n            vec3(0.0)\n        );\n        translation = (orientation * vec4(translation, 0.0)).xyz;\n        translation *= iTimeDelta;\n        \n        camera_position.xyz += translation;\n        fragColor = camera_position;\n        return;\n    }\n    \n    \n    if (address == ADDR_CAMERA_ORIENTATION) {\n        \/\/ Rotate the camera based on keypress\n        vec4 camera_orientation = read_data(BUFFER_STATE, ADDR_CAMERA_ORIENTATION);\n        \n        if (iTime < 0.1) {\n            camera_orientation = quat_from_axis_angle(vec3(0.0, 1.0, 0.0), 0.3);\n        }\n        \n        vec4 velocity = read_data(BUFFER_STATE, ADDR_CAMERA_ANG_VELOCITY);\n        velocity *= iTimeDelta;\n        \n        \n        \n        vec4 pan = quat_from_axis_angle(vec3(0.0, 1.0, 0.0), velocity.x);\n        vec4 tilt = quat_from_axis_angle(vec3(1.0, 0.0, 0.0), velocity.y);\n        vec4 roll = quat_from_axis_angle(vec3(0.0, 0.0, 1.0), velocity.z);\n        \n        \n        camera_orientation = quat_mul(pan, camera_orientation); \n        camera_orientation = quat_mul(tilt, camera_orientation); \n        camera_orientation = quat_mul(roll, camera_orientation); \n        \n        fragColor = camera_orientation;\n        return;\n    }\n    if (address == ADDR_CAMERA_ANG_VELOCITY) {\n        vec4 velocity = read_data(BUFFER_STATE, ADDR_CAMERA_ANG_VELOCITY);\n        \n        vec3 acceleration = vec3(\n            get_key(KEY_PAN_LEFT) - get_key(KEY_PAN_RIGHT),\n            get_key(KEY_TILT_UP) - get_key(KEY_TILT_DOWN),\n            get_key(KEY_ROLL_RIGHT) - get_key(KEY_ROLL_LEFT)\n        ) * 10.0;\n        velocity.xyz += acceleration * iTimeDelta;\n        \n        vec4 drag = velocity * 10.0;\n        velocity -= drag * iTimeDelta;\n        \n        fragColor = velocity;\n        return;\n    }\n    if (address == ADDR_CAMERA_LIN_VELOCITY) {\n        vec4 velocity = read_data(BUFFER_STATE, ADDR_CAMERA_LIN_VELOCITY);\n        \n        vec3 acceleration = vec3(\n            get_key(KEY_RIGHT) - get_key(KEY_LEFT),\n            get_key(KEY_UP) - get_key(KEY_DOWN),\n            get_key(KEY_FORWARD) - get_key(KEY_BACKWARD)\n        ) * 5.0;\n        velocity.xyz += acceleration * iTimeDelta;\n        \n        vec4 drag = velocity * 5.0;\n        velocity -= drag * iTimeDelta;\n        \n        fragColor = velocity;\n        return;\n    }\n}\n\n\n",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "const ivec2 ADDR_CAMERA_POSITION = ivec2(0,0);\nconst ivec2 ADDR_CAMERA_ORIENTATION = ivec2(0,1);\nconst ivec2 ADDR_CAMERA_ANG_VELOCITY = ivec2(0,2);\nconst ivec2 ADDR_CAMERA_LIN_VELOCITY = ivec2(0,3);\n\nconst float LENS = 0.5;\n\nconst int KEY_LEFT = 65;\nconst int KEY_UP   = 82;\nconst int KEY_RIGHT = 68;\nconst int KEY_DOWN = 70;\nconst int KEY_FORWARD = 87;\nconst int KEY_BACKWARD = 83;\n\nconst int KEY_TILT_UP = 38;\nconst int KEY_TILT_DOWN = 40;\nconst int KEY_PAN_LEFT = 37;\nconst int KEY_PAN_RIGHT = 39;\nconst int KEY_ROLL_LEFT = 81;\nconst int KEY_ROLL_RIGHT = 69;\n\n\/\/ Fetch a single pixe from a buffer\nvec4 read_data(sampler2D buffer, ivec2 address){\n    return texelFetch(buffer, address, 0);\n}\n\n\n\/\/ Create a quaternion from axis-angle notation\nvec4 quat_from_axis_angle(vec3 axis, float angle) {\n    float factor = sin(angle) \/ 2.0;\n    float w = cos(angle) \/ 2.0;\n    return normalize(vec4(axis*factor, w));\n}\n\n\/\/ Convert a quaternion into a transformation matrix\nmat4 quat_to_transform(vec4 quat, vec3 translation) {\n    float qx = quat.x;\n    float qy = quat.y;\n    float qz = quat.z;\n    float qw = quat.w;\n    float qx2 = qx * qx;\n    float qy2 = qy * qy;\n    float qz2 = qz * qz;\n    \n \treturn mat4(\n        1.0 - 2.0*qy2 - 2.0*qz2,\t2.0*qx*qy - 2.0*qz*qw,\t2.0*qx*qz + 2.0*qy*qw, 0.0,\n    \t2.0*qx*qy + 2.0*qz*qw,\t1.0 - 2.0*qx2 - 2.0*qz2,\t2.0*qy*qz - 2.0*qx*qw, 0.0,\n    \t2.0*qx*qz - 2.0*qy*qw,\t2.0*qy*qz + 2.0*qx*qw,\t1.0 - 2.0*qx2 - 2.0*qy2, 0.0,\n        translation, 0.0\n    );\n}\n\n\/\/ Multiply two quaternions\nvec4 quat_mul(vec4 a, vec4 b) {\n \treturn vec4(\n        a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,\n        a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,\n        a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,\n        a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z\n    );   \n}",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        }
+    ]
+}

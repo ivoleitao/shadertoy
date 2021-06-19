@@ -1,0 +1,184 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "4slyRs",
+        "date": "1490564246",
+        "viewed": 6863,
+        "name": "Alien corridor",
+        "username": "zguerrero",
+        "description": "Playing with raymarching and distance field functions, a lot of things taken form iq's web site http:\/\/iquilezles.org\/www\/articles\/distfunctions\/distfunctions.htm, and various shaders on Shadertoy. I love the smin !",
+        "likes": 179,
+        "published": 1,
+        "flags": 32,
+        "tags": [
+            "raymarching",
+            "tunnel",
+            "postprocess",
+            "alien",
+            "corridor"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XdfGR8",
+                    "filepath": "\/media\/previz\/buffer03.png",
+                    "previewfilepath": "\/media\/previz\/buffer03.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/bloom & vignet effect\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{ \n    vec2 uv =  fragCoord.xy\/iResolution.xy;\n   \n    vec4 tex = texture(iChannel1, uv);\n    vec4 texBlurred = texture(iChannel0, uv);\n    float vignet = length(uv - vec2(0.5))*1.5;\n        \n\tfragColor = mix(tex, texBlurred*texBlurred, vignet) + texBlurred*texBlurred*0.5;\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4sf3Rr",
+                    "filepath": "\/media\/a\/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+                    "previewfilepath": "\/media\/ap\/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "float EPSILON = 0.002;\nvec2 twist = vec2(2.0,7.0);\nfloat planesDistance = 0.3;\nvec4 bumpMapParams1 = vec4(2.0,7.0,0.01,-0.01);\nvec4 bumpMapParams2 = vec4(2.0,3.0,-0.01,0.01);\nvec4 heightMapParams = vec4(3.0,1.0,0.0,0.01);\nvec4 heightInfluence = vec4(-0.025,-0.05,0.8,1.8);\nfloat fogDensity = 0.2;\nfloat fogDistance = 0.1;\nvec3 groundColor1 = vec3(0.2,0.3,0.3);\nvec3 groundColor2 = vec3(0.4,0.8,0.4);\nvec3 columnColors = vec3(0.9,0.3,0.3);\nvec4 ambient = vec4(0.2,0.3,0.4,0.0);\nvec3 lightColor = vec3(0.4,0.7,0.7);\nvec4 fogColor = vec4(0.0,0.1,0.5,1.0);\nvec3 rimColor = vec3(1.0,0.75,0.75);\n\nfloat pi = 3.14159265359;\n\nmat2 rot(float a) \n{\n    vec2 s = sin(vec2(a, a + pi\/2.0));\n    return mat2(s.y,s.x,-s.x,s.y);\n}\n\nfloat smin( float a, float b, float k )\n{\n    float h = clamp( 0.5+0.5*(b-a)\/k, 0.0, 1.0 );\n    return mix( b, a, h ) - k*h*(1.0-h);\n}\n\nfloat sphere(vec3 pos, float radius, vec3 scale)\n{\n    return length(pos*scale)-radius;\n}\n\nfloat heightmap(vec2 uv)\n{\n    return heightMapParams.x*texture(iChannel0, (uv + iTime*heightMapParams.zw)*heightMapParams.y).x;\n}\n\nfloat bumpmap(vec2 uv)\n{\n    float b1 = bumpMapParams1.x*(1.0 - texture(iChannel0, (uv + iTime*bumpMapParams1.zw)*bumpMapParams1.y).x);\n    float b2 = bumpMapParams2.x*(1.0-texture(iChannel0, (uv + iTime*bumpMapParams2.zw)*bumpMapParams2.x).x);\n    return b1+b2;\n}\n\nfloat distfunc(vec3 pos)\n{\n    vec3 p2 = pos;\n    p2.x += sin(p2.z*3.0 + p2.y*5.0)*0.15;\n    p2.xy *= rot(floor(p2.z*2.0)*twist.y);\n    pos.xy *= rot(pos.z*twist.x);\n    \n    float h = heightmap(pos.xz)*heightInfluence.x;\n    \n    vec3 columnsrep = vec3(0.75,1.0,0.5);\n    vec3 reppos = (mod(p2 + vec3(iTime*0.01 + sin(pos.z*0.5),0.0,0.0),columnsrep)-0.5*columnsrep);\n    \n    float columnsScaleX = 1.0 + sin(p2.y*20.0*sin(p2.z) + iTime*5.0 + pos.z)*0.15;\n    float columnsScaleY = (sin(iTime + pos.z*4.0)*0.5+0.5);\n    \n    float columns = sphere(vec3(reppos.x, pos.y+0.25, reppos.z), 0.035, vec3(columnsScaleX,columnsScaleY,columnsScaleX));\n    float corridor = planesDistance - abs(pos.y) + h;\n    float d = smin(corridor, columns, 0.25); \n           \n    return d;\n}\n\nfloat rayMarch(vec3 rayDir, vec3 cameraOrigin)\n{\n    const int MAX_ITER = 50;\n\tconst float MAX_DIST = 30.0;\n    \n    float totalDist = 0.0;\n    float totalDist2 = 0.0;\n\tvec3 pos = cameraOrigin;\n\tfloat dist = EPSILON;\n    vec3 col = vec3(0.0);\n    float glow = 0.0;\n    \n    for(int j = 0; j < MAX_ITER; j++)\n\t{\n\t\tdist = distfunc(pos);\n\t\ttotalDist = totalDist + dist;\n\t\tpos += dist*rayDir;\n        \n        if(dist < EPSILON || totalDist > MAX_DIST)\n\t\t{\n\t\t\tbreak;\n\t\t}\n\t}\n    \n    return totalDist  ;\n}\n\n\/\/Taken from https:\/\/www.shadertoy.com\/view\/Xds3zN\nmat3 setCamera( in vec3 ro, in vec3 ta, float cr )\n{\n\tvec3 cw = normalize(ta-ro);\n\tvec3 cp = vec3(sin(cr), cos(cr),0.0);\n\tvec3 cu = normalize( cross(cw,cp) );\n\tvec3 cv = normalize( cross(cu,cw) );\n    return mat3( cu, cv, cw );\n}\n\nvec3 calculateNormals(vec3 pos)\n{\n\tvec2 eps = vec2(0.0, EPSILON*1.0);\n\tvec3 n = normalize(vec3(\n\tdistfunc(pos + eps.yxx) - distfunc(pos - eps.yxx),\n\tdistfunc(pos + eps.xyx) - distfunc(pos - eps.xyx),\n\tdistfunc(pos + eps.xxy) - distfunc(pos - eps.xxy)));\n    \n\treturn n;\n}\n\n\/\/Taken from https:\/\/www.shadertoy.com\/view\/XlXXWj\nvec3 doBumpMap(vec2 uv, vec3 nor, float bumpfactor)\n{\n   \n    const float eps = 0.001;\n    float ref = bumpmap(uv); \n    \n    vec3 grad = vec3(bumpmap(vec2(uv.x-eps, uv.y))-ref, 0.0, bumpmap(vec2(uv.x, uv.y-eps))-ref); \n             \n    grad -= nor*dot(nor, grad);          \n                      \n    return normalize( nor + grad*bumpfactor );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{ \n    vec3 cameraOrigin = vec3(0.0, 0.0, iTime*-0.1);\n    vec3 cameraTarget = cameraOrigin + vec3(0.0, 0.0, 1.0);;\n    \n\tvec2 screenPos = (fragCoord.xy\/iResolution.xy)*2.0-1.0;\n\tscreenPos.x *= iResolution.x\/iResolution.y;\n    \n\tmat3 cam = setCamera(cameraOrigin, cameraTarget, 0.0 );\n    \n    vec3 rayDir = cam* normalize( vec3(screenPos.xy,2.0) );\n    rayDir.xy *= rot(iTime*0.1);\n    float dist = rayMarch(rayDir, cameraOrigin);\n   \n    vec3 pos = cameraOrigin + dist*rayDir;\n    vec2 uv = pos.xy * rot(pos.z*twist.x);\n    float h = heightmap(vec2(uv.x, pos.z));\n    vec3 n = calculateNormals(pos);\n    vec3 bump = doBumpMap(vec2(uv.x, pos.z), n, 3.0);\n    float m = smoothstep(-0.15,0.2, planesDistance - abs(uv.y) + h*heightInfluence.y + sin(iTime)*0.05);\n    vec3 color = mix(mix(groundColor1, groundColor2, smoothstep(heightInfluence.z,heightInfluence.w,h)), columnColors, m);\n    float fog = dist*fogDensity-fogDistance;\n    float heightfog = pos.y;\n    float rim = (1.0-max(0.0, dot(-normalize(rayDir), bump)));\n    vec3 lightPos = pos - (cameraOrigin + vec3(0.0,0.0,1.0));\n    vec3 lightDir = -normalize(lightPos);\n    float lightdist = length(lightPos);\n    float atten = 1.0 \/ (1.0 + lightdist*lightdist*3.0);\n    float light = max(0.0, dot(lightDir, bump));\n   \tvec3 r = reflect(normalize(rayDir), bump);\n    float spec = clamp (dot (r, lightDir),0.0,1.0);\n    float specpow = pow(spec,20.0);\n    vec3 c = color*(ambient.xyz + mix(rim*rim*rim, rim*0.35+0.65, m)*rimColor + lightColor*(light*atten*2.0 + specpow*1.5));\n    vec4 res = mix(vec4(c, rim), fogColor, clamp(fog+heightfog,0.0,1.0));\n\n    \n\tfragColor = res;\n}",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/Blur Pass1\nvec2 sampleDist = vec2(2.0,2.0);\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{   \n    vec2 uv = fragCoord.xy\/iResolution.xy;\n    \n    vec4 tex = vec4(0.0);\n    vec2 dist = sampleDist\/iResolution.xy;\n    \n    for(int x = -2; x <= 2; x++)\n    {\n    \tfor(int y = -2; y <= 2; y++)\n        {\n\t\t\ttex += texture(iChannel0, uv + vec2(x,y)*dist);\n        }\n    }\n        \n    tex \/= 25.0;\n    \n\tfragColor = tex;\n}",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4sXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/Blur Pass2\nvec2 sampleDist = vec2(4.0,4.0);\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{   \n    vec2 uv = fragCoord.xy\/iResolution.xy;\n    \n    vec4 tex = vec4(0.0);\n    vec2 dist = sampleDist\/iResolution.xy;\n    \n    for(int x = -2; x <= 2; x++)\n    {\n    \tfor(int y = -2; y <= 2; y++)\n        {\n\t\t\ttex += texture(iChannel0, uv + vec2(x,y)*dist);\n        }\n    }\n        \n    tex \/= 25.0;\n    \n\tfragColor = tex;\n}",
+            "name": "Buffer C",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4sXGR8",
+                    "filepath": "\/media\/previz\/buffer02.png",
+                    "previewfilepath": "\/media\/previz\/buffer02.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XdfGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/Blur Pass3\nvec2 sampleDist = vec2(8.0,8.0);\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{   \n    vec2 uv = fragCoord.xy\/iResolution.xy;\n    \n    vec4 tex = vec4(0.0);\n    vec2 dist = sampleDist\/iResolution.xy;\n    \n    for(int x = -2; x <= 2; x++)\n    {\n    \tfor(int y = -2; y <= 2; y++)\n        {\n\t\t\ttex += texture(iChannel0, uv + vec2(x,y)*dist);\n        }\n    }\n        \n    tex \/= 25.0;\n    \n\tfragColor = tex;\n}",
+            "name": "Buffer D",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

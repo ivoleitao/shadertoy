@@ -1,0 +1,128 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "MdlGW7",
+        "date": "1372661086",
+        "viewed": 73082,
+        "name": "Cloudy Terrain",
+        "username": "iq",
+        "description": "A terrain full of trees or something (up to your interpretation). Distance field raymarching for the terrain. Linearly volumetric raymarching for the foliage. Linearly volumetric raymarching for clouds. Plain plane Raytraced for lakes.",
+        "likes": 392,
+        "published": 3,
+        "flags": 32,
+        "tags": [
+            "procedural",
+            "3d",
+            "raymarching",
+            "distancefield",
+            "clouds",
+            "volumetric"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Created by inigo quilez - iq\/2013\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord\/iResolution.xy;\n    vec4 data = texture( iChannel0, uv );\n\n    vec3 col = vec3(0.0);\n    if( data.w < 0.0 )\n    {\n        col = texture( iChannel0, uv ).xyz;\n    }\n    else\n    {\n        \/\/ decompress velocity vector\n        float ss = mod(data.w,256.0)\/255.0;\n        float st = floor(data.w\/256.0)\/255.0;\n\n        \/\/ motion blur (linear blur across velocity vectors\n        vec2 dir = (-1.0 + 2.0*vec2( ss, st ))*0.25;\n        col = vec3(0.0);\n        for( int i=0; i<32; i++ )\n        {\n            float h = float(i)\/31.0;\n            vec2 pos = uv + dir*h;\n            col += texture( iChannel0, pos ).xyz;\n        }\n        col \/= 32.0;\n    }\n    \n    \/\/ vignetting\t\n\tcol *= 0.5 + 0.5*pow( 16.0*uv.x*uv.y*(1.0-uv.x)*(1.0-uv.y), 0.1 );\n\n    fragColor = vec4( col, 1.0 );\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XdX3Rn",
+                    "filepath": "\/media\/a\/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+                    "previewfilepath": "\/media\/ap\/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XdXGzn",
+                    "filepath": "\/media\/a\/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+                    "previewfilepath": "\/media\/ap\/3083c722c0c738cad0f468383167a0d246f91af2bfa373e9c5c094fb8c8413e0.png",
+                    "type": "texture",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGzn",
+                    "filepath": "\/media\/a\/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+                    "previewfilepath": "\/media\/ap\/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "repeat",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Created by inigo quilez - iq\/2013\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\nfloat noise( in vec3 x )\n{\n    vec3 p = floor(x);\n    vec3 f = fract(x);\n\n    float a = textureLod( iChannel0, x.xy\/256.0 + (p.z+0.0)*120.7123, 0.0 ).x;\n    float b = textureLod( iChannel0, x.xy\/256.0 + (p.z+1.0)*120.7123, 0.0 ).x;\n\treturn mix( a, b, f.z );\n}\n\n\nconst mat3 m = mat3( 0.00,  0.80,  0.60,\n                    -0.80,  0.36, -0.48,\n                    -0.60, -0.48,  0.64 );\n\nfloat fbm( vec3 p )\n{\n    float f;\n    f  = 0.5000*noise( p ); p = m*p*2.02;\n    f += 0.2500*noise( p ); p = m*p*2.03;\n    f += 0.1250*noise( p ); p = m*p*2.01;\n    f += 0.0625*noise( p );\n    return f;\n}\n\nfloat envelope( vec3 p )\n{\n\tfloat isLake = 1.0-smoothstep( 0.62, 0.72, textureLod( iChannel0, 0.001*p.zx, 0.0).x );\n\treturn 0.1 + isLake*0.9*textureLod( iChannel1, 0.01*p.xz, 0.0 ).x;\n}\n\nfloat mapTerrain( in vec3 pos )\n{\n\treturn pos.y - envelope(pos);\n}\n\nfloat raymarchTerrain( in vec3 ro, in vec3 rd )\n{\n\tfloat maxd = 50.0;\n\tfloat precis = 0.001;\n    float h = 1.0;\n    float t = 0.0;\n    for( int i=0; i<80; i++ )\n    {\n        if( abs(h)<precis||t>maxd ) break;\n        t += h;\n\t    h = mapTerrain( ro+rd*t );\n    }\n\n    if( t>maxd ) t=-1.0;\n    return t;\n}\n\nvec3 lig = normalize( vec3(0.7,0.4,0.2) );\n\nvec3 calcNormal( in vec3 pos )\n{\n    vec3 eps = vec3(0.02,0.0,0.0);\n\treturn normalize( vec3(\n           mapTerrain(pos+eps.xyy) - mapTerrain(pos-eps.xyy),\n           0.5*2.0*eps.x,\n           mapTerrain(pos+eps.yyx) - mapTerrain(pos-eps.yyx) ) );\n\n}\n\nvec4 mapTrees( in vec3 pos, in vec3 rd )\n{\n    vec3  col = vec3(0.0);\t\n\tfloat den = 1.0;\n\n\tfloat kklake = textureLod( iChannel0, 0.001*pos.zx, 0.0).x;\n\tfloat isLake = smoothstep( 0.7, 0.71, kklake );\n\t\n\tif( pos.y>1.0 || pos.y<0.0 ) \n\t{\n\t\tden = 0.0;\n\t}\n\telse\n\t{\n\t\t\n\t\tfloat h = pos.y;\n\t\tfloat e = envelope( pos );\n\t\tfloat r = clamp(h\/e,0.0,1.0);\n\t\t\n        den = smoothstep( r, 1.0, textureLod(iChannel0, pos.xz*0.15, 0.0).x );\n        \n\t\tden *= 1.0-0.95*clamp( (r-0.75)\/(1.0-0.75) ,0.0,1.0);\n\t\t\n        float id = textureLod( iChannel0, pos.xz, 0.0).x;\n        float oc = pow( r, 2.0 );\n\n\t\tvec3  nor = calcNormal( pos );\n\t\tvec3  dif = vec3(1.0)*clamp( dot( nor, lig ), 0.0, 1.0 );\n\t\tfloat amb = 0.5 + 0.5*nor.y;\n\t\t\n\t\tfloat w = (2.8-pos.y)\/lig.y;\n\t\tfloat c = fbm( (pos+w*lig)*0.35 );\n\t\tc = smoothstep( 0.38, 0.6, c );\n\t\tdif *= pow( vec3(c), vec3(0.8, 1.0, 1.5 ) );\n\t\t\t\n\t\tvec3  brdf = 1.7*vec3(1.5,1.0,0.8)*dif*(0.1+0.9*oc) + 1.3*amb*vec3(0.1,0.15,0.2)*oc;\n\n\t\tvec3 mate = 0.6*vec3(0.5,0.5,0.1);\n\t\tmate += 0.3*textureLod( iChannel1, 0.1*pos.xz, 0.0 ).zyx;\n\t\t\n\t\tcol = brdf * mate;\n\n\t\tden *= 1.0-isLake;\n\t}\n\n\treturn vec4( col, den );\n}\n\n\nvec4 raymarchTrees( in vec3 ro, in vec3 rd, float tmax, vec3 bgcol, out float resT )\n{\n\tvec4 sum = vec4(0.0);\n    float t = tmax;\n\tfor( int i=0; i<512; i++ )\n\t{\n\t\tvec3 pos = ro + t*rd;\n\t\tif( sum.a>0.99 || pos.y<0.0  || t>20.0 ) break;\n\t\t\n\t\tvec4 col = mapTrees( pos, rd );\n\n\t\tcol.xyz = mix( col.xyz, bgcol, 1.0-exp(-0.0018*t*t) );\n        \n\t\tcol.rgb *= col.a;\n\n\t\tsum = sum + col*(1.0 - sum.a);\t\n\t\t\n\t\tt += 0.0035*t;\n\t}\n    \n    resT = t;\n\n\treturn clamp( sum, 0.0, 1.0 );\n}\n\nvec4 mapClouds( in vec3 p )\n{\n\tfloat d = 1.0-0.3*abs(2.8 - p.y);\n\td -= 1.6 * fbm( p*0.35 );\n\n\td = clamp( d, 0.0, 1.0 );\n\t\n\tvec4 res = vec4( d );\n\n\tres.xyz = mix( 0.8*vec3(1.0,0.95,0.8), 0.2*vec3(0.6,0.6,0.6), res.x );\n\tres.xyz *= 0.65;\n\t\n\treturn res;\n}\n\n\nvec4 raymarchClouds( in vec3 ro, in vec3 rd, in vec3 bcol, float tmax, out float rays, ivec2 px )\n{\n\tvec4 sum = vec4(0, 0, 0, 0);\n\trays = 0.0;\n    \n\tfloat sun = clamp( dot(rd,lig), 0.0, 1.0 );\n\tfloat t = 0.1*texelFetch( iChannel0, px&ivec2(255), 0 ).x;\n\tfor(int i=0; i<64; i++)\n\t{\n\t\tif( sum.w>0.99 || t>tmax ) break;\n\t\tvec3 pos = ro + t*rd;\n\t\tvec4 col = mapClouds( pos );\n\n\t\tfloat dt = max(0.1,0.05*t);\n\t\tfloat h = (2.8-pos.y)\/lig.y;\n\t\tfloat c = fbm( (pos + lig*h)*0.35 );\n\t\t\/\/kk += 0.05*dt*(smoothstep( 0.38, 0.6, c ))*(1.0-col.a);\n\t\trays += 0.02*(smoothstep( 0.38, 0.6, c ))*(1.0-col.a)*(1.0-smoothstep(2.75,2.8,pos.y));\n\t\n\t\t\n\t\tcol.xyz *= vec3(0.4,0.52,0.6);\n\t\t\n        col.xyz += vec3(1.0,0.7,0.4)*0.4*pow( sun, 6.0 )*(1.0-col.w);\n\t\t\n\t\tcol.xyz = mix( col.xyz, bcol, 1.0-exp(-0.0018*t*t) );\n\t\t\n\t\tcol.a *= 0.5;\n\t\tcol.rgb *= col.a;\n\n\t\tsum = sum + col*(1.0 - sum.a);\t\n\n\t\tt += dt;\/\/max(0.1,0.05*t);\n\t}\n    rays = clamp( rays, 0.0, 1.0 );\n\n\treturn clamp( sum, 0.0, 1.0 );\n}\n\nvec3 path( float time )\n{\n\treturn vec3( 32.0*cos(0.2+0.75*.1*time*1.5), 1.2, 32.0*sin(0.1+0.75*0.11*time*1.5) );\n}\n\nmat3 setCamera( in vec3 ro, in vec3 ta, float cr )\n{\n\tvec3 cw = normalize(ta-ro);\n\tvec3 cp = vec3(sin(cr), cos(cr),0.0);\n\tvec3 cu = normalize( cross(cw,cp) );\n\tvec3 cv = normalize( cross(cu,cw) );\n    return mat3( cu, cv, cw );\n}\n\nvoid moveCamera( float time, out vec3 oRo, out vec3 oTa, out float oCr, out float oFl )\n{\n    \/\/ camera\t\n\toRo = path( time );\n\toTa = path( time+1.0 );\n\toTa.y *= 0.2;\n\toCr = 0.3*cos(0.07*time);\n    oFl = 1.75;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 q = fragCoord.xy \/ iResolution.xy;\n\tvec2 p = -1.0 + 2.0*q;\n\tp.x *= iResolution.x \/ iResolution.y;\n\t\n\tfloat time = 23.5+iTime;\n\t\n    \/\/ camera\t\n\tvec3 ro, ta;\n    float roll, fl;\n    moveCamera( time, ro, ta, roll, fl );\n        \n\t\/\/ camera tx\n    mat3 cam = setCamera( ro, ta, roll );\n\n    \/\/ ray direction\n    vec3 rd = normalize( cam * vec3(p.xy,fl) );\n\n    \/\/ sky\t \n\tvec3 col = vec3(0.84,0.95,1.0)*0.77 - rd.y*0.6;\n\tcol *= 0.75;\n\tfloat sun = clamp( dot(rd,lig), 0.0, 1.0 );\n    col += vec3(1.0,0.7,0.3)*0.3*pow( sun, 6.0 );\n\tvec3 bcol = col;\n\n    \/\/ lakes\n    float gt = (0.0-ro.y)\/rd.y;\n    if( gt>0.0 )\n    {\n        vec3 pos = ro + rd*gt;\n\n\t\tvec3 nor = vec3(0.0,1.0,0.0);\n\t    nor.xz  = 0.10*(-1.0 + 2.0*texture( iChannel3, 1.5*pos.xz ).xz);\n\t    nor.xz += 0.15*(-1.0 + 2.0*texture( iChannel3, 3.2*pos.xz ).xz);\n\t    nor.xz += 0.20*(-1.0 + 2.0*texture( iChannel3, 6.0*pos.xz ).xz);\n\tnor = normalize(nor);\n\n\t\tvec3 ref = reflect( rd, nor );\n\t    vec3 sref = reflect( rd, vec3(0.0,1.0,0.0) );\n\t\tfloat sunr = clamp( dot(ref,lig), 0.0, 1.0 );\n\n\t    float kklake = texture( iChannel0, 0.001*pos.zx).x;\n\t\tcol = vec3(0.1,0.1,0.0);\n        vec3 lcol = vec3(0.2,0.5,0.7);\n\t\tcol = mix( lcol, 1.1*vec3(0.2,0.6,0.7), 1.0-smoothstep(0.7,0.81,kklake) );\n\t\t\n\t\tcol *= 0.12;\n\n\t    float fre = 1.0 - max(sref.y,0.0);\n\t\tcol += 0.8*vec3(1.0,0.9,0.8)*pow( sunr, 64.0 )*pow(fre,1.0);\n\t\tcol += 0.5*vec3(1.0,0.9,0.8)*pow( fre, 10.0 );\n\n\t\tfloat h = (2.8-pos.y)\/lig.y;\n        float c = fbm( (pos+h*lig)*0.35 );\n\t\tcol *= 0.4 + 0.6*smoothstep( 0.38, 0.6, c );\n\n\t    col *= smoothstep(0.7,0.701,kklake);\n\n\t    col.xyz = mix( col.xyz, bcol, 1.0-exp(-0.0018*gt*gt) );\n    }\n\n\n    \/\/ terrain\t\n\tfloat t = raymarchTerrain(ro, rd);\n    if( t>0.0 )\n\t{\n        \/\/ trees\t\t\n        float ot;\n        vec4 res = raymarchTrees( ro, rd, t, bcol, ot );\n        t = ot;\n\t    col = col*(1.0-res.w) + res.xyz;\n\t}\n\n\t\/\/ sun glow\n    col += vec3(1.0,0.5,0.2)*0.35*pow( sun, 3.0 );\n\n    float rays = 0.0;\n    \/\/ clouds\t\n    {\n\tif( t<0.0 ) t=600.0;\n    vec4 res = raymarchClouds( ro, rd, bcol, t, rays, ivec2(fragCoord) );\n\tcol = col*(1.0-res.w) + res.xyz;\n\t}\n\n\tcol += (1.0-0.8*col)*rays*rays*rays*0.4*vec3(1.0,0.8,0.7);\n\tcol = clamp( col, 0.0, 1.0 );\n\n\t\n    \/\/ gamma\t\n\tcol = pow( col, vec3(0.45) );\n\n    \/\/ contrast, desat, tint and vignetting\t\n\tcol = col*0.1 + 0.9*col*col*(3.0-2.0*col);\n\tcol = mix( col, vec3(col.x+col.y+col.z)*0.33, 0.2 );\n\tcol *= vec3(1.06,1.05,1.0);\n\n    \/\/-------------------------------------\n\t\/\/ velocity vectors (through depth reprojection)\n    \/\/-------------------------------------\n    float vel = 0.0;\n    if( t<0.0 )\n    {\n        vel = -1.0;\n    }\n    else\n    {\n\n        \/\/ old camera position\n        float oldTime = time - 1.0\/30.0; \/\/ 1\/30 of a second blur\n        vec3 oldRo, oldTa; float oldCr, oldFl;\n        moveCamera( oldTime, oldRo, oldTa, oldCr, oldFl );\n        mat3 oldCam = setCamera( oldRo, oldTa, oldCr );\n\n        \/\/ world space\n        vec3 wpos = ro + rd*t;\n        \/\/ camera space\n        vec3 cpos = vec3( dot( wpos - oldRo, oldCam[0] ),\n                          dot( wpos - oldRo, oldCam[1] ),\n                          dot( wpos - oldRo, oldCam[2] ) );\n        \/\/ ndc space\n        vec2 npos = oldFl * cpos.xy \/ cpos.z;\n        \/\/ screen space\n        vec2 spos = 0.5 + 0.5*npos*vec2(iResolution.y\/iResolution.x,1.0);\n\n\n        \/\/ compress velocity vector in a single float\n        vec2 uv = fragCoord\/iResolution.xy;\n        spos = clamp( 0.5 + 0.5*(spos - uv)\/0.25, 0.0, 1.0 );\n        vel = floor(spos.x*255.0) + floor(spos.y*255.0)*256.0;\n    }\n    \n    fragColor = vec4( col, vel );\n}",
+            "name": "Buf A",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

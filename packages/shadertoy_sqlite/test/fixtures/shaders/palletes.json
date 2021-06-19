@@ -1,0 +1,51 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "ll2GD3",
+        "date": "1433235426",
+        "viewed": 54206,
+        "name": "Palettes",
+        "username": "iq",
+        "description": "Cosine based palettes (faster than linear interpolation or triangle waves). \nMore info: [url]http:\/\/iquilezles.org\/www\/articles\/palettes\/palettes.htm[\/url]",
+        "likes": 302,
+        "published": 3,
+        "flags": 0,
+        "tags": [
+            "2d",
+            "color",
+            "palettes"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ The MIT License\n\/\/ Copyright \u00a9 2015 Inigo Quilez\n\/\/ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and\/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\n\n\n\/\/ A simple way to create color variation in a cheap way (yes, trigonometrics ARE cheap\n\/\/ in the GPU, don't try to be smart and use a triangle wave instead).\n\n\/\/ See http:\/\/iquilezles.org\/www\/articles\/palettes\/palettes.htm for more information\n\n\nvec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )\n{\n    return a + b*cos( 6.28318*(c*t+d) );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 p = fragCoord.xy \/ iResolution.xy;\n    \n    \/\/ animate\n    p.x += 0.01*iTime;\n    \n    \/\/ compute colors\n    vec3                col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.0,0.33,0.67) );\n    if( p.y>(1.0\/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.0,0.10,0.20) );\n    if( p.y>(2.0\/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.3,0.20,0.20) );\n    if( p.y>(3.0\/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,0.5),vec3(0.8,0.90,0.30) );\n    if( p.y>(4.0\/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,0.7,0.4),vec3(0.0,0.15,0.20) );\n    if( p.y>(5.0\/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25) );\n    if( p.y>(6.0\/7.0) ) col = pal( p.x, vec3(0.8,0.5,0.4),vec3(0.2,0.4,0.2),vec3(2.0,1.0,1.0),vec3(0.0,0.25,0.25) );\n    \n\n    \/\/ band\n    float f = fract(p.y*7.0);\n    \/\/ borders\n    col *= smoothstep( 0.49, 0.47, abs(f-0.5) );\n    \/\/ shadowing\n    col *= 0.5 + 0.5*sqrt(4.0*f*(1.0-f));\n    \/\/ dithering\n    col += (1.0\/255.0)*texture( iChannel0, fragCoord.xy\/iChannelResolution[0].xy ).xyz;\n\n\tfragColor = vec4( col, 1.0 );\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

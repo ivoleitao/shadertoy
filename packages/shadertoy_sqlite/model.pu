@@ -1,0 +1,63 @@
+@startuml model
+
+!define Table(name,desc) class name as "desc" << (T,#FFAAAA) >>
+!define primary_key(x) <b>x</b>
+!define unique(x) <color:green>x</color>
+!define not_null(x) <u>x</u>
+!define null(x) x
+
+hide methods
+skinparam linetype ortho
+
+Table(User, "User") {
+    primary_key(id) VARCHAR
+    null(picture) VARCHAR
+    not_null(member_since) INTEGER
+    not_null(following) INTEGER
+    not_null(followers) INTEGER
+    null(about) VARCHAR
+}
+
+Table(Shader, "Shader") {
+    primary_key(id) VARCHAR
+    not_null(userId) VARCHAR
+    not_null(version) VARCHAR
+    not_null(name) VARCHAR
+    not_null(date) INTEGER
+    null(description) VARCHAR
+    not_null(views) INTEGER
+    not_null(likes) INTEGER
+    not_null(privacy) VARCHAR
+    not_null(flags) INTEGER
+    not_null(tags_json) VARCHAR
+    not_null(render_passes_json) VARCHAR
+}
+
+Table(Comment, "Comment") {
+    primary_key(id) VARCHAR
+    not_null(shader_id) VARCHAR
+    not_null(user_id) VARCHAR
+    null(picture) VARCHAR
+    not_null(date) INTEGER
+    not_null(comment) VARCHAR
+}
+
+Table(Playlist, "Playlist") {
+    primary_key(id) VARCHAR
+    not_null(user_id) VARCHAR
+    not_null(name) VARCHAR
+    not_null(description) VARCHAR
+}
+
+Table(PlaylistShader, "PlaylistShader") {
+    primary_key(playlist_id) VARCHAR
+    primary_key(shader_id) VARCHAR
+    not_null(order) INTEGER
+}
+
+Shader ||..o{ Comment
+
+Shader ||..o{ PlaylistShader
+Playlist ||..o{ PlaylistShader
+
+@enduml

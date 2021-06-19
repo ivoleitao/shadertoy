@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Dart: Shadertoy",
+            "program": "packages/shadertoy/example/example.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Dart: Run all Shadertoy tests",
+            "type": "dart",
+            "request": "launch",
+            "program": "packages/shadertoy/test/"
+        },
+    ]
+}

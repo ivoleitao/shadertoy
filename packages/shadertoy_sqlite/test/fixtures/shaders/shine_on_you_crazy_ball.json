@@ -1,0 +1,36 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "WsfBzN",
+        "date": "1587743973",
+        "viewed": 2832,
+        "name": "Shine On You Crazy Ball",
+        "username": "Kali",
+        "description": "Surely not the best way to achieve what I did here, but I'm quite happy with the outcome and it was fun to figure out things. ",
+        "likes": 75,
+        "published": 1,
+        "flags": 0,
+        "usePreview": 0,
+        "tags": [
+            "raymarching",
+            "volumetric",
+            "reflections"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "const float det=.005;\nconst float maxdist=50.;\nfloat objcol, flo;\nvec3 ldir=vec3(4.,-1.5,-1.);\nconst vec3 lcol=vec3(.7,.3,.2);\nconst vec3 ilcol=vec3(.6,.5,1.);\n\n\nmat2 rot(float a) {\n\tfloat s=sin(a), c=cos(a);\n    return mat2(c,s,-s,c);\n}\n\nvec3 fractal(vec2 p) {\n    float m=100., l=100.;\n    vec2 c=vec2(100.);\n    p*=.2;\n    for (int i=0; i<5; i++) {\n    \tp=abs(p+.75)-abs(p-.75)-p;\n        p+=vec2(0.,2.);\n        p=p*2.5\/clamp(dot(p,p),.2,1.)-1.5;\n        if (i>0) l=min(l,min(abs(p.x),abs(p.y)));\n        m=min(m,length(p));\n        c=min(c,abs(p));\n    }\n    l=exp(-6.*l)*pow(abs(.5-fract(m*.3+iTime))*2.,6.);\n    c=normalize(exp(-1.*c));\n    return l*vec3(c.x,length(p)*.015,c.y)*1.5;\n}\n\nvec3 rotate(vec3 p) {\n    p.xz*=rot(iTime);\n    p.yz*=rot(iTime*.5);\n\treturn p;\n}\n\nfloat de_light(vec3 p) {\n    return length(p)-1.5;\n}\n\n\nfloat de(vec3 p) {\n    float op=smoothstep(.5,.7,sin(iTime*.5));\n    \/\/float op=1.;\n    float r=-op*1.3;\n\tfloat w=cos(length(p.xz*2.)-iTime*5.)*.15*smoothstep(0.,3.,length(p.xz));\n    w*=exp(-.1*length(p.xz));\n    float f=p.y+3.+w-r;\n    p=rotate(p);\n    float c1=abs(p.x)-op;\n    float c2=abs(p.y)-op;\n    float c3=abs(p.z)-op;\n\tfloat c=min(min(c3,min(c1,c2)),length(p)-2.8+r);\n    float s=length(p)-3.+r;\n    float d=max(s,-c);\n    p=fract(p*5.);\n    float grid=min(abs(p.z),min(abs(p.x),abs(p.y)))*.5;\n    d=min(d,f);\n    objcol=max(step(c,d+.1),grid);\n    flo=step(f,d);\n    objcol=max(flo,objcol);\n    return d;\n}\n\nvec3 normal(vec3 p) {\n    vec3 e=vec3(0.,det*4.,0.);\n\treturn normalize(vec3(de(p+e.yxx),de(p+e.xyx),de(p+e.xxy))-de(p));\n}\n\nvec3 triplanar(vec3 p, vec3 n) {\n\tp=rotate(p);\n    return fractal(p.yz) * abs(n.x) + fractal(p.xz) * abs(n.y) + fractal(p.xy) * abs(n.z);\n}\n\nfloat shadow(vec3 p, vec3 dir) {\n\tfloat td=.0, sh=1., d=.2;\n    for (int i=0; i<60; i++) {\n        p-=d*dir;\n        d=de(p);\n        float dl=de_light(p);\n        td+=min(d,dl);\n        sh=min(sh,10.*d\/td);\n        if (sh<.01 || dl<1.) break;\n    }\n    return clamp(sh,0.,1.);\n}\n\n\nvec3 shade(vec3 p, vec3 n, vec3 dir) {\n    float f=flo;\n    float ocol=objcol;\n    float sh=shadow(p,ldir);\n    float ish=shadow(p,normalize(p));\n    sh=max(sh,ish);\n    float amb=max(0.,dot(dir,-n))*.1;\n    float dif=max(0.,dot(ldir,-n))*sh;\n    vec3 ref=reflect(ldir,-n);\n    float spe=pow(max(0.,dot(dir,-ref)),50.);\n    vec3 fcol=triplanar(p,n)*(1.-ocol);\n    vec3 col=ocol*vec3(1.5)-f;\n    vec3 ildir=normalize(p);\n    float idif=max(0.,dot(ildir,-n))*exp(-.05*length(p));    \n    vec3 lref=reflect(ildir,-n);\n    float lspe=pow(max(0.,dot(dir,-lref)),30.)*ish;\n    return max((amb+dif*lcol)*col+spe*lcol,idif*ilcol*ish+lspe)+fcol;\n}\n\n\nvec3 march(vec3 from, vec3 dir) {\n\tfloat d, dl, td=0., tdl=0., ref=0.;\n    vec3 p=from, refrom=from, pl=p, col=vec3(0.), savecol=col, odir=dir;\n    vec3 back=lcol*max(0.,1.-dir.y*3.)*.1;\n    for (int i=0; i<80; i++) {\n\t\tp+=dir*d;\n\t\tpl+=dir*dl;\n        d=de(p);\n        td+=d;\n        if (d<det && flo<.5) break;\n        if (td>maxdist) break;\n        if (d<det && flo>.5) {\n\t        p-=det*dir*2.;\n            vec3 n=normal(p);\n            savecol=mix(shade(p,n,dir),back,td\/maxdist);\n            dir=reflect(dir,n);\n            ref=.7;\n            refrom=p;\n        }\n    }\n    if (d<det) {\n        p-=det*dir*2.;\n        vec3 n=normal(p);\n    \tcol=shade(p,n,dir);\n    } else {\n      \tback+=pow(max(0.,dot(dir,normalize(-ldir))),100.)*lcol;\n\t    back+=pow(max(0.,dot(dir,normalize(-ldir))),200.)*.5;\n        col=back;\n        td=maxdist;\n    }\n    float li1=pow(max(0.,dot(dir,-normalize(refrom))),120.);\n    float li2=pow(max(0.,dot(odir,-normalize(from))),120.);\n    float li=max(li1,li2);\n    li*=step(length(from),distance(p,from));\n    col=mix(col,savecol,ref)+li*ilcol*2.;\n    \n    int steps=70;\n    float lmax=maxdist*.5;\n    float st=lmax\/float(steps);\n    li=0.;\n    for (int i=0; i<steps; i++) {\n    \tp=from+odir*tdl;\n        tdl+=st;\n        if (tdl>td) break;\n        li+=shadow(p, normalize(p))*exp(-.25*length(p));\n    }\n    \n    return col+li*.035*ilcol;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tldir=normalize(ldir);\n    vec2 uv=(fragCoord-iResolution.xy*.5)\/iResolution.y;\n\tvec3 dir=normalize(vec3(uv,1.+sin(10.+iTime*.5)*.3));\n    vec3 from=vec3(0.,0.,-12.);\n    from.xz*=rot(iTime*.2);\n    dir.xz*=rot(iTime*.2);\n    dir.x+=sin(iTime*.5)*.3;\n    dir=normalize(dir);\n    vec3 col = march(from, dir);\n    fragColor = vec4(col,1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

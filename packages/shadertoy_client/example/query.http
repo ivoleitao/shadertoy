@@ -1,0 +1,5 @@
+GET {{baseUrl}}/{{apiPath}}/{{queryPath}}?key={{$dotenv API_KEY}}
+###
+GET {{baseUrl}}/{{apiPath}}/{{queryPath}}/prince?key={{$dotenv API_KEY}}
+###
+GET {{baseUrl}}/{{apiPath}}/{{queryPath}}/raymarching?key={{$dotenv API_KEY}}&filter=multipass&filter=soundoutput&sort=hot&from=0&num=2

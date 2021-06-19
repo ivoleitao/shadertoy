@@ -1,0 +1,33 @@
+  {
+    "ver": "0.1",
+    "info": {
+      "id": "lt33z7",
+      "date": "1468393135",
+      "viewed": 133813,
+      "name": "Ray Marching: Part 2",
+      "username": "jlfwong",
+      "description": "Part 2 of a ray marching tutorial http:\/\/jamie-wong.com\/2016\/07\/15\/ray-marching-signed-distance-functions\/",
+      "likes": 84,
+      "published": 1,
+      "flags": 0,
+      "tags": [
+        "raymarching"
+      ],
+      "hasliked": 0
+    },
+    "renderpass": [
+      {
+        "inputs": [],
+        "outputs": [
+          {
+            "id": "4dfGRr",
+            "channel": 0
+          }
+        ],
+        "code": "\/**\n * Part 2 Challenges\n * - Change the diffuse color of the sphere to be blue\n * - Change the specual color of the sphere to be green\n * - Make one of the lights pulse by having its intensity vary over time\n * - Add a third light to the scene\n *\/\n\nconst int MAX_MARCHING_STEPS = 255;\nconst float MIN_DIST = 0.0;\nconst float MAX_DIST = 100.0;\nconst float EPSILON = 0.0001;\n\n\/**\n * Signed distance function for a sphere centered at the origin with radius 1.0;\n *\/\nfloat sphereSDF(vec3 samplePoint) {\n    return length(samplePoint) - 1.0;\n}\n\n\/**\n * Signed distance function describing the scene.\n * \n * Absolute value of the return value indicates the distance to the surface.\n * Sign indicates whether the point is inside or outside the surface,\n * negative indicating inside.\n *\/\nfloat sceneSDF(vec3 samplePoint) {\n    return sphereSDF(samplePoint);\n}\n\n\/**\n * Return the shortest distance from the eyepoint to the scene surface along\n * the marching direction. If no part of the surface is found between start and end,\n * return end.\n * \n * eye: the eye point, acting as the origin of the ray\n * marchingDirection: the normalized direction to march in\n * start: the starting distance away from the eye\n * end: the max distance away from the ey to march before giving up\n *\/\nfloat shortestDistanceToSurface(vec3 eye, vec3 marchingDirection, float start, float end) {\n    float depth = start;\n    for (int i = 0; i < MAX_MARCHING_STEPS; i++) {\n        float dist = sceneSDF(eye + depth * marchingDirection);\n        if (dist < EPSILON) {\n\t\t\treturn depth;\n        }\n        depth += dist;\n        if (depth >= end) {\n            return end;\n        }\n    }\n    return end;\n}\n            \n\n\/**\n * Return the normalized direction to march in from the eye point for a single pixel.\n * \n * fieldOfView: vertical field of view in degrees\n * size: resolution of the output image\n * fragCoord: the x,y coordinate of the pixel in the output image\n *\/\nvec3 rayDirection(float fieldOfView, vec2 size, vec2 fragCoord) {\n    vec2 xy = fragCoord - size \/ 2.0;\n    float z = size.y \/ tan(radians(fieldOfView) \/ 2.0);\n    return normalize(vec3(xy, -z));\n}\n\n\/**\n * Using the gradient of the SDF, estimate the normal on the surface at point p.\n *\/\nvec3 estimateNormal(vec3 p) {\n    return normalize(vec3(\n        sceneSDF(vec3(p.x + EPSILON, p.y, p.z)) - sceneSDF(vec3(p.x - EPSILON, p.y, p.z)),\n        sceneSDF(vec3(p.x, p.y + EPSILON, p.z)) - sceneSDF(vec3(p.x, p.y - EPSILON, p.z)),\n        sceneSDF(vec3(p.x, p.y, p.z  + EPSILON)) - sceneSDF(vec3(p.x, p.y, p.z - EPSILON))\n    ));\n}\n\n\/**\n * Lighting contribution of a single point light source via Phong illumination.\n * \n * The vec3 returned is the RGB color of the light's contribution.\n *\n * k_a: Ambient color\n * k_d: Diffuse color\n * k_s: Specular color\n * alpha: Shininess coefficient\n * p: position of point being lit\n * eye: the position of the camera\n * lightPos: the position of the light\n * lightIntensity: color\/intensity of the light\n *\n * See https:\/\/en.wikipedia.org\/wiki\/Phong_reflection_model#Description\n *\/\nvec3 phongContribForLight(vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 eye,\n                          vec3 lightPos, vec3 lightIntensity) {\n    vec3 N = estimateNormal(p);\n    vec3 L = normalize(lightPos - p);\n    vec3 V = normalize(eye - p);\n    vec3 R = normalize(reflect(-L, N));\n    \n    float dotLN = dot(L, N);\n    float dotRV = dot(R, V);\n    \n    if (dotLN < 0.0) {\n        \/\/ Light not visible from this point on the surface\n        return vec3(0.0, 0.0, 0.0);\n    } \n    \n    if (dotRV < 0.0) {\n        \/\/ Light reflection in opposite direction as viewer, apply only diffuse\n        \/\/ component\n        return lightIntensity * (k_d * dotLN);\n    }\n    return lightIntensity * (k_d * dotLN + k_s * pow(dotRV, alpha));\n}\n\n\/**\n * Lighting via Phong illumination.\n * \n * The vec3 returned is the RGB color of that point after lighting is applied.\n * k_a: Ambient color\n * k_d: Diffuse color\n * k_s: Specular color\n * alpha: Shininess coefficient\n * p: position of point being lit\n * eye: the position of the camera\n *\n * See https:\/\/en.wikipedia.org\/wiki\/Phong_reflection_model#Description\n *\/\nvec3 phongIllumination(vec3 k_a, vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 eye) {\n    const vec3 ambientLight = 0.5 * vec3(1.0, 1.0, 1.0);\n    vec3 color = ambientLight * k_a;\n    \n    vec3 light1Pos = vec3(4.0 * sin(iTime),\n                          2.0,\n                          4.0 * cos(iTime));\n    vec3 light1Intensity = vec3(0.4, 0.4, 0.4);\n    \n    color += phongContribForLight(k_d, k_s, alpha, p, eye,\n                                  light1Pos,\n                                  light1Intensity);\n    \n    vec3 light2Pos = vec3(2.0 * sin(0.37 * iTime),\n                          2.0 * cos(0.37 * iTime),\n                          2.0);\n    vec3 light2Intensity = vec3(0.4, 0.4, 0.4);\n    \n    color += phongContribForLight(k_d, k_s, alpha, p, eye,\n                                  light2Pos,\n                                  light2Intensity);    \n    return color;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec3 dir = rayDirection(45.0, iResolution.xy, fragCoord);\n    vec3 eye = vec3(0.0, 0.0, 5.0);\n    float dist = shortestDistanceToSurface(eye, dir, MIN_DIST, MAX_DIST);\n    \n    if (dist > MAX_DIST - EPSILON) {\n        \/\/ Didn't hit anything\n        fragColor = vec4(0.0, 0.0, 0.0, 0.0);\n\t\treturn;\n    }\n    \n    \/\/ The closest point on the surface to the eyepoint along the view ray\n    vec3 p = eye + dist * dir;\n    \n    vec3 K_a = vec3(0.2, 0.2, 0.2);\n    vec3 K_d = vec3(0.7, 0.2, 0.2);\n    vec3 K_s = vec3(1.0, 1.0, 1.0);\n    float shininess = 10.0;\n    \n    vec3 color = phongIllumination(K_a, K_d, K_s, shininess, p, eye);\n    \n    fragColor = vec4(color, 1.0);\n}",
+        "name": "Image",
+        "description": "",
+        "type": "image"
+      }
+    ]
+  }

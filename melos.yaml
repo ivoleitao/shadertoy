@@ -1,0 +1,112 @@
+name: shadertoy
+
+packages:
+  - packages/**
+
+ide:
+  intellij:
+    false
+
+scripts:
+  get:
+    run: |
+      melos exec -- \
+        "dart pub get"
+    description: |
+      Run `dart pub get` in all packages.
+
+  upgrade:
+    run: |
+      melos exec -- \
+        "dart pub upgrade"
+    description: |
+      Run `dart pub upgrade` in all packages.
+
+  outdated:
+    run: |
+      melos exec -- \
+        "dart pub outdated"
+    description: |
+      Run `dart pub outdated` in all packages.
+
+  clean:
+    run: |
+      melos exec --scope="shadertoy" --scope="shadertoy_client" -- \
+        "dart run build_runner clean"
+    description: |
+      Run `dart run build_runner clean` in the selected packages.
+
+  build:
+    run: |
+      melos exec --scope="shadertoy" --scope="shadertoy_client" -- \
+        "dart run build_runner build --delete-conflicting-outputs"
+    description: |
+      Run `dart run build_runner --delete-conflicting-outputs` in supporting packages.
+  
+  analyze:
+    run: |
+      melos exec -- \
+        "dart analyze . --fatal-infos"
+    description: |
+      Run `dart analyze` in all packages.
+
+  format:
+    run: |
+      melos exec -- \
+        "dart format --set-exit-if-changed ."
+    description: |
+      Run `dart format` in all packages.
+
+  dependency-validator:
+    run: |
+      melos exec -- \
+        "dart run dependency_validator"
+    description: |
+      Run `dart run dependency_validator` in all packages.
+
+  doc:
+    run: |
+      melos exec -- \
+        "dartdoc"
+    description: |
+      Generate documentation for all packages.
+
+  test:
+    run: melos run test:vm && melos run test:chrome
+    description: |
+      Run `dart test` with multiple platforms in all packages.
+  
+  test:vm:
+    run: |
+      melos exec -- \
+        "dart test -p vm"
+    description: |
+      Run `dart test -p vm` in all packages.
+
+  test:chrome:
+    run: |
+      melos exec -- \
+        "dart test -p chrome"
+    description: |
+      Run `dart test -p chome` in the selected packages. 
+
+  coverage:
+    run: |
+      melos exec -c 1 -- \
+        "dart test --concurrency=1 --coverage=coverage && dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib"
+    description: |
+      Run `dart test` and collects coverage in all packages.
+
+  pana:
+    run: |
+      melos exec -c 1 -- \
+        "../../tool/pana.sh"
+    description: |
+      Run `pana` in all packages.
+
+  codecov:
+    run: |
+      melos exec -c 1 --verbose -- \
+        "bash -c 'bash <(curl -s https://codecov.io/bash) -f coverage/lcov.info -F MELOS_PACKAGE_NAME'"
+    description: |
+      Uploads the code coverage to codecov.

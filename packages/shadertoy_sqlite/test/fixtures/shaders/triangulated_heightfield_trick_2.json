@@ -1,0 +1,75 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "tlXSzB",
+        "date": "1563461172",
+        "viewed": 4410,
+        "name": "Triangulated Heightfield Trick 2",
+        "username": "fizzer",
+        "description": "I revisited [url=https:\/\/www.shadertoy.com\/view\/XlcBRX]this[\/url] idea of raytracing a triangulated heightfield with only 1 heightfield sample per step. This time the logic is a lot simpler, because I've used a regular equilateral triangle tiling grid.",
+        "likes": 103,
+        "published": 1,
+        "flags": 0,
+        "usePreview": 0,
+        "tags": [
+            "raytracing",
+            "heightfield",
+            "polygonal"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XdX3Rn",
+                    "filepath": "\/media\/a\/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+                    "previewfilepath": "\/media\/ap\/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4df3Rr",
+                    "filepath": "\/media\/a\/3871e838723dd6b166e490664eead8ec60aedd6b8d95bc8e2fe3f882f0fd90f0.jpg",
+                    "previewfilepath": "\/media\/ap\/3871e838723dd6b166e490664eead8ec60aedd6b8d95bc8e2fe3f882f0fd90f0.jpg",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/\n\/\/ The shaders of this series:\n\/\/\n\/\/   Triangulated Heightfield Trick 1 - https:\/\/www.shadertoy.com\/view\/XlcBRX (Rigid, right-triangle)\n\/\/   Triangulated Heightfield Trick 2 - https:\/\/www.shadertoy.com\/view\/tlXSzB (Rigid, equilateral)\n\/\/   Triangulated Heightfield Trick 3 - https:\/\/www.shadertoy.com\/view\/ttsSzX (Deforming, equilateral)\n\/\/   Tetrahedral Voxel Traversal      - https:\/\/www.shadertoy.com\/view\/wtfXWB (Rigid, tetrahedron)\n\/\/\n\n\/\/ Constants\nconst float pi = 3.14159265358979323;\nconst float th = pi * 2. \/ 3.;\n\n\/\/ Equilateral triangle edge length\nconst float edgeLength = 2. \/ tan(th);\n\n\/\/ Transformations for deforming the equilateral triangle grid into\n\/\/ a square grid with diagonal lines\nconst float th2 = -pi * .25;\nconst float e = edgeLength * 1.5;\nconst mat2 rm = mat2(cos(th2), sin(th2), -sin(th2), cos(th2));\nconst mat2 m = rm * mat2(1. \/ 2., 0., 0., e \/ 2.) * sqrt(2.);\nconst mat2 mt = (1. \/ sqrt(2.)) * mat2(2., 0., 0., 2. \/ e) * transpose(rm);\n\n\/\/ Normals of the 3 line directions in the equilateral triangle grid\nconst vec2 ns[3] = vec2[3](vec2(1, 0), vec2(cos(th), sin(th)), vec2(cos(th * 2.), sin(th * 2.)));\n\nconst float maxHeight = 6.;\n\n\/\/ Heightfield\nfloat sampleHeightfield(vec2 p)\n{\n    float h = \ttextureLod(iChannel0, p \/ 40. + iTime \/ 400., 2.).b *\n    \t\t\ttextureLod(iChannel1, p \/ 8., 2.).r * 1.6;\n    \n    return clamp(h, 0., 1. - 1e-4) * maxHeight;\n}\n\n\/\/ The raytracing function.\nfloat trace(vec3 ro, vec3 rd, out vec3 triNorm, out vec3 bary)\n{\n    vec3 oro = ro;\n    \n    float mint = (maxHeight * step(rd.y, 0.) - ro.y) \/ rd.y;\n\n    \/\/ Move ray start to bounding slab of heightfield.\n    ro += rd * max(0., mint);\n\n    \/\/ Determine the starting triangle by transforming the XZ\n    \/\/ plane triangular grid to a square grid with diagonal cuts at each square,\n    \/\/ then transforming the closet corners in that square grid back again.\n    \n    vec2 u = m * ro.xz;\n    \n    vec2 cu = floor(u), fu = u - cu;\n\n    vec2 tri0, tri1, tri2;\n\n    tri0 = mt * cu;\n\n    if(fu.x > fu.y)\n    {\n        tri1 = mt * (cu + vec2(1, 1));\n        tri2 = mt * (cu + vec2(1, 0));\n    }\n    else\n    {\n        tri1 = mt * (cu + vec2(1, 1));\n        tri2 = mt * (cu + vec2(0, 1));\n    }\n\n    \/\/ Ray geometry\n    vec3 rod = vec3(ro.x, dot(ro.xz, ns[1]), dot(ro.xz, ns[2]));\n    vec3 rdd = vec3(rd.x, dot(rd.xz, ns[1]), dot(rd.xz, ns[2]));\n    \n    vec3 inv = vec3(1) \/ rdd;\n    \n    \/\/ Intersection distances to each of the three lines on the\n    \/\/ equilateral triangle grid, from the ray starting point.\n    vec3 is = (floor(rod) + step(0., rdd) - rod) * inv;\n    \n    inv = abs(inv);\n    \n    vec3 triangle[3];\n\n    \/\/ Sort the triangle corners so that the corner at index N is opposite\n    \/\/ to the triangle edge coincident to grid line normal at index N.\n    for(int j = 0; j < 3; ++j)\n    {\n        float d0 = abs(dot(tri1 - tri0, ns[j]));\n        float d1 = abs(dot(tri2 - tri1, ns[j]));\n        float d2 = abs(dot(tri0 - tri2, ns[j]));\n\n        triangle[j].xz = tri1;\n\n        if(d0 < d1)\n        {\n            if(d0 < d2)\n                triangle[j].xz = tri2;\n        }\n        else if(d1 < d2)\n            triangle[j].xz = tri0;\n\n        \/\/ Also get the height values of the starting triangle corners here.\n        triangle[j].y = sampleHeightfield(triangle[j].xz);\n    }\n\n    \/\/ The step vectors which are used for mirroring the triangle across\n    \/\/ one of it's edges.\n    vec2 triSteps[3] = vec2[3](ns[0] * 2. * sign(rdd.x),\n                               ns[1] * 2. * sign(rdd.y),\n                               ns[2] * 2. * sign(rdd.z));\n    \n    float t0 = 0., t1, t = -1.;\n        \n    float maxt = (maxHeight * step(0., rd.y) - ro.y) \/ rd.y;\n    \n    triNorm = vec3(0);\n    \n    \/\/ The ray stepping loop\n    \/\/ \"min(iFrame, 0)\" is used here to prevent complete unrolling of the loop (which\n    \/\/ causes the compiler to take forever on OpenGL).\n    for(int i = min(iFrame, 0); i < 200; ++i)\n    {       \n        \/\/ Determine which grid line has the next closest intersection, and get the index\n        \/\/ of the triangle corner which is opposite to the edge coincident with that line.\n\n        int idx = 2;\n        t1 = is.z;\n\n        if(is.x < is.y)\n        {\n            if(is.x < is.z)\n            {\n                idx = 0;\n                t1 = is.x;\n            }\n        }\n        else if(is.y < is.z)\n        {\n        \tidx = 1;\n            t1 = is.y;\n        }\n        \n        \/\/ Intersect ray with triangle. Actually this is just a ray-versus-plane\n        \/\/ intersection, because the intersection point is already bounded by t0 and t1.\n        triNorm = cross(triangle[2] - triangle[0], triangle[1] - triangle[0]);\n        t = dot(triangle[0] - ro, triNorm) \/ dot(rd, triNorm);\n        \n        if(t > t0 && t < t1)\n            break;\n        \n\t\tif(t1 > maxt)\n            return 1e5;\n        \n        int idx1 = (idx + 1) % 3, idx2 = (idx + 2) % 3;\n        \n        \/\/ Step the ray to the next grid line intersection point.\n        is[idx] += inv[idx];\n        \n        \/\/ Mirror the triangle aross this grid line (which is coincident with\n        \/\/ the edge opposite the triangle corner being moved here). This reverses\n        \/\/ the winding.\n        triangle[idx].xz += triSteps[idx];\n        \n        \/\/ Take a single sample of the heightfield.\n        triangle[idx].y = sampleHeightfield(triangle[idx].xz);\n        \n        \/\/ Swap the other two corners, to maintain correspondence between triangle\n        \/\/ corners and opposite edge lines. This also has the effect of reversing the winding\n        \/\/ a second time, so all of the constructed triangles in fact have the same winding order.\n        vec3 temp = triangle[idx1];\n        triangle[idx1] = triangle[idx2];\n        triangle[idx2] = temp;\n        \n        t0 = t1;\n    }\n    \n    \/\/ Return the final intersection information.\n    \n    triNorm = normalize(triNorm);\n\n    vec3 rp = ro + rd * t;\n    \n    \/\/ Get the barycentric coordinates.\n    \n    float alpha = area(triangle[0], triangle[1], rp);\n    float beta = area(triangle[1], triangle[2], rp);\n    float gamma = area(triangle[2], triangle[0], rp);\n\n    float area = alpha + beta + gamma;\n\n    bary = vec3(alpha, beta, gamma) \/ area;\n\n    return distance(oro, rp);\n}\n\n\/\/ Ray direction function\nvec3 rfunc(vec2 uv)\n{\n    vec3 r = normalize(vec3(uv.xy, -1.5));\n    mat3 m = rotX(-.75) * rotZ(sin(iTime \/ 4.) * .1);\n    return m * r;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec3 col = vec3(0);\n\n    vec2 uv = fragCoord \/ iResolution.xy * 2. - 1.;    \n    uv.x *= iResolution.x \/ iResolution.y;\n\n    \/\/ Setup primary ray.\n    vec3 o = vec3(cos(iTime \/ 4.) * 4., 10., -iTime), r = rfunc(uv);\n    \n    vec3 triNorm, bary;\n    float t = trace(o, r, triNorm, bary);\n    \n    vec3 n = triNorm;\n\n    vec3 rp = o + r * t;\n    vec3 ld = normalize(vec3(10, 6, 3));\n    \n    \/\/ Directional light\n\tcol = vec3(max(0., dot(triNorm, ld))) * .8;\n                \n    \/\/ Shadow\n    float st = trace(rp + ld * 1e-2, ld, triNorm, triNorm);\n    if(st > 1e-2 && st < 1e3)\n\t\tcol *= .1;\n    \n    \/\/ Ambient light\n    col += max(0., n.y) * vec3(.3);\n    \n    col *= cos((rp.y + 6.5) * vec3(1.5, 2, .5) \/ 3.) * .5 + .5;\n    float w = t \/ 800. + pow(max(0., 1. - dot(-r, n)), 4.) * .2;\n    col *= mix(1.4, 1., smoothstep(.02 - w, .02 + w, min(bary.x, min(bary.y, bary.z))));\n\n    \/\/ Fog\n    col = mix(vec3(.5, .5, 1.), col, exp2(-t \/ 400.));\n\n    \/\/ Clamp and gamma-correct\n    fragColor = vec4(pow(clamp(col, 0., 1.), vec3(1. \/ 2.2)), 1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "mat3 rotX(float a)\n{\n    return mat3(1., 0., 0.,\n                0., cos(a), sin(a),\n                0., -sin(a), cos(a));\n}\n\nmat3 rotY(float a)\n{\n    return mat3(cos(a), 0., sin(a),\n                0., 1., 0.,\n                -sin(a), 0., cos(a));\n}\n\nmat3 rotZ(float a)\n{\n    return mat3(cos(a), sin(a), 0.,\n                -sin(a), cos(a), 0.,\n                0., 0., 1.);\n}\n\nfloat area(vec3 a,vec3 b,vec3 c)\n{\n   b-=a;\n   c-=a;\n   return length(cross(b,c))\/2.;\n}\n\n",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        }
+    ]
+}

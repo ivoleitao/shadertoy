@@ -1,0 +1,129 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "4dtSzX",
+        "date": "1460598776",
+        "viewed": 2037,
+        "name": "Aurora Explorer [re]",
+        "username": "KylBlz",
+        "description": "Must watch for at least 1 minute! Controls: WASD, Shift, Space, Mouse!",
+        "likes": 89,
+        "published": 1,
+        "flags": 48,
+        "usePreview": 0,
+        "tags": [
+            "3d",
+            "fractal",
+            "raymarch",
+            "volumetric",
+            "raytrace",
+            "controls"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGzn",
+                    "filepath": "\/media\/a\/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+                    "previewfilepath": "\/media\/ap\/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+                    "type": "texture",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "Xdf3zn",
+                    "filepath": "\/media\/a\/85a6d68622b36995ccb98a89bbb119edf167c914660e4450d313de049320005c.png",
+                    "previewfilepath": "\/media\/ap\/85a6d68622b36995ccb98a89bbb119edf167c914660e4450d313de049320005c.png",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "nearest",
+                        "wrap": "repeat",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\n#define view_dist 20.\n\/\/low:64\tmedium:128\tultra:255\n#define vol_steps 98\n\n#define PI       3.14159265\n#define tex(a,b) textureLod(a,b,0.)\n\n\/\/ storage register\/texel addresses\nconst vec2 txVel = vec2(0.5,0.5);\nconst vec2 txLoc = vec2(1.5,0.5);\nconst vec2 txRot = vec2(2.5,0.5);\nconst vec2 txMou = vec2(3.5,0.5);\n\nconst float mtSphere = 1.,\n            mtGround = 2.,\n            mtLight = 3.,\n    \t\tzfar = 10000.;\n\n\/\/the reflective sphere\nvec4 sphere = vec4(vec3(0.1, 0.1, 0.1), 0.2);\n\/\/the light\nvec4 light = vec4(vec3(0.,1.,0.), 0.05);\n\/\/plane location, plane normal, plane width\nmat3 plane = mat3(vec3(0., -0.7, 0.), vec3(0., 1., 0.), vec3(0.5, 0., 0.));\n\/\/just need this public\nvec3 camVel = vec3(0.);\n\n\/\/properties\nfloat modifier = 0.7,\t\/\/plasma\n\t  contrast = 20.0,\n      clump = 1.0,\n      size = 0.075,\n\t  ambient = 0.1,\t\/\/light\n      brightness = 5.;\n\nvec3 rotateXY(vec3 p, vec2 angle) {\n    vec2 c = cos(angle), s = sin(angle);\n    p.yz *= mat2 (c.x,s.x,-s.x,c.x);\n    p.xz *= mat2 (c.y,s.y,-s.y,c.y);\n    return p;\n}\n\nvec2 csqr( vec2 a )  { return vec2( a.x*a.x - a.y*a.y, 2.*a.x*a.y  ); }\n\n\/\/plasma noise function\nfloat map(in vec3 p) {\n\tfloat res = 0.;\n    vec3 c = p;\n\tfor (int i = 0; i < 3; ++i) {\n        p = modifier*abs(p)\/dot(p,p) -modifier*clump;\n        p.yz= csqr(p.yz);\n        res += exp(-contrast * abs(dot(p,c)));\n\t}\n\treturn res;\n}\n\n\/\/marches air space between objects and camera\nvec3 raymarch( in vec3 ro, vec3 rd, vec2 tminmax ) {\n    \/\/start at starting loc\n    float t = tminmax.x;\n    \/\/small delta\n    float dt = (tminmax.y - tminmax.x) \/ float(vol_steps);\n    \/\/output color\n    vec3 col= vec3(0.);\n    vec3 pos = ro;\n    \/\/current sample\n    float c = 0.;\n    for( int i=0; i<vol_steps; i++ ) {\n        \/\/this steps through empty space faster\n        t += (.7 + t*t * 0.007) * dt*exp(-c*c);\n        pos = ro+t*rd;\n        \/\/get plasma density\n        c = map(pos*size);\n\t\t\/\/adjusted sumation\n        col += c*c*normalize(abs(pos.zyx));\n    }\n    return col * 0.008;\n}\n\n\/\/returns { location, normal, vec3(dist, volume, material) }\nmat3 traceScene( vec3 ro, vec3 rd) {\n    \/\/sphere intersection\n    vec3 oc = ro - sphere.xyz;\n    float c = dot( oc, oc ) - sphere.w*sphere.w;\n    float bs = dot( oc, rd );\n    float hs = sqrt(bs*bs - c);\n    float sphereDepth = zfar;\n    if (hs > 0.) {\n        if (bs < 0.) sphereDepth = -bs - hs;\n    }\n    \/\/now the light\n    oc = ro - light.xyz;\n    c = dot( oc, oc ) - light.w*light.w;\n    float bl = dot( oc, rd );\n    float hl = sqrt(bl*bl - c);\n    float lightDepth = zfar;\n    if (hl > 0.) {\n        if (bl < 0.) lightDepth = -bl - hl;\n    }\n    \/\/plane intersection\n    float planeAng = dot(plane[1], rd);\n    float planeDepth = dot(plane[1], plane[0] - ro) \/ planeAng;\n    if (planeDepth < 0. || planeDepth > zfar) planeDepth = zfar;\n    \n    \/\/depth test\n    if (sphereDepth < planeDepth && sphereDepth < lightDepth) {\n        vec3 sloc = ro+rd*sphereDepth;\n        return mat3(sloc,\n                   (sloc-sphere.xyz) \/ sphere.w,\n                   vec3(max(0., sphereDepth), hs\/sphere.w, mtSphere));\n    } else if (planeDepth < sphereDepth && planeDepth < lightDepth) {\n\t\treturn mat3(ro+rd*planeDepth,\n                    plane[1],\n                    vec3(max(0., planeDepth), planeAng+1.+plane[2].x, mtGround));\n    } else if (lightDepth < planeDepth && lightDepth < sphereDepth) {\n        vec3 sloc = ro+rd*lightDepth;\n        return mat3(sloc,\n                    sloc \/ light.w,\n                    vec3(max(0., lightDepth), light.w, mtLight));\n    } else {\n        return mat3(vec3(map(rd * (0.3+0.1*sin(iTime*0.1)))), vec3(rd), vec3(zfar, zfar, 0.));\n    }\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    \/\/place 0,0 in center from -1 to 1 ndc\n    vec2 uv = fragCoord.xy * 2.\/iResolution.xx - vec2(1., 0.5);\n    \/\/mostly for post process\n    float radial = pow(max(length(uv)-0.2, 0.), 2.);\n    \n    \/\/get input, update camera\n    vec3 camLoc = tex( iChannel0, txLoc\/iChannelResolution[0].xy ).xyz;\n    camVel = tex(iChannel0, txVel\/iChannelResolution[0].xy ).xyz;\n\tvec3 camRot = tex(iChannel0, txRot\/iChannelResolution[0].xy ).xyz;\n    \/\/camRot is angle vec in rad\n    vec3 camDir = normalize(vec3(uv, 1.0));\n    vec3 rayDir = normalize(rotateXY(camDir, camRot.xy));\n    \n    \/\/update light\n    light.xz = vec2(sin(iTime)*1.,cos(iTime)*1.);\n    \/\/update fractal\n    clump = 1.+0.2*sin(iTime*0.1);\n    size = 0.075-0.01*sin(iTime*0.1);\n    \n    \/\/contains location xyz, normal xyz, distance, material, 0.\n    mat3 collision = traceScene(camLoc,  rayDir);\n\n    \/\/calculate light properties\n    vec3 lightDir = normalize(light.xyz - collision[0]);\n    float light2surface = distance(light.xyz, collision[0]),\n    \t  lightMoment = max(pow(0.25+dot(rayDir, reflect(lightDir, collision[1])), 3.), 0.),\n          lightPow = brightness \/ (light2surface*light2surface+1.);\n    \n    \/\/volume\n    fragColor = vec4(clamp(raymarch(camLoc, rayDir, vec2(0., min(view_dist, collision[2].x))),0., 1.), 1.);\n        \n    \/\/if ray collided with sphere\n    if (collision[2].z == mtSphere) {\n        \n        fragColor.rgb += collision[0].zyx*abs(collision[1].zyx)*(lightMoment+0.5)*(lightPow+0.5)*0.8; \n    \n    }\n    \/\/if ray collided with ground\n    else if (collision[2].z == mtGround) {\n        float fresnel = 1.2+dot(rayDir,collision[1]);\n        \/\/sample texture with distance fade and energy conservation\n        vec3 groundCol = tex(iChannel1, collision[0].xz * 0.5).rrr \/ (collision[2].x*collision[2].x*0.001+1.) * fresnel;\n        \/\/make floor patterned\n        vec3 offset = vec3(0., (groundCol.r + .5*tex(iChannel2, collision[0].xz).r)*(0.1-fresnel*0.07), 0.);\n        vec3 newrd = normalize(rayDir + offset);\n        lightMoment = max(pow(0.5+dot(newrd, reflect(lightDir, collision[1])), 3.)*1.2, 0.);\n        \/\/yep\n        vec3 reflectdir = reflect(newrd, collision[1]);\n        \/\/reflect off ground\n        vec3 skyCol = vec3(map(reflectdir * (0.3+0.1*sin(iTime*0.1))))*abs(reflectdir);\n        \/\/get shadow\n        mat3 collision2 = traceScene(light.xyz - offset*2., normalize(collision[0]-light.xyz));\n        \/\/reflect off ground\n        mat3 collision3 = traceScene(collision[0] + collision[1]*0.001, reflect(rayDir, collision[1] - offset*2.));\n        float aofactor = min(collision3[2].x - 1., 1.);\n        \/\/skycolor * fresnel * ao + ground color * light properties\n        fragColor.rgb += skyCol * max(fresnel - 0.5, 0.) * aofactor*step(0.01, aofactor) + \n            \t\t\t groundCol * (ambient + lightMoment * float(int(collision2[2].z != mtSphere)) * lightPow);\n    \n    }\n    \/\/ray collided with light source\n    else if (collision[2].z == mtLight) {\n        fragColor.rgb = vec3(2.);\n        \n    }\n    \/\/ray did not collide (sky)\n    else {\n        \/\/nothing much going on up here yet\n        fragColor.rgb += collision[0]*abs(collision[1]);\n\n    }\n    \n    \/\/apply retina adjustment before clamp\n    fragColor.rgb = clamp(fragColor.rgb, 0., 1.);\n    \/\/darken for now, eventually blur\n    fragColor.rgb *= (1. - radial*0.2);\n    \/\/gamma correction\n    fragColor.rgb = pow(fragColor.rgb, vec3(1. + radial));\n}\n",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGRr",
+                    "filepath": "\/presets\/tex00.jpg",
+                    "previewfilepath": "\/presets\/tex00.jpg",
+                    "type": "keyboard",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\n#define MAX_ACCELERATION      16.\n#define MAX_VELOCITY          4.\n#define FRICTION              8.\n\n#define VALUE_VELOCITY        0\n#define VALUE_POSITION        1\n#define VALUE_ROTATION        2\n#define VALUE_MOUSE           3\n\n\/\/half pi\nconst float pi = 3.1415926,\n    \t\tpi_5 = 1.5707963;\n\nconst vec2 KEY_W \t = vec2(87.5 \/ 256., 0.),\n    \t   KEY_S \t = vec2(83.5 \/ 256., 0.),\n    \t   KEY_A \t = vec2(65.5 \/ 256., 0.),\n    \t   KEY_D \t = vec2(68.5 \/ 256., 0.),\n\t\t   KEY_LEFT  = vec2(37.5 \/ 256., 0.),\n\t\t   KEY_UP    = vec2(38.5 \/ 256., 0.),\n\t\t   KEY_RIGHT = vec2(39.5 \/ 256., 0.),\n\t\t   KEY_DOWN  = vec2(40.5 \/ 256., 0.),\n    \t   KEY_SHIFT = vec2(16.0 \/ 256., 0.),\n    \t   KEY_SPACE = vec2(32.0 \/ 256., 0.);\n\nconst vec4 INIT_POS = vec4(6.5, 1.0, -7., 1.),\n    \t   INIT_VEL = vec4(0., 0., 0., 1.),\n    \t   INIT_ROT = vec4(0.1, -0.65, 0., 1.),\n    \t   INIT_MOU = vec4(0., 0., 0., 1.);\n\nvec3 vRotateY(vec3 p, float angle) {\n    float c = cos(angle), s = sin(angle);\n    return vec3(c*p.x + s*p.z, p.y, -s*p.x + c*p.z);\n}\n\nvec3 getAcceleration() {\n    return vec3(\n        texture(iChannel1, KEY_D).x - texture(iChannel1, KEY_A).x + texture(iChannel1, KEY_RIGHT).x - texture(iChannel1, KEY_LEFT).x,\n        texture(iChannel1, KEY_SPACE).x - texture(iChannel1, KEY_SHIFT).x,\n        texture(iChannel1, KEY_W).x - texture(iChannel1, KEY_S).x + texture(iChannel1, KEY_UP).x - texture(iChannel1, KEY_DOWN).x\n    );\n}\n\nvec4 getValue(int a) {\n    vec2 q = vec2(float(a) + 0.5, 0.0) \/ iResolution.x;\n    return texture(iChannel0, q);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord ) {\n    if (fragCoord.y > 1.) discard;\n    \n    int a = int(fragCoord.x);\n    float q = fragCoord.x \/ iResolution.x;\n    vec4 value = texture(iChannel0, vec2(q, 0.));\n    \n    \/\/set initial values\n    if (iFrame == 0) {\n        if (a == VALUE_ROTATION) {\n            value = INIT_ROT;\n        } else if (a == VALUE_MOUSE) {\n            value = INIT_MOU;\n        } else if (a == VALUE_VELOCITY) {\n            value = INIT_VEL;\n        } else if (a == VALUE_POSITION) {\n            value = INIT_POS;\n        }    \n    }\n    \n    if (a == VALUE_ROTATION && iMouse.z > 0.) {\n        vec4 mouse = 2.0 * abs(iMouse) \/ iResolution.y;\n        vec4 rot = getValue(VALUE_MOUSE);\n        value.y = mouse.x - mouse.z + rot.y;\n        value.x = clamp(mouse.y - mouse.w + rot.x, -pi_5, pi_5);\n        \n    } else if (a == VALUE_MOUSE && iMouse.z < 0.) {\n        value = getValue(VALUE_ROTATION);\n        \n    } else if (a == VALUE_VELOCITY) {\n        float rot = getValue(VALUE_ROTATION).y;\n        vec3 acc = vRotateY(getAcceleration(), rot);\n        value.xyz += acc * MAX_ACCELERATION * iTimeDelta;\n        float speed = length(value.xyz);\n        \/\/limit speed\n        if (speed > MAX_VELOCITY) {\n            value.xyz *= MAX_VELOCITY \/ speed;\n        } else if (speed > FRICTION * iTimeDelta) {\n            value.xyz *= (speed - FRICTION * iTimeDelta) \/ speed;\n        } else {\n            value.xyz = vec3(0.0, 0.0, 0.0);\n        }\n    } else if (a == VALUE_POSITION) {\n        vec3 velocity = getValue(VALUE_VELOCITY).xyz;\n        value.xyz += velocity * iTimeDelta;\n        \/\/collision detection?\n        if (value.y < -10.99) value.y = -10.99;\n    }\n    \n    fragColor = vec4(value);\n    return;\n}\n",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

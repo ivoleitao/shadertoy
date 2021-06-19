@@ -1,0 +1,233 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "XltGRX",
+        "date": "1471211994",
+        "viewed": 4773,
+        "name": "Frozen Barrens",
+        "username": "knarkowicz",
+        "description": "Still hadn't a chance to play No Man's Sky, but this is how I imagine this game.\nUncomment #define FREE_CAMERA to freely move the camera using mouse.",
+        "likes": 85,
+        "published": 3,
+        "flags": 32,
+        "usePreview": 0,
+        "tags": [
+            "3d",
+            "raymarching",
+            "terrain",
+            "planet",
+            "ice",
+            "scifi",
+            "snow",
+            "frozen"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XdfGR8",
+                    "filepath": "\/media\/previz\/buffer03.png",
+                    "previewfilepath": "\/media\/previz\/buffer03.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "vec3 saturate( vec3 x )\n{\n    return clamp( x, 0.0, 1.0 );\n}\n\nvec3 ACESFilm( vec3 x )\n{\n    float a = 2.51;\n    float b = 0.03;\n    float c = 2.43;\n    float d = 0.59;\n    float e = 0.14;\n    return saturate( ( x * ( a * x + b ) ) \/ ( x * ( c * x + d ) + e ) );\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 screenUV \t= fragCoord.xy \/ iResolution.xy;\n    vec2 bloomUV \t= screenUV \/ 4.0;\n  \n  \tvec3 color\t= texture( iChannel0, screenUV ).xyz;\n\tvec3 bloom\t= texture( iChannel1, bloomUV ).xyz;\n    color += bloom * 0.15;\n    \n    \/\/ vignette\n    float vignette = screenUV.x * screenUV.y * ( 1.0 - screenUV.x ) * ( 1.0 - screenUV.y );\n    vignette = clamp( pow( 16.0 * vignette, 0.3 ), 0.0, 1.0 );\n    color *= vignette; \n    \n    color = pow( color, vec3( 1.3 ) ) * 1.0;\n    color = ACESFilm( color );\n    \n    fragColor = vec4( pow( color, vec3( 1.0 \/ 2.2 ) ), 1.0 );\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XdfGRn",
+                    "filepath": "\/media\/a\/e6e5631ce1237ae4c05b3563eda686400a401df4548d0f9fad40ecac1659c46c.jpg",
+                    "previewfilepath": "\/media\/ap\/e6e5631ce1237ae4c05b3563eda686400a401df4548d0f9fad40ecac1659c46c.jpg",
+                    "type": "texture",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4sfGRn",
+                    "filepath": "\/media\/a\/fb918796edc3d2221218db0811e240e72e340350008338b0c07a52bd353666a6.jpg",
+                    "previewfilepath": "\/media\/ap\/fb918796edc3d2221218db0811e240e72e340350008338b0c07a52bd353666a6.jpg",
+                    "type": "texture",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4sf3Rn",
+                    "filepath": "\/media\/a\/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+                    "previewfilepath": "\/media\/ap\/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4sf3Rr",
+                    "filepath": "\/media\/a\/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+                    "previewfilepath": "\/media\/ap\/ad56fba948dfba9ae698198c109e71f118a54d209c0ea50d77ea546abad89c57.png",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Main scene\n\n\/\/ #define FREE_CAMERA\n\nconst float MATH_PI = float( 3.14159265359 );\n\nfloat saturate( float x )\n{\n    return clamp( x, 0.0, 1.0 );\n}\n\nvec3 saturate( vec3 x )\n{\n    return clamp( x, 0.0, 1.0 );\n}\n\nfloat Square( float x )\n{\n    return x * x;\n}\n\nvec3 SRGB( vec3 x )\n{\n    return x * x;\n}\n\nfloat VisibilityTerm( float roughness, float ndotv, float ndotl )\n{\n\tfloat m2\t= roughness * roughness;\n\tfloat visV\t= ndotl * sqrt( ndotv * ( ndotv - ndotv * m2 ) + m2 );\n\tfloat visL\t= ndotv * sqrt( ndotl * ( ndotl - ndotl * m2 ) + m2 );\n\treturn 0.5 \/ max( visV + visL, 0.00001 );\n}\n\nfloat DistributionTerm( float roughness, float ndoth )\n{\n\tfloat m2\t= roughness * roughness;\n\tfloat d\t\t= ( ndoth * m2 - ndoth ) * ndoth + 1.0;\n\treturn m2 \/ ( d * d * MATH_PI );\n}\n\nvec3 FresnelTerm( vec3 specularColor, float vdoth )\n{\n\tvec3 fresnel = clamp( 50.0 * specularColor.y, 0.0, 1.0 ) * specularColor + ( 1.0 - specularColor ) * pow( ( 1.0 - vdoth ), 5.0 );\n\treturn fresnel;\n}\n\nvec3 LightSpecular( vec3 normal, vec3 viewDir, vec3 lightDir, vec3 lightColor, float roughness, vec3 specularColor )\n{\n\tvec3 halfVec = normalize( viewDir + lightDir );\n\n\tfloat vdoth = saturate( dot( viewDir,\thalfVec\t ) );\n\tfloat ndoth\t= saturate( dot( normal,\thalfVec\t ) );\n\tfloat ndotv = saturate( dot( normal,\tviewDir  ) );\n\tfloat ndotl = saturate( dot( normal,\tlightDir ) );\n    \n   \tvec3\tf = FresnelTerm( specularColor, vdoth );\n\tfloat\td = DistributionTerm( roughness, ndoth );\n\tfloat\tv = VisibilityTerm( roughness, ndotv, ndotl );\n    \n    vec3 specular;\n\tspecular = lightColor * f * ( d * v * MATH_PI * ndotl );\n\treturn specular;\n}\n\nfloat Sphere( vec3 p, float s )\n{\n    return length( p ) - s;\n}\n\nfloat RoundBox( vec3 p, vec3 b, float r )\n{\n \tvec3 d = abs( p ) - b;\n\treturn min( max( d.x, max( d.y, d.z ) ), 0.0 ) + length( max( d, 0.0 ) ) - r;\n}\n\nfloat Intersect( float a, float b )\n{\n    return max( a, b );\n}\n\nfloat Substract( float a, float b )\n{\n    return max( a, -b );\n}\n\nfloat SubstractRound( float a, float b, float r ) \n{\n    vec2 u = max( vec2( r + a, r - b ), vec2( 0.0, 0.0 ) );\n    return min( -r, max( a, -b ) ) + length( u );\n}\n\nfloat Union( float a, float b )\n{\n    return min( a, b );\n}\n\nfloat UnionRound( float a, float b, float r ) \n{\n    vec2 u = max( vec2( r - a, r - b ), vec2( 0.0, 0.0 ) );\n    return max( r, min( a, b ) ) - length( u );\n}\n\nvoid Rotate( inout vec2 p, float a ) \n{\n    p = cos( a ) * p + sin( a ) * vec2( p.y, -p.x );\n}\n\nfloat Rand( vec2 co )\n{\n    return fract( sin( dot( co.xy, vec2( 12.9898, 78.233 ) ) ) * 43758.5453 );\n}\n\nfloat Terrain( vec2 p )\n{\t\n\tfloat ret = 0.0;\n    \n    p.x += cos( p.y * 0.1 ) * 10.0;\n    \n    ret = sin( p.x * 0.07 ) * 4.0 + cos( p.y * 0.08 + p.x * 0.03 ) * 2.0 + sin( p.y * 0.01 - 0.5 * MATH_PI ) * 20.0 + 15.0;\n\tret += textureLod( iChannel0, p \/ 32.0, 1.0 ).x * 0.5 + textureLod( iChannel0, p \/ 64.0, 1.0 ).x * 1.0;\n    return ret;\n}\n\nfloat Scene( vec3 p )\n{\n    float ret = p.y - Terrain( p.xz );\n\n    vec3 t = p;\n    t.x = mod( t.x, 200.0 ) - 0.5 * 200.0;\n    t.z = mod( t.z, 200.0 ) - 0.5 * 200.0;\n    Rotate( t.yz, 0.1 * MATH_PI );      \n    ret = UnionRound( ret, RoundBox( t, vec3( 10.0, 100.0, 10.0 ), 2.0 ), 30.0 );\n    \n    t = p;\n    t.x = mod( t.x, 150.0 ) - 0.5 * 150.0;\n    t.z = mod( t.z, 150.0 ) - 0.5 * 150.0;\n    Rotate( t.yz, -0.2 * MATH_PI );      \n    ret = UnionRound( ret, RoundBox( t, vec3( 4.0, 30.0, 4.0 ), 1.0 ), 6.0 );    \n    \n    t = p;\n    t.x = mod( t.x, 30.0 ) - 0.5 * 30.0;\n    t.z = mod( t.z, 30.0 ) - 0.5 * 30.0;\n    Rotate( t.yz, 0.2 * MATH_PI );\n    t.y += 4.0;\n    float box2 = RoundBox( t, vec3( 2.0, 10.0, 2.0 ), 0.25 );\n    \n    t = p;\n    t.x = mod( t.x, 70.0 ) - 0.5 * 70.0;\n    t.z = abs( t.z ) - 30.0;\n\tRotate( t.xz, 0.2 * MATH_PI ); \n    t.y += 4.0;\n    box2 = Union( box2, RoundBox( t, vec3( 4.0, 8.0, 10.0 ), 1.0 ) );\n\n    ret = UnionRound( ret, box2, 3.0 );\n    \n    t = p;\n    t.x -= 150.0;\n    t.x = mod( t.x, 200.0 ) - 0.5 * 200.0;\n    t.y += 2.0;\n    t.z = abs( t.z ) - 7.0;\n    Rotate( t.yz, -0.1 * MATH_PI );\n    float tunnel = RoundBox( t, vec3( 2.0, 13.0, 2.0 ), 0.25 );\n    tunnel = Union( tunnel, RoundBox( t + vec3( 8.0, 0.0, 0.0 ), vec3( 2.0, 7.0, 2.0 ), 0.25 ) );\n    tunnel = Union( tunnel, RoundBox( t + vec3( 16.0, 0.0, 0.0 ), vec3( 2.0, 9.0, 2.0 ), 0.25 ) );\n\ttunnel = Union( tunnel, RoundBox( t + vec3( 32.0, 0.0, 0.0 ), vec3( 2.0, 12.0, 2.0 ), 0.25 ) );\n\ttunnel = Union( tunnel, RoundBox( t + vec3( 40.0, 0.0, 0.0 ), vec3( 2.0, 7.0, 2.0 ), 0.25 ) );\n    ret = UnionRound( ret, tunnel, 3.0 );\n                   \n    return ret;\n}\n\nfloat CastRay( in vec3 ro, in vec3 rd )\n{\n    const float maxd = 500.0;\n    \n    float h = 1.0;\n    float t = 0.0;\n   \n    for ( int i = 0; i < 128; ++i )\n    {\n        if ( h < 0.01 || t > maxd ) \n        {\n            break;\n        }\n        \n        h = Scene( ro + rd * t );\n        t += h;\n    }\n\n    if ( t > maxd )\n    {\n        t = -1.0;\n    }\n\n    return t;\n}\n\nvec3 SceneNormal( in vec3 pos )\n{\n    vec3 eps = vec3( 0.01, 0.0, 0.0 );\n    vec3 nor = vec3(\n        Scene( pos + eps.xyy ) - Scene( pos - eps.xyy ),\n        Scene( pos + eps.yxy ) - Scene( pos - eps.yxy ),\n        Scene( pos + eps.yyx ) - Scene( pos - eps.yyx ) );\n    return normalize( -nor );\n}\n\nvec3 NormalMapTex( vec2 uv )\n{\n\tfloat eps = -1.0 \/ 256.0;        \n    float a = texture( iChannel2, uv + vec2( 0.0, 0.0 ) ).x;\n\tfloat b = texture( iChannel2, uv + vec2( eps, 0.0 ) ).x;\n    float c = texture( iChannel2, uv + vec2( 0.0, eps ) ).x;\n\treturn -normalize( vec3( b - a, 0.25, c - a ) );\n}\n\nvec3 NormalMap( vec3 normal, vec3 pos, vec3 triPlanarWeights )\n{\n    return normalize( normal + NormalMapTex( pos.yz ) * triPlanarWeights.x + NormalMapTex( pos.xz ) * triPlanarWeights.y + NormalMapTex( pos.xy ) * triPlanarWeights.z );\n}\n\nfloat SmoothNoise( vec3 v )\n{\n\tvec3 i = floor( v );\n\tvec3 f = fract( v );\n\n\tf = f * f * ( -2.0 * f + 3.0 );\n\n\tvec2 uv\t\t= ( i.xy + vec2( 7.0, 17.0 ) * i.z ) + f.xy;\n\tfloat lowz\t= textureLod( iChannel1, ( uv.xy + 0.5 ) \/ 64.0, 0.0 ).x;\n\n\tuv\t\t\t= ( i.xy + vec2( 7.0, 17.0 ) * ( i.z + 1.0 ) ) + f.xy;\n\tfloat highz = textureLod( iChannel1, ( uv.xy + 0.5 ) \/ 64.0, 0.0 ).x;\n\tfloat r\t\t= mix( lowz, highz, f.z );\n\n\treturn 2.0 * r - 1.0;\n}\n\nfloat DensityNoise( vec3 pos, vec3 noisePosScale, vec3 noisePosScaleBias, float noiseScale, float noiseBias )\n{\n\tpos = pos * noisePosScale + noisePosScaleBias;\n\n\tfloat noise = SmoothNoise( pos ) + 0.5 * SmoothNoise( pos * 3.07 );\n\tnoise = saturate( noise * noiseScale + noiseBias );\n\n\treturn noise;\n}\n\nvoid VolumetricFog( inout vec3 color, vec3 rayOrigin, vec3 rayDir, float sceneT, vec2 fragCoord )\n{\n    sceneT = sceneT <= 0.0 ? 500.0 : sceneT;\n    \n    float fogHeightFalloff = 0.1;\n    float fogDensity = 0.10;\n    \n    vec3 seed = vec3( 0.06711056, 0.00583715, 52.9829189 );\n    float dither = fract( seed.z * fract( dot( fragCoord.xy, seed.xy ) ) );\n    \n    float fogAlpha = 0.0;\n    for ( int i = 0; i < 64; ++i )\n    {\n        float stepSize = 1.0;        \n        float t = ( float( i ) + 0.5 + dither ) * stepSize;\n        if ( t <= sceneT )\n        {\n        \tvec3 p = rayOrigin + t * rayDir;\n        \tfloat s = DensityNoise( p + vec3( iTime * 1.0, 0.0, iTime * 3.0 ), vec3( 0.3 ), vec3( 0.0, 0.0, 0.0 ), 1.0, 0.0 ) * exp( -( p.y + 10.0 ) * fogHeightFalloff );\n            fogAlpha += s * fogDensity * stepSize * ( 1.0 - exp( -fogDensity * t ) );\n        }\n    } \n    \n    fogAlpha = saturate( fogAlpha );\n    \n    vec3 lightDir \t\t= normalize( vec3( -0.8, -1.0, -0.8 ) );\n    float k\t\t\t\t= 0.8;\n\tfloat cosPhi\t\t= dot( lightDir, rayDir );\n\tfloat shlickPhase\t= ( 1.0 - k * k ) \/ ( 4.0 * MATH_PI * Square( 1.0 + k * cosPhi ) );\n    vec3 fogColor \t\t= vec3( 0.6, 0.5, 0.4 ) * 1.0 + vec3( 1.0, 1.0, 0.5 ) * shlickPhase;\n    \n    color = color * ( 1.0 - fogAlpha ) + fogColor * fogAlpha;\n}\n\nfloat RaySphere( vec3 rayOrigin, vec3 rayDir, vec3 spherePos, float sphereRadius )\n{\n\tvec3 oc = rayOrigin - spherePos;\n\t\n\tfloat b = dot( oc, rayDir );\n\tfloat c = dot( oc, oc ) - sphereRadius * sphereRadius;\n\tfloat h = b * b - c;\n\t\n\tfloat t;\n\tif ( h < 0.0 )\n    {\n\t\tt = -1.0;\n    }\n\telse\n    {\n\t\tt = ( -b - sqrt( h ) );\n    }\n\treturn t;\n}\n\nvec3 Sky( vec3 rayDir )\n{\n    \/\/ sky and sun\n    vec3 skyPos     = rayDir;\n    vec2 skyAngle   = vec2( atan( skyPos.z, skyPos.x ), acos( skyPos.y ) );\n\n    \/\/ sky\n    vec3 color = mix( vec3( 0.17, 0.16, 0.09 ), vec3( 0.34, 0.09, 0.07 ), saturate( 0.6 - skyPos.y ) );    \n    color += vec3( texture( iChannel3, skyAngle ) ) * 0.05;\n    \n    \/\/ sun\n    float sun = exp( -5.0 * length( skyAngle - vec2( 0.8, 1.0 ) ) );\n    color += vec3( 1.0, 1.0, 0.5 ) * sun;\n    \n    sun = RaySphere( vec3( 0.0 ), rayDir, vec3( 1.0, 1.0, 1.0 ), 0.05 );\n    if ( sun >= 0.0 )\n    \tcolor = vec3( 1.0, 1.0, 0.9 );    \n\n\n    vec3 planetPos0 = vec3( 1.5, 0.5, -0.8 );\n    vec3 planetPos1 = vec3( 0.0, 4.0, 8.0 );\n    float planet0 = RaySphere( vec3( 0.0 ), rayDir, planetPos0, 0.6 );\n    float planet1 = RaySphere( vec3( 0.0 ), rayDir, planetPos1, 2.0 );\n    \n    float planet = max( planet0, planet1 );\n    vec3 planetPos = planet1 >= 0.0 ? planetPos1 : planetPos0;\n\n    if ( planet >= 0.0 )\n    {\n    \tvec3 planetNormal = normalize( planetPos - planet * rayDir );\n    \tvec3 lightDir = normalize( planetPos - vec3( 15.0, 15.0, 15.0 ) );\n    \tcolor = color * 0.8 + vec3( 1.0, 1.0, 0.5 ) * saturate( dot( planetNormal, lightDir ) );\n    }  \n    \n    \/\/ stars\n    vec2 starTile   = floor( skyAngle.xy * 20.0 );\n    vec2 starPos    = fract( skyAngle.xy * 20.0 ) * 2.0 - 1.0;\n    float starRand  = Rand( starTile + vec2( 0.1, 0.3 ) );\n    starRand = starRand > 0.9 ? starRand : 0.0;\n    starRand = planet >= 0.0 ? 0.0 : starRand;\n    color += 0.2 * vec3( 1.2, 2.0, 1.2 ) * starRand * exp( -20.0 * length( starPos ) );    \n    \n    \/\/ meteors\n    vec2 meteorAngle = vec2( skyAngle.x + skyAngle.y, skyAngle.x - skyAngle.y );\n    vec2 meteorPos0 = ( meteorAngle.xy + vec2( 0.0, iTime * 0.5 ) );\n    vec2 meteorPos1 = ( meteorAngle.xy + vec2( 0.0, iTime * 0.5 + 0.75 ) );\n    meteorPos0.x = fract( meteorPos0.x + floor( meteorPos0.y ) * 0.13171243 );\n    meteorPos1.x = fract( meteorPos1.x + floor( meteorPos1.y ) * 0.34234243 + 0.5 );\n    meteorPos0.y = fract( meteorPos0.y * 0.5 ) * 2.0;\n    meteorPos1.y = fract( meteorPos1.y * 0.5 ) * 2.0;\n    meteorPos0 = meteorPos0 * 2.0 - 1.0;\n    meteorPos1 = meteorPos1 * 2.0 - 1.0;\n\tmeteorPos0.y *= 0.05;\n    meteorPos1.y *= 0.05;\n    color += 0.1 * vec3( 1.2, 2.0, 1.2 ) * exp( -150.0 * min( length( meteorPos0 ), length( meteorPos1 ) ) );\n    \n    return color;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 screenUV = fragCoord.xy \/ iResolution.xy;\n    vec2 p = -1.0 + 2.0 * screenUV;\n    p.x *= iResolution.x \/ iResolution.y;\n    p.x = 1.0 - p.x;\n\n    vec2 mo = iMouse.xy \/ iResolution.xy;\n    \n    float cameraOffset\t= iTime * 5.0;\n    float yaw           = 0.35 * MATH_PI;    \n    float pitch         = -0.3;\n    \n    float camTime = mod( iTime, 40.0 );\n    \n    float w = smoothstep( 0.0, 1.0, saturate( camTime * 0.25 ) );\n    yaw \t= mix( yaw, \t1.3, w );\n    pitch \t= mix( pitch, \t0.3, w );    \n\n    w = smoothstep( 0.0, 1.0, saturate( ( camTime - 4.0 ) * 0.1 ) );\n    yaw \t= mix( yaw, \t0.1 * MATH_PI, w );\n    pitch \t= mix( pitch, \t-0.2 * MATH_PI, w );\n    \n    w = smoothstep( 0.0, 1.0, saturate( ( camTime - 15.0 ) * 0.07 ) );\n    yaw \t= mix( yaw, \t0.8 * MATH_PI, w );\n    pitch \t= mix( pitch, \t0.0, w );\n    \n    w = smoothstep( 0.0, 1.0, saturate( ( camTime - 25.0 ) * 0.1 ) );\n    yaw \t= mix( yaw, \t0.35 * MATH_PI, w );\n    pitch \t= mix( pitch, \t-0.3, w );\n    \n#ifdef FREE_CAMERA\n    yaw\t\t= -6.0 * mo.x - 0.5 * MATH_PI;    \n    pitch\t= -6.0 * mo.y + 0.5 * MATH_PI;\n#endif\n    \n    vec3 rayOrigin;    \n    rayOrigin.x = iTime * 5.0;\n    rayOrigin.y = Terrain( vec2( rayOrigin.x, 0.0 ) ) + 3.0;\n    rayOrigin.z = 0.0;\n    \n    mat3 rotY = mat3(\n        vec3( cos( yaw ), 0.0, -sin( yaw ) ),\n\t\tvec3( 0.0, 1.0, 0.0 ),        \n        vec3( sin( yaw ), 0.0, cos( yaw ) )\n        );          \n    \n    mat3 rotZ = mat3(\n        vec3( 1.0, 0.0, 0.0 ),\n        vec3( 0.0, cos( pitch ), sin( pitch ) ),\n        vec3( 0.0, -sin( pitch ), cos( pitch ) )\n        );    \n    \n    \/\/ ray direction\n    vec3 rayDir = rotY * rotZ * normalize( vec3( p.xy, 2.5 ) );  \n    vec3 color = vec3( 0.0 );\n    \n    float t = CastRay( rayOrigin, rayDir );\n    if ( t > 0.0 )\n    {\n        vec3 pos = rayOrigin + t * rayDir;\n        vec3 normal = SceneNormal( pos );\n        \n        \/\/ texture scale\n        float uvScale \t\t\t= 0.25; \n        float normalMapScale \t= 0.5;\n        if ( abs( pos.z ) > 50.0 )\n        {\n            uvScale \t\t= 0.05;\n            normalMapScale \t= 0.25;\n        }\n        \n\t\tvec3 triPlanarWeights = abs( normal );\n        triPlanarWeights = normalize( max( triPlanarWeights, 0.0001 ) );\n\t\ttriPlanarWeights \/= triPlanarWeights.x + triPlanarWeights.y + triPlanarWeights.z;\n\n        vec3 diffuseColor\t= vec3( 1.0 );\n        vec3 specularColor \t= vec3( 0.04 );\n        vec3 emissive \t\t= vec3( 0.0 );\n        float roughness \t= 1.0;\n                \n        float snowLayer = texture( iChannel0, pos.xz * 0.005 ).x\n        \t+ 0.5 * texture( iChannel3, pos.xz * 0.01 ).x\n            + 0.25 * texture( iChannel2, pos.xz * 0.05 ).x;\n        float snow = saturate( ( snowLayer - 0.5 ) * 4.0 ) * saturate( -normal.y );\n        \n        \/\/ ice\n\t\tdiffuseColor \t= vec3( 0.0 );\n\t\tspecularColor \t= vec3( 0.04 );\n\t\troughness\t\t= 0.1;\n        normal\t\t\t= NormalMap( normal, pos * uvScale, triPlanarWeights * normalMapScale );\n\n       \t\/\/ snow\n       \tdiffuseColor \t= mix( diffuseColor, vec3( 0.7 ), snow );\n       \tspecularColor \t= vec3( 0.04 );\n       \troughness\t\t= mix( roughness, 1.0, snow );\n\n        vec3 lightColor = vec3( 1.0, 1.0, 0.8 ) * 2.0;\n        vec3 lightDir \t= normalize( vec3( -0.8, -1.0, -0.8 ) );\n\n        float wrap = 0.5;\n        vec3 diffuse = lightColor * saturate( ( dot( normal, lightDir ) + wrap ) \/ ( ( 1.0 + wrap ) * ( 1.0 + wrap ) ) );\n        color = diffuseColor * diffuse;\n        color += LightSpecular( normal, rayDir, lightDir, lightColor, roughness, specularColor );\n                \n        \/\/ ambient\n        float ndotv = saturate( dot( normal, rayDir ) );\n        vec3 envSpecular = FresnelTerm( specularColor, ndotv );        \n        vec3 refl = reflect( rayDir, normal );\n        color += diffuseColor * 0.2;\n        color += envSpecular * Sky( refl );\n        \n        \/\/ refraction        \n        float depth0 = abs( pos.z ) > 50.0 ? 10.0 : 1.0;\n        float depth1 = depth0 * 5.0;\n        vec3 refrRayDir = refract( rayDir, -normal, 1.03 );\n        refrRayDir = normalize( mix( rayDir, refrRayDir, smoothstep( 0.0, 1.0, saturate( length( refrRayDir ) ) ) ) );\n        vec2 layer0UVX = ( rayOrigin + ( t + depth0 ) * refrRayDir ).yz * uvScale;\n        vec2 layer1UVX = ( rayOrigin + ( t + depth1 ) * refrRayDir ).yz * uvScale * 0.5 + 0.5;\n        vec2 layer0UVY = ( rayOrigin + ( t + depth0 ) * refrRayDir ).xz * uvScale;\n        vec2 layer1UVY = ( rayOrigin + ( t + depth1 ) * refrRayDir ).xz * uvScale * 0.5 + 0.5;\n        vec2 layer0UVZ = ( rayOrigin + ( t + depth0 ) * refrRayDir ).xy * uvScale;\n        vec2 layer1UVZ = ( rayOrigin + ( t + depth1 ) * refrRayDir ).xy * uvScale * 0.5 + 0.5;\n        \n        float refrLayer0X = texture( iChannel0, layer0UVX ).xyz.x;\n        float refrLayer1X = texture( iChannel0, layer1UVX ).xyz.x;\n        float refrLayer0Y = texture( iChannel0, layer0UVY ).xyz.x;\n        float refrLayer1Y = texture( iChannel0, layer1UVY ).xyz.x;\n        float refrLayer0Z = texture( iChannel0, layer0UVZ ).xyz.x;\n        float refrLayer1Z = texture( iChannel0, layer1UVZ ).xyz.x;\n\n        vec3 iceFogColor = vec3( 0.3, 0.6, 0.7 ); \n        vec3 refrColorX = vec3( refrLayer0X + ( 1.0 - refrLayer0X ) * refrLayer1X + 0.1 ) * iceFogColor;\n        vec3 refrColorY = vec3( refrLayer0Y + ( 1.0 - refrLayer0Y ) * refrLayer1Y + 0.1 ) * iceFogColor;\n        vec3 refrColorZ = vec3( refrLayer0Z + ( 1.0 - refrLayer0Z ) * refrLayer1Z + 0.1 ) * iceFogColor;\n\n        vec3 refrColor = refrColorX * triPlanarWeights.x + refrColorY * triPlanarWeights.y + refrColorZ * triPlanarWeights.z;\n        refrColor = refrColor * refrColor;\n        color += ( 1.0 - envSpecular ) * refrColor * ( 1.0 - snow );\n        \n\t\t\/\/ fog\n        color = mix( vec3( 0.17, 0.16, 0.09 ), color, saturate( exp( -0.005 * t ) ) );\n    }\n    else\n    {\n        color = Sky( rayDir );\n    }\n    \n\tVolumetricFog( color, rayOrigin, rayDir, t, fragCoord );\n    \n    fragColor = vec4( color, 1.0 );\n}",
+            "name": "Buf A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Bloom downsample\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 srcUV = 4.0 * fragCoord.xy \/ iResolution.xy;\n    if ( srcUV.x > 1.0 || srcUV.y > 1.0 )\n    {\n        discard;\n    }\n\n    vec2 off = 0.7 \/ iResolution.xy;\n    vec3 mainTap = texture( iChannel0, srcUV ).xyz;\n    vec3 color = mainTap;\n    color += texture( iChannel0, srcUV + vec2( +off.x, +off.y ) ).xyz;\n    color += texture( iChannel0, srcUV + vec2( -off.x, +off.y ) ).xyz;\n    color += texture( iChannel0, srcUV + vec2( -off.x, -off.y ) ).xyz;\n    color += texture( iChannel0, srcUV + vec2( +off.x, -off.y ) ).xyz;\n    \n\tfloat bloomLuminance = ( mainTap.x + mainTap.y + mainTap.z ) \/ 3.0 - 0.5;\n\tcolor *= clamp( bloomLuminance \/ 2.0, 0.0, 1.0 );\n    color = clamp( color, 0.0, 100.0 );\n    \n    fragColor = vec4( color \/ 5.0, 1.0 );\n}",
+            "name": "Buf B",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4sXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Bloom blur x\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 srcUV = fragCoord.xy \/ iResolution.xy;\n    if ( srcUV.x > 0.25 || srcUV.y > 0.25 )\n    {\n        discard;\n    }\n\n    float sigma \t= 14.0;\n    float sigma2Sq  = 2.0 * sigma * sigma;\n    float weightScale = 1.0 \/ sqrt( 3.14 * sigma2Sq );\n    vec3 color = vec3( 0.0 );\n    float weightSum = 0.0;\n    const int kernelSize = 32;\n    vec2 off = vec2( 1.0 \/ iResolution.x, 0.0 );\n    for ( int i = -kernelSize; i <= kernelSize; ++i )\n    {\n        vec2 tapUV = srcUV + off * float( i );\n     \tfloat weight = weightScale * exp( -( float( i ) * float( i ) ) \/ sigma2Sq );\n        weight = tapUV.x >= 0.25 ? 0.0 : weight;\n        weightSum += weight;\n        color += texture( iChannel0, tapUV ).xyz * weight;\n    }\n    color \/= weightSum;\n       \n    fragColor = vec4( color, 1.0 );\n}",
+            "name": "Buf C",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4sXGR8",
+                    "filepath": "\/media\/previz\/buffer02.png",
+                    "previewfilepath": "\/media\/previz\/buffer02.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XdfGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Bloom blur y\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 srcUV = fragCoord.xy \/ iResolution.xy;\n    if ( srcUV.x > 0.25 || srcUV.y > 0.25 )\n    {\n        discard;\n    }\n\n    float sigma \t= 14.0;\n    float sigma2Sq  = 2.0 * sigma * sigma;\n    float weightScale = 1.0 \/ sqrt( 3.14 * sigma2Sq );\n    vec3 color = vec3( 0.0 );\n    float weightSum = 0.0;\n    const int kernelSize = 32;\n    vec2 off = vec2( 0.0, 1.0 \/ iResolution.y );\n    for ( int i = -kernelSize; i <= kernelSize; ++i )\n    {\n        vec2 tapUV = srcUV + off * float( i );\n     \tfloat weight = weightScale * exp( -( float( i ) * float( i ) ) \/ sigma2Sq );\n        weight = tapUV.y >= 0.25 ? 0.0 : weight;\n        weightSum += weight;\n        color += texture( iChannel0, tapUV ).xyz * weight;\n    }\n    color \/= weightSum;\n       \n    fragColor = vec4( color, 1.0 );\n}",
+            "name": "Buf D",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

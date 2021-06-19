@@ -1,0 +1,70 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "Msl3Rr",
+        "date": "1362385890",
+        "viewed": 76944,
+        "name": "Cubescape",
+        "username": "iq",
+        "description": "Raymarched rounded pulsating cubes. Mixes raytracing in a (2D) grid and raymarching within a cell. If it runs to slow for you, disable the 4x supersampling by making line 6 take value 1",
+        "likes": 461,
+        "published": 3,
+        "flags": 1,
+        "tags": [
+            "procedural",
+            "3d",
+            "raymarching",
+            "sound",
+            "reactive",
+            "music",
+            "vr"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XsfGRn",
+                    "filepath": "\/media\/a\/1f7dca9c22f324751f2a5a59c9b181dfe3b5564a04b724c657732d0bf09c99db.jpg",
+                    "previewfilepath": "\/media\/ap\/1f7dca9c22f324751f2a5a59c9b181dfe3b5564a04b724c657732d0bf09c99db.jpg",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGzn",
+                    "filepath": "\/media\/a\/29de534ed5e4a6a224d2dfffab240f2e19a9d95f5e39de8898e850efdb2a99de.mp3",
+                    "previewfilepath": "\/media\/ap\/29de534ed5e4a6a224d2dfffab240f2e19a9d95f5e39de8898e850efdb2a99de.mp3",
+                    "type": "music",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Created by inigo quilez - iq\/2013\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/\/---------------------------------\n\n#if HW_PERFORMANCE==0\n#define AA 1\n#else\n#define AA 2   \/\/ make this 2 or 3 for antialiasing\n#endif\n\nfloat hash( float n ) { return fract(sin(n)*13.5453123); }\n\nfloat maxcomp( in vec3 v ) { return max( max( v.x, v.y ), v.z ); }\n\nfloat dbox( vec3 p, vec3 b, float r )\n{\n    return length(max(abs(p)-b,0.0))-r;\n}\n\nvec4 texcube( sampler2D sam, in vec3 p, in vec3 n )\n{\n    vec3 a = n*n;\n\tvec4 x = texture( sam, p.yz );\n\tvec4 y = texture( sam, p.zx );\n\tvec4 z = texture( sam, p.yx );\n\treturn (x*a.x + y*a.y + z*a.z) \/ (a.x + a.y + a.z);\n}\n\n\/\/---------------------------------\n\nfloat freqs[4];\n\nvec3 mapH( in vec2 pos )\n{\n\tvec2 fpos = fract( pos ); \n\tvec2 ipos = floor( pos );\n\t\n    float f = 0.0;\t\n\tfloat id = hash( ipos.x + ipos.y*57.0 );\n\tf += freqs[0] * clamp(1.0 - abs(id-0.20)\/0.30, 0.0, 1.0 );\n\tf += freqs[1] * clamp(1.0 - abs(id-0.40)\/0.30, 0.0, 1.0 );\n\tf += freqs[2] * clamp(1.0 - abs(id-0.60)\/0.30, 0.0, 1.0 );\n\tf += freqs[3] * clamp(1.0 - abs(id-0.80)\/0.30, 0.0, 1.0 );\n\n    f = pow( clamp( f, 0.0, 1.0 ), 2.0 );\n    float h = 2.5*f;\n\n    return vec3( h, id, f );\n}\n\nvec3 map( in vec3 pos )\n{\n\tvec2  p = fract( pos.xz ); \n    vec3  m = mapH( pos.xz );\n\tfloat d = dbox( vec3(p.x-0.5,pos.y-0.5*m.x,p.y-0.5), vec3(0.3,m.x*0.5,0.3), 0.1 );\n    return vec3( d, m.yz );\n}\n\nconst float surface = 0.001;\n\nvec3 trace( vec3 ro, in vec3 rd, in float tmin, in float tmax )\n{\n    ro += tmin*rd;\n    \n\tvec2 pos = floor(ro.xz);\n    vec3 rdi = 1.0\/rd;\n    vec3 rda = abs(rdi);\n\tvec2 rds = sign(rd.xz);\n\tvec2 dis = (pos-ro.xz+ 0.5 + rds*0.5) * rdi.xz;\n\t\n\tvec3 res = vec3( -1.0 );\n\n    \/\/ traverse regular grid (in 2D)\n\tvec2 mm = vec2(0.0);\n\tfor( int i=0; i<28; i++ ) \n\t{\n        vec3 cub = mapH( pos );\n\n        #if 1\n            vec2 pr = pos+0.5-ro.xz;\n\t\t\tvec2 mini = (pr-0.5*rds)*rdi.xz;\n\t        float s = max( mini.x, mini.y );\n            if( (tmin+s)>tmax ) break;\n        #endif\n        \n        \n        \/\/ intersect box\n\t\tvec3  ce = vec3( pos.x+0.5, 0.5*cub.x, pos.y+0.5 );\n        vec3  rb = vec3(0.3,cub.x*0.5,0.3);\n        vec3  ra = rb + 0.12;\n\t\tvec3  rc = ro - ce;\n        float tN = maxcomp( -rdi*rc - rda*ra );\n        float tF = maxcomp( -rdi*rc + rda*ra );\n        if( tN < tF )\/\/&& tF > 0.0 )\n        {\n            \/\/ raymarch\n            float s = tN;\n            float h = 1.0;\n            for( int j=0; j<24; j++ )\n            {\n                h = dbox( rc+s*rd, rb, 0.1 ); \n                s += h;\n                if( s>tF ) break;\n            }\n\n            if( h < (surface*s*2.0) )\n            {\n                res = vec3( s, cub.yz );\n                break; \n            }\n            \n\t\t}\n\n        \/\/ step to next cell\t\t\n\t\tmm = step( dis.xy, dis.yx ); \n\t\tdis += mm*rda.xz;\n        pos += mm*rds;\n\t}\n\n    res.x += tmin;\n    \n\treturn res;\n}\n\nfloat usmoothstep( in float x )\n{\n    x = clamp(x,0.0,1.0);\n    return x*x*(3.0-2.0*x);\n}\n\nfloat softshadow( in vec3 ro, in vec3 rd, in float mint, in float maxt, in float k )\n{\n    float res = 1.0;\n    float t = mint;\n    for( int i=0; i<50; i++ )\n    {\n        float h = map( ro + rd*t ).x;\n        res = min( res, usmoothstep(k*h\/t) );\n        t += clamp( h, 0.05, 0.2 );\n        if( res<0.001 || t>maxt ) break;\n    }\n    return clamp( res, 0.0, 1.0 );\n}\n\nvec3 calcNormal( in vec3 pos, in float t )\n{\n    vec2 e = vec2(1.0,-1.0)*surface*t;\n    return normalize( e.xyy*map( pos + e.xyy ).x + \n\t\t\t\t\t  e.yyx*map( pos + e.yyx ).x + \n\t\t\t\t\t  e.yxy*map( pos + e.yxy ).x + \n\t\t\t\t\t  e.xxx*map( pos + e.xxx ).x );\n}\n\nconst vec3 light1 = vec3(  0.70, 0.52, -0.45 );\nconst vec3 light2 = vec3( -0.71, 0.000,  0.71 );\nconst vec3 lpos = vec3(0.0) + 6.0*light1;\n\nvec2 boundingVlume( vec2 tminmax, in vec3 ro, in vec3 rd )\n{\n    float bp = 2.7;\n    float tp = (bp-ro.y)\/rd.y;\n    if( tp>0.0 ) \n    {\n        if( ro.y>bp ) tminmax.x = max( tminmax.x, tp );\n        else          tminmax.y = min( tminmax.y, tp );\n    }\n    bp = 0.0;\n    tp = (bp-ro.y)\/rd.y;\n    if( tp>0.0 ) \n    {\n        if( ro.y>bp ) tminmax.y = min( tminmax.y, tp );\n    }\n    return tminmax;\n}\n\nvec3 doLighting( in vec3 col, in float ks,\n                 in vec3 pos, in vec3 nor, in vec3 rd )\n{\n    vec3  ldif = lpos - pos;\n    float llen = length( ldif );\n    ldif \/= llen;\n\tfloat con = dot( light1,ldif);\n\tfloat occ = mix( clamp( pos.y\/4.0, 0.0, 1.0 ), 1.0, 0.2*max(0.0,nor.y) );\n    vec2 sminmax = vec2(0.01, 5.0);\n\n    float sha = softshadow( pos, ldif, sminmax.x, sminmax.y, 32.0 );;\n\t\t\n    float bb = smoothstep( 0.5, 0.8, con );\n    float lkey = clamp( dot(nor,ldif), 0.0, 1.0 );\n\tvec3  lkat = vec3(1.0);\n          lkat *= vec3(bb*bb*0.6+0.4*bb,bb*0.5+0.5*bb*bb,bb).zyx;\n          lkat \/= 1.0+0.25*llen*llen;\t\t\n\t\t  lkat *= 30.0;\n          \/\/lkat *= sha;\n          lkat *= vec3(sha,0.6*sha+0.4*sha*sha,0.3*sha+0.7*sha*sha);\n    \n    float lbac = clamp( 0.5 + 0.5*dot( light2, nor ), 0.0, 1.0 );\n          lbac *= smoothstep( 0.0, 0.8, con );\n\t\t  lbac \/= 1.0+0.2*llen*llen;\t\t\n\t\t  lbac *= 7.0;\n\tfloat lamb = 1.0 - 0.5*nor.y;\n          lamb *= 1.0-smoothstep( 10.0, 25.0, length(pos.xz) );\n\t\t  lamb *= 0.25 + 0.75*smoothstep( 0.0, 0.8, con );\n\t\t  lamb *= 0.25;\n\n    vec3 lin  = 1.0*vec3(1.60,0.70,0.30)*lkey*lkat*(0.5+0.5*occ);\n         lin += 1.0*vec3(0.20,0.05,0.02)*lamb*occ*occ;\n         lin += 1.0*vec3(0.70,0.20,0.08)*lbac*occ*occ;\n         lin *= vec3(1.3,1.1,1.0);\n    \n    col = col*lin;\n\n    vec3 hal = normalize(ldif-rd);\n    vec3 spe = lkey*lkat*(0.5+0.5*occ)*5.0*\n               pow( clamp(dot(hal, nor),0.0,1.0), 6.0+6.0*ks ) * \n               (0.04+0.96*pow(clamp(1.0-dot(hal,ldif),0.0,1.0),5.0));\n\n    col += (0.4+0.6*ks)*spe*vec3(0.8,0.9,1.0);\n\n    col = 1.4*col\/(1.0+col);\n    \n    return col;\n}\n\nmat3 setLookAt( in vec3 ro, in vec3 ta, float cr )\n{\n\tvec3  cw = normalize(ta-ro);\n\tvec3  cp = vec3(sin(cr), cos(cr),0.0);\n\tvec3  cu = normalize( cross(cw,cp) );\n\tvec3  cv = normalize( cross(cu,cw) );\n    return mat3( cu, cv, cw );\n}\n\nvec3 render( in vec3 ro, in vec3 rd )\n{\n    vec3 col = vec3( 0.0 );\n\n    vec2 tminmax = vec2(0.0, 40.0 );\n\n    tminmax = boundingVlume( tminmax, ro, rd );\n\n    \/\/ raytrace\n    vec3 res = trace( ro, rd, tminmax.x, tminmax.y );\n    if( res.y > -0.5 )\n    {\n        float t = res.x;\n        vec3 pos = ro + t*rd;\n        vec3 nor = calcNormal( pos, t );\n\n        \/\/ material\t\n        col = 0.5 + 0.5*cos( 6.2831*res.y + vec3(0.0, 0.4, 0.8) );\n        vec3 ff = texcube( iChannel1, 0.21*vec3(pos.x,4.0*res.z-pos.y,pos.z), nor ).xyz;\n        ff = pow(ff,vec3(1.3))*1.1;\n        col *= ff.x;\n\n        \/\/ lighting\n        col = doLighting( col, ff.x*ff.x*ff.x*2.0, pos, nor, rd );\n        col *= 1.0 - smoothstep( 20.0, 40.0, t );\n    }\n    return col;\n}\n\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tfreqs[0] = texture( iChannel0, vec2( 0.01, 0.25 ) ).x;\n\tfreqs[1] = texture( iChannel0, vec2( 0.07, 0.25 ) ).x;\n\tfreqs[2] = texture( iChannel0, vec2( 0.15, 0.25 ) ).x;\n\tfreqs[3] = texture( iChannel0, vec2( 0.30, 0.25 ) ).x;\n    \/\/-----------\n    float time = 5.0 + 0.2*iTime + 20.0*iMouse.x\/iResolution.x;\n    \n    vec3 tot = vec3(0.0);\n    #if AA>1\n    for( int j=0; j<AA; j++ )\n    for( int i=0; i<AA; i++ )\n    {\n        vec2 off = vec2(float(i),float(j))\/float(AA);\n    #else\n        vec2 off = vec2(0.0);\n    #endif        \n        vec2 xy = (-iResolution.xy+2.0*(fragCoord+off)) \/ iResolution.y;\n\n        \/\/ camera\t\n        vec3 ro = vec3( 8.5*cos(0.2+.33*time), 5.0+2.0*cos(0.1*time), 8.5*sin(0.1+0.37*time) );\n        vec3 ta = vec3( -2.5+3.0*cos(1.2+.41*time), 0.0, 2.0+3.0*sin(2.0+0.38*time) );\n        float roll = 0.2*sin(0.1*time);\n\n        \/\/ camera tx\n        mat3 ca = setLookAt( ro, ta, roll );\n        vec3 rd = normalize( ca * vec3(xy.xy,1.75) );\n        \n        vec3 col = render( ro, rd );\n        col = pow( col, vec3(0.4545) );\n        col = pow( col, vec3(0.8,0.93,1.0) );\n        \/\/col = clamp(col,0.0,1.0);\n        tot += col;\n        \n    #if AA>1\n    }\n\ttot \/= float(AA*AA);\n    #endif    \n    \n    \/\/ vigneting\n\tvec2 q = fragCoord.xy\/iResolution.xy;\n    tot *= 0.2 + 0.8*pow( 16.0*q.x*q.y*(1.0-q.x)*(1.0-q.y), 0.1 );\n\n    fragColor = vec4( tot, 1.0 );\n}\n\n\nvoid mainVR( out vec4 fragColor, in vec2 fragCoord, in vec3 fragRayOri, in vec3 fragRayDir )\n{\n\tfreqs[0] = texture( iChannel0, vec2( 0.01, 0.25 ) ).x;\n\tfreqs[1] = texture( iChannel0, vec2( 0.07, 0.25 ) ).x;\n\tfreqs[2] = texture( iChannel0, vec2( 0.15, 0.25 ) ).x;\n\tfreqs[3] = texture( iChannel0, vec2( 0.30, 0.25 ) ).x;\n\n    vec3 col = render( fragRayOri + vec3(0.0,4.0,0.0), fragRayDir );\n\n    col = pow( col, vec3(0.4545) );\n    col = pow( col, vec3(0.8,0.95,1.0) );\n\n    fragColor = vec4( col, 1.0 );\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

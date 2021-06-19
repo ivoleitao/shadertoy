@@ -1,0 +1,45 @@
+name: Shadertoy Publish
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'packages/**'
+      - '.github/workflows/publish.yml'
+
+jobs:
+  publish:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        sdk: ['stable']
+
+    steps:
+      - name: Setup os
+        run: |
+          sudo apt-get update
+          sudo apt-get install libsqlite3-dev -y
+
+      - name: Set up dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Bootstrap
+        run: |
+          pub global activate melos
+          melos bootstrap
+          echo '${{ secrets.PUB_CREDENTIALS }}' > ~/.pub-cache/credentials.json
+
+      - name: Coverage
+        run: |
+          melos run coverage
+
+      - name: Upload coverage
+        run: |
+          melos run codecov

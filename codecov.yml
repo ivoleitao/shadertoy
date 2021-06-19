@@ -1,0 +1,28 @@
+coverage:
+  range: 50..100
+  status:
+    project:
+      default: off
+      shadertoy:
+        flags: shadertoy
+      shadertoy_client:
+        flags: shadertoy_client
+      shadertoy_sqlite:
+        flags: shadertoy_sqlite
+      shadertoy_cli:
+        flags: shadertoy_cli
+
+
+flags:
+  stash:
+    paths:
+      - packages/shadertoy/lib/
+  stash_test:
+    paths:
+      - packages/shadertoy_client/lib/
+  stash_memory:
+    paths:
+      - packages/shadertoy_sqlite/lib/
+  stash_file:
+    paths:
+      - packages/shadertoy_cli/lib/

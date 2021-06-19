@@ -1,0 +1,179 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "MdV3Wz",
+        "date": "1454184710",
+        "viewed": 8311,
+        "name": "Fractal Explorer Multi-res.",
+        "username": "Dave_Hoskins",
+        "description": "Mandalay fractal. USE WASD\/CURSOR KEYS AND MOUSE.\nThanks to 'rebb' for the fractal formula reference in Fractal city_242.\nUses multi-resolution rendering for speed up.",
+        "likes": 140,
+        "published": 3,
+        "flags": 112,
+        "usePreview": 0,
+        "tags": [
+            "3d",
+            "raymarching",
+            "fractal",
+            "mandalay"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "repeat",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "nearest",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "nearest",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "llj3z3",
+                    "filepath": "https:\/\/soundcloud.com\/nitenichiryu\/dubtechnoblogshowmixlr-2016-01-24",
+                    "previewfilepath": "https:\/\/soundcloud.com\/nitenichiryu\/dubtechnoblogshowmixlr-2016-01-24",
+                    "type": "musicstream",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 0
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Fractal Explorer Multi-res. January 2016\n\/\/ by David Hoskins\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\/\/ https:\/\/www.shadertoy.com\/view\/MdV3Wz\n\n\/\/ Mandalay fractal. Thanks to 'rebb' for the fractal fomula reference in Fractal city_242.\n\/\/ Here:- https:\/\/www.shadertoy.com\/view\/MsK3DR\n\n\/\/ Enable antialiasing...\n#define ANTIALIAS\n\n\/\/ * * CONTROLS * *\n\/\/ WASD or CURSOR keys\n\/\/ Mouse drag to turn.\n\/\/ SHIFT orw SPACE for 2X speed\n\n\/\/--------------------------------------------------------------------------\n#define SUN_COLOUR vec3(1., .95, .9)\n#define FOG_COLOUR vec3(.12, 0.13, 0.14)\n#define HASHSCALE .1031\n#define TAU 6.28318530718\n\nvec2 fcoord;\n\nvec2 camStore = vec2(4.0,  0.0);\nvec2 rotationStore\t= vec2(1.,  0.);\nvec3 sunLight  = normalize(vec3(  0.4, 0.7,  0.4 ));\n\n\n\/\/--------------------------------------------------------------------------\nvec3 loadValue3( in vec2 re )\n{\n    return texture( iChannel0, (0.5+re) \/ iChannelResolution[0].xy, -100.0 ).xyz;\n}\nvec2 loadValue2( in vec2 re )\n{\n    return texture( iChannel0, (0.5+re) \/ iChannelResolution[0].xy, -100.0 ).xy;\n}\n\n\/\/----------------------------------------------------------------------------------------\n\/\/ From https:\/\/www.shadertoy.com\/view\/4djSRW\n\n\/\/----------------------------------------------------------------------------------------\nfloat Noise( in vec3 x )\n{\n    vec3 p = floor(x);\n    vec3 f = fract(x);\n\tf = f*f*(3.0-2.0*f);\n\t\n\tvec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;\n\tvec2 rg = texture( iChannel2, (uv+ 0.5)\/256.0).yx;\n\treturn mix( rg.x, rg.y, f.z );\n}\nvec3 GetSky(vec3 pos)\n{\n    pos *= 2.;\n    pos -= iTime*.08;\n\tfloat t = Noise(pos);\n    t += Noise(pos * 2.1) * .5;\n    t += Noise(pos * 4.3) * .25;\n    t += Noise(pos * 7.9) * .125;\n\treturn (t * 0.7+.6) *FOG_COLOUR *.6;\n}\n\/\/----------------------------------------------------------------------------------------\n\/\/--------------------------------------------------------------------------\nfloat Shadow( in vec3 ro, in vec3 rd)\n{\n\tfloat res = 1.0;\n    float t = 0.06;\n\tfloat h;\n\t\n    for (int i = 0; i < 5; i++)\n\t{\n\t\th = Map( ro + rd*t );\n\t\tres = min(4.5*h \/ t, res);\n\t\tt += h+.2;\n\t}\n    return max(res, 0.0);\n}\n\n\/\/--------------------------------------------------------------------------\nvec3 DoLighting(in vec3 mat, in vec3 pos, in vec3 normal, in vec3 eyeDir, in float d, in float sh)\n{\n    vec3 sunLight  = normalize( vec3(  0.4, 0.4,  0.3 ) );\n\/\/\tsh = Shadow(pos,  sunLight);\n    \/\/ Light surface with 'sun'...\n\tvec3 col = mat * SUN_COLOUR*(max(dot(sunLight,normal), 0.0)) *sh;\n    col += mat *(max(dot(-sunLight,normal), 0.0))*.5;\n    \n    normal = reflect(eyeDir, normal); \/\/ Specular...\n    col += pow(max(dot(sunLight, normal), 0.0), 10.0)  * SUN_COLOUR * .4 *sh;\n    \/\/ Abmient..\n    col += mat * .2 * max(normal.y, 0.3)+.011;\n    \n    \n\treturn col;\n}\n\n\/\/--------------------------------------------------------------------------\nvec3 GetNormal(vec3 p, float sphereR)\n{\n\tvec2 eps = vec2(sphereR, 0.0);\n\treturn normalize( vec3(\n           Map(p+eps.xyy) - Map(p-eps.xyy),\n           Map(p+eps.yxy) - Map(p-eps.yxy),\n           Map(p+eps.yyx) - Map(p-eps.yyx) ) );\n}\n\n\/\/--------------------------------------------------------------------------\nfloat SphereRadius(in float t)\n{\n    t = t * .001*(500.\/iResolution.y);\n    return (t);\n}\n\n\/\/--------------------------------------------------------------------------\nfloat binarySubdivision(in vec3 rO, in vec3 rD, vec2 t)\n{\n\t\/\/ Home in on the surface by dividing by two and split...\n    float halfwayT;\n\tfor (int n = 0; n < 4; n++)\n\t{\n\t\thalfwayT = (t.x + t.y) * .5;\n        (Map(rO + halfwayT*rD) < SphereRadius(t.x)) ? t.x = halfwayT:t.y = halfwayT;\n\t}\n\treturn halfwayT;\n}\n\n\/\/--------------------------------------------------------------------------\nfloat Scene(in vec3 rO, in vec3 rD, in float t)\n{\n\t\n\tvec3 p = vec3(0.0);\n    \/\/t -= hash13(rO+rD+t)*.1;\n    float oldT = t;\n\n\tfor( int j=0; j < 60; j++ )\n\t{\n\t\tif (t > 7.0) break;\n\t\tp = rO + t*rD;\n\t\tfloat de = Map(p);\n\t\tif(abs(de) < .001) break;\n        oldT = t;\n\t\tt +=  de;\n\t}\n    if (t < 7.0) t = binarySubdivision(rO, rD, vec2(t, oldT));\n\treturn t;\n}\n\nfloat calcOcc( in vec3 pos, in vec3 nor)\n{\n\tfloat occ = 0.0;\n    float sca = 1.0;\n    for(float h= 0.02; h < .05; h+= .01)\n    {\n\t\tvec3 opos = pos + h*nor;\n        float d = Map(opos);\n        occ += (h-d)*sca;\n        \/\/sca *= 0.5;\n    }\n    return clamp( 1.0 - 2.0*occ, 0.0, 1.0 );\n}\n\n\n\/\/--------------------------------------------------------------------------\nvec3 PostEffects(vec3 rgb, vec2 xy)\n{\n\t\/\/ Gamma first...\n\n\n    rgb = rgb*rgb * (3.0-2.0*rgb);\n   \trgb = pow(rgb, vec3(0.45));\n    rgb  = rgb * 2.;\n\n\t\/\/ Vignette...\n    rgb *= .7+0.5*pow(250.0*xy.x*xy.y*(1.0-xy.x)*(1.0-xy.y), 0.3);\t\n\n\n\treturn clamp(rgb, 0.0, 1.0);\n}\n\n\/\/--------------------------------------------------------------------------\nvec3 TexCube( sampler2D sam, in vec3 p, in vec3 n )\n{\n\tvec3 x = texture( sam, p.yz ).xzy;\n\tvec3 y = texture( sam, p.zx ).xyz;\n\tvec3 z = texture( sam, p.xy ).yzx;\n\treturn (x*abs(n.x) + y*abs(n.y) + z*abs(n.z))\/(abs(n.x)+abs(n.y)+abs(n.z));\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec2 rot2D(inout vec2 p, float a)\n{\n    return cos(a)*p - sin(a) * vec2(p.y, -p.x);\n}\n\n\/\/--------------------------------------------------------------------------\nvoid mainImage( out vec4 fragColour, in vec2 fragCoord )\n{\n\n\tfloat m = (iMouse.x\/iResolution.x)*20.0;\n\tfloat gTime = ((iTime+26.)*.2+m);\n    vec2 xy = fragCoord.xy \/ iResolution.xy;\n\tvec2 uv = (-1. + 2.0 * xy) * vec2(iResolution.x\/iResolution.y,1.0);\n    \n    vec3 cameraPos = texture( iChannel0, vec2(.5,.5)\/iResolution.xy, -100.0 ).xyz;\n    vec2 camRot = texture( iChannel0, vec2(1.5,.5)\/iResolution.xy, -100.0 ).xy;\n    camRot*= TAU;\n   \n\t\/\/ Recorded distance so far..\n    float recDis = texture( iChannel1, xy*.5, -100.0 ).x;\n\n    vec3 col = vec3(.0);\n    vec3 sky = vec3(-1);\n    \n    \n#ifdef ANTIALIAS\n    for (int y = 0; y < 2; y++)\n    {\n    \tfor (int x = 0; x < 2; x++)\n        {\n            vec3 dir = normalize( vec3(uv+vec2(x,y)\/iResolution.xy, sqrt(max(1.2 - dot(uv.xy, uv.xy)*.1, 0.))));\n#else\n\t\t\tvec3 dir = normalize( vec3(uv, sqrt(max(1.2 - dot(uv.xy, uv.xy)*.1, 0.))));\n                                       \n\n#endif\n            dir =  normalize(dir);\n\n            float roll = .05 * sin(iTime*.3);\n            dir.xy = dir.xy*cos(roll) + sin(roll)*vec2(1,-1)*dir.yx;\n            dir.zy = dir.zy*cos(camRot.x) + sin(camRot.x)*vec2(1,-1)*dir.yz;\n            dir.xz = dir.xz*cos(camRot.y) + sin(camRot.y)*vec2(1,-1)*dir.zx;\n\n            float dis = Scene(cameraPos, dir, recDis);\n            if (sky.x < 0.0)  sky = GetSky(dir);\n            if (dis < 7.0)\n            {\n                vec3 pos = cameraPos + dir * dis;\n                float sphereR = SphereRadius(dis);\n                vec3 normal = GetNormal(pos, sphereR);\n\n                float sha = Shadow(pos, sunLight);\n                float occ = calcOcc(pos, sunLight);\n\n                vec3 alb =\tX.xyz*X.w*orbitTrap.x +\n\t\t\t\t\t\t\tY.xyz*Y.w*orbitTrap.y +\n\t\t\t\t\t\t\tZ.xyz*Z.w*orbitTrap.z +\n\t\t\t\t\t\t\tR.xyz*R.w*orbitTrap.w;\n\t\t\t\t\/\/alb *= occ;\n                vec3 mat = DoLighting(alb*.2, pos, normal, dir, dis, sha)*occ;\n                mat = mix(sky,mat, clamp(exp(-dis*dis*.05)+.03,0.0, 1.0));\n                col += mat;\n            }else\n            {\n                col += sky+pow(max(dot(sunLight, dir), 0.0), 20.0)  * SUN_COLOUR * .07;\n\n            }\n            col += pow(max(dot(sunLight, dir), 0.0), 2.0)  * SUN_COLOUR * .08;\n#ifdef ANTIALIAS\n        }\n    }\n        col\/=4.;\n#endif\n    \n\t   \n\tcol = PostEffects(col, xy) * smoothstep(.0, 2.0, iTime);\t\n\t\n    \/\/fragColour=vec4(col+vec3(recDis\/16., 0, 0), 1.);\n    \/\/fragColour=vec4(dis\/16.);\n\tfragColour=vec4(col, 1.);\n}\n\n\/\/--------------------------------------------------------------------------",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGRr",
+                    "filepath": "\/presets\/tex00.jpg",
+                    "previewfilepath": "\/presets\/tex00.jpg",
+                    "type": "keyboard",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "nearest",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Adaption of Ben Quantock, WASD 2016 ( https:\/\/www.shadertoy.com\/view\/ldyGzW )\n\/\/ With speed limits and frame delta added by Dave Hoskins.\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n#define INVERT_Y 0\n\n#define ACCEL .01\n#define DECAY  .85 \/\/ how much velocity is preserved per frame (proportionally)\n#define MAX_SPEED  .01\n\n#if INVERT_Y\nconst float yMul = 1.0;\n#else\nconst float yMul = -1.0;\n#endif\nconst int KEY_W\t\t= 87;\nconst int KEY_A\t\t= 65;\nconst int KEY_S\t\t= 83;\nconst int KEY_D\t\t= 68;\nconst int KEY_LEFT  = 37;\nconst int KEY_UP    = 38;\nconst int KEY_RIGHT = 39;\nconst int KEY_DOWN  = 40;\n\nconst int KEY_SPACE\t= 32;\nconst int KEY_SHIFT\t= 16;\n\n\/\/----------------------------------------------------------------------------------------\nfloat ReadKey( int key )\n{\n   \treturn step(.5,texture( iChannel3, vec2( (float(key)+.5)\/256.0, .25)).x);\n}\n\n\/\/----------------------------------------------------------------------------------------\n\/\/----------------------------------------------------------------------------------------\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    fragColor = vec4(0.0,0.0,0.0,1.0);\n\n    if ( int(fragCoord.y) == 0 )\n    {\n        if ( int(fragCoord.x) == 0 )\n        {\n            vec3 camPos = texture( iChannel0, vec2(.5,.5)\/iResolution.xy, -100.0 ).xyz;\n            vec3 camVel = texture( iChannel0, vec2(3.5,.5)\/iResolution.xy, -100.0 ).xyz;\n            float time  = (iTime-texture( iChannel0, vec2(4.5,.5)\/iResolution.xy, -100.0 ).x)*30.0;\n             if (iFrame == 0)\n\t\t    {\n        \t\tfragColor = vec4(3.0, 4.2,1.5, 1.);\n            }else\n            {\n                camVel *= time*(1.0+ReadKey(KEY_SHIFT)+ReadKey(KEY_SPACE));\n                vec3 oldCam = camPos;\n                camPos.x += camVel.x;if (Map(camPos) < 0.002) camPos.x = oldCam.x;\n                camPos.y += camVel.y;if (Map(camPos) < 0.002) camPos.y = oldCam.y;\n                camPos.z += camVel.z;if (Map(camPos) < 0.002) camPos.z = oldCam.z;\n                \n            \tfragColor = vec4(camPos, 0);\n            }\n        }\n        else if ( int(fragCoord.x) <= 2 )\n        {\n            vec4 baseCamRot = texture( iChannel0, vec2(2.5,.5)\/iResolution.xy, -100.0 );\n            vec4 camRot = texture( iChannel0, vec2(1.5,.5)\/iResolution.xy, -100.0 );\n\n            vec2 mouseRot = (iMouse.yx\/iResolution.yx-.5)*vec2(.5*yMul,1.);\n            \n            camRot.w = iMouse.z;\n            \n            bool press = (camRot.w > .0);\n            bool lastPress = (baseCamRot.w > .0);\n            bool click = press && !lastPress;\n            if ( click )\n            {\n                baseCamRot.xy -= mouseRot;\n            }\n            \n            if ( press )\n            {\n                camRot.xy = baseCamRot.xy + mouseRot;\n            }\n            else\n            {\n                \/\/update the base pos\n                baseCamRot = camRot;\n            }\n\n            baseCamRot.w = camRot.w;\n            \n            \/\/ store\n            if ( int(fragCoord.x) == 1 )\n            {\n\t\t\t\tif (iFrame == 0)\n\t\t    \t{\n        \t\t\tfragColor = vec4(.0, .75, .0,0);\n            \t}else\n            \tfragColor = camRot;\n            }\n            else\n            {\n            \tfragColor = baseCamRot;\n            }\n        }\n        else if ( int(fragCoord.x) == 3 )\n        {\n            vec4 camVel = texture( iChannel0, vec2(3.5,.5)\/iResolution.xy, -100.0 );\n            vec4 camRot = texture( iChannel0, vec2(1.5,.5)\/iResolution.xy, -100.0 )*6.28318530718;\n            \n            vec3 forward = vec3(0,0,ACCEL);\n            vec3 right \t = vec3(ACCEL,0,0);\n\n            forward.zy = forward.zy*cos(camRot.x) + sin(camRot.x)*vec2(1,-1)*forward.yz;\n            right.zy = right.zy*cos(camRot.x) + sin(camRot.x)*vec2(1,-1)*right.yz;\n                \n            forward.xz = forward.xz*cos(camRot.y) + sin(camRot.y)*vec2(1,-1)*forward.zx;\n\t\t    right.xz = right.xz*cos(camRot.y) + sin(camRot.y)*vec2(1,-1)*right.zx;\n            \n            camVel.xyz += (ReadKey(KEY_W)-ReadKey(KEY_S)+ReadKey(KEY_UP)-ReadKey(KEY_DOWN)) * forward;\n            camVel.xyz += (ReadKey(KEY_D)-ReadKey(KEY_A)+ReadKey(KEY_RIGHT)-ReadKey(KEY_LEFT)) * right;\n            \n\n            camVel *= DECAY; \/\/ exponential decay\n            float lim = length(camVel);\n            if (lim > MAX_SPEED)\n            {\n                camVel = normalize(camVel) * MAX_SPEED;\n            }\n        \n            \n            fragColor = camVel;\n        }\n\t\telse if ( int(fragCoord.x) == 4 )\n        {\n\t\t\tfragColor = vec4(iTime);\n\t    }\n    }\n}\n",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "nearest",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Fractal Explorer Multi-res. January 2016\n\/\/ by David Hoskins\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\/\/ https:\/\/www.shadertoy.com\/view\/MdV3Wz\n\n\/\/ Mandalay fractal. Thanks to 'rebb' for the fractal fomula reference in Fractal city_242.\n\/\/ Here:- https:\/\/www.shadertoy.com\/view\/MsK3DR\n\n\n\/\/--------------------------------------------------------------------------\n#define TAU 6.28318530718\n\n\/\/--------------------------------------------------------------------------\nvec3 loadValue3( in vec2 re )\n{\n    return texture( iChannel0, (0.5+re) \/ iChannelResolution[0].xy, -100.0 ).xyz;\n}\nvec2 loadValue2( in vec2 re )\n{\n    return texture( iChannel0, (0.5+re) \/ iChannelResolution[0].xy, -100.0 ).xy;\n}\n\n\/\/----------------------------------------------------------------------------------------\n\n\/\/--------------------------------------------------------------------------\n\nfloat SphereRadius(in float t)\n{\n    t = t * .001*(500.\/iResolution.y);\n    return (t*2.5);\n}\n\/\/--------------------------------------------------------------------------\nfloat binarySubdivision(in vec3 rO, in vec3 rD, vec2 t)\n{\n\t\/\/ Home in on the surface by dividing by two and split...\n    float halfwayT;\n\tfor (int n = 0; n < 4; n++)\n\t{\n\t\thalfwayT = (t.x + t.y) * .5;\n        (Map(rO + halfwayT*rD) < SphereRadius(t.x)) ? t.x = halfwayT:t.y = halfwayT;\n\t}\n\treturn halfwayT;\n}\n\/\/--------------------------------------------------------------------------\nfloat Scene(in vec3 rO, in vec3 rD, vec2 uv)\n{\n\n\tfloat t = hash12(uv)*.05;\n    float oldT = t;\n\n\t\n\tvec3 p = vec3(0.0);\n\n\tfor( int j=0; j < 80; j++ )\n\t{\n\t\tif (t > 7.0) break;\n\t\tp = rO + t*rD;\n\t\t\n\t\tfloat de = Map(p);\n\t\tif(abs(de) < .1) break;\n        \n       oldT = t;\n\t\tt +=  de;\n\t}\n    \/\/if (t < 7.0) t = binarySubdivision(rO, rD, vec2(t, oldT));\n\n\treturn max(t, 0.01);\n}\n\n\/\/--------------------------------------------------------------------------\nvoid mainImage( out vec4 fragColour, in vec2 fragCoord )\n{\n\tfloat m = (iMouse.x\/iResolution.x)*20.0;\n\tfloat gTime = ((iTime+26.)*.2+m);\n    \n    \/\/ Only use a quarter of the screen for first pass...\n    vec2 xy = fragCoord.xy \/ iResolution.xy;\n    if(xy.x > .5 || xy.y > .5) discard;\n    xy *= 2.0;\n\tvec2 uv = (-1. + 2.0 * xy) * vec2(iResolution.x\/iResolution.y,1.0);\n    \n   \n    vec3 cameraPos = texture( iChannel0, vec2(.5,.5)\/iResolution.xy, -100.0 ).xyz;\n    vec2 camRot = texture( iChannel0, vec2(1.5,.5)\/iResolution.xy, -100.0 ).xy;\n\n    camRot*= TAU;\n\n\tvec3 dir = normalize( vec3(uv, sqrt(max(1.2 - dot(uv.xy, uv.xy)*.1, 0.))));\n    dir =  normalize(dir);\n\n    float roll = .05 * sin(iTime*.3);\n    dir.xy = dir.xy*cos(roll) + sin(roll)*vec2(1,-1)*dir.yx;\n    dir.zy = dir.zy*cos(camRot.x) + sin(camRot.x)*vec2(1,-1)*dir.yz;\n    dir.xz = dir.xz*cos(camRot.y) + sin(camRot.y)*vec2(1,-1)*dir.zx;\n  \n    float dis = Scene(cameraPos, dir, fragCoord);\n\t\n\tfragColour = vec4(dis);\n}\n\n\/\/--------------------------------------------------------------------------",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "float hash12(vec2 p)\n{\n\tvec3 p3  = fract(vec3(p.xyx) * .1031);\n    p3 += dot(p3, p3.yzx + 33.33);\n    return fract((p3.x + p3.y) * p3.z);\n}\nfloat hash13(vec3 p3)\n{\n\tp3  = fract(p3 * .1031);\n    p3 += dot(p3, p3.yzx + 33.33);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\n\nfloat Scale = 4.;\nfloat MinRad2 = 0.25;\n\nfloat sr = 4.0;\nvec3 fo =vec3 (0.7,.9528,.9);\nvec3 gh = vec3 (.8,.7,0.5638);\nvec3 gw = vec3 (.3, 0.5 ,.2);\nvec4 X = vec4( .1,0.5,0.1,.3);\nvec4 Y = vec4(.1, 0.8, .1, .1);\nvec4 Z = vec4(.2,0.2,.2,.45902);\nvec4 R = vec4(0.19,.1,.1,.2);\nvec4 orbitTrap = vec4(40000.0);\n\/\/--------------------------------------------------------------------------\nfloat DBFold(vec3 p, float fo, float g, float w){\n    if(p.z>p.y) p.yz=p.zy;\n    float vx=p.x-2.*fo;\n    float vy=p.y-4.*fo;\n    float v=max(abs(vx+fo)-fo,vy);\n    float v1=max(vx-g,p.y-w);\n    v=min(v,v1);\n    v1=max(v1,-abs(p.x));\n    return min(v,p.x);\n}\n\/\/the coordinates are pushed\/pulled in parallel\n\n\n\/\/the coordinates are pushed\/pulled in parallel\nvec3 DBFoldParallel(vec3 p, vec3 fo, vec3 g, vec3 w){\n\tvec3 p1=p;\n\tp.x=DBFold(p1,fo.x,g.x,w.x);\n\tp.y=DBFold(p1.yzx,fo.y,g.y,w.y);\n\tp.z=DBFold(p1.zxy,fo.z,g.z,w.z);\n\treturn p;\n}\n\/\/serial version\nvec3 DBFoldSerial(vec3 p, vec3 fo, vec3 g,vec3 w){\n\tp.x=DBFold(p,fo.x,g.x,w.x);\n\tp.y=DBFold(p.yzx,fo.y,g.y,w.y);\n\tp.z=DBFold(p.zxy,fo.z,g.z,w.z);\n\treturn p;\n}\nfloat Map(vec3 p)\n{\n\tvec4 JC=vec4(p,1.);\n\tfloat r2=dot(p,p);\n\tfloat dd = 1.;\n\tfor(int i = 0; i< 6; i++){\n\t\t\n\t\tp = p - clamp(p.xyz, -1.0, 1.0) * 2.0;  \/\/ mandelbox's box fold\n\n\t\t\/\/Apply pull transformation\n\t\tvec3 signs=sign(p);\/\/Save \tthe original signs\n\t\tp=abs(p);\n\t\tp=DBFoldParallel(p,fo,gh,gw);\n\t\t\n\t\tp*=signs;\/\/resore signs: this way the mandelbrot set won't extend in negative directions\n\t\t\n\t\t\/\/Sphere fold\n\t\tr2=dot(p,p);\n\t\tfloat  t = clamp(1.\/r2, 1., 1.\/MinRad2);\n\t\tp*=t; dd*=t;\n\t\t\n\t\t\/\/Scale and shift\n\t\tp=p*Scale+JC.xyz; dd=dd*Scale+JC.w;\n\t\tp=vec3(1.0,1.0,.92)*p;\n\n\t\tr2=dot(p,p);\n\t\torbitTrap = min(orbitTrap, abs(vec4(p.x,p.y,p.z,r2)));\t\n\t}\n\tdd=abs(dd);\n#if 1\n\treturn (sqrt(r2)-sr)\/dd;\/\/bounding volume is a sphere\n#else\n\tp=abs(p); return (max(p.x,max(p.y,p.z))-sr)\/dd;\/\/bounding volume is a cube\n#endif\n}",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        }
+    ]
+}

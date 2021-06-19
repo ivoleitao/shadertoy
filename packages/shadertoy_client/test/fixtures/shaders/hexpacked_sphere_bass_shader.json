@@ -1,0 +1,52 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "3tjyRt",
+        "date": "1595173724",
+        "viewed": 3080,
+        "name": "HexPacked Sphere BASS Shader",
+        "username": "pjkarlik",
+        "description": "wanted something fun to do today - so no rules just playing..\nHex tiling with spheres! The bassline is perfect for audio stuff here! let the timer get to 112.00\n",
+        "likes": 36,
+        "published": 3,
+        "flags": 64,
+        "usePreview": 0,
+        "tags": [
+            "audio",
+            "hexagon",
+            "tile"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "llBGzt",
+                    "filepath": "https:\/\/soundcloud.com\/bigstun\/deadmau5-sofi-needs-a-ladder-bigstun-bootleg",
+                    "previewfilepath": "https:\/\/soundcloud.com\/bigstun\/deadmau5-sofi-needs-a-ladder-bigstun-bootleg",
+                    "type": "musicstream",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 0
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Hexagon Tiled Audio Shader\n\/\/\n\/\/ Just playing around after getting some help with hexagon\n\/\/ tiling from @Shane https:\/\/www.shadertoy.com\/view\/3d2fzK\n\/\/ learning though deconstruction \n\n#define MAX_DIST \t135.\n\n#define PI  \t\t3.1415926\n#define PI2 \t\t6.2831952\n#define R \t\t\tiResolution\n#define M \t\t\tiMouse\n#define T \t\t\tiTime\n#define S \t\t\tsmoothstep\n#define r2(a)  mat2(cos(a), sin(a), -sin(a), cos(a))\n\nfloat sampleFreq(float freq) {return texture(iChannel0, vec2(freq, 0.25)).x;}\n\/\/@iq vec2 to float hash.\nfloat hash2(vec2 p){  return fract(sin(dot(p, vec2(27.609, 57.583)))*43758.5453); }\n\/\/ not used\nvec3 get_mouse( vec3 ro ) {\n    float x = M.xy==vec2(0) ? -.6 : -(M.y \/ R.y * 1. - .5) * PI;\n    float y = M.xy==vec2(0) ? .9 : (M.x \/ R.x * 2. - 1.) * PI;\n    ro.zy *= r2(x);\n    ro.zx *= r2(y);\n    return ro;\n}\n\n\/\/ my lazy global v's\nfloat mid = 0.;\nvec3 hitPoint =vec3(0.);\n\n#define HEX_SCALE 1.95\n\/\/@Shane - Hexagon tiling >mind blown<\nvec4 map(vec3 q3){\n    q3.xz*=r2(T*.22); \n    \/\/ Scaling and Vars\n    const float scale = 2.\/HEX_SCALE;\n\tconst vec2 l = vec2(scale*1.732\/2., scale);\n\tconst vec2 s = l*2.;\n    float d = 1e5;\n    vec2 p, ip;\n    \/\/ IDs and Center Points\n    vec2 id = vec2(0);\n    vec2 cntr = vec2(0);\n    const vec2[4] ps4 = vec2[4](vec2(-l.x, l.y), l + vec2(0., l.y), -l, vec2(l.x, -l.y) + vec2(0., l.y));\n    \/\/ which pass you're on\n    float boxID = 0.; \n    for(int i = 0; i<4; i++){\n        \/\/ Block center.\n        cntr = ps4[i]\/2.;\n        \/\/ Local coordinates.\n        p = q3.xz - cntr;\n        ip = floor(p\/s) + .5; \/\/ Local tile ID.\n        p -= (ip)*s; \/\/ New local position.\n        \/\/ Correct positional individual tile ID.\n        vec2 idi = (ip)*s + cntr;\n        \/\/float hx=hash2(idi*.5);\n        float hx=distance(idi,vec2(.0));\n        float th = sampleFreq(.01+hx*.0021)*45.;\n        th = abs(th*14.999)\/15.*.15; \n        \/\/ make shape\n        vec3 p3 = vec3(p.x,q3.y,p.y);\n        float sp = length(p3-vec3(0.,th,0.))-((th*.12));\n        if(sp<d){\n            d = sp;\n         \tid = idi;\n            boxID = float(i);\n            mid = 2.;\n        }   \n    }\n    \/\/ Return the distance, position-base ID and box ID.\n    return vec4(d\/1.7, id, boxID);\n}\n\n\/\/Tetrahedron technique\nvec3 get_normal(in vec3 p, in float t) {\n\t\/\/https:\/\/iquilezles.org\/www\/articles\/normalsSDF\/normalsSDF.htm\n    float h = 0.0002*t; \n    #define ZERO (min(iFrame,0))\n    vec3 n = vec3(0.0);\n    for( int i=ZERO; i<4; i++ ){\n        vec3 e = 0.5773*(2.0*vec3((((i+3)>>1)&1),((i>>1)&1),(i&1))-1.0);\n        n += e*map(p+e*h).x;\n    }\n    return normalize(n);\n}\n\nvec4 ray_march( in vec3 ro, in vec3 rd, int maxstep ) {\n    float t = 0.0001;\n    vec3 m = vec3(0.);\n    for( int i=0; i<maxstep; i++ ) {\n        vec4 d = map(ro + rd * t);\n        m = d.yzw;\n        if(d.x<.001*t||t>MAX_DIST) break;\n        t += d.x*.5;\n    }\n    return vec4(t,m);\n}\n\nfloat get_diff(in vec3 p, in vec3 lpos, in vec3 n) {\n    vec3 l = lpos-p;\n    vec3 lp = normalize(l);\n    float dif = clamp(dot(n,lp),0. , 1.),\n          shadow = ray_march(p + n * 0.0002 * 2.,lp,128).x;\n    if(shadow < length(l)) dif *= .2;\n    return dif;\n}\n\n\nvoid mainImage( out vec4 O, in vec2 F ) {\n    vec2 U = (2.*F.xy-R.xy)\/max(R.x,R.y);\n    vec3 ro = vec3(0.,11.,12.5),\n         lp = vec3(0.,4.,.0);\n\t\t \n    \/\/ro = get_mouse(ro);\n    float tmod = mod(T*.15,3.);\n\n    if(tmod<1.) {\n        lp = vec3(.0,0.,.0);\n        ro = vec3(.0,15.,1.);\n    } else if(tmod<2.) {\n        ro = vec3(0.,8.,22.5);\n        lp = vec3(0.,5.,.0);\n    }\n    vec3 cf = normalize(lp-ro),\n     \t cp = vec3(0.,1.,0.),\n     \t cr = normalize(cross(cp, cf)),\n     \t cu = normalize(cross(cf, cr)),\n     \t c = ro + cf * .85,\n     \t i = c + U.x * cr + U.y * cu,\n     \t rd = i-ro;\n\n    vec3 C = vec3(0.);\n\t\/\/ trace dat map\n    vec4 ray = ray_march(ro,rd,256);\n    float t = ray.x;\n\tvec3 hid = ray.yzw;\n    if(t<MAX_DIST) {\n\t\tvec3 p = ro + t * rd,\n             n = get_normal(p, t),\n             h = vec3(.5);\n        float dst = distance(hid.xy,vec2(.0));\n        \n        float cht = 22.;\n\t\th = .5 + .45*cos(PI2*dst\/cht + vec3(0, 1, 2));\n        vec3 lpos1 = vec3(.5, 25.0, -.5),\n             diff =  vec3(1.) * get_diff(p, lpos1, n);\n        C += h * (diff);\n        \n        \/\/ single bounce reflect \n        vec3 rr=reflect(rd,n);\n        vec4 ref=ray_march(p,rr,128);\n        hid = ref.yzw;\n        if(ref.x<MAX_DIST){\n            dst = distance(hid.xy,vec2(.0));\n            p+=ref.x*rr;\n            n = get_normal(p, ref.x),\n            h = .5 + .45*cos(PI2*dst\/cht + vec3(0, 1, 2));\n            diff = vec3(.7)*get_diff(p, lpos1, n);\n            C += h * diff ;\n        }\n    } else {\n      C += vec3(.025);\n    }\n    \/\/ fog and gamma out - cheap\n    vec3 FD = mix(vec3(.07),vec3(.4,.3,.21),U.y);\n    C = mix( C, FD, 1.-exp(-.00005*t*t*t));\n    O = vec4(pow(C, vec3(0.4545)),1.0);\n}\n",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

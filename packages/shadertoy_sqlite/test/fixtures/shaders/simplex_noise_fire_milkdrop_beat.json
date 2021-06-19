@@ -1,0 +1,330 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "XsKGzc",
+        "date": "1455834915",
+        "viewed": 772,
+        "name": "Simplex Noise Fire Milkdrop Beat",
+        "username": "Flexi",
+        "description": "Milkdrop pipeline with basic beat dectector.\nBuf A contains the beat detetection debug view.\nBuf B\n R: Perlin Noise Fire\n G: Julia Fractal\n B: Turing Patterns",
+        "likes": 14,
+        "published": 1,
+        "flags": 96,
+        "tags": [
+            "milkdrop"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XdfGR8",
+                    "filepath": "\/media\/previz\/buffer03.png",
+                    "previewfilepath": "\/media\/previz\/buffer03.png",
+                    "type": "buffer",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "#define pi2_inv 0.159154943091895335768883763372\n\nvec2 lower_left(vec2 uv)\n{\n    return fract(uv * 0.5);\n}\n\nvec2 lower_right(vec2 uv)\n{\n    return fract((uv - vec2(1, 0.)) * 0.5);\n}\n\nvec2 upper_left(vec2 uv)\n{\n    return fract((uv - vec2(0., 1)) * 0.5);\n}\n\nvec2 upper_right(vec2 uv)\n{\n    return fract((uv - 1.) * 0.5);\n}\n\nvec4 BlurA(vec2 uv, int level)\n{\n    if(level <= 0)\n    {\n        return texture(iChannel0, fract(uv));\n    }\n\n    uv = upper_left(uv);\n    for(int depth = 1; depth < 8; depth++)\n    {\n        if(depth >= level)\n        {            \n            uv = lower_right(uv);\n        }\n    }\n\n    return texture(iChannel3, uv);\n}\n\nvec4 BlurB(vec2 uv, int level)\n{\n    if(level <= 0)\n    {\n        return texture(iChannel1, fract(uv));\n    }\n\n    uv = lower_left(uv);\n    for(int depth = 1; depth < 8; depth++)\n    {\n        if(depth < level)\n        {            \n            uv = lower_right(uv);\n        }\n    }\n\n    return texture(iChannel3, uv);\n}\n\nvec4 BlurSpectrogram(vec2 uv, int level)\n{\n    uv = upper_right(uv);\n    for(int depth = 1; depth < 8; depth++)\n    {\n        if(depth < level)\n        {\n            uv = lower_right(uv);\n        }\n    }\n\n    return texture(iChannel3, uv);\n}\n\nvec2 GradientA(vec2 uv, vec2 d, vec4 selector, int level){\n    vec4 dX = 0.5*BlurA(uv + vec2(1.,0.)*d, level) - 0.5*BlurA(uv - vec2(1.,0.)*d, level);\n    vec4 dY = 0.5*BlurA(uv + vec2(0.,1.)*d, level) - 0.5*BlurA(uv - vec2(0.,1.)*d, level);\n    return vec2( dot(dX, selector), dot(dY, selector) );\n}\n\nvec2 GradientB(vec2 uv, vec2 d, vec4 selector, int level){\n    vec4 dX = 0.5*BlurB(uv + vec2(1.,0.)*d, level) - 0.5*BlurB(uv - vec2(1.,0.)*d, level);\n    vec4 dY = 0.5*BlurB(uv + vec2(0.,1.)*d, level) - 0.5*BlurB(uv - vec2(0.,1.)*d, level);\n    return vec2( dot(dX, selector), dot(dY, selector) );\n}\n\nfloat border(vec2 domain, float thickness){\n    vec2 uv = fract(domain-vec2(0.5));\n    uv = min(uv,1.-uv)*2.;\n    return clamp(max(uv.x,uv.y)-1.+thickness,0.,1.)\/(thickness);\n}\n\nvec2 rot90(vec2 vector){\n    return vector.yx*vec2(1,-1);\n}\n\n\nvec2 complex_mul(vec2 factorA, vec2 factorB){\n    return vec2( factorA.x*factorB.x - factorA.y*factorB.y, factorA.x*factorB.y + factorA.y*factorB.x);\n}\n\nvec2 rotozoom(vec2 uv, float ang, float zoom, vec2 aspect){\n    vec2 rot = vec2(cos(ang), sin(ang))*zoom;    \n    return 0.5 + complex_mul((uv - 0.5)*aspect, rot)\/aspect;\n}\n\nvec2 spiralzoom(vec2 domain, vec2 center, float n, float spiral_factor, float zoom_factor, vec2 pos){\n    vec2 uv = domain - center;\n    float d = length(uv);\n    return vec2( atan(uv.y, uv.x)*n*pi2_inv + d*spiral_factor, -log(d)*zoom_factor) + pos;\n}\n\nvec2 complex_div(vec2 numerator, vec2 denominator){\n    return vec2( numerator.x*denominator.x + numerator.y*denominator.y,\n                numerator.y*denominator.x - numerator.x*denominator.y)\/\n        vec2(denominator.x*denominator.x + denominator.y*denominator.y);\n}\n\nfloat unit_square(vec2 uv){\n    return float((uv.x < 1.) && (uv.x > 0.) && (uv.y < 1.) && (uv.y > 0.));\n}\n\nfloat circle(vec2 uv, vec2 aspect, float scale){\n    return clamp( 1. - length((uv-0.5)*aspect*scale), 0., 1.);\n}\n\nfloat sigmoid(float x) {\n    return 2.\/(1. + exp2(-x)) - 1.;\n}\n\nfloat smoothcircle(vec2 uv, vec2 aspect, float radius, float ramp){\n    return 0.5 - sigmoid( ( length( (uv - 0.5) * aspect) - radius) * ramp) * 0.5;\n}\n\nfloat spectrum(float domain, int t, int level)\n{\n    float sixty_fourth = 1.\/32.;\n    vec2 uv = vec2(float(t)*2.\/sixty_fourth + sixty_fourth, domain);\n    uv = upper_right(uv); level++;\n    for(int depth = 1; depth < 8; depth++)\n    {\n        if(depth < level)\n        {            \n            uv = lower_right(uv);\n        }\n    }\n\n    return texture(iChannel3, uv).x;\n}\n\nfloat spectrum2D(vec2 uv, float thickness, int level)\n{\n    float val = spectrum(uv.x, 0, level);\n    return (abs(uv.y - val) < thickness\/2.) ? (1.-abs(uv.y - val)*2.\/thickness) : 0.;\n}\n\nvec4 rainbowSpectra(vec2 uv)\n{\n    float thickness = 0.015;\n    vec4 spectra =         vec4(0.25,0,0.5,0)* spectrum2D(uv, thickness, 7);\n    spectra = mix(spectra, vec4(0.5,0,1.,0), spectrum2D(uv, thickness, 6));\n    spectra = mix(spectra, vec4(0,0.5,1,0), spectrum2D(uv, thickness, 5));\n    spectra = mix(spectra, vec4(0,1.,0.5,0), spectrum2D(uv, thickness, 4));\n    spectra = mix(spectra, vec4(1,1,0,0), spectrum2D(uv, thickness, 3));\n    spectra = mix(spectra, vec4(0.6,0.25,0,0), spectrum2D(uv, thickness, 2));\n    spectra = mix(spectra, vec4(0.85,0,0,0), spectrum2D(uv, thickness, 1));\n    spectra = mix(spectra, vec4(1), spectrum2D(uv, thickness, 0));\n\n    return spectra*unit_square(uv);\n}\n\nfloat bass(){\n    return spectrum(0.125, 0, 4);\n}\n\nfloat mid(){\n    return spectrum(0.5, 0, 4);\n}\n\nfloat treb(){\n    return spectrum(0.875, 0, 4);\n}\n\n\/\/ Buf D contains an N x N array\nfloat N = 16.;\n\n\/\/ in the rectangle region between 2 points\nvec2 p1 = vec2(0.75);\nvec2 p2 = vec2(1.);\n\nvec4 Cell(int index)\n{    \n    \/\/ map the index to the cell in the array\n    float x = mod(float(index), N) \/ N;\n    float y = floor(float(index) \/ N) \/ N;\n\n    \/\/ compartmentalization\n    vec2 cell_size = (p2 - p1) \/ N;\n    vec2 center = p1 + cell_size*0.5 + (p2-p1)*vec2(x,y);\n\n    return texture(iChannel3, center);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy \/ iResolution.xy;\n    vec2 pixelSize = 1. \/ iResolution.xy;\n    vec2 aspect = vec2(1.,iResolution.y\/iResolution.x);\n\n\n    fragColor = BlurA(uv, 1); \/\/ simple bypass\n    fragColor = vec4(0);\n\n    fragColor =  mix(fragColor, vec4(0.1), spectrum2D(uv, 0.05, 0));\n    fragColor =  mix(fragColor, vec4(0.2), spectrum2D(uv, 0.04, 1));\n    fragColor =  mix(fragColor, vec4(0.3), spectrum2D(uv, 0.03, 2));\n    fragColor =  mix(fragColor, vec4(0.6), spectrum2D(uv, 0.02, 3));\n    fragColor =  mix(fragColor, vec4(0.9), spectrum2D(uv, 0.01, 4));\n\n    \/\/ fragColor = mix(fragColor, vec4(1), rainbowSpectra(uv));\n\n    vec4 rnd0 = Cell(10);\n    vec4 rnd1 = Cell(11);\n    vec4 p12 = Cell(12);\n    vec4 p13 = Cell(13);\n    vec4 p14 = Cell(14);\n    vec4 p15 = Cell(15);\n\n    vec4 last_beat_min = Cell(7);\n    vec4 last_beat_max = Cell(8);\n    vec4 beat_residual = Cell(4);\n\n    float beat_relative = (beat_residual.w - last_beat_min.w)\/(last_beat_max.w - last_beat_min.w);\n\n    float c1 = smoothcircle(uv - aspect.yx*0.5 + rnd0.xy*aspect.yx, aspect, 0.013, 600.);\n    float c2 = smoothcircle(uv - aspect.yx*0.5 + rnd1.xy*aspect.yx, aspect, 0.01, 800.);\n    float c3 = smoothcircle(uv - aspect.yx*0.5 + mix(rnd0.xy, rnd1.xy, beat_relative)*aspect.yx, aspect, 0.002, 1200.);\n    float c12 = smoothcircle(uv - aspect.yx*0.5 + p12.xy*aspect.yx, aspect, 0.008, 600.);\n    float c13 = smoothcircle(uv - aspect.yx*0.5 + p13.xy*aspect.yx, aspect, 0.005, 600.);\n    float c14 = smoothcircle(uv - aspect.yx*0.5 + p14.xy*aspect.yx, aspect, 0.002, 600.);\n    float c15 = smoothcircle(uv - aspect.yx*0.5 + p15.xy*aspect.yx, aspect, 0.001, 600.);\n\n    fragColor *= beat_relative;\n    fragColor =  mix(fragColor, vec4(1), BlurA(uv, 0));\n\n    vec2 d = GradientB(uv, 4.\/iResolution.xy, vec4(0,0,1,0), 3);\n    fragColor = mix(fragColor, vec4(1), vec4(BlurB(uv + d*0.025,0).xy,0.,0.));\n\n    \/\/    fragColor =  mix(fragColor, vec4(1), c1);\n    fragColor =  mix(fragColor, vec4(1), c2);\n    fragColor =  mix(fragColor, vec4(1), c3);\n    fragColor =  mix(fragColor, vec4(1), c12);\n    fragColor =  mix(fragColor, vec4(1), c13);\n    fragColor =  mix(fragColor, vec4(1), c14);\n    fragColor =  mix(fragColor, vec4(1), c15);\n\n    \/\/    fragColor =  mix(fragColor, fragColor*vec4(2.,1.,0,0), Cell(9).x);\n\n    \/\/ beatdetect development view:\n    \/\/ fragColor =  mix(fragColor, vec4(1), BlurA(uv, 0));\n\n    \/\/ blur level stack\n    \/\/fragColor =  mix(fragColor*.0, vec4(1), texture(iChannel3, uv));\n\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XdfGR8",
+                    "filepath": "\/media\/previz\/buffer03.png",
+                    "previewfilepath": "\/media\/previz\/buffer03.png",
+                    "type": "buffer",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "#define pi2_inv 0.159154943091895335768883763372\n\nvec2 lower_left(vec2 uv)\n{\n    return fract(uv * 0.5);\n}\n\nvec2 lower_right(vec2 uv)\n{\n    return fract((uv - vec2(1, 0.)) * 0.5);\n}\n\nvec2 upper_left(vec2 uv)\n{\n    return fract((uv - vec2(0., 1)) * 0.5);\n}\n\nvec2 upper_right(vec2 uv)\n{\n    return fract((uv - 1.) * 0.5);\n}\n\nvec2 wrap_flip(vec2 uv){\n    return vec2(1.)-abs(fract(uv*.5)*2.-1.);\n}\n\nvec2 mouseDelta(){\n    vec2 pixelSize = 1. \/ iResolution.xy;\n    float eighth = 1.\/8.;\n    vec4 oldMouse = texture(iChannel3, vec2(7.5 * eighth, 3.5 * eighth));\n    vec4 nowMouse = vec4(iMouse.xy \/ iResolution.xy, iMouse.zw \/ iResolution.xy);\n    if(oldMouse.z > pixelSize.x && oldMouse.w > pixelSize.y && \n       nowMouse.z > pixelSize.x && nowMouse.w > pixelSize.y)\n    {\n        return nowMouse.xy - oldMouse.xy;\n    }\n    return vec2(0.);\n}\n\nvec4 BlurA(vec2 uv, int level)\n{\n    uv = wrap_flip(uv);\n\n    if(level <= 0)\n    {\n        return texture(iChannel0, uv);\n    }\n\n    uv = upper_left(uv);\n    for(int depth = 1; depth < 8; depth++)\n    {\n        if(depth < level)\n        {            \n            uv = lower_right(uv);\n        }\n    }\n\n    return texture(iChannel3, uv);\n}\n\nvec2 GradientA(vec2 uv, vec2 d, vec4 selector, int level){\n    vec4 dX = 0.5*BlurA(uv + vec2(1.,0.)*d, level) - 0.5*BlurA(uv - vec2(1.,0.)*d, level);\n    vec4 dY = 0.5*BlurA(uv + vec2(0.,1.)*d, level) - 0.5*BlurA(uv - vec2(0.,1.)*d, level);\n    return vec2( dot(dX, selector), dot(dY, selector) );\n}\n\nfloat border(vec2 domain, float thickness){\n    vec2 uv = fract(domain-vec2(0.5));\n    uv = min(uv,1.-uv)*2.;\n    return clamp(max(uv.x,uv.y)-1.+thickness,0.,1.)\/(thickness);\n}\n\nvec2 rot90(vec2 vector){\n    return vector.yx*vec2(1,-1);\n}\n\n\nvec2 complex_mul(vec2 factorA, vec2 factorB){\n    return vec2( factorA.x*factorB.x - factorA.y*factorB.y, factorA.x*factorB.y + factorA.y*factorB.x);\n}\n\nvec2 rotozoom(vec2 uv, float ang, float zoom, vec2 aspect){\n    vec2 rot = vec2(cos(ang), sin(ang))*zoom;    \n    return 0.5 + complex_mul((uv - 0.5)*aspect, rot)\/aspect;\n}\n\nvec2 spiralzoom(vec2 domain, vec2 center, float n, float spiral_factor, float zoom_factor, vec2 pos){\n    vec2 uv = domain - center;\n    float d = length(uv);\n    return vec2( atan(uv.y, uv.x)*n*pi2_inv + d*spiral_factor, -log(d)*zoom_factor) + pos;\n}\n\nvec2 complex_div(vec2 numerator, vec2 denominator){\n    return vec2( numerator.x*denominator.x + numerator.y*denominator.y,\n                numerator.y*denominator.x - numerator.x*denominator.y)\/\n        vec2(denominator.x*denominator.x + denominator.y*denominator.y);\n}\n\nfloat unit_square(vec2 uv){\n    return float((uv.x < 1.) && (uv.x > 0.) && (uv.y < 1.) && (uv.y > 0.));\n}\n\nfloat circle(vec2 uv, vec2 aspect, float scale){\n    return clamp( 1. - length((uv-0.5)*aspect*scale), 0., 1.);\n}\n\nfloat sigmoid(float x) {\n    return 2.\/(1. + exp2(-x)) - 1.;\n}\n\nfloat smoothcircle(vec2 uv, vec2 aspect, float radius, float ramp){\n    return 0.5 - sigmoid( ( length( (uv - 0.5) * aspect) - radius) * ramp) * 0.5;\n}\n\nfloat conetip(vec2 uv, vec2 pos, float size, float min)\n{\n    vec2 aspect = vec2(1.,iResolution.y\/iResolution.x);\n    return max( min, 1. - length((uv - pos) * aspect \/ size) );\n}\n\nfloat warpFilter(vec2 uv, vec2 pos, float size, float ramp)\n{\n    return 0.5 + sigmoid( conetip(uv, pos, size, -16.) * ramp) * 0.5;\n}\n\nvec2 vortex_warp(vec2 uv, vec2 pos, float size, float ramp, vec2 rot)\n{\n    vec2 aspect = vec2(1.,iResolution.y\/iResolution.x);\n\n    vec2 pos_correct = 0.5 + (pos - 0.5);\n    vec2 rot_uv = pos_correct + complex_mul((uv - pos_correct)*aspect, rot)\/aspect;\n    float _filter = warpFilter(uv, pos_correct, size, ramp);\n    return mix(uv, rot_uv, _filter);\n}\n\nvec2 vortex_pair_warp(vec2 uv, vec2 pos, vec2 vel)\n{\n    vec2 aspect = vec2(1.,iResolution.y\/iResolution.x);\n    float ramp = 4.;\n\n    float d = 0.125;\n\n    float l = length(vel);\n    vec2 p1 = pos;\n    vec2 p2 = pos;\n\n    if(l > 0.){\n        vec2 normal = normalize(vel.yx * vec2(-1., 1.))\/aspect;\n        p1 = pos - normal * d \/ 2.;\n        p2 = pos + normal * d \/ 2.;\n    }\n\n    float w = l \/ d * 2.;\n\n    \/\/ two overlapping rotations that would annihilate when they were not displaced.\n    vec2 circle1 = vortex_warp(uv, p1, d, ramp, vec2(cos(w),sin(w)));\n    vec2 circle2 = vortex_warp(uv, p2, d, ramp, vec2(cos(-w),sin(-w)));\n    return (circle1 + circle2) \/ 2.;\n}\n\nfloat spectrum(float domain, int t, int level)\n{\n    float sixty_fourth = 1.\/32.;\n    vec2 uv = vec2(float(t)*3.*sixty_fourth + sixty_fourth, domain);\n    uv = upper_right(uv); level++;\n    for(int depth = 1; depth < 8; depth++)\n    {\n        if(depth < level)\n        {            \n            uv = lower_right(uv);\n        }\n    }\n\n    return texture(iChannel3, uv).x;\n}\n\nfloat spectrum2D(vec2 uv, float thickness, int level)\n{\n    float val = spectrum(uv.x, 0, level);\n    return (abs(uv.y - val) < thickness\/2.) ? (1.-abs(uv.y - val)*2.\/thickness) : 0.;\n}\n\nvec4 rainbowSpectra(vec2 uv)\n{\n    float thickness = 0.015;\n    vec4 spectra =         vec4(0.25,0,0.5,0)* spectrum2D(uv, thickness, 7);\n    spectra = mix(spectra, vec4(0.5,0,1.,0), spectrum2D(uv, thickness, 6));\n    spectra = mix(spectra, vec4(0,0.5,1,0), spectrum2D(uv, thickness, 5));\n    spectra = mix(spectra, vec4(0,1.,0.5,0), spectrum2D(uv, thickness, 4));\n    spectra = mix(spectra, vec4(1,1,0,0), spectrum2D(uv, thickness, 3));\n    spectra = mix(spectra, vec4(0.6,0.25,0,0), spectrum2D(uv, thickness, 2));\n    spectra = mix(spectra, vec4(0.85,0,0,0), spectrum2D(uv, thickness, 1));\n    spectra = mix(spectra, vec4(1), spectrum2D(uv, thickness, 0));\n\n    return spectra*unit_square(uv);\n}\n\n\/\/ Buf D contains an N x N array\nfloat N = 16.;\n\n\/\/ in the rectangle region between 2 points\nvec2 p1 = vec2(0.75);\nvec2 p2 = vec2(1.);\n\nvec4 Cell(int index)\n{    \n    \/\/ map the index to the cell in the array\n    float x = mod(float(index), N) \/ N;\n    float y = floor(float(index) \/ N) \/ N;\n\n    \/\/ compartmentalization\n    vec2 cell_size = (p2 - p1) \/ N;\n    vec2 center = p1 + cell_size*0.5 + (p2-p1)*vec2(x,y);\n\n    return texture(iChannel3, center);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 pixel_size = 1. \/ iResolution.xy;\n    vec2 uv = fragCoord.xy * pixel_size;\n    vec4 noise = (texture(iChannel2, fragCoord.xy \/ iChannelResolution[2].xy + fract(vec2(42,56)*iTime))-0.5)*2.;\n    vec2 aspect = vec2(1.,iResolution.y\/iResolution.x);\n\n    fragColor = BlurA( 0.5 + (uv - 0.5)*1. + pixel_size*vec2(8,0) + vec2(0,iTime*0.0), 0)*0.9995 - 0.0\/256.;\n\n    vec4 v0 = Cell(0);\n    vec4 v1 = Cell(1);\n    vec4 v3 = Cell(3);\n    vec2 uv_v0 =vec2(0.95, v0.w);\n    vec2 uv_v3 =vec2(0.95, v3.w*4. + 0.25);\n    vec4 beat_residual = Cell(4);\n    float energy = (v0.w - v1.w);\n    vec2 uv_v1 =vec2(0.95, energy +0.05);\n    if(uv.x >= 0.95 - 1.\/256.){\n        fragColor.z = Cell(9).x;\n    }\n    fragColor = mix(fragColor, vec4(0,1,0,0), circle(uv - uv_v0+0.5, aspect, 256.));\n    fragColor = mix(fragColor, vec4(1,0,0,0), circle(uv - uv_v1+0.5, aspect, 256.));\n    fragColor = mix(fragColor, vec4(1,1,1,0), circle(uv - uv_v3+0.5, aspect, 256.));\n\n    vec2 uv_v4 =vec2(0.95, beat_residual.w*0.25);\n    fragColor = mix(fragColor, vec4(0,1,1,0), circle(uv - uv_v4+0.5, aspect, 256.));\n\n    vec4 last_beat_min = Cell(7);\n    vec4 last_beat_max = Cell(8);\n\n    float beat_relative = (beat_residual.w - last_beat_min.w)\/(last_beat_max.w - last_beat_min.w);\n\n    vec2 uv_lo =vec2(0.95, last_beat_min.w*0.25);\n    vec2 uv_hi =vec2(0.95, last_beat_max.w*0.25);\n\n    vec2 uv_abs =vec2(0.95,  Cell(9).y*0.5*iTimeDelta);\n\n    fragColor = mix(fragColor, vec4(1,0,1,0), circle(uv - uv_lo+0.5, aspect, 256.));\n    fragColor = mix(fragColor, vec4(1,1,0,0), circle(uv - uv_hi+0.5, aspect, 256.));\n    fragColor = mix(fragColor, vec4(0,0,1,0), circle(uv - uv_abs+0.5, aspect, 256.));\n\n}",
+            "name": "Buf A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XdfGR8",
+                    "filepath": "\/media\/previz\/buffer03.png",
+                    "previewfilepath": "\/media\/previz\/buffer03.png",
+                    "type": "buffer",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "#define pi2_inv 0.159154943091895335768883763372\n\nvec2 lower_left(vec2 uv)\n{\n    return fract(uv * 0.5);\n}\n\nvec2 lower_right(vec2 uv)\n{\n    return fract((uv - vec2(1, 0.)) * 0.5);\n}\n\nvec2 upper_left(vec2 uv)\n{\n    return fract((uv - vec2(0., 1)) * 0.5);\n}\n\nvec2 upper_right(vec2 uv)\n{\n    return fract((uv - 1.) * 0.5);\n}\n\nvec4 BlurA(vec2 uv, int level)\n{\n    if(level <= 0)\n    {\n        return texture(iChannel0, fract(uv));\n    }\n\n    uv = upper_left(uv);\n    for(int depth = 1; depth < 8; depth++)\n    {\n        if(depth < level)\n        {\n            uv = lower_right(uv);\n        }\n    }\n\n    return texture(iChannel3, uv);\n}\n\nvec4 BlurB(vec2 uv, int level)\n{\n    if(level <= 0)\n    {\n        return texture(iChannel1, fract(uv));\n    }\n\n    uv = lower_left(uv);\n    for(int depth = 1; depth < 8; depth++)\n    {\n        if(depth < level)\n        {\n            uv = lower_right(uv);\n        }\n    }\n\n    return texture(iChannel3, uv);\n}\n\nvec2 GradientA(vec2 uv, vec2 d, vec4 selector, int level){\n    vec4 dX = 0.5*BlurA(uv + vec2(1.,0.)*d, level) - 0.5*BlurA(uv - vec2(1.,0.)*d, level);\n    vec4 dY = 0.5*BlurA(uv + vec2(0.,1.)*d, level) - 0.5*BlurA(uv - vec2(0.,1.)*d, level);\n    return vec2( dot(dX, selector), dot(dY, selector) );\n}\n\nvec2 rot90(vec2 vector){\n    return vector.yx*vec2(1,-1);\n}\n\nvec2 complex_mul(vec2 factorA, vec2 factorB){\n    return vec2( factorA.x*factorB.x - factorA.y*factorB.y, factorA.x*factorB.y + factorA.y*factorB.x);\n}\n\nvec2 spiralzoom(vec2 domain, vec2 center, float n, float spiral_factor, float zoom_factor, vec2 pos){\n    vec2 uv = domain - center;\n    float d = length(uv);\n    return vec2( atan(uv.y, uv.x)*n*pi2_inv + d*spiral_factor, -log(d)*zoom_factor) + pos;\n}\n\nvec2 complex_div(vec2 numerator, vec2 denominator){\n    return vec2( numerator.x*denominator.x + numerator.y*denominator.y,\n                numerator.y*denominator.x - numerator.x*denominator.y)\/\n        vec2(denominator.x*denominator.x + denominator.y*denominator.y);\n}\n\nfloat circle(vec2 uv, vec2 aspect, float scale){\n    return clamp( 1. - length((uv-0.5)*aspect*scale), 0., 1.);\n}\n\nfloat sigmoid(float x) {\n    return 2.\/(1. + exp2(-x)) - 1.;\n}\n\nfloat smoothcircle(vec2 uv, vec2 aspect, float radius, float ramp){\n    return 0.5 - sigmoid( ( length( (uv - 0.5) * aspect) - radius) * ramp) * 0.5;\n}\n\nfloat conetip(vec2 uv, vec2 pos, float size, float min)\n{\n    vec2 aspect = vec2(1.,iResolution.y\/iResolution.x);\n    return max( min, 1. - length((uv - pos) * aspect \/ size) );\n}\n\nfloat warpFilter(vec2 uv, vec2 pos, float size, float ramp)\n{\n    return 0.5 + sigmoid( conetip(uv, pos, size, -16.) * ramp) * 0.5;\n}\n\nvec2 vortex_warp(vec2 uv, vec2 pos, float size, float ramp, vec2 rot)\n{\n    vec2 aspect = vec2(1.,iResolution.y\/iResolution.x);\n\n    vec2 pos_correct = 0.5 + (pos - 0.5);\n    vec2 rot_uv = pos_correct + complex_mul((uv - pos_correct)*aspect, rot)\/aspect;\n    float _filter = warpFilter(uv, pos_correct, size, ramp);\n    return mix(uv, rot_uv, _filter);\n}\n\nvec2 vortex_pair_warp(vec2 uv, vec2 pos, vec2 vel)\n{\n    vec2 aspect = vec2(1.,iResolution.y\/iResolution.x);\n    float ramp = 4.;\n\n    float d = 0.125;\n\n    float l = length(vel);\n    vec2 p1 = pos;\n    vec2 p2 = pos;\n\n    if(l > 0.){\n        vec2 normal = normalize(vel.yx * vec2(-1., 1.))\/aspect;\n        p1 = pos - normal * d \/ 2.;\n        p2 = pos + normal * d \/ 2.;\n    }\n\n    float w = l \/ d * 2.;\n\n    \/\/ two overlapping rotations that would annihilate when they were not displaced.\n    vec2 circle1 = vortex_warp(uv, p1, d, ramp, vec2(cos(w),sin(w)));\n    vec2 circle2 = vortex_warp(uv, p2, d, ramp, vec2(cos(-w),sin(-w)));\n    return (circle1 + circle2) \/ 2.;\n}\n\nbool is_onscreen(vec2 uv){\n    return (uv.x < 1.) && (uv.x > 0.) && (uv.y < 1.) && (uv.y > 0.);\n}\n\n\/\/ Buf D contains an N x N array\nfloat N = 16.;\n\n\/\/ in the rectangle region between 2 points\nvec2 p1 = vec2(0.75);\nvec2 p2 = vec2(1.);\n\nvec4 Cell(int index)\n{    \n    \/\/ map the index to the cell in the array\n    float x = mod(float(index), N) \/ N;\n    float y = floor(float(index) \/ N) \/ N;\n\n    \/\/ compartmentalization\n    vec2 cell_size = (p2 - p1) \/ N;\n    vec2 center = p1 + cell_size*0.5 + (p2-p1)*vec2(x,y);\n\n    return texture(iChannel3, center);\n}\n\nvec2 mouseDelta(){\n    vec2 pixelSize = 1. \/ iResolution.xy;\n    float eighth = 1.\/8.;\n    vec4 oldMouse = Cell(2);\n    vec4 nowMouse = vec4(iMouse.xy \/ iResolution.xy, iMouse.zw \/ iResolution.xy);\n    if(oldMouse.z > pixelSize.x && oldMouse.w > pixelSize.y && \n       nowMouse.z > pixelSize.x && nowMouse.w > pixelSize.y)\n    {\n        return nowMouse.xy - oldMouse.xy;\n    }\n    return vec2(0.);\n}\n\/\/\n\/\/ Description : Array and textureless GLSL 3D simplex noise function.\n\/\/      Author : Ian McEwan, Ashima Arts.\n\/\/  Maintainer : ijm\n\/\/     Lastmod : 20110409 (stegu)\n\/\/     License : Copyright (C) 2011 Ashima Arts. All rights reserved.\n\/\/               Distributed under the MIT License. See LICENSE file.\n\/\/\n\n\/\/uniform float time;\n\nvec4 permute( vec4 x ) {\n\n    return mod( ( ( x * 34.0 ) + 1.0 ) * x, 289.0 );\n\n}\n\nvec4 taylorInvSqrt( vec4 r ) {\n\n    return 1.79284291400159 - 0.85373472095314 * r;\n\n}\n\nfloat snoise( vec3 v ) {\n\n    const vec2 C = vec2( 1.0 \/ 6.0, 1.0 \/ 3.0 );\n    const vec4 D = vec4( 0.0, 0.5, 1.0, 2.0 );\n\n    \/\/ First corner\n\n    vec3 i  = floor( v + dot( v, C.yyy ) );\n    vec3 x0 = v - i + dot( i, C.xxx );\n\n    \/\/ Other corners\n\n    vec3 g = step( x0.yzx, x0.xyz );\n    vec3 l = 1.0 - g;\n    vec3 i1 = min( g.xyz, l.zxy );\n    vec3 i2 = max( g.xyz, l.zxy );\n\n    \/\/  x0 = x0 - 0. + 0.0 * C\n    vec3 x1 = x0 - i1 + 1.0 * C.xxx;\n    vec3 x2 = x0 - i2 + 2.0 * C.xxx;\n    vec3 x3 = x0 - 1. + 3.0 * C.xxx;\n\n    \/\/ Permutations\n\n    i = mod( i, 289.0 );\n    vec4 p = permute( permute( permute(\n        i.z + vec4( 0.0, i1.z, i2.z, 1.0 ) )\n                              + i.y + vec4( 0.0, i1.y, i2.y, 1.0 ) )\n                     + i.x + vec4( 0.0, i1.x, i2.x, 1.0 ) );\n\n    \/\/ Gradients\n    \/\/ ( N*N points uniformly over a square, mapped onto an octahedron.)\n\n    float n_ = 1.0 \/ 7.0; \/\/ N=7\n\n    vec3 ns = n_ * D.wyz - D.xzx;\n\n    vec4 j = p - 49.0 * floor( p * ns.z *ns.z );  \/\/  mod(p,N*N)\n\n    vec4 x_ = floor( j * ns.z );\n    vec4 y_ = floor( j - 7.0 * x_ );    \/\/ mod(j,N)\n\n    vec4 x = x_ *ns.x + ns.yyyy;\n    vec4 y = y_ *ns.x + ns.yyyy;\n    vec4 h = 1.0 - abs( x ) - abs( y );\n\n    vec4 b0 = vec4( x.xy, y.xy );\n    vec4 b1 = vec4( x.zw, y.zw );\n\n    vec4 s0 = floor( b0 ) * 2.0 + 1.0;\n    vec4 s1 = floor( b1 ) * 2.0 + 1.0;\n    vec4 sh = -step( h, vec4( 0.0 ) );\n\n    vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;\n    vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;\n\n    vec3 p0 = vec3( a0.xy, h.x );\n    vec3 p1 = vec3( a0.zw, h.y );\n    vec3 p2 = vec3( a1.xy, h.z );\n    vec3 p3 = vec3( a1.zw, h.w );\n\n    \/\/ Normalise gradients\n\n    vec4 norm = taylorInvSqrt( vec4( dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3) ) );\n    p0 *= norm.x;\n    p1 *= norm.y;\n    p2 *= norm.z;\n    p3 *= norm.w;\n\n    \/\/ Mix final noise value\n\n    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3) ), 0.0 );\n    m = m * m;\n    return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),\n                                 dot(p2,x2), dot(p3,x3) ) );\n\n}\nfloat heightMap( vec3 coord ) {\n\n    float n = abs( snoise( coord ) );\n\n    n += 0.25   * abs( snoise( coord * 2.0 ) );\n    n += 0.25   * abs( snoise( coord * 4.0 ) );\n    n += 0.125  * abs( snoise( coord * 8.0 ) );\n    n += 0.0625 * abs( snoise( coord * 16.0 ) );\n\n    return n;\n\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy \/ iResolution.xy;\n    vec2 uv_orig = uv;\n    vec4 noise = texture(iChannel2, fragCoord.xy \/ iChannelResolution[2].xy + fract(vec2(42,56)*iTime));\n\n    if(iFrame<10)\n    {\n        fragColor = noise;\n        return;\n    }\n\n\n    uv = 0.5 + (uv - 0.5)*0.99;\n    vec2 pixelSize = 1.\/iResolution.xy;\n    vec2 mouseV = mouseDelta();\n    vec2 aspect = vec2(1.,iResolution.y\/iResolution.x);\n    vec2 warp = vortex_pair_warp(uv, iMouse.xy*pixelSize, mouseV*aspect*1.4) - uv;\n    float time = float(iFrame)\/60.;\n    warp += vec2(sin(time*0.1 + uv.x*2. +1.) - sin(time*0.214 + uv.y*2. +1.), sin(time*0.168 + uv.x*2. +1.) - sin(time*0.115 +uv.y*2. +1.))*pixelSize*0.5;\n    uv += warp;\n\n\n    \/\/ reaction-diffusion in blue\n    fragColor.b = BlurB(uv, 0).b;\n    fragColor.b += ((BlurB(uv, 1) - BlurB(uv, 2)).b*0.5 + (noise.b-0.5) * 0.004); \n\n\n    \/\/ Julia fractal in the green channel: \n\n    vec2 c = vec2(-0.18, -0.18);\n    vec2 tuning =  vec2(1.7);\n    vec2 complexSquaredPlusC; \/\/ One steps towards the Julia Attractor\n    vec2 uv_j = (uv_orig - vec2(0.5))*tuning;\n    complexSquaredPlusC.x = (uv_j.x * uv_j.x - uv_j.y * uv_j.y + c.x + 0.5);\n    complexSquaredPlusC.y = (2. * uv_j.x * uv_j.y + c.y + 0.5);\n\n    if(is_onscreen(complexSquaredPlusC)){\n        float old = BlurB(complexSquaredPlusC, 0).y;\n        fragColor.y = old + 0.003;\n    }else{\n        fragColor.y = 0.;\t\t\n    }\n\n    \/\/ Perlin noise fire in red\n    \n   \tvec3 snoisePos = vec3(uv_orig*64., time*0.5);\n\tvec2 snoiseVec = (0.5-vec2( heightMap(snoisePos), heightMap(snoisePos + vec3(32.))))\/iResolution.xy*2.;\n\t\n\tfragColor.x = BlurB(0.5 + (uv_orig-0.5)*0.999 + warp + snoiseVec, 0).x - 0.005;\n\tfragColor.x = mix(fragColor.x, 1.0, BlurB(uv_orig, 0).y*0.75);\n\n    fragColor = clamp(fragColor, 0., 1.);\n\n    \/\/fragColor = noise; \/\/ reset\n}",
+            "name": "Buf B",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XdfGR8",
+                    "filepath": "\/media\/previz\/buffer03.png",
+                    "previewfilepath": "\/media\/previz\/buffer03.png",
+                    "type": "buffer",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4sXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ resolution reduction and horizontal blur\n\nvec2 lower_left(vec2 uv)\n{\n    return fract(uv * 0.5);\n}\n\nvec2 lower_right(vec2 uv)\n{\n    return fract((uv - vec2(1, 0.)) * 0.5);\n}\n\nvec2 upper_left(vec2 uv)\n{\n    return fract((uv - vec2(0., 1)) * 0.5);\n}\n\nvec2 upper_right(vec2 uv)\n{\n    return fract((uv - 1.) * 0.5);\n}\n\nvec4 blur_horizontal(sampler2D channel, vec2 uv, float scale)\n{\n    float h = scale \/ iResolution.x;\n    vec4 sum = vec4(0.0);\n\n    sum += texture(channel, fract(vec2(uv.x - 4.0*h, uv.y)) ) * 0.05;\n    sum += texture(channel, fract(vec2(uv.x - 3.0*h, uv.y)) ) * 0.09;\n    sum += texture(channel, fract(vec2(uv.x - 2.0*h, uv.y)) ) * 0.12;\n    sum += texture(channel, fract(vec2(uv.x - 1.0*h, uv.y)) ) * 0.15;\n    sum += texture(channel, fract(vec2(uv.x + 0.0*h, uv.y)) ) * 0.16;\n    sum += texture(channel, fract(vec2(uv.x + 1.0*h, uv.y)) ) * 0.15;\n    sum += texture(channel, fract(vec2(uv.x + 2.0*h, uv.y)) ) * 0.12;\n    sum += texture(channel, fract(vec2(uv.x + 3.0*h, uv.y)) ) * 0.09;\n    sum += texture(channel, fract(vec2(uv.x + 4.0*h, uv.y)) ) * 0.05;\n\n    return sum\/0.98; \/\/ normalize\n}\n\nvec4 blur_horizontal_left_column(vec2 uv, int depth)\n{\n    float h = pow(2., float(depth)) \/ iResolution.x;    \n    vec2 uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9;\n\n    uv1 = fract(vec2(uv.x - 4.0 * h, uv.y) * 2.);\n    uv2 = fract(vec2(uv.x - 3.0 * h, uv.y) * 2.);\n    uv3 = fract(vec2(uv.x - 2.0 * h, uv.y) * 2.);\n    uv4 = fract(vec2(uv.x - 1.0 * h, uv.y) * 2.);\n    uv5 = fract(vec2(uv.x + 0.0 * h, uv.y) * 2.);\n    uv6 = fract(vec2(uv.x + 1.0 * h, uv.y) * 2.);\n    uv7 = fract(vec2(uv.x + 2.0 * h, uv.y) * 2.);\n    uv8 = fract(vec2(uv.x + 3.0 * h, uv.y) * 2.);\n    uv9 = fract(vec2(uv.x + 4.0 * h, uv.y) * 2.);\n\n    if(uv.y > 0.5)\n    {\n        uv1 = upper_left(uv1);\n        uv2 = upper_left(uv2);\n        uv3 = upper_left(uv3);\n        uv4 = upper_left(uv4);\n        uv5 = upper_left(uv5);\n        uv6 = upper_left(uv6);\n        uv7 = upper_left(uv7);\n        uv8 = upper_left(uv8);\n        uv9 = upper_left(uv9);\n    }\n    else{\n        uv1 = lower_left(uv1);\n        uv2 = lower_left(uv2);\n        uv3 = lower_left(uv3);\n        uv4 = lower_left(uv4);\n        uv5 = lower_left(uv5);\n        uv6 = lower_left(uv6);\n        uv7 = lower_left(uv7);\n        uv8 = lower_left(uv8);\n        uv9 = lower_left(uv9);\n    }\n\n    for(int level = 0; level < 8; level++)\n    {\n        if(level < depth)\n        {\n\n            uv1 = lower_right(uv1);\n            uv2 = lower_right(uv2);\n            uv3 = lower_right(uv3);\n            uv4 = lower_right(uv4);\n            uv5 = lower_right(uv5);\n            uv6 = lower_right(uv6);\n            uv7 = lower_right(uv7);\n            uv8 = lower_right(uv8);\n            uv9 = lower_right(uv9);\n        }\n    }\n\n    vec4 sum = vec4(0.0);\n\n    sum += texture(iChannel3, uv1) * 0.05;\n    sum += texture(iChannel3, uv2) * 0.09;\n    sum += texture(iChannel3, uv3) * 0.12;\n    sum += texture(iChannel3, uv4) * 0.15;\n    sum += texture(iChannel3, uv5) * 0.16;\n    sum += texture(iChannel3, uv6) * 0.15;\n    sum += texture(iChannel3, uv7) * 0.12;\n    sum += texture(iChannel3, uv8) * 0.09;\n    sum += texture(iChannel3, uv9) * 0.05;\n\n    return sum\/0.98; \/\/ normalize\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord.xy \/ iResolution.xy;\n\n    if(uv.x < 0.5)\n    {\n        vec2 uv_half = fract(uv*2.);\n        if(uv.y > 0.5)\n        {\n            fragColor = blur_horizontal(iChannel0, uv_half, 1.);\n        }\n        else\n        {\n            fragColor = blur_horizontal(iChannel1, uv_half, 1.);\n        }\n    }\n    else\n    {\n        for(int level = 0; level < 8; level++)\n        {\n            if(!((uv.x > 0.5 && uv.y > 0.5) || (uv.x <= 0.5)))\n            {\n                vec2 uv_half = fract(uv*2.);\n                fragColor = blur_horizontal_left_column(uv_half, level);\n                uv = uv_half;\n            }\n        }\n    }\n}",
+            "name": "Buf C",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4sXGR8",
+                    "filepath": "\/media\/previz\/buffer02.png",
+                    "previewfilepath": "\/media\/previz\/buffer02.png",
+                    "type": "buffer",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XdfGR8",
+                    "filepath": "\/media\/previz\/buffer03.png",
+                    "previewfilepath": "\/media\/previz\/buffer03.png",
+                    "type": "buffer",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "MsXGWN",
+                    "filepath": "https:\/\/soundcloud.com\/freshfoolishtrackremix\/chase-status-feat-delilah-time",
+                    "previewfilepath": "https:\/\/soundcloud.com\/freshfoolishtrackremix\/chase-status-feat-delilah-time",
+                    "type": "musicstream",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XdfGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ vertical blur (second pass)\n\nvec2 lower_left(vec2 uv)\n{\n    return fract(uv * 0.5);\n}\n\nvec2 lower_right(vec2 uv)\n{\n    return fract((uv - vec2(1, 0.)) * 0.5);\n}\n\nvec2 upper_left(vec2 uv)\n{\n    return fract((uv - vec2(0., 1)) * 0.5);\n}\n\nvec2 upper_right(vec2 uv)\n{\n    return fract((uv - 1.) * 0.5);\n}\n\nvec2 wrap_flip(vec2 uv){\n    return vec2(1.)-abs(fract(uv*.5)*2.-1.);\n}\n\nvec4 blur_vertical_upper_left(sampler2D channel, vec2 uv)\n{\n    float v = 1. \/ iResolution.y;\n    vec4 sum = vec4(0.0);\n    sum += texture(channel, upper_left(vec2(uv.x, uv.y - 4.0*v)) ) * 0.05;\n    sum += texture(channel, upper_left(vec2(uv.x, uv.y - 3.0*v)) ) * 0.09;\n    sum += texture(channel, upper_left(vec2(uv.x, uv.y - 2.0*v)) ) * 0.12;\n    sum += texture(channel, upper_left(vec2(uv.x, uv.y - 1.0*v)) ) * 0.15;\n    sum += texture(channel, upper_left(vec2(uv.x, uv.y + 0.0*v)) ) * 0.16;\n    sum += texture(channel, upper_left(vec2(uv.x, uv.y + 1.0*v)) ) * 0.15;\n    sum += texture(channel, upper_left(vec2(uv.x, uv.y + 2.0*v)) ) * 0.12;\n    sum += texture(channel, upper_left(vec2(uv.x, uv.y + 3.0*v)) ) * 0.09;\n    sum += texture(channel, upper_left(vec2(uv.x, uv.y + 4.0*v)) ) * 0.05;\n    return sum\/0.98; \/\/ normalize\n}\n\nvec4 blur_vertical_lower_left(sampler2D channel, vec2 uv)\n{\n    float v = 1. \/ iResolution.y;\n    vec4 sum = vec4(0.0);\n    sum += texture(channel, lower_left(vec2(uv.x, uv.y - 4.0*v)) ) * 0.05;\n    sum += texture(channel, lower_left(vec2(uv.x, uv.y - 3.0*v)) ) * 0.09;\n    sum += texture(channel, lower_left(vec2(uv.x, uv.y - 2.0*v)) ) * 0.12;\n    sum += texture(channel, lower_left(vec2(uv.x, uv.y - 1.0*v)) ) * 0.15;\n    sum += texture(channel, lower_left(vec2(uv.x, uv.y + 0.0*v)) ) * 0.16;\n    sum += texture(channel, lower_left(vec2(uv.x, uv.y + 1.0*v)) ) * 0.15;\n    sum += texture(channel, lower_left(vec2(uv.x, uv.y + 2.0*v)) ) * 0.12;\n    sum += texture(channel, lower_left(vec2(uv.x, uv.y + 3.0*v)) ) * 0.09;\n    sum += texture(channel, lower_left(vec2(uv.x, uv.y + 4.0*v)) ) * 0.05;\n    return sum\/0.98; \/\/ normalize\n}\n\nvec4 blur_vertical_left_column(vec2 uv, int depth)\n{\n    float v = pow(2., float(depth)) \/ iResolution.y;\n\n    vec2 uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9;\n\n    uv1 = fract(vec2(uv.x, uv.y - 4.0*v) * 2.);\n    uv2 = fract(vec2(uv.x, uv.y - 3.0*v) * 2.);\n    uv3 = fract(vec2(uv.x, uv.y - 2.0*v) * 2.);\n    uv4 = fract(vec2(uv.x, uv.y - 1.0*v) * 2.);\n    uv5 = fract(vec2(uv.x, uv.y + 0.0*v) * 2.);\n    uv6 = fract(vec2(uv.x, uv.y + 1.0*v) * 2.);\n    uv7 = fract(vec2(uv.x, uv.y + 2.0*v) * 2.);\n    uv8 = fract(vec2(uv.x, uv.y + 3.0*v) * 2.);\n    uv9 = fract(vec2(uv.x, uv.y + 4.0*v) * 2.);\n\n    if(uv.x < 0.5)\n    {\n        if(uv.y > 0.5)\n        {\n            uv1 = upper_left(uv1);\n            uv2 = upper_left(uv2);\n            uv3 = upper_left(uv3);\n            uv4 = upper_left(uv4);\n            uv5 = upper_left(uv5);\n            uv6 = upper_left(uv6);\n            uv7 = upper_left(uv7);\n            uv8 = upper_left(uv8);\n            uv9 = upper_left(uv9);\n        }\n        else\n        {\n            uv1 = lower_left(uv1);\n            uv2 = lower_left(uv2);\n            uv3 = lower_left(uv3);\n            uv4 = lower_left(uv4);\n            uv5 = lower_left(uv5);\n            uv6 = lower_left(uv6);\n            uv7 = lower_left(uv7);\n            uv8 = lower_left(uv8);\n            uv9 = lower_left(uv9);\n        }\n    }\n    else\n    {\n        vec2 uv_s = upper_right(uv*2.)*2.;\n        uv1 = clamp(vec2(uv_s.x, uv_s.y - 4.0*v), 0., 1.);\n        uv2 = clamp(vec2(uv_s.x, uv_s.y - 3.0*v), 0., 1.);\n        uv3 = clamp(vec2(uv_s.x, uv_s.y - 2.0*v), 0., 1.);\n        uv4 = clamp(vec2(uv_s.x, uv_s.y - 1.0*v), 0., 1.);\n        uv5 = clamp(vec2(uv_s.x, uv_s.y + 0.0*v), 0., 1.);\n        uv6 = clamp(vec2(uv_s.x, uv_s.y + 1.0*v), 0., 1.);\n        uv7 = clamp(vec2(uv_s.x, uv_s.y + 2.0*v), 0., 1.);\n        uv8 = clamp(vec2(uv_s.x, uv_s.y + 3.0*v), 0., 1.);\n        uv9 = clamp(vec2(uv_s.x, uv_s.y + 4.0*v), 0., 1.);\n        depth--;\n        uv1 = upper_right(uv1);\n        uv2 = upper_right(uv2);\n        uv3 = upper_right(uv3);\n        uv4 = upper_right(uv4);\n        uv5 = upper_right(uv5);\n        uv6 = upper_right(uv6);\n        uv7 = upper_right(uv7);\n        uv8 = upper_right(uv8);\n        uv9 = upper_right(uv9);\n    }\n    for(int level = 0; level < 8; level++)\n    {\n        if(level <= depth)\n        {\n\n            uv1 = lower_right(uv1);\n            uv2 = lower_right(uv2);\n            uv3 = lower_right(uv3);\n            uv4 = lower_right(uv4);\n            uv5 = lower_right(uv5);\n            uv6 = lower_right(uv6);\n            uv7 = lower_right(uv7);\n            uv8 = lower_right(uv8);\n            uv9 = lower_right(uv9);\n        }\n    }\n\n    vec4 sum = vec4(0.0);\n    if(uv.x > 0.5 && uv.y > 0.5)\n    {\n        \/\/return vec4(0);\n        sum += texture(iChannel3, uv1) * 0.05;\n        sum += texture(iChannel3, uv2) * 0.09;\n        sum += texture(iChannel3, uv3) * 0.12;\n        sum += texture(iChannel3, uv4) * 0.15;\n        sum += texture(iChannel3, uv5) * 0.16;\n        sum += texture(iChannel3, uv6) * 0.15;\n        sum += texture(iChannel3, uv7) * 0.12;\n        sum += texture(iChannel3, uv8) * 0.09;\n        sum += texture(iChannel3, uv9) * 0.05;\n    }\n    else\n    {\n        sum += texture(iChannel2, uv1) * 0.05;\n        sum += texture(iChannel2, uv2) * 0.09;\n        sum += texture(iChannel2, uv3) * 0.12;\n        sum += texture(iChannel2, uv4) * 0.15;\n        sum += texture(iChannel2, uv5) * 0.16;\n        sum += texture(iChannel2, uv6) * 0.15;\n        sum += texture(iChannel2, uv7) * 0.12;\n        sum += texture(iChannel2, uv8) * 0.09;\n        sum += texture(iChannel2, uv9) * 0.05;\n    }\n    return sum\/0.98; \/\/ normalize\n}\n\n\/\/ sampling from spectrogram\n\nfloat spectrum(float domain, int t, int level)\n{\n    float d = 64.\/iResolution.x;\n    vec2 uv = vec2(float(t)*2.*d + d, domain);\n    uv = upper_right(uv); level++;\n    for(int depth = 1; depth < 8; depth++)\n    {\n        if(depth < level)\n        {\n            uv = lower_right(uv);\n        }        \n    }\n\n    return texture(iChannel3, uv).x;\n}\n\nfloat bass(int t){\n    return spectrum(0.125, t, 4);\n}\n\nfloat mid(int t){\n    return spectrum(0.5, t, 4);\n}\n\nfloat treb(int t){\n    return spectrum(0.875, t, 4);\n}\n\nvec4 vol(int t){\n    float lo = bass(t);\n    float mi = mid(t);\n    float hi = treb(t);\n    return vec4(lo, mi, hi, (lo + mi + hi)*0.333);\n}\n\n\/\/ Buf D contains an N x N array\nfloat N = 16.;\n\n\/\/ in the rectangle region between 2 points\nvec2 p1 = vec2(0.75);\nvec2 p2 = vec2(1.);\n\nvec4 Cell(int index)\n{    \n    \/\/ map the index to the cell in the array\n    float x = mod(float(index), N) \/ N;\n    float y = floor(float(index) \/ N) \/ N;\n\n    \/\/ compartmentalization\n    vec2 cell_size = (p2 - p1) \/ N;\n    vec2 center = p1 + cell_size*0.5 + (p2-p1)*vec2(x,y);\n\n    return texture(iChannel3, center);\n}\n\nvoid set_cell(inout vec4 bufD, vec2 uv, int index, vec4 value)\n{    \n    \/\/ map the index to the cell in the array\n    float x = mod(float(index), N) \/ N;\n    float y = floor(float(index) \/ N) \/ N;\n\n\n    \/\/ compartmentalization\n    vec2 cell_size = (p2 - p1) \/ N;\n    vec2 center = p1 + cell_size*0.5 + (p2-p1)*vec2(x,y);\n\n    \/\/ store\n    if(abs(uv - center).x <= cell_size.x*0.5 && abs(uv - center).y <= cell_size.y*0.5)\n    {\n        bufD = value;\n    }\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 pixel_size = 1.\/iResolution.xy;\n    vec2 uv = fragCoord.xy * pixel_size;\n    vec2 uv_orig = uv;\n    vec2 uv_half = fract(uv*2.);\n    if(uv.x < 0.5)\n    {\n        if(uv.y > 0.5)\n        {\n            fragColor = blur_vertical_upper_left(iChannel2, uv_half);\n        }\n        else\n        {\n            fragColor = blur_vertical_lower_left(iChannel2, uv_half);\n        }\n    }\n    else\n    {\n        for(int level = 0; level < 8; level++)\n        {\n            if(!((uv.x > 0.5 && uv.y >= 0.5) || (uv.x < 0.5)))\n            {\n                vec2 uv_half = fract(uv*2.);\n                fragColor = blur_vertical_left_column(uv_half, level);\n                uv = uv_half;\n            }\n        }\n        uv_half = fract(uv_orig*2.);\n\n        if(uv_orig.y > 0.5)\n        {\n            if(uv_half.x < pixel_size.x *128.)\n            {\n                fragColor = texture(iChannel1, uv_half.yx);\n            }else{\n                fragColor = texture(iChannel3, uv_orig - vec2(64.,0.) * pixel_size);\n                \/\/fragColor = vec4(0);\n            }\n        }\n    }\n\n    \/\/ \n    vec4 v0 = vol(0);\n    vec4 v1 = vol(1);\n\n    set_cell(fragColor, uv, 0, v0);\n    set_cell(fragColor, uv, 1, v1);\n    set_cell(fragColor, uv, 2, vec4(iMouse.xy * pixel_size, iMouse.zw * pixel_size));\n\n    vec4 v2 = vol(2);\n    vec4 attack = v2 + v0 - 2.*v1;\n    set_cell(fragColor, uv, 3, attack);\n\n    vec4 old_beat_residual = Cell(4);\n    vec4 beat_residual = max(vec4(0.), old_beat_residual*0.992 - 0.008 + max(attack*4., 0.));\n    set_cell(fragColor, uv, 4, beat_residual);\n    set_cell(fragColor, uv, 5, old_beat_residual);\n\n    attack = beat_residual - old_beat_residual;\n    set_cell(fragColor, uv, 6, attack );\n\n    vec4 last_beat_min = Cell(7);\n    vec4 last_beat_max = Cell(8);\n\n    float frames_since_last_beat = Cell(9).y;\n    bool beat = (v0.w > 0.2 && attack.w*min(1.25, 0.25 + frames_since_last_beat*0.03) > 0.0025\/iTimeDelta) || ((last_beat_min.w < 0.01) && attack.w > 0.5) || ((frames_since_last_beat > 500.) && attack.w > 0.2);\n    beat = beat && (frames_since_last_beat > 2.);\n\n    vec4 noise = texture(iChannel0, fragCoord.xy \/ iChannelResolution[0].xy + fract(vec2(23,47)*iTime));\n\n    if(beat)\n    {\n        set_cell(fragColor, uv, 7, old_beat_residual);\n        set_cell(fragColor, uv, 8, beat_residual);\n        set_cell(fragColor, uv, 15, Cell(14));\n        set_cell(fragColor, uv, 14, Cell(13));\n        set_cell(fragColor, uv, 13, Cell(12));\n        set_cell(fragColor, uv, 12, Cell(11));\n        vec4 head = Cell(10);\n        set_cell(fragColor, uv, 11, head);\n        float w = noise.z*6.285;\n        head.xy += vec2(cos(w),sin(w))*2.5*attack.w;\n        set_cell(fragColor, uv, 10, wrap_flip(head.xy).xyxy);\n        frames_since_last_beat = 1.;\n    }\n    else\n    {\n        set_cell(fragColor, uv, 7, min(last_beat_min, beat_residual));\n        set_cell(fragColor, uv, 8, max(last_beat_max, beat_residual));\n        set_cell(fragColor, uv, 10, Cell(10));\n        set_cell(fragColor, uv, 11, Cell(11));\n        set_cell(fragColor, uv, 15, Cell(15));\n        set_cell(fragColor, uv, 14, Cell(14));\n        set_cell(fragColor, uv, 13, Cell(13));\n        set_cell(fragColor, uv, 12, Cell(12));\n        frames_since_last_beat += 1.;\n    }\n\n    set_cell(fragColor, uv, 9, vec4(beat, frames_since_last_beat, 0, 0));\n\n}",
+            "name": "Buf D",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

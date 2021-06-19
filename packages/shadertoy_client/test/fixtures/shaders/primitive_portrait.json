@@ -1,0 +1,102 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "ts2cWm",
+        "date": "1586792222",
+        "viewed": 4333,
+        "name": "Primitive Portrait",
+        "username": "yx",
+        "description": "Released in the 4k Executable Graphics compo at Revision 2020. Placed 6th of 16 entries.\n\nDownload the executable version here: [url]https:\/\/www.pouet.net\/prod.php?which=85265[\/url]\n\nNote: All comments on how to minify the shader further will be deleted.",
+        "likes": 107,
+        "published": 3,
+        "flags": 32,
+        "usePreview": 0,
+        "tags": [
+            "exegfx"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "mat2 rotate(float a){\n    float c=cos(a),s=sin(a);\n    return mat2(c,-s,s,c);\n}\n\nfloat sdRect(vec2 p, vec2 r)\n{\n    p=abs(p)-r;\n    return max(p.x,p.y);\n}\n\nfloat sdf(vec2 p)\n{\n    float d=1e9;\n    d=min(d,sdRect(p-vec2(3),vec2(7,1)));\n    d=min(d,sdRect(p-vec2(3),vec2(1,7)));\n    d=min(d,sdRect(p+vec2(3),vec2(1,7)));\n    d=min(d,sdRect(p+vec2(6,3),vec2(4,1)));\n    d=min(d,sdRect(p+vec2(9),vec2(1)));\n    d=min(d,sdRect(p-vec2(9),vec2(1)));\n    return d;\n}\n\nvoid mainImage(out vec4 fragColor, vec2 fragCoord)\n{\n\tvec2 uv=fragCoord.xy\/iResolution.xy;\n\tvec4 tex=texelFetch(iChannel0,ivec2(fragCoord),0);\n\n\t\/\/ divide by sample-count\n\tvec3 color=tex.rgb\/tex.a;\n    \n    \/\/ each grayscale light is in a separate color channel\n    \/\/ so I can adjust the balance in post here\n    \/\/ comment this out for pretty debug colors\n    vec3 weights = vec3(1.5,.2,.2);\n    weights \/= dot(weights,vec3(1));\n    color = vec3(dot(color,weights));\n    \n\t\/\/ vignette to darken the corners\n\tuv-=.5;\n\tcolor *= 1.-dot(uv,uv)*.8;\n\n    \/\/ exposure and tonemap\n    color *= 2.5;\n    color = 1.-exp(color*-2.);\n\n\t\/\/ gamma correction\n\tcolor = pow(color, vec3(.45));\n    \n    \/\/ raise the black level slightly\n    color = color*.98+.02;\n\n    \/\/ \"final\" color\n    fragColor = vec4(vec3(color),1);\n    \n\t\/\/ set up for logo overlay\n    uv.x*=iResolution.x\/iResolution.y;\n    uv -= vec2(.8888,-.5); \/\/ assumes 16:9\n    uv *= 720.;\n    uv += vec2(20,-20);\n\tfloat threshold = abs(dFdx(uv.x)*.5);\n\tuv+=vec2(8,0);\n    uv*=rotate(acos(-1.)*.25);\n\n    \/\/ logo overlay\n\tfragColor.rgb *= smoothstep(-threshold,threshold,sdf(uv))*.2+.8;\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGzn",
+                    "filepath": "\/media\/a\/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+                    "previewfilepath": "\/media\/ap\/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "#define pi acos(-1.)\n\nmat2 rotate(float b)\n{\n    float c = cos(b),s = sin(b);\n    return mat2(c,-s,s,c);\n}\n\nvec2 hash2(float n) {\n\treturn fract(sin(vec2(n,n+1.))*vec2(43758.5453123));\n}\n\nfloat sdIcosahedron(vec3 p, float r)\n{\n    const float q = (sqrt(5.)+3.)\/2.;\n\n    const vec3 n1 = normalize(vec3(q,1,0));\n    const vec3 n2 = vec3(sqrt(3.)\/3.);\n\n    p = abs(p);\n    float d = dot(p, n2.xyz);\n    p=p*n1.x+p.yzx*n1.y;\n    return max(max(p.x,p.y),max(p.z,d))-n1.x*r;\n}\n\nfloat sdOctahedron(vec3 p, float r)\n{\n    return (dot(abs(p),vec3(1))-r)\/sqrt(3.);\n}\n\nfloat sdDodecahedron(vec3 p, float r)\n{\n\tconst float phi = (1.+sqrt(5.))*.5;\n    p = abs(p);\n    p += phi*p.zxy;\n    return (max(max(p.x,p.y),p.z)-r*phi) \/ sqrt(phi*phi+1.);\n}\n\nstruct prim_t {\n    vec3 pos;\n    float size;\n    float rxy;\n    float ryz;\n};\n\n\/\/ where the magic numbers live:\nconst prim_t icosa[]=prim_t[](\n\tprim_t(vec3(3.36,-.23,0),1.2,-.65,0.),\n\tprim_t(vec3(2.0,-1.,0),.71,.2,0.),\n\tprim_t(vec3(1.2,-3.1,0),.71,-.08,0.),\n\tprim_t(vec3(1.75,1.36,-.2),.63,0.,0.03)\n    \n    \/\/ not necessary for the shadow effect,\n    \/\/ added late for aesthetic reasons\n\t,prim_t(vec3(4.1,1.66,0),.3,0.,0.0)\n\t,prim_t(vec3(5.8,-.2,0),.3,7.,0.0)\n);\nconst prim_t dodec[]=prim_t[](\n\tprim_t(vec3(.97,-1.55,0),.55,-.05,0.),\n\tprim_t(vec3(.90,-1.95,0),.51,.0,0.),\n\tprim_t(vec3(2.2,2.1,.2),1.2,.0,.08),\n\tprim_t(vec3(1.45,-2.4,0),.7,0.,0.)\n    \n    \/\/ see earlier comment\n\t,prim_t(vec3(3.0,-2.4,0),.4,.3,0.)\n);\nconst prim_t octah[]=prim_t[](\n\tprim_t(vec3(.68,3.2,0),1.05,0.,-.47),\n\tprim_t(vec3(.5,-3.75,0),.8,0.,.45),\n\tprim_t(vec3(.8,.93,0),.8,0.,.72),\n\tprim_t(vec3(.18,-2.2,0),.4,1.5,0.5),\n\tprim_t(vec3(.2,-2.6,0),.5,0.,0.5)\n);\n\nvec3 primTransform(vec3 p, prim_t b) {\n\tp-=b.pos;\n    p.xy*=rotate(b.rxy);\n    p.yz*=rotate(b.ryz);\n    return p;\n}\n\nfloat scene(vec3 p)\n{\n    float d = 1e9;\n    \n    float ground = -p.z;\n    if (abs(ground)<.01){\n    \t\/\/ plaster wall surface, just two octaves of subtle noise\n    \tground -= texture(iChannel1,p.xy*.125).r*.0025;\n    \tground -= texture(iChannel1,p.xy*.25).r*.0025;\n    }\n\n    \/\/ avoid evaluating expensive geometry if possible\n    if (p.x > -2. && p.x < 6.5 && abs(p.y) < 5.) {\n        for(int i=0;i<6;++i){\n            d=min(d,sdIcosahedron(\n                primTransform(p,icosa[i]),\n                icosa[i].size\n            ));\n        }\n        for(int i=0;i<5;++i){\n            d=min(d,sdDodecahedron(\n                primTransform(p,dodec[i]),\n                dodec[i].size\n            ));\n        }\n        for(int i=0;i<5;++i){\n            d=min(d,sdOctahedron(\n                primTransform(p,octah[i]),\n                octah[i].size\n            ));\n        }\n    }\n    \n    return min(d,ground);\n}\n\nvec2 rv2;\n\nvec3 ortho(vec3 a){\n    vec3 b=cross(vec3(-1,-1,.5),a);\n    \/\/ assume b is nonzero\n    return (b);\n}\n\n\/\/ various bits of lighting code \"borrowed\" from \n\/\/ http:\/\/blog.hvidtfeldts.net\/index.php\/2015\/01\/path-tracing-3d-fractals\/\nvec3 getSampleBiased(vec3  dir, float power) {\n\tdir = normalize(dir);\n\tvec3 o1 = normalize(ortho(dir));\n\tvec3 o2 = normalize(cross(dir, o1));\n\tvec2 r = rv2;\n\tr.x=r.x*2.*pi;\n\tr.y=pow(r.y,1.0\/(power+1.0));\n\tfloat oneminus = sqrt(1.0-r.y*r.y);\n\treturn cos(r.x)*oneminus*o1+sin(r.x)*oneminus*o2+r.y*dir;\n}\n\nvec3 getConeSample(vec3 dir, float extent) {\n\tdir = normalize(dir);\n\tvec3 o1 = normalize(ortho(dir));\n\tvec3 o2 = normalize(cross(dir, o1));\n\tvec2 r =  rv2;\n\tr.x=r.x*2.*pi;\n\tr.y=1.0-r.y*extent;\n\tfloat oneminus = sqrt(1.0-r.y*r.y);\n\treturn cos(r.x)*oneminus*o1+sin(r.x)*oneminus*o2+r.y*dir;\n}\n\nvec3 sky(vec3 viewDir) {\n    float toplight = step(.5, dot(viewDir,vec3(0,1,-.2)));\n    float sidelight = step(.5, dot(viewDir,normalize(vec3(1,0,-1))));\n    return vec3(0,toplight,sidelight);\n}\n\nbool trace5(vec3 cam, vec3 dir, float EPS, out vec3 h, out vec3 n, out float k) {\n\tfloat t=0.;\n    for(int i=0;i<100;++i)\n    {\n        k = scene(cam+dir*t);\n        t += k;\n        if (abs(k) < EPS)\n            break;\n    }\n\n    h = cam+dir*t;\n\t\n    \/\/ if we hit something\n    if(abs(k)<EPS)\n    {\n        vec2 o = vec2(EPS, 0);\n        k=scene(h);\n        n = normalize(vec3(\n            scene(h+o.xyy),\n            scene(h+o.yxy),\n            scene(h+o.yyx) \n        )-k);\n        return true;\n    }\n    return false;\n}\n\nvec3 trace2(vec3 cam, vec3 dir)\n{\n    const vec3 sunPos = vec3(20,0,-5);\n    const float sunSize = 1e-3;\n    vec3 sunColor = vec3(1,0,0);\n    \n    vec3 accum = vec3(1);\n    vec3 direct = vec3(0);\n    for(int ibounce=0;ibounce<5;++ibounce)\n    {\n        vec3 h,n;\n        float k;\n        if (trace5(cam,dir,.001,h,n,k))\n        {\n            cam = h+n*.002;\n            dir=getSampleBiased(n,1.);\n             \n            vec3 sunDirection = sunPos-h;\n            vec3 sunSampleDir = getConeSample(sunDirection,sunSize);\n            float sunLight = dot(n, sunSampleDir);\n            vec3 dummy0,dummy1;\n            float dummy2;\n            if (sunLight>0.0 && !trace5(h + n*.01,sunSampleDir,.01,dummy0,dummy1,dummy2)) {\n                direct += accum*sunLight*sunColor;\n            }\n            rv2=hash2(rv2.y);\n        }\n        else if (abs(k) > .1) {\n            return direct + sky(dir) * accum;\n        } else {\n            break;\n        }\n    }\n    \n    \/\/ deliberately fail the pixel\n    return vec3(-1.);\n}\n\nvec2 bokeh(){\n\tvec2 a=rv2;\n    if(a.y>a.x)\n        a=1.-a;\n    a.y*=pi*2.\/a.x;\n    return a.x*vec2(cos(a.y),sin(a.y));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ recover previous frame for iterative rendering\n   \tfragColor = texelFetch(iChannel0,ivec2(fragCoord),0);\t\n    \n    \/\/ get UVs\n    vec2 uv = fragCoord.xy\/iResolution.xy-.5;\n\n    \/\/ seed per-pixel\n\trv2 = hash2( iTime+(uv.x+iResolution.x*uv.y)*1.51269341231 );\n    \n    \/\/ jitter for antialiasing\n    uv += 2.*(rv2-.5)\/iResolution.xy;\n    \n    \/\/ correct UVs for aspect ratio\n    uv.x*=iResolution.x\/iResolution.y;\n\t\n    \/\/ camera params\n    const vec3 camPos = vec3(-.5,-.2,-10);\n    const vec3 lookAt = vec3(-.5,-.2,0);\n    const float focusDistance=distance(camPos,lookAt);\n    const vec2 apertureRadius=vec2(1,2)*.1;\n   \n    \/\/ make a camera\n    vec3 cam = vec3(0);\n    vec3 dir = normalize(vec3(uv,1.));\n    \n    \/\/ slight bokeh\n    vec2 bokehJitter=bokeh();\n    cam.xy+=bokehJitter*apertureRadius;\n    dir.xy-=bokehJitter*apertureRadius*dir.z\/focusDistance;\n\n    \/\/ rotate\/move the camera\n    vec3 lookDir = lookAt-camPos;\n    float pitch = -atan(lookDir.y,length(lookDir.xz));\n    float yaw = -atan(lookDir.x,lookDir.z);\n    cam.yz *= rotate(pitch);\n    dir.yz *= rotate(pitch);\n    cam.xz *= rotate(yaw);\n    dir.xz *= rotate(yaw);\n    cam += camPos;\n    \n    \/\/ compute the pixel color\n\tvec3 pixel = trace2(cam,dir);\n        \n    if (iMouse.z > 0.) {\n        fragColor = vec4(0);\n    }\n\n    fragColor += (!isnan(pixel.r) && pixel.r >= 0.) ? vec4(vec3(pixel),1) : vec4(0);\n}",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "\/*\n~ Primitive Portrait\n  by yx\/Polarity\n\n~ 2.6kb executable graphics\n  released at Revision 2020\n\n~ inspired by Kumi Yamashita's works of light and shadow\n\n~ should take no longer than 15 seconds to render\n\n~ tools:\n  crinkler 2.1a by loonies & tbc\n  shader minifier by llb\n\n~ greetings:\n  alia\n  alkama\n  blackle\n  cpdt\n  evvvvil\n  fizzer\n  flopine\n  noby\n  nusan\n  slerpy\n  tdhooper\n  wrighter\n*\/",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        }
+    ]
+}
