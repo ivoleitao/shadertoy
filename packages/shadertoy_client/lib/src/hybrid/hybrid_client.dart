@@ -1,19 +1,49 @@
+import 'dart:collection';
+
 import 'package:dio/dio.dart';
+import 'package:file/file.dart';
 import 'package:shadertoy/shadertoy_api.dart';
+import 'package:shadertoy_client/src/hybrid/shader_sync.dart';
+import 'package:shadertoy_client/src/hybrid/user_sync.dart';
 import 'package:shadertoy_client/src/site/site_client.dart';
 import 'package:shadertoy_client/src/site/site_options.dart';
 import 'package:shadertoy_client/src/ws/ws_client.dart';
 import 'package:shadertoy_client/src/ws/ws_options.dart';
 
-/// A marker interface implementing both [ShadertoySite] and [ShadertoyWS]
-abstract class ShadertoyHybrid implements ShadertoySite, ShadertoyWS {}
+abstract class SyncTaskRunner {
+  void log(String message);
+
+  Future<List<T>> process<T extends IterableMixin<APIResponse>>(
+      List<Future<T>> tasks,
+      {String? message});
+}
+
+/// An hybrid interface implementing both [ShadertoySite] and [ShadertoyWS]
+abstract class ShadertoyHybrid implements ShadertoySite, ShadertoyWS {
+  /// Synchronizes the [store] with the remote shadertoy data. It can optionally
+  /// download shader and user assets if [fs] is specified
+  ///
+  /// * [store]: A [ShadertoyStore] implementation
+  /// * [fs]: A [FileSystem] implementation to store shader and user assets
+  /// * [concurrency]: Maximum number of simultaneous requests
+  /// * [timeout]: Request timeout in seconds
+  /// * [shaderIds]: If specified only the this shader id's will be sync
+  /// * [playlistIds]: The playlists to synchronize
+  void rsync(ShadertoyStore store,
+      {FileSystem? fs,
+      SyncTaskRunner? runner,
+      int? concurrency,
+      int? timeout,
+      List<String>? shaderIds,
+      List<String>? playlistIds});
+}
 
 /// A Shadertoy hybrid client
 ///
 /// An implementation of the [ShadertoyWS] and [ShadertoySite] APIs
 /// providing the full set of methods either through the [ShadertoySite] implementation
-/// or through the [ShadertoyWS] implementation first then falling back to the [ShadertoySite]
-/// implementation. This provides an implementation that provides the same set of shaders available
+/// or through the [ShadertoyWS] implementation then falling back to the [ShadertoySite]
+/// implementation. This could be used to provide the same set of shaders available
 /// through the REST API (public+api privacy settings) complementing those with additional methods
 /// available through the site implementation
 class ShadertoyHybridClient extends ShadertoyBaseClient
@@ -146,68 +176,22 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
   Future<DownloadFileResponse> downloadMedia(String inputPath) {
     return _siteClient.downloadMedia(inputPath);
   }
-}
 
-/// Creates [ShadertoyHybrid] backed by a [ShadertoyHybridClient]
-///
-/// * [user]: The Shadertoy user
-/// * [password]: The Shadertoy password
-/// * [cookieName]: The Shadertoy cookie name
-/// * [userShaderCount]: The number of shaders requested for a user paged call
-/// * [playlistShaderCount]: The number of shaders requested for a playlist paged call
-/// * [pageResultsShaderCount]: The number of shaders presented in the Shadertoy results page
-/// * [pageUserShaderCount]: The number of shaders presented in the Shadertoy user page
-/// * [pagePlaylistShaderCount]: The number of shaders presented in the Shadertoy playlist page
-/// * [baseUrl]: The Shadertoy base url
-/// * [poolMaxAllocatedResources]: The maximum number of resources allocated for parallel calls
-/// * [poolTimeout]: The timeout before giving up on a call
-/// * [retryMaxAttempts]: The maximum number of attempts at a failed request
-/// * [shaderCount]: The number of shaders fetched in a paged call
-/// * [errorHandling]: The error handling mode
-/// * [client]: A pre-initialized [Dio] client
-ShadertoyHybrid newShadertoyHybridClient(
-    {String? user,
-    String? password,
-    String? cookieName,
-    int? userShaderCount,
-    int? playlistShaderCount,
-    int? pageResultsShaderCount,
-    int? pageUserShaderCount,
-    int? pagePlaylistShaderCount,
-    String? apiKey,
-    String? apiPath,
-    String? baseUrl,
-    int? poolMaxAllocatedResources,
-    int? poolTimeout,
-    int? retryMaxAttempts,
-    int? shaderCount,
-    ErrorMode? errorHandling,
-    Dio? client}) {
-  return ShadertoyHybridClient(
-      ShadertoySiteOptions(
-          user: user,
-          password: password,
-          cookieName: cookieName,
-          userShaderCount: userShaderCount,
-          playlistShaderCount: playlistShaderCount,
-          pageResultsShaderCount: pageResultsShaderCount,
-          pageUserShaderCount: pageUserShaderCount,
-          pagePlaylistShaderCount: pagePlaylistShaderCount,
-          baseUrl: baseUrl,
-          poolMaxAlocatedResources: poolMaxAllocatedResources,
-          poolTimeout: poolTimeout,
-          retryMaxAttempts: retryMaxAttempts,
-          errorHandling: errorHandling),
-      wsOptions: apiKey != null
-          ? ShadertoyWSOptions(
-              apiKey: apiKey,
-              apiPath: apiPath,
-              baseUrl: baseUrl,
-              poolMaxAllocatedResources: poolMaxAllocatedResources,
-              poolTimeout: poolTimeout,
-              retryMaxAttempts: retryMaxAttempts,
-              shaderCount: shaderCount,
-              errorHandling: errorHandling)
-          : null,
-      client: client);
+  @override
+  void rsync(ShadertoyStore store,
+      {FileSystem? fs,
+      SyncTaskRunner? runner,
+      int? concurrency,
+      int? timeout,
+      List<String>? shaderIds,
+      List<String>? playlistIds}) async {
+    final shaderProcessor = ShaderSyncProcessor(this, store,
+        runner: runner, concurrency: concurrency, timeout: timeout);
+    final shaderSyncResult =
+        await shaderProcessor.syncShaders(fs: fs, shaderIds: shaderIds);
+
+    final userProcessor = UserSyncProcessor(this, store,
+        runner: runner, concurrency: concurrency, timeout: timeout);
+    await userProcessor.syncUsers(shaderSyncResult, fs: fs);
+  }
 }

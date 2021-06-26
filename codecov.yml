@@ -14,15 +14,15 @@ coverage:
 
 
 flags:
-  stash:
+  shadertoy:
     paths:
       - packages/shadertoy/lib/
-  stash_test:
+  shadertoy_client:
     paths:
       - packages/shadertoy_client/lib/
-  stash_memory:
+  shadertoy_sqlite:
     paths:
       - packages/shadertoy_sqlite/lib/
-  stash_file:
+  shadertoy_cli:
     paths:
       - packages/shadertoy_cli/lib/

@@ -148,36 +148,3 @@ class ShadertoyWSClient extends ShadertoyHttpClient<ShadertoyWSOptions>
             error: toResponseError(de, context: CONTEXT_SHADER)));
   }
 }
-
-/// Creates [ShadertoyWS] backed by the Shadertoy Rest API
-///
-/// * [apiKey]: The API key
-/// * [apiPath]: The base api path
-/// * [baseUrl]: The Shadertoy base url
-/// * [poolMaxAllocatedResources]: The maximum number of resources allocated for parallel calls
-/// * [poolTimeout]: The timeout before giving up on a call
-/// * [retryMaxAttempts]: The maximum number of attempts at a failed request
-/// * [shaderCount]: The number of shaders fetched in a paged call
-/// * [errorHandling]: The error handling mode
-/// * [client]: A pre-initialized [Dio] client
-ShadertoyWS newShadertoyWSClient(String apiKey,
-    {String? apiPath,
-    String? baseUrl,
-    int? poolMaxAllocatedResources,
-    int? poolTimeout,
-    int? retryMaxAttempts,
-    int? shaderCount,
-    ErrorMode? errorHandling,
-    Dio? client}) {
-  return ShadertoyWSClient(
-      ShadertoyWSOptions(
-          apiKey: apiKey,
-          apiPath: apiPath,
-          baseUrl: baseUrl,
-          poolMaxAllocatedResources: poolMaxAllocatedResources,
-          poolTimeout: poolTimeout,
-          retryMaxAttempts: retryMaxAttempts,
-          shaderCount: shaderCount,
-          errorHandling: errorHandling),
-      client: client);
-}

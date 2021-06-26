@@ -71,7 +71,7 @@ import 'dart:io';
 
 import 'package:moor/ffi.dart';
 import 'package:moor/moor.dart';
-import 'package:shadertoy_api/shadertoy_api.dart';
+import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
 
 QueryExecutor diskExecutor(File file, {bool logStatements = false}) {

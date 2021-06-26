@@ -9,8 +9,8 @@ import 'package:test/test.dart';
 import 'fixtures/fixtures.dart';
 
 void main() {
-  ShadertoyMoorOptions newOptions() {
-    return ShadertoyMoorOptions();
+  ShadertoySqliteOptions newOptions() {
+    return ShadertoySqliteOptions();
   }
 
   QueryExecutor memoryExecutor({bool logStatements = false}) {
@@ -21,9 +21,9 @@ void main() {
     return MoorStore(executor ?? memoryExecutor());
   }
 
-  ShadertoyMoorStore newMoorStore(ShadertoyMoorOptions options,
+  ShadertoySqliteStore newMoorStore(ShadertoySqliteOptions options,
       {QueryExecutor? executor}) {
-    return ShadertoyMoorStore(newStore(executor), options);
+    return ShadertoySqliteStore(newStore(executor), options);
   }
 
   moorRuntimeOptions.dontWarnAboutMultipleDatabases = true;

@@ -14,6 +14,7 @@ dependencies:
   meta: ^1.4.0
   enum_to_string: ^2.0.1
   path: ^1.8.0
+  file: ^6.1.2
   pool: ^1.5.0
   retry: ^3.1.0
   dio: ^4.0.0
@@ -21,6 +22,7 @@ dependencies:
   dio_cookie_manager: ^2.0.0
   html: ^0.15.0
   intl: ^0.17.0
+  glob: ^2.0.1
   envify: ^2.0.0
   shadertoy:
     path: ../shadertoy

@@ -9,7 +9,7 @@ QueryExecutor memoryExecutor({bool logStatements = false}) {
 
 void main(List<String> arguments) async {
   // Creates a new store with an in-memory executor
-  final store = newShadertoyMoorStore(memoryExecutor());
+  final store = newShadertoySqliteStore(memoryExecutor());
 
   // Creates user 1
   final userId1 = 'UzZ0Z1';

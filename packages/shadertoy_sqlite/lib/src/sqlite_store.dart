@@ -4,7 +4,7 @@ import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite_options.dart';
 
-class ShadertoyMoorStore extends ShadertoyBaseStore {
+class ShadertoySqliteStore extends ShadertoyBaseStore {
   // ignore: unused_field
   static final int _SQLITE_ABORT = 4;
   // ignore: unused_field
@@ -191,14 +191,14 @@ class ShadertoyMoorStore extends ShadertoyBaseStore {
   /// The [MoorStore]
   final MoorStore store;
 
-  /// The [ShadertoyMoorOptions]
-  final ShadertoyMoorOptions options;
+  /// The [ShadertoySqliteOptions]
+  final ShadertoySqliteOptions options;
 
-  /// Creates a [ShadertoyMoorStore]
+  /// Creates a [ShadertoySqliteStore]
   ///
   /// * [store]: A pre-initialized [MoorStore] store
-  /// * [options]: The [ShadertoyMoorOptions] used to configure this store
-  ShadertoyMoorStore(this.store, this.options);
+  /// * [options]: The [ShadertoySqliteOptions] used to configure this store
+  ShadertoySqliteStore(this.store, this.options);
 
   /// Converts a [SqliteException] to a [ResponseError]
   ///
@@ -651,21 +651,21 @@ class ShadertoyMoorStore extends ShadertoyBaseStore {
   }
 }
 
-/// Creates a [ShadertoyStore] backed by a [ShadertoyMoorStore]
+/// Creates a [ShadertoyStore] backed by a [ShadertoySqliteStore]
 ///
 /// * [executor]: The [QueryExecutor] for this store
 /// * [shaderCount]: The number of shaders requested for a paged call
 /// * [userShaderCount]: The number of shaders requested for a user paged call
 /// * [playlistShaderCount]: The number of shaders requested for a playlist paged call
 /// * [errorHandling]: The error handling mode
-ShadertoyStore newShadertoyMoorStore(QueryExecutor executor,
+ShadertoyStore newShadertoySqliteStore(QueryExecutor executor,
     {int? shaderCount,
     int? userShaderCount,
     int? playlistShaderCount,
     ErrorMode? errorHandling}) {
-  return ShadertoyMoorStore(
+  return ShadertoySqliteStore(
       MoorStore(executor),
-      ShadertoyMoorOptions(
+      ShadertoySqliteOptions(
           shaderCount: shaderCount,
           userShaderCount: userShaderCount,
           playlistShaderCount: playlistShaderCount,

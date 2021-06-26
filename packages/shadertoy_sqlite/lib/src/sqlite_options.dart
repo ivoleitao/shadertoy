@@ -1,7 +1,7 @@
 import 'package:shadertoy/shadertoy_api.dart';
 
-/// Options for the Shadertoy Moor store
-class ShadertoyMoorOptions extends ShadertoyClientOptions {
+/// Options for the Shadertoy Sqlite store
+class ShadertoySqliteOptions extends ShadertoyClientOptions {
   /// The default number of shaders fetched for a paged call.
   static const int DefaultShaderCount = 12;
 
@@ -20,13 +20,13 @@ class ShadertoyMoorOptions extends ShadertoyClientOptions {
   /// The number of shaders requested for a playlist paged call
   final int playlistShaderCount;
 
-  /// Builds a [ShadertoyMoorOptions]
+  /// Builds a [ShadertoySqliteOptions]
   ///
   /// * [shaderCount]: The number of shaders requested for a paged call
   /// * [userShaderCount]: The number of shaders requested for a user paged call
   /// * [playlistShaderCount]: The number of shaders requested for a playlist paged call
   /// * [errorHandling]: The error handling mode
-  ShadertoyMoorOptions(
+  ShadertoySqliteOptions(
       {int? shaderCount,
       int? userShaderCount,
       int? playlistShaderCount,
@@ -40,18 +40,18 @@ class ShadertoyMoorOptions extends ShadertoyClientOptions {
     assert(this.playlistShaderCount >= 1);
   }
 
-  /// Builds a copy of a [ShadertoyMoorOptions]
+  /// Builds a copy of a [ShadertoySqliteOptions]
   ///
   /// * [shaderCount]: The number of shaders requested for a paged call
   /// * [userShaderCount]: The number of shaders requested for a user paged call
   /// * [playlistShaderCount]: The number of shaders requested for a playlist paged call
   /// * [errorHandling]: The error handling mode
-  ShadertoyMoorOptions copyWith(
+  ShadertoySqliteOptions copyWith(
       {int? shaderCount,
       int? userShaderCount,
       int? playlistShaderCount,
       ErrorMode? errorHandling}) {
-    return ShadertoyMoorOptions(
+    return ShadertoySqliteOptions(
         shaderCount: shaderCount ?? this.shaderCount,
         userShaderCount: userShaderCount ?? this.userShaderCount,
         playlistShaderCount: playlistShaderCount ?? this.playlistShaderCount,
