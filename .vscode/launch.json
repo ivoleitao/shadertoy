@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Dart: Shadertoy",
+            "name": "Shadertoy : Example",
             "program": "packages/shadertoy/example/example.dart",
             "args": [],
             "request": "launch",
@@ -10,10 +10,243 @@
             "console": "debugConsole"
         },
         {
-            "name": "Dart: Run all Shadertoy tests",
-            "type": "dart",
+            "name": "Client : Site : Login",
+            "program": "packages/shadertoy_client/example/site/login.dart",
+            "args": [],
             "request": "launch",
-            "program": "packages/shadertoy/test/"
+            "type": "dart",
+            "console": "debugConsole"
         },
+        {
+            "name": "Client : Site : Logout",
+            "program": "packages/shadertoy_client/example/site/logout.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find Shader By Id",
+            "program": "packages/shadertoy_client/example/site/find_shader_by_id.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find Shaders By Id Set",
+            "program": "packages/shadertoy_client/example/site/find_shaders_by_idset.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find Shaders",
+            "program": "packages/shadertoy_client/example/site/find_shaders.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find All Shader Ids",
+            "program": "packages/shadertoy_client/example/site/find_all_shader_ids.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find Shader Ids",
+            "program": "packages/shadertoy_client/example/site/find_shader_ids.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find Comments By Shader Id",
+            "program": "packages/shadertoy_client/example/site/find_comments_by_shaderid.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find User By Id",
+            "program": "packages/shadertoy_client/example/site/find_user_byid.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find Shaders By User Id",
+            "program": "packages/shadertoy_client/example/site/find_shaders_by_userid.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find Shader Ids By User Id",
+            "program": "packages/shadertoy_client/example/site/find_shader_ids_by_userid.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find Playlist By Id",
+            "program": "packages/shadertoy_client/example/site/find_playlist_by_id.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find Shaders By Playlist Id",
+            "program": "packages/shadertoy_client/example/site/find_shaders_by_playlistid.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Find Shader Ids By Playlist Id",
+            "program": "packages/shadertoy_client/example/site/find_shader_ids_by_playlistid.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Download Shader Picture",
+            "program": "packages/shadertoy_client/example/site/download_shader_picture.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Site : Download Media",
+            "program": "packages/shadertoy_client/example/site/download_media.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : WS : Find Shader By Id",
+            "program": "packages/shadertoy_client/example/ws/find_shader_byid.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : WS : Find Shaders By Id Set",
+            "program": "packages/shadertoy_client/example/ws/find_shaders_byidset.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : WS : Find Shaders",
+            "program": "packages/shadertoy_client/example/ws/find_shaders.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : WS : Find All Shader Ids",
+            "program": "packages/shadertoy_client/example/ws/find_all_shader_ids.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : WS : Find Shaders Ids",
+            "program": "packages/shadertoy_client/example/ws/find_shader_ids.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "Client : Hybrid : Find Shader By Id",
+            "program": "packages/shadertoy_client/example/hybrid/find_shader_by_id.dart",
+            "args": [],
+            "request": "launch",
+            "type": "dart",
+            "console": "debugConsole"
+        },
+        {
+            "name": "CLI : User",
+            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "args": [
+                "user",
+                "-i",
+                "shaderflix"
+            ],
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "CLI : Shader",
+            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "args": [
+                "shader",
+                "-k",
+                "BdHtWh",
+                "-i",
+                "MddGzf"
+            ],
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "CLI : Shader Comments",
+            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "args": [
+                "comments",
+                "-i",
+                "MtsXzl"
+            ],
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "CLI : Playlist",
+            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "args": [
+                "playlist",
+                "-i",
+                "week"
+            ],
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "CLI: Sqlite",
+            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "args": [
+                "sqlite",
+                "-k",
+                "BdHtWh",
+                "-f",
+                ".dart_tool/shadertoy",
+                "-s",
+                "MdX3Rr",
+                "-s",
+                "Mt3XW8"
+            ],
+            "request": "launch",
+            "type": "dart"
+        }
     ]
 }

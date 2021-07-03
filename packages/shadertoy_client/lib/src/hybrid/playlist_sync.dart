@@ -33,11 +33,11 @@ class PlaylistSyncResult extends SyncResult<PlaylistSyncTask> {
       : super(added: added, removed: removed);
 }
 
-class PlaylistSyncRunner extends SyncProcessor {
-  PlaylistSyncRunner(ShadertoyHybridClient client, ShadertoyStore store,
-      {SyncTaskRunner? processor, int? concurrency, int? timeout})
+class PlaylistSyncProcessor extends SyncProcessor {
+  PlaylistSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
+      {SyncTaskRunner? runner, int? concurrency, int? timeout})
       : super(client, store,
-            processor: processor, concurrency: concurrency, timeout: timeout);
+            runner: runner, concurrency: concurrency, timeout: timeout);
 
   FindPlaylistResponse getPlaylistError(dynamic e, String playlistId) {
     return FindPlaylistResponse(

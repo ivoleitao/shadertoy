@@ -69,8 +69,8 @@ abstract class SyncProcessor {
   final int timeout;
 
   SyncProcessor(this.client, this.store,
-      {SyncTaskRunner? processor, int? concurrency, int? timeout})
-      : runner = processor ?? const DefaultTaskRunner(),
+      {SyncTaskRunner? runner, int? concurrency, int? timeout})
+      : runner = runner ?? const DefaultTaskRunner(),
         concurrency = concurrency ?? 10,
         timeout = timeout ?? 30;
 

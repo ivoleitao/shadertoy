@@ -88,14 +88,14 @@ class CommentTaskResult extends SyncResult<CommentTask> {
 
 class ShaderSyncProcessor extends SyncProcessor {
   static final Glob _ShaderMediaFiles =
-      Glob('${ShadertoyContext.ShaderMediaPath}/*.jpg');
+      Glob('**/${ShadertoyContext.ShaderMediaPath}/*.jpg');
   static final Glob _ShaderInputSourceFiles = Glob(
-      '{presets/*.jpg,media/{previz,a}/{*.png,*.jpg,*.mp3,*.bin,*.webm,*.ogv}}');
+      '**/{presets/*.jpg,media/{previz,a}/{*.png,*.jpg,*.mp3,*.bin,*.webm,*.ogv}}');
 
   ShaderSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
       : super(client, store,
-            processor: runner, concurrency: concurrency, timeout: timeout);
+            runner: runner, concurrency: concurrency, timeout: timeout);
 
   FindShaderResponse _getShaderError(dynamic e, String shaderId) {
     return FindShaderResponse(
@@ -160,7 +160,7 @@ class ShaderSyncProcessor extends SyncProcessor {
           storeShaders.map((fsr) => fsr.shader?.info).whereType<Info>();
       final storeShaderIds = storeInfos.map((info) => info.id).toSet();
 
-      final clientResponse = shaderIds != null
+      final clientResponse = shaderIds == null || shaderIds.isEmpty
           ? await client.findAllShaderIds()
           : FindShaderIdsResponse(ids: shaderIds);
       if (clientResponse.ok) {
@@ -335,26 +335,26 @@ class ShaderSyncProcessor extends SyncProcessor {
   }
 
   Future<DownloadSyncResult> _syncShaderPictures(
-      FileSystem fs, ShaderSyncResult shaderSync) async {
-    final fsDirectory = fs.currentDirectory;
+      FileSystem fs, Directory dir, ShaderSyncResult shaderSync) async {
     final localShaderIds = <String>{};
     final shaderMediaPath = ShadertoyContext.ShaderMediaPath;
     await for (final path
-        in listFiles(fsDirectory, _ShaderMediaFiles, recursive: true)) {
+        in listFiles(dir, _ShaderMediaFiles, recursive: true)) {
       localShaderIds.add(fileNameToShaderId(p.basenameWithoutExtension(path)));
     }
 
     final localShaderInputSources = <String>{};
     await for (final path
-        in listFiles(fsDirectory, _ShaderInputSourceFiles, recursive: true)) {
-      localShaderInputSources.add(p.relative(path));
+        in listFiles(dir, _ShaderInputSourceFiles, recursive: true)) {
+      localShaderInputSources.add(p.relative(path, from: dir.path));
     }
 
     final shaderPictureRemotePath =
         (shaderId) => ShadertoyContext.shaderPicturePath(shaderId);
-    final shaderPictureLocalPath = (shaderId) =>
-        p.join(shaderMediaPath, '${shaderIdToFileName(shaderId)}.jpg');
-    final shaderInputSourceLocalPath = (inputSource) => inputSource;
+    final shaderPictureLocalPath = (shaderId) => p.join(
+        dir.path, shaderMediaPath, '${shaderIdToFileName(shaderId)}.jpg');
+    final shaderInputSourceLocalPath =
+        (inputSource) => p.join(dir.path, inputSource);
 
     final currentShaderIds = shaderSync.currentShaderIds;
     final currentShaderInputSources = shaderSync.currentShaderInputSourcePaths;
@@ -369,7 +369,7 @@ class ShaderSyncProcessor extends SyncProcessor {
       ...shaderSync.addedShaderInputSourcePaths,
       ...currentShaderInputSources.difference(localShaderInputSources)
     }) {
-      addShaderPaths.putIfAbsent(path, () => path);
+      addShaderPaths.putIfAbsent(path, () => shaderInputSourceLocalPath(path));
     }
 
     final removeShaderPaths = {
@@ -392,11 +392,12 @@ class ShaderSyncProcessor extends SyncProcessor {
   }
 
   Future<ShaderSyncResult> syncShaders(
-      {FileSystem? fs, List<String>? shaderIds}) async {
+      {FileSystem? fs, Directory? dir, List<String>? shaderIds}) async {
     final shaderSyncResult = await _syncShaders(shaderIds);
     await _syncShaderComments(shaderSyncResult);
     if (fs != null) {
-      await _syncShaderPictures(fs, shaderSyncResult);
+      await _syncShaderPictures(
+          fs, dir ?? fs.currentDirectory, shaderSyncResult);
     }
 
     return shaderSyncResult;

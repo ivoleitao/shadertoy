@@ -10,6 +10,8 @@ import 'package:shadertoy_client/src/site/site_options.dart';
 import 'package:shadertoy_client/src/ws/ws_client.dart';
 import 'package:shadertoy_client/src/ws/ws_options.dart';
 
+import 'playlist_sync.dart';
+
 abstract class SyncTaskRunner {
   void log(String message);
 
@@ -25,17 +27,19 @@ abstract class ShadertoyHybrid implements ShadertoySite, ShadertoyWS {
   ///
   /// * [store]: A [ShadertoyStore] implementation
   /// * [fs]: A [FileSystem] implementation to store shader and user assets
+  /// * [fsPath]: A path on the [FileSystem]
   /// * [concurrency]: Maximum number of simultaneous requests
   /// * [timeout]: Request timeout in seconds
   /// * [shaderIds]: If specified only the this shader id's will be sync
   /// * [playlistIds]: The playlists to synchronize
   void rsync(ShadertoyStore store,
       {FileSystem? fs,
+      Directory? dir,
       SyncTaskRunner? runner,
       int? concurrency,
       int? timeout,
       List<String>? shaderIds,
-      List<String>? playlistIds});
+      List<String> playlistIds});
 }
 
 /// A Shadertoy hybrid client
@@ -63,11 +67,11 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
       {ShadertoyWSOptions? wsOptions, Dio? client})
       : super(siteOptions.baseUrl) {
     client ??= Dio(BaseOptions(baseUrl: siteOptions.baseUrl));
+    _siteClient = ShadertoySiteClient(siteOptions, client: client);
     if (wsOptions != null) {
       _hybridClient = ShadertoyWSClient(wsOptions, client: client);
     } else {
-      _hybridClient =
-          _siteClient = ShadertoySiteClient(siteOptions, client: client);
+      _hybridClient = _siteClient;
     }
   }
 
@@ -180,18 +184,25 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
   @override
   void rsync(ShadertoyStore store,
       {FileSystem? fs,
+      Directory? dir,
       SyncTaskRunner? runner,
       int? concurrency,
       int? timeout,
       List<String>? shaderIds,
-      List<String>? playlistIds}) async {
+      List<String> playlistIds = const <String>[]}) async {
     final shaderProcessor = ShaderSyncProcessor(this, store,
         runner: runner, concurrency: concurrency, timeout: timeout);
-    final shaderSyncResult =
-        await shaderProcessor.syncShaders(fs: fs, shaderIds: shaderIds);
+    final shaderSyncResult = await shaderProcessor.syncShaders(
+        fs: fs, dir: dir, shaderIds: shaderIds);
 
     final userProcessor = UserSyncProcessor(this, store,
         runner: runner, concurrency: concurrency, timeout: timeout);
-    await userProcessor.syncUsers(shaderSyncResult, fs: fs);
+    await userProcessor.syncUsers(shaderSyncResult, fs: fs, dir: dir);
+
+    if (shaderIds == null) {
+      final playlistProcessor = PlaylistSyncProcessor(this, store,
+          runner: runner, concurrency: concurrency, timeout: timeout);
+      await playlistProcessor.syncPlaylists(playlistIds);
+    }
   }
 }

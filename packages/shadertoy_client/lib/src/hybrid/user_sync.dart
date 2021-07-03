@@ -59,12 +59,12 @@ class UserSyncResult extends SyncResult<UserSyncTask> {
 
 class UserSyncProcessor extends SyncProcessor {
   static final Glob _UserMediaFiles = Glob(
-      '{${ShadertoyContext.UserMediaPath}/*/{*.jpg,*.png,*.jpeg,*.gif},${ShadertoyContext.ImgPath}/profile.jpg}');
+      '**/{${ShadertoyContext.UserMediaPath}/*/{*.jpg,*.png,*.jpeg,*.gif},${ShadertoyContext.ImgPath}/profile.jpg}');
 
   UserSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
       : super(client, store,
-            processor: runner, concurrency: concurrency, timeout: timeout);
+            runner: runner, concurrency: concurrency, timeout: timeout);
 
   FindUserResponse getUserError(dynamic e, String userId) {
     return FindUserResponse(
@@ -178,14 +178,14 @@ class UserSyncProcessor extends SyncProcessor {
   }
 
   Future<DownloadSyncResult> _syncUserPictures(
-      FileSystem fs, UserSyncResult userSync) async {
-    final fsDirectory = fs.currentDirectory;
+      FileSystem fs, Directory dir, UserSyncResult userSync) async {
     final localUserPictures = <String>{};
 
-    await for (final path
-        in listFiles(fsDirectory, _UserMediaFiles, recursive: true)) {
-      localUserPictures.add(p.relative(path));
+    await for (final path in listFiles(dir, _UserMediaFiles, recursive: true)) {
+      localUserPictures.add(p.relative(path, from: dir.path));
     }
+
+    final userPictureLocalPath = (path) => p.join(dir.path, path);
 
     final currentUserPicturePaths = userSync.currentUserPicturePaths;
     final addUserPicturePaths = {
@@ -193,12 +193,12 @@ class UserSyncProcessor extends SyncProcessor {
         ...userSync.addedUserPicturePaths,
         ...currentUserPicturePaths.difference(localUserPictures)
       })
-        path: path
+        path: userPictureLocalPath(path)
     };
     final removeUserPicturePaths = {
       ...userSync.removedUserPicturePaths,
       ...localUserPictures.difference(currentUserPicturePaths)
-    };
+    }.map((path) => userPictureLocalPath(path)).toSet();
 
     final added = await _addUserPicture(fs, addUserPicturePaths)
         .then((value) => value.where((task) => task.response.ok).toList());
@@ -209,10 +209,10 @@ class UserSyncProcessor extends SyncProcessor {
   }
 
   Future<UserSyncResult> syncUsers(ShaderSyncResult shaderSync,
-      {FileSystem? fs}) async {
+      {FileSystem? fs, Directory? dir}) async {
     final userSyncResult = await _syncUsers(shaderSync);
     if (fs != null) {
-      await _syncUserPictures(fs, userSyncResult);
+      await _syncUserPictures(fs, dir ?? fs.currentDirectory, userSyncResult);
     }
 
     return userSyncResult;

@@ -49,6 +49,7 @@ jobs:
       - name: Bootstrap
         run: |
           melos bootstrap
+          echo '${{ secrets.SHADERTOY_CREDENTIALS }}' > ./packages/shadertoy_client/.env
           
       - name: Linter
         run: |

@@ -30,11 +30,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Bootstrap
+      - name: Install tools
         run: |
           pub global activate melos
+          
+      - name: Bootstrap
+        run: |
           melos bootstrap
           echo '${{ secrets.PUB_CREDENTIALS }}' > ~/.pub-cache/credentials.json
+          echo '${{ secrets.SHADERTOY_CREDENTIALS }}' > ./packages/shadertoy_client/.env
 
       - name: Coverage
         run: |
