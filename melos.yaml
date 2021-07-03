@@ -85,7 +85,7 @@ scripts:
 
   test:chrome:
     run: |
-      melos exec -- \
+      melos exec --scope="shadertoy" --scope="shadertoy_client" -- \
         "dart test -p chrome"
     description: |
       Run `dart test -p chome` in the selected packages. 
