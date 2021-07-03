@@ -12,7 +12,7 @@ dependencies:
   path: ^1.8.0
   args: ^2.1.1
   file: ^6.1.2
-  moor: ^4.3.2
+  moor: ^4.4.0
   shadertoy:
     path: ../shadertoy
   # shadertoy_client: ^1.0.11
