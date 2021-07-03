@@ -19,7 +19,7 @@ packages/*/test/.test_coverage.dart
 
 # Environment configurations
 **/.env
-**/.env.g.dart
+**/env.g.dart
 
 # Avoid committing generated Javascript files:
 *.dart.js
