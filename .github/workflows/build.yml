@@ -50,6 +50,8 @@ jobs:
         run: |
           melos bootstrap
           echo '${{ secrets.SHADERTOY_CREDENTIALS }}' > ./packages/shadertoy_client/.env
+          ls
+          cat ./packages/shadertoy_client/.env
           
       - name: Build
         run: |
