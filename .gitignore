@@ -17,6 +17,10 @@ packages/*/coverage/
 packages/*/coverage_badge.svg
 packages/*/test/.test_coverage.dart
 
+# Environment configurations
+**/.env
+**/.env.g.dart
+
 # Avoid committing generated Javascript files:
 *.dart.js
 *.info.json      # Produced by the --dump-info flag.
