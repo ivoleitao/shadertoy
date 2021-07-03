@@ -344,7 +344,7 @@ class FindUserResponse extends APIResponse with EquatableMixin {
 ///
 /// The response returned upon the execution of a find users API call
 /// When [FindUsersResponse.error] is *not null* there was an error in the find users call
-/// When [FindUsersResponse.error] is *null* the [FindUsersResponse.shaders] has the returned users
+/// When [FindUsersResponse.error] is *null* the [FindUsersResponse.users] has the returned users
 class FindUsersResponse extends APIResponse with EquatableMixin {
   @JsonKey(name: 'Users')
 

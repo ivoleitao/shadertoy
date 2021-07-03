@@ -33,7 +33,6 @@ class Playlist extends Equatable {
   /// * [userId]: The user id
   /// * [name]: The playlist name
   /// * [description]: The playlist description
-  /// * [privacy]: The playlist privacy
   const Playlist(
       {required this.id,
       required this.userId,
@@ -56,7 +55,6 @@ class Playlist extends Equatable {
   /// * [userId]: The user id
   /// * [name]: The playlist name
   /// * [description]: The playlist description
-  /// * [privacy]: The playlist privacy
   Playlist copyWith(
       {String? id,
       String? userId,

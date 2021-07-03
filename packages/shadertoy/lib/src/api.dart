@@ -177,9 +177,9 @@ abstract class ShadertoyExtendedClient extends ShadertoyClient {
   /// Returns a [FindCommentsResponse] for a shader with id [shaderId]
   ///
   /// On success comments has the corresponding
-  /// list of [Comment] and error set to null
+  /// list of comment and error set to null
   ///
-  /// In case of error a [ResponseError] is set and no [Comment] list is provided
+  /// In case of error a [ResponseError] is set and no comment list is provided
   Future<FindCommentsResponse> findCommentsByShaderId(String shaderId);
 
   /// Returns a [FindPlaylistResponse] for a playlist with [playlistId]
@@ -331,9 +331,9 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
 
   /// Returns a [FindCommentResponse] for a comment with id [commentId]
   ///
-  /// Upon success a [Comment] object is provided and error is set to null
+  /// Upon success a comment object is provided and error is set to null
   ///
-  /// In case of error a [ResponseError] is set and no [Comment] is provided
+  /// In case of error a [ResponseError] is set and no comment is provided
   Future<FindCommentResponse> findCommentById(String commentId);
 
   /// Returns a [FindCommentIdsResponse] with all the comment id's
@@ -350,16 +350,16 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   /// In case of error a [ResponseError] is set and no comment list is provided
   Future<FindCommentsResponse> findAllComments();
 
-  /// Saves a list of shaders [Comment]
+  /// Saves a list of shaders comment
   ///
-  /// On success the list of [Comment] was saved
+  /// On success the list of comment was saved
   ///
   /// In case of error a [ResponseError] is set on [SaveShaderCommentsResponse]
   Future<SaveShaderCommentsResponse> saveShaderComments(List<Comment> comments);
 
-  /// Deletes a [Comment] by [commentId]
+  /// Deletes a comment by [commentId]
   ///
-  /// On success the [Comment] identified by [commentId] is deleted
+  /// On success the comment identified by [commentId] is deleted
   ///
   /// In case of error a [ResponseError] is set on [DeleteCommentResponse]
   Future<DeleteCommentResponse> deleteCommentById(String commentId);

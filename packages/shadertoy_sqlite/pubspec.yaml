@@ -1,9 +1,8 @@
 name: shadertoy_sqlite
-version: 1.0.5
-publish_to: none
+version: 2.0.0-dev.1
 description: >-
   A implementation of the shadertoy storage API using
-  Moor as the storage backend
+  Sqlite as the storage backend
 homepage: https://github.com/ivoleitao/shadertoy
 
 environment:
@@ -21,5 +20,5 @@ dev_dependencies:
   test: ^1.17.5
   dio: ^4.0.0
   universal_platform: ^1.0.0+1
-  dependency_validator: ^3.0.0
   moor_generator: ^4.3.1
+  dependency_validator: ^3.1.0

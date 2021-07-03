@@ -27,7 +27,7 @@ abstract class ShadertoyHybrid implements ShadertoySite, ShadertoyWS {
   ///
   /// * [store]: A [ShadertoyStore] implementation
   /// * [fs]: A [FileSystem] implementation to store shader and user assets
-  /// * [fsPath]: A path on the [FileSystem]
+  /// * [dir]: A path on the [FileSystem]
   /// * [concurrency]: Maximum number of simultaneous requests
   /// * [timeout]: Request timeout in seconds
   /// * [shaderIds]: If specified only the this shader id's will be sync
