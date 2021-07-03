@@ -12,8 +12,8 @@ mixin _$ShaderDaoMixin on DatabaseAccessor<MoorStore> {
   $PlaylistShaderTableTable get playlistShaderTable =>
       attachedDatabase.playlistShaderTable;
   Selectable<String> shaderId() {
-    return customSelect('SELECT id FROM Shader',
-        variables: [],
-        readsFrom: {shaderTable}).map((QueryRow row) => row.read<String>('id'));
+    return customSelect('SELECT id FROM Shader', variables: [], readsFrom: {
+      shaderTable,
+    }).map((QueryRow row) => row.read<String>('id'));
   }
 }

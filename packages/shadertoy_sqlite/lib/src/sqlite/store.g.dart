@@ -257,75 +257,41 @@ class $UserTableTable extends UserTable
   final String? _alias;
   $UserTableTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedTextColumn id = _constructId();
-  GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn(
-      'id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+      'id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _pictureMeta = const VerificationMeta('picture');
-  @override
-  late final GeneratedTextColumn picture = _constructPicture();
-  GeneratedTextColumn _constructPicture() {
-    return GeneratedTextColumn(
-      'picture',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> picture = GeneratedColumn<String?>(
+      'picture', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _memberSinceMeta =
       const VerificationMeta('memberSince');
-  @override
-  late final GeneratedDateTimeColumn memberSince = _constructMemberSince();
-  GeneratedDateTimeColumn _constructMemberSince() {
-    return GeneratedDateTimeColumn(
-      'member_since',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> memberSince =
+      GeneratedColumn<DateTime?>('member_since', aliasedName, false,
+          typeName: 'INTEGER', requiredDuringInsert: true);
   final VerificationMeta _followingMeta = const VerificationMeta('following');
-  @override
-  late final GeneratedIntColumn following = _constructFollowing();
-  GeneratedIntColumn _constructFollowing() {
-    return GeneratedIntColumn('following', $tableName, false,
-        defaultValue: Constant(0));
-  }
-
+  late final GeneratedColumn<int?> following = GeneratedColumn<int?>(
+      'following', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: Constant(0));
   final VerificationMeta _followersMeta = const VerificationMeta('followers');
-  @override
-  late final GeneratedIntColumn followers = _constructFollowers();
-  GeneratedIntColumn _constructFollowers() {
-    return GeneratedIntColumn('followers', $tableName, false,
-        defaultValue: Constant(0));
-  }
-
+  late final GeneratedColumn<int?> followers = GeneratedColumn<int?>(
+      'followers', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: Constant(0));
   final VerificationMeta _aboutMeta = const VerificationMeta('about');
-  @override
-  late final GeneratedTextColumn about = _constructAbout();
-  GeneratedTextColumn _constructAbout() {
-    return GeneratedTextColumn(
-      'about',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> about = GeneratedColumn<String?>(
+      'about', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
       [id, picture, memberSince, following, followers, about];
   @override
-  $UserTableTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'User';
   @override
-  String get $tableName => _alias ?? 'User';
-  @override
-  final String actualTableName = 'User';
+  String get actualTableName => 'User';
   @override
   VerificationContext validateIntegrity(Insertable<UserEntry> instance,
       {bool isInserting = false}) {
@@ -795,128 +761,63 @@ class $ShaderTableTable extends ShaderTable
   final String? _alias;
   $ShaderTableTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedTextColumn id = _constructId();
-  GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn(
-      'id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+      'id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn(
-      'user_id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _versionMeta = const VerificationMeta('version');
-  @override
-  late final GeneratedTextColumn version = _constructVersion();
-  GeneratedTextColumn _constructVersion() {
-    return GeneratedTextColumn(
-      'version',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> version = GeneratedColumn<String?>(
+      'version', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedTextColumn name = _constructName();
-  GeneratedTextColumn _constructName() {
-    return GeneratedTextColumn(
-      'name',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _dateMeta = const VerificationMeta('date');
-  @override
-  late final GeneratedDateTimeColumn date = _constructDate();
-  GeneratedDateTimeColumn _constructDate() {
-    return GeneratedDateTimeColumn(
-      'date',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> date = GeneratedColumn<DateTime?>(
+      'date', aliasedName, false,
+      typeName: 'INTEGER', requiredDuringInsert: true);
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
-  @override
-  late final GeneratedTextColumn description = _constructDescription();
-  GeneratedTextColumn _constructDescription() {
-    return GeneratedTextColumn(
-      'description',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
+      'description', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _viewsMeta = const VerificationMeta('views');
-  @override
-  late final GeneratedIntColumn views = _constructViews();
-  GeneratedIntColumn _constructViews() {
-    return GeneratedIntColumn('views', $tableName, false,
-        defaultValue: Constant(0));
-  }
-
+  late final GeneratedColumn<int?> views = GeneratedColumn<int?>(
+      'views', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: Constant(0));
   final VerificationMeta _likesMeta = const VerificationMeta('likes');
-  @override
-  late final GeneratedIntColumn likes = _constructLikes();
-  GeneratedIntColumn _constructLikes() {
-    return GeneratedIntColumn('likes', $tableName, false,
-        defaultValue: Constant(0));
-  }
-
+  late final GeneratedColumn<int?> likes = GeneratedColumn<int?>(
+      'likes', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: Constant(0));
   final VerificationMeta _privacyMeta = const VerificationMeta('privacy');
-  @override
-  late final GeneratedTextColumn privacy = _constructPrivacy();
-  GeneratedTextColumn _constructPrivacy() {
-    return GeneratedTextColumn(
-      'privacy',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> privacy = GeneratedColumn<String?>(
+      'privacy', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _flagsMeta = const VerificationMeta('flags');
-  @override
-  late final GeneratedIntColumn flags = _constructFlags();
-  GeneratedIntColumn _constructFlags() {
-    return GeneratedIntColumn('flags', $tableName, false,
-        defaultValue: Constant(0));
-  }
-
+  late final GeneratedColumn<int?> flags = GeneratedColumn<int?>(
+      'flags', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: Constant(0));
   final VerificationMeta _tagsJsonMeta = const VerificationMeta('tagsJson');
-  @override
-  late final GeneratedTextColumn tagsJson = _constructTagsJson();
-  GeneratedTextColumn _constructTagsJson() {
-    return GeneratedTextColumn('tags_json', $tableName, false,
-        defaultValue: Constant('[]'));
-  }
-
+  late final GeneratedColumn<String?> tagsJson = GeneratedColumn<String?>(
+      'tags_json', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: false,
+      defaultValue: Constant('[]'));
   final VerificationMeta _renderPassesJsonMeta =
       const VerificationMeta('renderPassesJson');
-  @override
-  late final GeneratedTextColumn renderPassesJson =
-      _constructRenderPassesJson();
-  GeneratedTextColumn _constructRenderPassesJson() {
-    return GeneratedTextColumn(
-      'render_passes_json',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> renderPassesJson =
+      GeneratedColumn<String?>('render_passes_json', aliasedName, false,
+          typeName: 'TEXT', requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -933,11 +834,9 @@ class $ShaderTableTable extends ShaderTable
         renderPassesJson
       ];
   @override
-  $ShaderTableTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'Shader';
   @override
-  String get $tableName => _alias ?? 'Shader';
-  @override
-  final String actualTableName = 'Shader';
+  String get actualTableName => 'Shader';
   @override
   VerificationContext validateIntegrity(Insertable<ShaderEntry> instance,
       {bool isInserting = false}) {
@@ -1302,85 +1201,45 @@ class $CommentTableTable extends CommentTable
   final String? _alias;
   $CommentTableTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedTextColumn id = _constructId();
-  GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn(
-      'id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+      'id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _shaderIdMeta = const VerificationMeta('shaderId');
-  @override
-  late final GeneratedTextColumn shaderId = _constructShaderId();
-  GeneratedTextColumn _constructShaderId() {
-    return GeneratedTextColumn('shader_id', $tableName, false,
-        $customConstraints: 'NOT NULL REFERENCES Shader(id) ON DELETE CASCADE');
-  }
-
+  late final GeneratedColumn<String?> shaderId = GeneratedColumn<String?>(
+      'shader_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL REFERENCES Shader(id) ON DELETE CASCADE');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn(
-      'user_id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _pictureMeta = const VerificationMeta('picture');
-  @override
-  late final GeneratedTextColumn picture = _constructPicture();
-  GeneratedTextColumn _constructPicture() {
-    return GeneratedTextColumn(
-      'picture',
-      $tableName,
-      true,
-    );
-  }
-
+  late final GeneratedColumn<String?> picture = GeneratedColumn<String?>(
+      'picture', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _dateMeta = const VerificationMeta('date');
-  @override
-  late final GeneratedDateTimeColumn date = _constructDate();
-  GeneratedDateTimeColumn _constructDate() {
-    return GeneratedDateTimeColumn(
-      'date',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<DateTime?> date = GeneratedColumn<DateTime?>(
+      'date', aliasedName, false,
+      typeName: 'INTEGER', requiredDuringInsert: true);
   final VerificationMeta _commentMeta = const VerificationMeta('comment');
-  @override
-  late final GeneratedTextColumn comment = _constructComment();
-  GeneratedTextColumn _constructComment() {
-    return GeneratedTextColumn(
-      'comment',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> comment = GeneratedColumn<String?>(
+      'comment', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _hiddenMeta = const VerificationMeta('hidden');
-  @override
-  late final GeneratedBoolColumn hidden = _constructHidden();
-  GeneratedBoolColumn _constructHidden() {
-    return GeneratedBoolColumn('hidden', $tableName, false,
-        defaultValue: const Constant(false));
-  }
-
+  late final GeneratedColumn<bool?> hidden = GeneratedColumn<bool?>(
+      'hidden', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (hidden IN (0, 1))',
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns =>
       [id, shaderId, userId, picture, date, comment, hidden];
   @override
-  $CommentTableTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'Comment';
   @override
-  String get $tableName => _alias ?? 'Comment';
-  @override
-  final String actualTableName = 'Comment';
+  String get actualTableName => 'Comment';
   @override
   VerificationContext validateIntegrity(Insertable<CommentEntry> instance,
       {bool isInserting = false}) {
@@ -1627,58 +1486,28 @@ class $PlaylistTableTable extends PlaylistTable
   final String? _alias;
   $PlaylistTableTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedTextColumn id = _constructId();
-  GeneratedTextColumn _constructId() {
-    return GeneratedTextColumn(
-      'id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+      'id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  @override
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn(
-      'user_id',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedTextColumn name = _constructName();
-  GeneratedTextColumn _constructName() {
-    return GeneratedTextColumn(
-      'name',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
-  @override
-  late final GeneratedTextColumn description = _constructDescription();
-  GeneratedTextColumn _constructDescription() {
-    return GeneratedTextColumn(
-      'description',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
+      'description', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [id, userId, name, description];
   @override
-  $PlaylistTableTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'Playlist';
   @override
-  String get $tableName => _alias ?? 'Playlist';
-  @override
-  final String actualTableName = 'Playlist';
+  String get actualTableName => 'Playlist';
   @override
   VerificationContext validateIntegrity(Insertable<PlaylistEntry> instance,
       {bool isInserting = false}) {
@@ -1886,41 +1715,27 @@ class $PlaylistShaderTableTable extends PlaylistShaderTable
   final String? _alias;
   $PlaylistShaderTableTable(this._db, [this._alias]);
   final VerificationMeta _playlistIdMeta = const VerificationMeta('playlistId');
-  @override
-  late final GeneratedTextColumn playlistId = _constructPlaylistId();
-  GeneratedTextColumn _constructPlaylistId() {
-    return GeneratedTextColumn('playlist_id', $tableName, false,
-        $customConstraints:
-            'NOT NULL REFERENCES Playlist(id) ON DELETE CASCADE');
-  }
-
+  late final GeneratedColumn<String?> playlistId = GeneratedColumn<String?>(
+      'playlist_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL REFERENCES Playlist(id) ON DELETE CASCADE');
   final VerificationMeta _shaderIdMeta = const VerificationMeta('shaderId');
-  @override
-  late final GeneratedTextColumn shaderId = _constructShaderId();
-  GeneratedTextColumn _constructShaderId() {
-    return GeneratedTextColumn('shader_id', $tableName, false,
-        $customConstraints: 'NOT NULL REFERENCES Shader(id) ON DELETE CASCADE');
-  }
-
+  late final GeneratedColumn<String?> shaderId = GeneratedColumn<String?>(
+      'shader_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL REFERENCES Shader(id) ON DELETE CASCADE');
   final VerificationMeta _orderMeta = const VerificationMeta('order');
-  @override
-  late final GeneratedIntColumn order = _constructOrder();
-  GeneratedIntColumn _constructOrder() {
-    return GeneratedIntColumn(
-      'order',
-      $tableName,
-      false,
-    );
-  }
-
+  late final GeneratedColumn<int?> order = GeneratedColumn<int?>(
+      'order', aliasedName, false,
+      typeName: 'INTEGER', requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [playlistId, shaderId, order];
   @override
-  $PlaylistShaderTableTable get asDslTable => this;
+  String get aliasedName => _alias ?? 'PlaylistShader';
   @override
-  String get $tableName => _alias ?? 'PlaylistShader';
-  @override
-  final String actualTableName = 'PlaylistShader';
+  String get actualTableName => 'PlaylistShader';
   @override
   VerificationContext validateIntegrity(
       Insertable<PlaylistShaderEntry> instance,
