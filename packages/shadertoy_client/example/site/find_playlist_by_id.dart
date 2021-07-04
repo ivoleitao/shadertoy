@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:shadertoy_client/shadertoy_client.dart';
 
 void main(List<String> arguments) async {
-  final site = newShadertoySiteClient();
+  final client = newShadertoySiteClient();
 
-  final response = await site.findPlaylistById('featured');
-  print('${response.playlist?.id}');
-  print('${response.playlist?.userId}');
-  print('${response.playlist?.name}');
-  print('${response.playlist?.description}');
+  final result = await client.findPlaylistById('featured');
+  print('${result.playlist?.id}');
+  print('${result.playlist?.userId}');
+  print('${result.playlist?.name}');
+  print('${result.playlist?.description}');
 
-  print(jsonEncode(response.playlist?.toJson()));
+  print(jsonEncode(result.playlist?.toJson()));
 }

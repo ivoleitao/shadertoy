@@ -1,22 +1,24 @@
+import 'package:dotenv/dotenv.dart' show load, env;
 import 'package:shadertoy_client/shadertoy_client.dart';
 
-import '../env.dart';
-
 void main(List<String> arguments) async {
-  // If the user is not specified in the arguments, try the environment one
-  var user = arguments.isEmpty ? Env.user : arguments[0];
+  // Load the .env file
+  load();
+
+  // Fetch the user from the .env file
+  final user = env['USER'];
 
   // if no user is found abort
-  if (user.isEmpty) {
+  if (user == null) {
     print('Invalid user');
     return;
   }
 
-  // If the password is not specified in the arguments, try the environment one
-  var password = arguments.isEmpty ? Env.password : arguments[0];
+  // Fetch the password from the .env file
+  final password = env['PASSWORD'];
 
   // if no password is found abort
-  if (password.isEmpty) {
+  if (password == null) {
     print('Invalid password');
     return;
   }

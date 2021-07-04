@@ -3,16 +3,16 @@ import 'dart:convert';
 import 'package:shadertoy_client/shadertoy_client.dart';
 
 void main(List<String> arguments) async {
-  final site = newShadertoySiteClient();
+  final client = newShadertoySiteClient();
 
-  final response = await site.findUserById('shaderflix');
-  print('Name: ${response.user?.id}');
-  print('Picture: ${response.user?.picture}');
-  print('Joined: ${response.user?.memberSince}');
-  print('Following: ${response.user?.following}');
-  print('Followers: ${response.user?.followers}');
+  final result = await client.findUserById('shaderflix');
+  print('Name: ${result.user?.id}');
+  print('Picture: ${result.user?.picture}');
+  print('Joined: ${result.user?.memberSince}');
+  print('Following: ${result.user?.following}');
+  print('Followers: ${result.user?.followers}');
   print('About:');
-  print('${response.user?.about}');
+  print('${result.user?.about}');
 
-  print(jsonEncode(response.user?.toJson()));
+  print(jsonEncode(result.user?.toJson()));
 }

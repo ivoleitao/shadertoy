@@ -1,24 +1,12 @@
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 
-import 'env.dart';
-
 void main(List<String> arguments) async {
-  // If the api key is not specified in the arguments, try the environment one
-  var apiKey = arguments.isEmpty ? Env.apiKey : arguments[0];
-
-  // if no api key is found abort
-  if (apiKey.isEmpty) {
-    print('Invalid API key');
-    return;
-  }
-
-  final ws = newShadertoyWSClient(apiKey);
-  final site = newShadertoySiteClient();
+  final client = newShadertoySiteClient();
 
   // Gets the shader by id
   final shaderId = '3lsSzf';
-  final sr = await ws.findShaderById(shaderId);
+  final sr = await client.findShaderById(shaderId);
   if (sr.ok) {
     // If there is no error print the shader contents
     print('${sr.shader?.info.id}');
@@ -41,8 +29,8 @@ void main(List<String> arguments) async {
     print('Error retrieving the shader: ${sr.error?.message}');
   }
 
-  // Gets the firs 5 comments for this shader
-  final sc = await site.findCommentsByShaderId(shaderId);
+  // Gets the first 5 comments for this shader
+  final sc = await client.findCommentsByShaderId(shaderId);
   if (sc.ok) {
     // If there is no error print the shader comments
     sc.comments?.take(5).forEach((c) => print('${c.userId}: ${c.text}'));

@@ -1,8 +1,8 @@
 import 'package:shadertoy_client/shadertoy_client.dart';
 
 void main(List<String> arguments) async {
-  final site = newShadertoySiteClient();
+  final client = newShadertoySiteClient();
 
-  final sr = await site.findShaderIds();
-  print('${sr.total} shader(s)');
+  final result = await client.findShaderIds();
+  print('${result.total} shader(s)');
 }
