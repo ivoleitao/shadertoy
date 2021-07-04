@@ -14,7 +14,7 @@ void main(List<String> arguments) async {
     return;
   }
 
-  // Fetch the user from the .env file
+  // Fetch the password from the .env file
   final password = env['PASSWORD'];
 
   // if no password is found abort
