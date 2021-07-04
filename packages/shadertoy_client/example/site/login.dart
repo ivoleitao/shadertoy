@@ -28,7 +28,7 @@ void main(List<String> arguments) async {
 
   print('Logged In: $loggedIn');
   var sr = await site.findShaderById('3lsSzf');
-  print('${sr.shader?.info.id}');
+  print(sr.shader?.info.id);
   print('\tName: ${sr.shader?.info.name}');
   print('\tLiked: ${sr.shader?.info.hasLiked}');
 
@@ -38,7 +38,7 @@ void main(List<String> arguments) async {
 
   print('Logged In: $loggedIn');
   sr = await site.findShaderById('3lsSzf');
-  print('${sr.shader?.info.id}');
+  print(sr.shader?.info.id);
   print('\tName: ${sr.shader?.info.name}');
   print('\tLiked: ${sr.shader?.info.hasLiked}');
 }

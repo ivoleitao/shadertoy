@@ -15,9 +15,9 @@ import 'package:test/test.dart';
 
 void main() {
   final genericResponseError1 = ResponseError(
-      code: ErrorCode.UNKNOWN,
+      code: ErrorCode.unknown,
       message: 'Unknown error',
-      context: CONTEXT_SHADER,
+      context: contextShader,
       target: 'wtd3zs');
 
   test('Convert a response error to a JSON serializable map and back', () {
@@ -27,91 +27,91 @@ void main() {
   });
 
   test('Test a generic response error', () {
-    expect(genericResponseError1.code, ErrorCode.UNKNOWN);
+    expect(genericResponseError1.code, ErrorCode.unknown);
     expect(genericResponseError1.message, 'Unknown error');
-    expect(genericResponseError1.context, CONTEXT_SHADER);
+    expect(genericResponseError1.context, contextShader);
     expect(genericResponseError1.target, 'wtd3zs');
   });
 
   test('Create a authentication response error', () {
     final responseError = ResponseError.authentication(
         message: 'Authentication error',
-        context: CONTEXT_USER,
+        context: contextUser,
         target: 'email@email.com');
-    expect(responseError.code, ErrorCode.AUTHENTICATION);
+    expect(responseError.code, ErrorCode.authentication);
     expect(responseError.message, 'Authentication error');
-    expect(responseError.context, CONTEXT_USER);
+    expect(responseError.context, contextUser);
     expect(responseError.target, 'email@email.com');
   });
 
   test('Create a authorization response error', () {
     final responseError = ResponseError.authorization(
         message: 'Authorization error',
-        context: CONTEXT_USER,
+        context: contextUser,
         target: 'email@email.com');
-    expect(responseError.code, ErrorCode.AUTHORIZATION);
+    expect(responseError.code, ErrorCode.authorization);
     expect(responseError.message, 'Authorization error');
-    expect(responseError.context, CONTEXT_USER);
+    expect(responseError.context, contextUser);
     expect(responseError.target, 'email@email.com');
   });
 
   test('Create a backend timeout response error', () {
     final responseError = ResponseError.backendTimeout(
         message: 'Backend timeout error',
-        context: CONTEXT_SHADER,
+        context: contextShader,
         target: 'wtd3zs');
-    expect(responseError.code, ErrorCode.BACKEND_TIMEOUT);
+    expect(responseError.code, ErrorCode.backendTimeout);
     expect(responseError.message, 'Backend timeout error');
-    expect(responseError.context, CONTEXT_SHADER);
+    expect(responseError.context, contextShader);
     expect(responseError.target, 'wtd3zs');
   });
 
   test('Create a backend status response error', () {
     final responseError = ResponseError.backendStatus(
         message: 'Backend status error',
-        context: CONTEXT_SHADER,
+        context: contextShader,
         target: 'wtd3zs');
-    expect(responseError.code, ErrorCode.BACKEND_STATUS);
+    expect(responseError.code, ErrorCode.backendStatus);
     expect(responseError.message, 'Backend status error');
-    expect(responseError.context, CONTEXT_SHADER);
+    expect(responseError.context, contextShader);
     expect(responseError.target, 'wtd3zs');
   });
 
   test('Create a backend response response error', () {
     final responseError = ResponseError.backendResponse(
         message: 'Backend response error',
-        context: CONTEXT_SHADER,
+        context: contextShader,
         target: 'wtd3zs');
-    expect(responseError.code, ErrorCode.BACKEND_RESPONSE);
+    expect(responseError.code, ErrorCode.backendResponse);
     expect(responseError.message, 'Backend response error');
-    expect(responseError.context, CONTEXT_SHADER);
+    expect(responseError.context, contextShader);
     expect(responseError.target, 'wtd3zs');
   });
 
   test('Create a not found response error', () {
     final responseError = ResponseError.notFound(
-        message: 'Not found error', context: CONTEXT_SHADER, target: 'wtd3zs');
-    expect(responseError.code, ErrorCode.NOT_FOUND);
+        message: 'Not found error', context: contextShader, target: 'wtd3zs');
+    expect(responseError.code, ErrorCode.notFound);
     expect(responseError.message, 'Not found error');
-    expect(responseError.context, CONTEXT_SHADER);
+    expect(responseError.context, contextShader);
     expect(responseError.target, 'wtd3zs');
   });
 
   test('Create a aborted response error', () {
     final responseError = ResponseError.aborted(
-        message: 'Aborted error', context: CONTEXT_SHADER, target: 'wtd3zs');
-    expect(responseError.code, ErrorCode.ABORTED);
+        message: 'Aborted error', context: contextShader, target: 'wtd3zs');
+    expect(responseError.code, ErrorCode.aborted);
     expect(responseError.message, 'Aborted error');
-    expect(responseError.context, CONTEXT_SHADER);
+    expect(responseError.context, contextShader);
     expect(responseError.target, 'wtd3zs');
   });
 
   test('Create a unknown response error', () {
     final responseError = ResponseError.unknown(
-        message: 'Unknown error', context: CONTEXT_SHADER, target: 'wtd3zs');
-    expect(responseError.code, ErrorCode.UNKNOWN);
+        message: 'Unknown error', context: contextShader, target: 'wtd3zs');
+    expect(responseError.code, ErrorCode.unknown);
     expect(responseError.message, 'Unknown error');
-    expect(responseError.context, CONTEXT_SHADER);
+    expect(responseError.context, contextShader);
     expect(responseError.target, 'wtd3zs');
   });
 
@@ -200,7 +200,7 @@ void main() {
       userId: 'userId1',
       description: 'description1',
       likes: 1,
-      privacy: ShaderPrivacy.public_api,
+      privacy: ShaderPrivacy.publicApi,
       flags: 1,
       tags: ['test1'],
       hasLiked: true);

@@ -25,24 +25,24 @@ enum Sort {
 }
 
 /// User context
-const CONTEXT_USER = 'user';
+const contextUser = 'user';
 
 /// Shader context
-const CONTEXT_SHADER = 'shader';
+const contextShader = 'shader';
 
 /// Comment context
-const CONTEXT_COMMENT = 'comment';
+const contextComment = 'comment';
 
 /// Playlist context
-const CONTEXT_PLAYLIST = 'playlist';
+const contextPlaylist = 'playlist';
 
 /// The exception handling mode
 enum ErrorMode {
   /// The errors should be handled and returned on the response error
-  HandleAndReturn,
+  handleAndReturn,
 
   /// The errors should be handled and returned on retrown
-  HandleAndRetrow
+  handleAndRetrow
 }
 
 /// Base class for the client options
@@ -50,7 +50,7 @@ enum ErrorMode {
 /// It provides a number of options that can be configured regardless the specific implementation
 abstract class ShadertoyClientOptions {
   /// The default error handling mode
-  static const ErrorMode DefaultErrorHandling = ErrorMode.HandleAndReturn;
+  static const ErrorMode defaultErrorHandling = ErrorMode.handleAndReturn;
 
   /// The selected error handling mode
   final ErrorMode errorHandling;
@@ -59,7 +59,7 @@ abstract class ShadertoyClientOptions {
   ///
   /// * [errorHandling]: The error handling mode
   ShadertoyClientOptions({ErrorMode? errorHandling})
-      : errorHandling = errorHandling ?? DefaultErrorHandling;
+      : errorHandling = errorHandling ?? defaultErrorHandling;
 }
 
 /// Base shadertoy client API
@@ -249,9 +249,9 @@ extension ShadertoyClientExtension on ShadertoyClient {
     return future.catchError((e) {
       if (e is E) {
         final apiResponse = handle(e);
-        if (errorMode == ErrorMode.HandleAndReturn) {
+        if (errorMode == ErrorMode.handleAndReturn) {
           return Future.value(apiResponse);
-        } else if (errorMode == ErrorMode.HandleAndRetrow) {
+        } else if (errorMode == ErrorMode.handleAndRetrow) {
           return Future<R>.error(apiResponse.error ??
               ResponseError.unknown(message: 'Unknown Error'));
         }

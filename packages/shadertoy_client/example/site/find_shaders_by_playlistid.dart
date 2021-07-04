@@ -7,6 +7,7 @@ void main(List<String> arguments) async {
 
   final result = await client.findShadersByPlaylistId('week');
   print('${result.total} shader id(s)');
-  result.shaders
-      ?.forEach((shader) => stdout.write('${shader.shader?.info.id} '));
+  for (var shader in result.shaders ?? []) {
+    stdout.write('${shader.shader?.info.id} ');
+  }
 }

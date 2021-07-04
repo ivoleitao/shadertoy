@@ -46,18 +46,18 @@ extension WSMockAdaptater on MockAdapter {
 
   MockAdapter addFindShadersRoute(
       List<FindShaderResponse> fsl, ShadertoyWSOptions options) {
-    fsl.forEach((fixture) {
+    for (var fixture in fsl) {
       addFindShaderRoute(fixture, options);
-    });
+    }
 
     return this;
   }
 
   MockAdapter addFindShadersSocketErrorRoute(List<FindShaderResponse> fsl,
       ShadertoyWSOptions options, String message) {
-    fsl.forEach((fixture) {
+    for (var fixture in fsl) {
       addFindShaderSocketErrorRoute(fixture, options, message);
-    });
+    }
 
     return this;
   }

@@ -5,19 +5,19 @@ import 'package:shadertoy/shadertoy_api.dart';
 /// It provides a number of options that can be configured regardless the specific implementation of the client
 abstract class ShadertoyHttpOptions extends ShadertoyClientOptions {
   /// Default base URL for Shadertoy website
-  static const String DefaultBaseUrl = 'https://www.shadertoy.com';
+  static const String defaultBaseUrl = 'https://www.shadertoy.com';
 
   /// The default maximum number of resources that may be allocated at once in the pool
-  static const int DefaultPoolMaxAllocatedResources = 5;
+  static const int defaultPoolMaxAllocatedResources = 5;
 
   /// The default timeout for a request
-  static const int DefaultPoolTimeout = 30;
+  static const int defaultPoolTimeout = 30;
 
   /// The default maximum number of attempts before giving up
-  static const int DefaultRetryMaxAttempts = 3;
+  static const int defaultRetryMaxAttempts = 3;
 
   /// The default number of shaders fetched for a paged call.
-  static const int DefaultShaderCount = 12;
+  static const int defaultShaderCount = 12;
 
   /// The base url of the shadertoy website
   final String baseUrl;
@@ -44,12 +44,12 @@ abstract class ShadertoyHttpOptions extends ShadertoyClientOptions {
 
   /// Builds a [ShadertoyHttpOptions]
   ///
-  /// * [baseUrl]: The base url of the shadertoy website, defaults to [ShadertoyHttpOptions.DefaultBaseUrl]
+  /// * [baseUrl]: The base url of the shadertoy website, defaults to [ShadertoyHttpOptions.defaultBaseUrl]
   /// * [supportsCookies]: If the http client should support cookies
-  /// * [poolMaxAllocatedResources]: The maximum number of resources allocated for parallel calls, defaults to [ShadertoyHttpOptions.DefaultPoolMaxAllocatedResources]
-  /// * [poolTimeout]: The timeout before giving up on a call, defaults to [ShadertoyHttpOptions.DefaultPoolTimeout]
-  /// * [retryMaxAttempts]: The maximum number of attempts at a failed request, defaults to [ShadertoyHttpOptions.DefaultRetryMaxAttempts]
-  /// * [shaderCount]: The number of shaders fetched in a paged call, defaults to [ShadertoyHttpOptions.DefaultShaderCount]
+  /// * [poolMaxAllocatedResources]: The maximum number of resources allocated for parallel calls, defaults to [ShadertoyHttpOptions.defaultPoolMaxAllocatedResources]
+  /// * [poolTimeout]: The timeout before giving up on a call, defaults to [ShadertoyHttpOptions.defaultPoolTimeout]
+  /// * [retryMaxAttempts]: The maximum number of attempts at a failed request, defaults to [ShadertoyHttpOptions.defaultRetryMaxAttempts]
+  /// * [shaderCount]: The number of shaders fetched in a paged call, defaults to [ShadertoyHttpOptions.defaultShaderCount]
   /// * [errorHandling]: The error handling mode
   ShadertoyHttpOptions(
       {String? baseUrl,
@@ -59,12 +59,12 @@ abstract class ShadertoyHttpOptions extends ShadertoyClientOptions {
       int? retryMaxAttempts,
       int? shaderCount,
       ErrorMode? errorHandling})
-      : baseUrl = baseUrl ?? DefaultBaseUrl,
+      : baseUrl = baseUrl ?? defaultBaseUrl,
         poolMaxAllocatedResources =
-            poolMaxAllocatedResources ?? DefaultPoolMaxAllocatedResources,
-        poolTimeout = poolTimeout ?? DefaultPoolTimeout,
-        retryMaxAttempts = retryMaxAttempts ?? DefaultRetryMaxAttempts,
-        shaderCount = shaderCount ?? DefaultShaderCount,
+            poolMaxAllocatedResources ?? defaultPoolMaxAllocatedResources,
+        poolTimeout = poolTimeout ?? defaultPoolTimeout,
+        retryMaxAttempts = retryMaxAttempts ?? defaultRetryMaxAttempts,
+        shaderCount = shaderCount ?? defaultShaderCount,
         super(errorHandling: errorHandling) {
     assert(this.baseUrl.isNotEmpty, 'baseUrl is empty');
     assert(this.poolMaxAllocatedResources >= 1,

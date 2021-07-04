@@ -24,7 +24,7 @@ enum ShaderPrivacy {
   @JsonValue(3)
 
   /// Is like Public content, but can also be accessible to third party applications or services that use Shadertoy's public API.
-  public_api
+  publicApi
 }
 
 @JsonSerializable()

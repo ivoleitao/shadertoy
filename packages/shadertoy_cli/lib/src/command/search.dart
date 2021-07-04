@@ -51,7 +51,7 @@ class SearchCommand extends MultiCommand {
 
     final qr = await client.findShaderIds(
         term: term,
-        filters: filter != null ? filter.toSet() : null,
+        filters: filter?.toSet(),
         sort: sort != null ? EnumToString.fromString(Sort.values, sort) : null,
         from: from,
         num: num);

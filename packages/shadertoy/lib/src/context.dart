@@ -9,28 +9,28 @@ part 'context.g.dart';
 @JsonSerializable()
 class ShadertoyContext extends Equatable {
   /// The relative path to the shader images previews
-  static const String ShaderMediaPath = 'media/shaders';
+  static const String shaderMediaPath = 'media/shaders';
 
   /// The relative path to the user image thumbnails
-  static const String UserMediaPath = 'media/users';
+  static const String userMediaPath = 'media/users';
 
   /// The relative path to the signin url
-  static const String SignInPath = 'signin';
+  static const String signInPath = 'signin';
 
   /// The relative path to the signout url
-  static const String SignOutPath = 'signout';
+  static const String signOutPath = 'signout';
 
   /// The relative path to the shader embedding
-  static const String EmbedPath = 'embed';
+  static const String embedPath = 'embed';
 
   /// The relative path to the browse url
-  static const String BrowsePath = 'browse';
+  static const String browsePath = 'browse';
 
   /// The relative path to the shader view url
-  static const String ViewPath = 'view';
+  static const String viewPath = 'view';
 
   /// The relative path to the img url
-  static const String ImgPath = 'img';
+  static const String imgPath = 'img';
 
   /// The base url of the shadertoy website
   @JsonKey(name: 'baseUrl')
@@ -42,19 +42,19 @@ class ShadertoyContext extends Equatable {
   /// The relative path of the shader view url
   /// * [shaderId]: The shader id
   static String shaderViewPath(String shaderId) {
-    return '$ViewPath/$shaderId';
+    return '$viewPath/$shaderId';
   }
 
   /// The relative path of the shader embed url
   /// * [shaderId]: The shader id
   static String shaderEmbedPath(String shaderId) {
-    return '$EmbedPath/$shaderId';
+    return '$embedPath/$shaderId';
   }
 
   /// The relative path of the shader picture url
   /// * [shaderId]: The shader id
   static String shaderPicturePath(String shaderId) {
-    return '$ShaderMediaPath/$shaderId.jpg';
+    return '$shaderMediaPath/$shaderId.jpg';
   }
 
   @override
@@ -80,17 +80,17 @@ class ShadertoyContext extends Equatable {
 
   /// The signin url
   String get signInUrl {
-    return '$baseUrl/$SignInPath';
+    return '$baseUrl/$signInPath';
   }
 
   /// The signout url
   String get signOutUrl {
-    return '$baseUrl/$SignOutPath';
+    return '$baseUrl/$signOutPath';
   }
 
   /// The browse url
   String get shaderBrowseUrl {
-    return '$baseUrl/$BrowsePath';
+    return '$baseUrl/$browsePath';
   }
 
   /// The shader view url

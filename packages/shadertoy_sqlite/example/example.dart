@@ -41,7 +41,7 @@ void main(List<String> arguments) async {
           userId: userId1,
           description: 'A shader example',
           likes: 570,
-          privacy: ShaderPrivacy.public_api,
+          privacy: ShaderPrivacy.publicApi,
           flags: 32,
           tags: [
             'procedural',

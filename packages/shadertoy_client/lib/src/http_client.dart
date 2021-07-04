@@ -18,9 +18,9 @@ import 'package:shadertoy_client/src/http_options.dart';
 abstract class ShadertoyHttpClient<T extends ShadertoyHttpOptions>
     extends ShadertoyBaseClient {
   /// Maps the error codes returned by the Shadertoy API to [ErrorCode] values.
-  static const Map<String, ErrorCode> MessageToErrorCode = {
-    'Invalid key': ErrorCode.AUTHORIZATION,
-    'Shader not found': ErrorCode.NOT_FOUND
+  static const Map<String, ErrorCode> messageToErrorCode = {
+    'Invalid key': ErrorCode.authorization,
+    'Shader not found': ErrorCode.notFound
   };
 
   /// Internal [Dio] http client instance
@@ -90,7 +90,7 @@ abstract class ShadertoyHttpClient<T extends ShadertoyHttpOptions>
       final error = data.error;
       if (error != null) {
         error.code =
-            MessageToErrorCode[data.error?.message] ?? ErrorCode.UNKNOWN;
+            messageToErrorCode[data.error?.message] ?? ErrorCode.unknown;
         error.context = context;
         error.target = target;
       }

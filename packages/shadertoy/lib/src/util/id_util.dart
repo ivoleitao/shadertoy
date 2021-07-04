@@ -1,6 +1,6 @@
 /// The regex used to extract from a filename triplets
 /// of digits of later conversion to a letter
-final RegExp CodePairsRegExp = RegExp(r'\d{3}');
+final RegExp codePairsRegExp = RegExp(r'\d{3}');
 
 /// Converts a shaderId to a filename suitable for case sensitive OS's
 ///
@@ -24,5 +24,5 @@ String shaderIdToFileName(String shaderId) {
 /// so the number or digits in filename should be actually a multiple of 3
 String fileNameToShaderId(String fileName) {
   return String.fromCharCodes(
-      CodePairsRegExp.allMatches(fileName).map((m) => int.parse(m.group(0)!)));
+      codePairsRegExp.allMatches(fileName).map((m) => int.parse(m.group(0)!)));
 }

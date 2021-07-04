@@ -113,7 +113,7 @@ class ShaderDao extends DatabaseAccessor<MoorStore> with _$ShaderDaoMixin {
         }
 
         if (tags != null && tags.isNotEmpty) {
-          var tagExp;
+          Expression<bool?> tagExp;
           for (var tag in tags) {
             tagExp = entry.tagsJson.like('%$tag%');
             exp = (exp == null ? tagExp : exp & tagExp);

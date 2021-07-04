@@ -17,6 +17,6 @@ void main(List<String> arguments) async {
   var hybrid = newShadertoyHybridClient(apiKey: apiKey);
 
   final sr = await hybrid.findShaderById('3lsSzf');
-  print('${sr.shader?.info.id}');
+  print(sr.shader?.info.id);
   print('\tName: ${sr.shader?.info.name}');
 }

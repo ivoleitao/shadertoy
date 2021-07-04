@@ -19,5 +19,7 @@ void main(List<String> arguments) async {
   final client = newShadertoyWSClient(apiKey);
   final result = await client.findShaderIds(term: 'elevated');
   print('${result.total} shader id(s)');
-  result.ids?.forEach((shaderId) => stdout.write('$shaderId '));
+  for (var shaderId in result.ids ?? []) {
+    stdout.write('$shaderId ');
+  }
 }

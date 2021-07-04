@@ -29,7 +29,7 @@ void main() {
   moorRuntimeOptions.dontWarnAboutMultipleDatabases = true;
 
   Future<List<FindShaderResponse>> _nameSort(List<String> shaderPaths) async {
-    final nameSort = (FindShaderResponse fsr) => fsr.shader?.info.name ?? '';
+    nameSort(FindShaderResponse fsr) => fsr.shader?.info.name ?? '';
     final response = await findShadersResponseFixture(shaderPaths);
     final shaders = response.shaders ?? [];
     final result = List<FindShaderResponse>.from(shaders);
@@ -43,7 +43,7 @@ void main() {
   }
 
   Future<List<FindShaderResponse>> _dateSort(List<String> shaderPaths) async {
-    final dateSort = (FindShaderResponse fsr) =>
+    dateSort(FindShaderResponse fsr) =>
         fsr.shader?.info.date ?? DateTime(2013, 1, 2);
     final response = await findShadersResponseFixture(shaderPaths);
     final shaders = response.shaders ?? [];
@@ -59,8 +59,7 @@ void main() {
 
   Future<List<FindShaderResponse>> _popularitySort(
       List<String> shaderPaths) async {
-    final popularitySort =
-        (FindShaderResponse fsr) => fsr.shader?.info.views ?? 1;
+    popularitySort(FindShaderResponse fsr) => fsr.shader?.info.views ?? 1;
     final response = await findShadersResponseFixture(shaderPaths);
     final shaders = response.shaders ?? [];
     final result = List<FindShaderResponse>.from(shaders);
@@ -80,7 +79,7 @@ void main() {
   }
 
   Future<List<FindShaderResponse>> _loveSort(List<String> shaderPaths) async {
-    final loveSort = (FindShaderResponse fsr) => fsr.shader?.info.likes ?? 1;
+    loveSort(FindShaderResponse fsr) => fsr.shader?.info.likes ?? 1;
     final response = await findShadersResponseFixture(shaderPaths);
     final shaders = response.shaders ?? [];
     final result = List<FindShaderResponse>.from(shaders);
@@ -100,14 +99,14 @@ void main() {
   }
 
   Future<List<FindShaderResponse>> _hotSort(List<String> shaderPaths) async {
-    final hotSort = (FindShaderResponse fsr) {
+    hotSort(FindShaderResponse fsr) {
       final info = fsr.shader?.info;
       final views = info?.views ?? 1;
       final milisNow = DateTime.now().millisecondsSinceEpoch;
       final milisDate = info?.date.millisecondsSinceEpoch ?? 1;
 
       return views / (milisNow ~/ 1000 - (milisDate) ~/ 1000);
-    };
+    }
 
     final response = await findShadersResponseFixture(shaderPaths);
     final shaders = response.shaders ?? [];
@@ -198,7 +197,7 @@ void main() {
           response.error,
           ResponseError.notFound(
               message: 'Shader $shaderId not found',
-              context: CONTEXT_SHADER,
+              context: contextShader,
               target: shaderId));
     });
 
@@ -733,7 +732,7 @@ void main() {
           response.error,
           ResponseError.notFound(
               message: 'User $userId not found',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: userId));
     });
 
@@ -1074,7 +1073,7 @@ void main() {
           response.error,
           ResponseError.notFound(
               message: 'Playlist $playlistId not found',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 
@@ -1171,7 +1170,7 @@ void main() {
           response.error,
           ResponseError.unprocessableEntity(
               message: 'FOREIGN KEY constraint failed',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 

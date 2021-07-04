@@ -38,7 +38,6 @@ jobs:
         run: |
           melos bootstrap
           echo '${{ secrets.PUB_CREDENTIALS }}' > ~/.pub-cache/credentials.json
-          echo '${{ secrets.SHADERTOY_CREDENTIALS }}' > ./packages/shadertoy_client/.env
 
       - name: Coverage
         run: |

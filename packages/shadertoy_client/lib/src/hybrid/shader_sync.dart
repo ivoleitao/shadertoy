@@ -8,22 +8,34 @@ import 'package:shadertoy/shadertoy_util.dart';
 import 'hybrid_client.dart';
 import 'sync.dart';
 
+/// A shader synchronization task
 class ShaderSyncTask extends SyncTask<FindShaderResponse> {
+  /// The [ShaderSyncTask] constructor
+  ///
+  /// * [response]: The [FindShaderResponse] associated with this task
   ShaderSyncTask(FindShaderResponse response) : super.one(response);
 }
 
+/// The result of a shader synchronization task
 class ShaderSyncResult extends SyncResult<ShaderSyncTask> {
+  /// The current task
   final List<ShaderSyncTask> current;
 
+  /// The current shader info
   Iterable<Info> get _currentShaderInfo =>
       current.map((task) => task.response.shader?.info).whereType<Info>();
 
+  /// The current shader ids
   Set<String> get currentShaderIds =>
       _currentShaderInfo.map((info) => info.id).toSet();
 
+  /// The current user ids
   Set<String> get currentUserIds =>
       _currentShaderInfo.map((info) => info.userId).toSet();
 
+  /// Extracts the list of input source paths from a list of [ShaderSyncTask]s
+  ///
+  /// * [tasks]: A list of tasks
   Set<String> _shaderInputSourcePaths(List<ShaderSyncTask> tasks) {
     final paths = <String>{};
     for (final task in tasks) {
@@ -46,26 +58,38 @@ class ShaderSyncResult extends SyncResult<ShaderSyncTask> {
     return paths;
   }
 
+  /// The current shader input source paths
   Set<String> get currentShaderInputSourcePaths =>
       _shaderInputSourcePaths(current);
 
+  /// The added shader infos
   Iterable<Info> get _addedShaderInfo =>
       added.map((task) => task.response.shader?.info).whereType<Info>();
 
+  /// The added shader id's
   Set<String> get addedShaderIds =>
       _addedShaderInfo.map((info) => info.id).toSet();
 
+  /// The added shader input source paths
   Set<String> get addedShaderInputSourcePaths => _shaderInputSourcePaths(added);
 
+  /// The removed shader infos
   Iterable<Info> get _removedShaderInfo =>
       removed.map((task) => task.response.shader?.info).whereType<Info>();
 
+  /// The removed shader ids
   Set<String> get removedShaderIds =>
       _removedShaderInfo.map((info) => info.id).toSet();
 
+  /// The removed shader input source paths
   Set<String> get removedShaderInputSourcePaths =>
       _shaderInputSourcePaths(removed);
 
+  /// The [ShaderSyncResult] constructor
+  ///
+  /// * [current]: The current [ShaderSyncTask]
+  /// * [added]: The list of added [ShaderSyncTask]s
+  /// * [removed]: The list of removed [ShaderSyncTask]s
   ShaderSyncResult(
       {this.current = const [],
       List<ShaderSyncTask>? added,
@@ -73,36 +97,68 @@ class ShaderSyncResult extends SyncResult<ShaderSyncTask> {
       : super(added: added, removed: removed);
 }
 
-class CommentTask extends SyncTask<FindCommentResponse> {
-  CommentTask(FindCommentResponse response) : super.one(response);
+/// A comment synchronization task
+class CommentSyncTask extends SyncTask<FindCommentResponse> {
+  /// The [CommentSyncTask] constructor
+  ///
+  /// * [response]: The [FindCommentResponse] associated with this task
+  CommentSyncTask(FindCommentResponse response) : super.one(response);
 }
 
-class CommentsTask extends SyncTask<FindCommentsResponse> {
-  CommentsTask(FindCommentsResponse response) : super.one(response);
+/// A comments synchronization task
+class CommentsSyncTask extends SyncTask<FindCommentsResponse> {
+  /// The [CommentsSyncTask] constructor
+  ///
+  /// * [response]: The [FindCommentsResponse] associated with this task
+  CommentsSyncTask(FindCommentsResponse response) : super.one(response);
 }
 
-class CommentTaskResult extends SyncResult<CommentTask> {
-  CommentTaskResult({List<CommentTask>? added, List<CommentTask>? removed})
+/// The result of a comment synchronization task
+class CommentTaskResult extends SyncResult<CommentSyncTask> {
+  /// The [CommentTaskResult] constructor
+  ///
+  /// * [added]: The list of added [CommentSyncTask]s
+  /// * [removed]: The list of removed [CommentSyncTask]s
+  CommentTaskResult(
+      {List<CommentSyncTask>? added, List<CommentSyncTask>? removed})
       : super(added: added, removed: removed);
 }
 
+/// The processor of shader synchronization tasks
 class ShaderSyncProcessor extends SyncProcessor {
-  static final Glob _ShaderMediaFiles =
-      Glob('**/${ShadertoyContext.ShaderMediaPath}/*.jpg');
-  static final Glob _ShaderInputSourceFiles = Glob(
+  /// A [Glob] defining the location of the local shader media files
+  static final Glob _shaderMediaFiles =
+      Glob('**/${ShadertoyContext.shaderMediaPath}/*.jpg');
+
+  /// A [Glob] defining the location of the local shader input source files
+  static final Glob _shaderInputSourceFiles = Glob(
       '**/{presets/*.jpg,media/{previz,a}/{*.png,*.jpg,*.mp3,*.bin,*.webm,*.ogv}}');
 
+  /// The [ShaderSyncProcessor] constructur
+  ///
+  /// * [client]: The [ShadertoyHybridClient] instance
+  /// * [store]: The [ShadertoyStore] instance
+  /// * [runner]: The [SyncTaskRunner] that will be used in this processor
+  /// * [concurrency]: The number of concurrent tasks
+  /// * [timeout]: The maximum timeout waiting for a task completion
   ShaderSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
       : super(client, store,
             runner: runner, concurrency: concurrency, timeout: timeout);
 
+  /// Creates a [FindShaderResponse] with a error
+  ///
+  /// * [e]: The error cause
+  /// * [shaderId]: The shader id
   FindShaderResponse _getShaderError(dynamic e, String shaderId) {
     return FindShaderResponse(
         error: ResponseError.unknown(
-            message: e.toString(), context: CONTEXT_SHADER, target: shaderId));
+            message: e.toString(), context: contextShader, target: shaderId));
   }
 
+  /// Saves a shader with id equal to [shaderId]
+  ///
+  /// * [shaderId]: The shader id
   Future<ShaderSyncTask> _addShader(String shaderId) {
     return client
         .findShaderById(shaderId)
@@ -118,6 +174,9 @@ class ShaderSyncProcessor extends SyncProcessor {
         .catchError((e) => ShaderSyncTask(_getShaderError(e, shaderId)));
   }
 
+  /// Saves a list of shaders with [shaderIds]
+  ///
+  /// * [shaderIds]: The list shader ids
   Future<List<ShaderSyncTask>> _addShaders(Set<String> shaderIds) async {
     final tasks = <Future<ShaderSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
@@ -130,6 +189,9 @@ class ShaderSyncProcessor extends SyncProcessor {
         message: 'Saving ${shaderIds.length} shader(s): ');
   }
 
+  /// Deletes a shader with id [shaderId]
+  ///
+  /// * [shaderId]: The shader id
   Future<ShaderSyncTask> _deleteShader(String shaderId) {
     return store
         .findShaderById(shaderId)
@@ -139,6 +201,9 @@ class ShaderSyncProcessor extends SyncProcessor {
         .catchError((e) => ShaderSyncTask(_getShaderError(e, shaderId)));
   }
 
+  /// Deletes a list of shaders with [shaderIds]
+  ///
+  /// * [shaderIds]: The list shader ids
   Future<List<ShaderSyncTask>> _deleteShaders(Set<String> shaderIds) async {
     final tasks = <Future<ShaderSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
@@ -151,7 +216,10 @@ class ShaderSyncProcessor extends SyncProcessor {
         message: 'Deleting ${shaderIds.length} shader(s): ');
   }
 
-  Future<ShaderSyncResult> _syncShaders(List<String>? shaderIds) async {
+  /// Synchronizes shaders
+  ///
+  /// * [shaderIds]: An optional list of shader ids
+  Future<ShaderSyncResult> _syncShaders({List<String>? shaderIds}) async {
     final storeResponse = await store.findAllShaders();
 
     if (storeResponse.ok) {
@@ -192,74 +260,94 @@ class ShaderSyncProcessor extends SyncProcessor {
     return ShaderSyncResult();
   }
 
-  Future<List<CommentTask>> _clientComments(Set<String> shaderIds) async {
-    final tasks = <Future<CommentsTask>>[];
+  /// Obtains the list of comments for each shader id provided in [shaderIds]
+  ///
+  /// * [shaderIds]: The list of shader ids
+  Future<List<CommentSyncTask>> _clientComments(Set<String> shaderIds) async {
+    final tasks = <Future<CommentsSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     for (final shaderId in shaderIds) {
       tasks.add(taskPool.withResource(() => store
           .findCommentsByShaderId(shaderId)
-          .then((cr) => CommentsTask(cr))));
+          .then((cr) => CommentsSyncTask(cr))));
     }
 
     return runner
-        .process<CommentsTask>(tasks,
+        .process<CommentsSyncTask>(tasks,
             message:
                 'Downloading comments from ${shaderIds.length} shader(s): ')
         .then((commentTasks) => [
               for (var commentTask in commentTasks)
                 if (commentTask.response.ok)
                   for (var comment in commentTask.response.comments ?? [])
-                    CommentTask(FindCommentResponse(comment: comment))
+                    CommentSyncTask(FindCommentResponse(comment: comment))
             ]);
   }
 
+  /// Creates a [FindCommentResponse] with a error
+  ///
+  /// * [e]: The error cause
+  /// * [commentId]: The comment id
   FindCommentResponse getCommentError(dynamic e, String commentId) {
     return FindCommentResponse(
         error: ResponseError.unknown(
-            message: e.toString(),
-            context: CONTEXT_COMMENT,
-            target: commentId));
+            message: e.toString(), context: contextComment, target: commentId));
   }
 
-  Future<CommentTask> _addComment(Comment comment) {
+  /// Saves a comment
+  ///
+  /// * [comment]: The comment to save
+  Future<CommentSyncTask> _addComment(Comment comment) {
     return store
         .saveShaderComments([comment])
-        .then((_) => CommentTask(FindCommentResponse(comment: comment)))
-        .catchError((e) => CommentTask(getCommentError(e, comment.id)));
+        .then((_) => CommentSyncTask(FindCommentResponse(comment: comment)))
+        .catchError((e) => CommentSyncTask(getCommentError(e, comment.id)));
   }
 
-  Future<List<CommentTask>> _addComments(List<Comment> comments) async {
-    final tasks = <Future<CommentTask>>[];
+  /// Saves a list of comments
+  ///
+  /// * [comments]: The list comments
+  Future<List<CommentSyncTask>> _addComments(List<Comment> comments) async {
+    final tasks = <Future<CommentSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     for (final comment in comments) {
       tasks.add(taskPool.withResource(() => _addComment(comment)));
     }
 
-    return runner.process<CommentTask>(tasks,
+    return runner.process<CommentSyncTask>(tasks,
         message: 'Saving ${comments.length} comment(s): ');
   }
 
-  Future<CommentTask> _deleteComment(Comment comment) {
+  /// Deletes a comment
+  ///
+  /// * [comment]: The comment
+  Future<CommentSyncTask> _deleteComment(Comment comment) {
     return store
         .deleteCommentById(comment.id)
-        .then((value) => CommentTask(FindCommentResponse(comment: comment)))
-        .catchError((e) => CommentTask(getCommentError(e, comment.id)));
+        .then((value) => CommentSyncTask(FindCommentResponse(comment: comment)))
+        .catchError((e) => CommentSyncTask(getCommentError(e, comment.id)));
   }
 
-  Future<List<CommentTask>> _deleteComments(List<Comment> comments) async {
-    final tasks = <Future<CommentTask>>[];
+  /// Deletes a list of comments
+  ///
+  /// * [comments]: The list comments
+  Future<List<CommentSyncTask>> _deleteComments(List<Comment> comments) async {
+    final tasks = <Future<CommentSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     for (final comment in comments) {
       tasks.add(taskPool.withResource(() => _deleteComment(comment)));
     }
 
-    return runner.process<CommentTask>(tasks,
+    return runner.process<CommentSyncTask>(tasks,
         message: 'Deleting ${comments.length} comment(s): ');
   }
 
+  /// Synchronizes a list of comments from a previously synchronized list of shaders
+  ///
+  /// * [shaderSync]: The shader synchronization result
   Future<CommentTaskResult> _syncShaderComments(
       ShaderSyncResult shaderSync) async {
     final storeResponse = await store.findAllComments();
@@ -306,55 +394,66 @@ class ShaderSyncProcessor extends SyncProcessor {
     return CommentTaskResult();
   }
 
-  Future<List<DownloadTask>> _addShaderPictures(
+  /// Stores a list of shader pictures
+  ///
+  /// * [fs]: The [FileSystem]
+  /// * [pathMap]: A map where the key is the remote path and the value the local path
+  Future<List<DownloadSyncTask>> _addShaderPictures(
       FileSystem fs, Map<String, String> pathMap) async {
-    final tasks = <Future<DownloadTask>>[];
+    final tasks = <Future<DownloadSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     pathMap.forEach((shaderPicturePath, shaderPictureFilePath) {
       tasks.add(taskPool.withResource(() => addMedia(
           fs, shaderPicturePath, shaderPictureFilePath,
-          context: CONTEXT_SHADER)));
+          context: contextShader)));
     });
 
-    return runner.process<DownloadTask>(tasks,
+    return runner.process<DownloadSyncTask>(tasks,
         message: 'Saving ${pathMap.length} shader picture(s): ');
   }
 
-  Future<List<DownloadTask>> _deleteShaderPictures(
+  /// Deletes a list of shader pictures
+  ///
+  /// * [fs]: The [FileSystem]
+  /// * [pathSet]: A set of shader picture paths to delete
+  Future<List<DownloadSyncTask>> _deleteShaderPictures(
       FileSystem fs, Set<String> pathSet) async {
-    final tasks = <Future<DownloadTask>>[];
+    final tasks = <Future<DownloadSyncTask>>[];
 
     for (final shaderPictureFilePath in pathSet) {
-      tasks
-          .add(deleteMedia(fs, shaderPictureFilePath, context: CONTEXT_SHADER));
+      tasks.add(deleteMedia(fs, shaderPictureFilePath, context: contextShader));
     }
 
-    return runner.process<DownloadTask>(tasks,
+    return runner.process<DownloadSyncTask>(tasks,
         message: 'Deleting ${pathSet.length} shader picture(s): ');
   }
 
+  /// Synchronizes the pictures from a shader
+  ///
+  /// * [fs]: The [FileSystem]
+  /// * [dir]: The target directory on the [FileSystem]
+  /// * [shaderSync]: The shader synchronization result
   Future<DownloadSyncResult> _syncShaderPictures(
       FileSystem fs, Directory dir, ShaderSyncResult shaderSync) async {
     final localShaderIds = <String>{};
-    final shaderMediaPath = ShadertoyContext.ShaderMediaPath;
+    final shaderMediaPath = ShadertoyContext.shaderMediaPath;
     await for (final path
-        in listFiles(dir, _ShaderMediaFiles, recursive: true)) {
+        in listFiles(dir, _shaderMediaFiles, recursive: true)) {
       localShaderIds.add(fileNameToShaderId(p.basenameWithoutExtension(path)));
     }
 
     final localShaderInputSources = <String>{};
     await for (final path
-        in listFiles(dir, _ShaderInputSourceFiles, recursive: true)) {
+        in listFiles(dir, _shaderInputSourceFiles, recursive: true)) {
       localShaderInputSources.add(p.relative(path, from: dir.path));
     }
 
-    final shaderPictureRemotePath =
-        (shaderId) => ShadertoyContext.shaderPicturePath(shaderId);
-    final shaderPictureLocalPath = (shaderId) => p.join(
+    shaderPictureRemotePath(shaderId) =>
+        ShadertoyContext.shaderPicturePath(shaderId);
+    shaderPictureLocalPath(shaderId) => p.join(
         dir.path, shaderMediaPath, '${shaderIdToFileName(shaderId)}.jpg');
-    final shaderInputSourceLocalPath =
-        (inputSource) => p.join(dir.path, inputSource);
+    shaderInputSourceLocalPath(inputSource) => p.join(dir.path, inputSource);
 
     final currentShaderIds = shaderSync.currentShaderIds;
     final currentShaderInputSources = shaderSync.currentShaderInputSourcePaths;
@@ -391,9 +490,14 @@ class ShaderSyncProcessor extends SyncProcessor {
     return DownloadSyncResult(added: added, removed: removed);
   }
 
+  /// Synchronizes the pictures from a shader
+  ///
+  /// * [fs]: The [FileSystem]
+  /// * [dir]: The target directory on the [FileSystem]
+  /// * [shaderSync]: The shader synchronization result
   Future<ShaderSyncResult> syncShaders(
       {FileSystem? fs, Directory? dir, List<String>? shaderIds}) async {
-    final shaderSyncResult = await _syncShaders(shaderIds);
+    final shaderSyncResult = await _syncShaders(shaderIds: shaderIds);
     await _syncShaderComments(shaderSyncResult);
     if (fs != null) {
       await _syncShaderPictures(

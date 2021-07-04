@@ -9,7 +9,7 @@ void main(List<String> arguments) async {
   final sr = await client.findShaderById(shaderId);
   if (sr.ok) {
     // If there is no error print the shader contents
-    print('${sr.shader?.info.id}');
+    print(sr.shader?.info.id);
     print('\tName: ${sr.shader?.info.name}');
     print('\tUserName: ${sr.shader?.info.userId}');
     print('\tDate: ${sr.shader?.info.date}');
@@ -22,8 +22,10 @@ void main(List<String> arguments) async {
     print('\tFlags: ${sr.shader?.info.flags}');
     print('\tLiked: ${sr.shader?.info.hasLiked}');
     print('\tRender Passes: ${sr.shader?.renderPasses.length}');
-    sr.shader?.renderPasses.forEach((element) => print(
-        '\t\t${element.name} has ${element.inputs.length} input(s) and ${element.outputs.length} output(s)'));
+    for (var element in sr.shader?.renderPasses ?? []) {
+      print(
+          '\t\t${element.name} has ${element.inputs.length} input(s) and ${element.outputs.length} output(s)');
+    }
   } else {
     // In case of error print the error message
     print('Error retrieving the shader: ${sr.error?.message}');

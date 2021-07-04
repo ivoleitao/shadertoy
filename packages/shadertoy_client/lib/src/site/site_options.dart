@@ -6,21 +6,21 @@ import 'package:shadertoy_client/src/http_options.dart';
 /// Stores the options used to build a [ShadertoySiteClient]
 class ShadertoySiteOptions extends ShadertoyHttpOptions {
   /// The default Shadertoy cookie name
-  static const String DefaultCookieName = 'sdtd';
+  static const String defaultCookieName = 'sdtd';
 
   /// The default number of shaders presented in the Shadertoy
   /// results [page](https://www.shadertoy.com/results)
-  static const int DefaultPageResultsShaderCount = 12;
+  static const int defaultPageResultsShaderCount = 12;
 
   /// The default number of shaders presented in the Shadertoy
   /// user, for example iq user page as seen in
   /// [here](https://www.shadertoy.com/user/iq)
-  static const int DefaultPageUserShaderCount = 8;
+  static const int defaultPageUserShaderCount = 8;
 
   /// The default number of shaders presented in a Shadertoy
   /// playlist page, for example the playlist of the week as seen in
   /// [here](https://www.shadertoy.com/playlist/week)
-  static const int DefaultPagePlaylistShaderCount = 12;
+  static const int defaultPagePlaylistShaderCount = 12;
 
   /// The Shadertoy user login
   final String? user;
@@ -55,12 +55,12 @@ class ShadertoySiteOptions extends ShadertoyHttpOptions {
   ///
   /// * [user]: The Shadertoy user
   /// * [password]: The Shadertoy password
-  /// * [cookieName]: The Shadertoy cookie name, defaults to [ShadertoySiteOptions.DefaultCookieName]
-  /// * [userShaderCount]: The number of shaders requested for a user paged call, defaults to [ShadertoySiteOptions.DefaultPageUserShaderCount]
-  /// * [playlistShaderCount]: The number of shaders requested for a playlist paged call, defaults to [ShadertoySiteOptions.DefaultPagePlaylistShaderCount]
-  /// * [pageResultsShaderCount]: The number of shaders presented in the Shadertoy results page, defaults to [ShadertoySiteOptions.DefaultPageResultsShaderCount]
-  /// * [pageUserShaderCount]: The number of shaders presented in the Shadertoy user page, defaults to [ShadertoySiteOptions.DefaultPageUserShaderCount]
-  /// * [pagePlaylistShaderCount]: The number of shaders presented in the Shadertoy playlist page, defaults to [ShadertoySiteOptions.DefaultPagePlaylistShaderCount]
+  /// * [cookieName]: The Shadertoy cookie name, defaults to [ShadertoySiteOptions.defaultCookieName]
+  /// * [userShaderCount]: The number of shaders requested for a user paged call, defaults to [ShadertoySiteOptions.defaultPageUserShaderCount]
+  /// * [playlistShaderCount]: The number of shaders requested for a playlist paged call, defaults to [ShadertoySiteOptions.defaultPagePlaylistShaderCount]
+  /// * [pageResultsShaderCount]: The number of shaders presented in the Shadertoy results page, defaults to [ShadertoySiteOptions.defaultPageResultsShaderCount]
+  /// * [pageUserShaderCount]: The number of shaders presented in the Shadertoy user page, defaults to [ShadertoySiteOptions.defaultPageUserShaderCount]
+  /// * [pagePlaylistShaderCount]: The number of shaders presented in the Shadertoy playlist page, defaults to [ShadertoySiteOptions.defaultPagePlaylistShaderCount]
   /// * [baseUrl]: The Shadertoy base url
   /// * [poolMaxAllocatedResources]: The maximum number of resources allocated for parallel calls
   /// * [poolTimeout]: The timeout before giving up on a call
@@ -85,15 +85,15 @@ class ShadertoySiteOptions extends ShadertoyHttpOptions {
       : assert(user == null || user.isNotEmpty, 'user is null or not empty'),
         assert(password == null || password.isNotEmpty,
             'password is null or not empty'),
-        cookieName = cookieName ?? DefaultCookieName,
-        userShaderCount = userShaderCount ?? DefaultPageUserShaderCount,
+        cookieName = cookieName ?? defaultCookieName,
+        userShaderCount = userShaderCount ?? defaultPageUserShaderCount,
         playlistShaderCount =
-            playlistShaderCount ?? DefaultPagePlaylistShaderCount,
+            playlistShaderCount ?? defaultPagePlaylistShaderCount,
         pageResultsShaderCount =
-            pageResultsShaderCount ?? DefaultPageResultsShaderCount,
-        pageUserShaderCount = pageUserShaderCount ?? DefaultPageUserShaderCount,
+            pageResultsShaderCount ?? defaultPageResultsShaderCount,
+        pageUserShaderCount = pageUserShaderCount ?? defaultPageUserShaderCount,
         pagePlaylistShaderCount =
-            pagePlaylistShaderCount ?? DefaultPagePlaylistShaderCount,
+            pagePlaylistShaderCount ?? defaultPagePlaylistShaderCount,
         super(
             baseUrl: baseUrl,
             supportsCookies: true,

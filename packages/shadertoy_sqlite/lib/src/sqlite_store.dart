@@ -6,187 +6,187 @@ import 'package:shadertoy_sqlite/src/sqlite_options.dart';
 
 class ShadertoySqliteStore extends ShadertoyBaseStore {
   // ignore: unused_field
-  static final int _SQLITE_ABORT = 4;
+  static final int _sqliteAbort = 4;
   // ignore: unused_field
-  static final int _SQLITE_AUTH = 23;
+  static final int _sqliteAuth = 23;
   // ignore: unused_field
-  static final int _SQLITE_BUSY = 5;
+  static final int _sqliteBusy = 5;
   // ignore: unused_field
-  static final int _SQLITE_CANTOPEN = 14;
+  static final int _sqliteCantopen = 14;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT = 19;
+  static final int _sqliteConstraint = 19;
   // ignore: unused_field
-  static final int _SQLITE_CORRUPT = 11;
+  static final int _sqliteCorrupt = 11;
   // ignore: unused_field
-  static final int _SQLITE_DONE = 101;
+  static final int _sqliteDone = 101;
   // ignore: unused_field
-  static final int _SQLITE_EMPTY = 16;
+  static final int _sqliteEmpty = 16;
   // ignore: unused_field
-  static final int _SQLITE_ERROR = 1;
+  static final int _sqliteError = 1;
   // ignore: unused_field
-  static final int _SQLITE_FORMAT = 24;
+  static final int _sqliteFormat = 24;
   // ignore: unused_field
-  static final int _SQLITE_FULL = 13;
+  static final int _sqliteFull = 13;
   // ignore: unused_field
-  static final int _SQLITE_INTERNAL = 2;
+  static final int _sqliteInternal = 2;
   // ignore: unused_field
-  static final int _SQLITE_INTERRUPT = 9;
+  static final int _sqliteInterrupt = 9;
   // ignore: unused_field
-  static final int _SQLITE_IOERR = 10;
+  static final int _sqliteIoerr = 10;
   // ignore: unused_field
-  static final int _SQLITE_LOCKED = 6;
+  static final int _sqliteLocked = 6;
   // ignore: unused_field
-  static final int _SQLITE_MISMATCH = 20;
+  static final int _sqliteMismatch = 20;
   // ignore: unused_field
-  static final int _SQLITE_MISUSE = 21;
+  static final int _sqliteMisuse = 21;
   // ignore: unused_field
-  static final int _SQLITE_NOLFS = 22;
+  static final int _sqliteNolfs = 22;
   // ignore: unused_field
-  static final int _SQLITE_NOMEM = 7;
+  static final int _sqliteNomem = 7;
   // ignore: unused_field
-  static final int _SQLITE_NOTADB = 26;
+  static final int _sqliteNotadb = 26;
   // ignore: unused_field
-  static final int _SQLITE_NOTFOUND = 12;
+  static final int _sqliteNotfound = 12;
   // ignore: unused_field
-  static final int _SQLITE_NOTICE = 27;
+  static final int _sqliteNotice = 27;
   // ignore: unused_field
-  static final int _SQLITE_OK = 0;
+  static final int _sqliteOk = 0;
   // ignore: unused_field
-  static final int _SQLITE_PERM = 3;
+  static final int _sqlitePerm = 3;
   // ignore: unused_field
-  static final int _SQLITE_PROTOCOL = 15;
+  static final int _sqliteProtocol = 15;
   // ignore: unused_field
-  static final int _SQLITE_RANGE = 25;
+  static final int _sqliteRange = 25;
   // ignore: unused_field
-  static final int _SQLITE_READONLY = 8;
+  static final int _sqliteReadonly = 8;
   // ignore: unused_field
-  static final int _SQLITE_ROW = 100;
+  static final int _sqliteRow = 100;
   // ignore: unused_field
-  static final int _SQLITE_SCHEMA = 17;
+  static final int _sqliteSchema = 17;
   // ignore: unused_field
-  static final int _SQLITE_TOOBIG = 18;
+  static final int _sqliteToobig = 18;
   // ignore: unused_field
-  static final int _SQLITE_WARNING = 28;
+  static final int _sqliteWarning = 28;
   // ignore: unused_field
-  static final int _SQLITE_ABORT_ROLLBACK = 516;
+  static final int _sqliteAbortRollback = 516;
   // ignore: unused_field
-  static final int _SQLITE_BUSY_RECOVERY = 261;
+  static final int _sqliteBusyRecovery = 261;
   // ignore: unused_field
-  static final int _SQLITE_BUSY_SNAPSHOT = 517;
+  static final int _sqliteBusySnapshot = 517;
   // ignore: unused_field
-  static final int _SQLITE_BUSY_TIMEOUT = 773;
+  static final int _sqliteBusyTimeout = 773;
   // ignore: unused_field
-  static final int _SQLITE_CANTOPEN_CONVPATH = 1038;
+  static final int _sqliteCantopenConvpath = 1038;
   // ignore: unused_field
-  static final int _SQLITE_CANTOPEN_DIRTYWAL = 1294;
+  static final int _sqliteCantopenDirtywal = 1294;
   // ignore: unused_field
-  static final int _SQLITE_CANTOPEN_FULLPATH = 782;
+  static final int _sqliteCantopenFullpath = 782;
   // ignore: unused_field
-  static final int _SQLITE_CANTOPEN_ISDIR = 526;
+  static final int _sqliteCantopenIsdir = 526;
   // ignore: unused_field
-  static final int _SQLITE_CANTOPEN_NOTEMPDIR = 270;
+  static final int _sqliteCantopenNotempdir = 270;
   // ignore: unused_field
-  static final int _SQLITE_CANTOPEN_SYMLINK = 1550;
+  static final int _sqliteCantopenSymlink = 1550;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_CHECK = 275;
+  static final int _sqliteConstraintCheck = 275;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_COMMITHOOK = 531;
+  static final int _sqliteConstraintCommithook = 531;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_FOREIGNKEY = 787;
+  static final int _sqliteConstraintForeignkey = 787;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_FUNCTION = 1043;
+  static final int _sqliteConstraintFunction = 1043;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_NOTNULL = 1299;
+  static final int _sqliteConstraintNotnull = 1299;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_PINNED = 2835;
+  static final int _sqliteConstraintPinned = 2835;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_PRIMARYKEY = 1555;
+  static final int _sqliteConstraintPrimarykey = 1555;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_ROWID = 2579;
+  static final int _sqliteConstraintRowid = 2579;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_TRIGGER = 1811;
+  static final int _sqliteConstraintTrigger = 1811;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_UNIQUE = 2067;
+  static final int _sqliteConstraintUnique = 2067;
   // ignore: unused_field
-  static final int _SQLITE_CONSTRAINT_VTAB = 2323;
+  static final int _sqliteConstraintVtab = 2323;
   // ignore: unused_field
-  static final int _SQLITE_CORRUPT_INDEX = 779;
+  static final int _sqliteCorruptIndex = 779;
   // ignore: unused_field
-  static final int _SQLITE_CORRUPT_SEQUENCE = 523;
+  static final int _sqliteCorruptSequence = 523;
   // ignore: unused_field
-  static final int _SQLITE_CORRUPT_VTAB = 267;
+  static final int _sqliteCorruptVtab = 267;
   // ignore: unused_field
-  static final int _SQLITE_ERROR_MISSING_COLLSEQ = 257;
+  static final int _sqliteErrorMissingCollseq = 257;
   // ignore: unused_field
-  static final int _SQLITE_ERROR_RETRY = 513;
+  static final int _sqliteErrorRetry = 513;
   // ignore: unused_field
-  static final int _SQLITE_ERROR_SNAPSHOT = 769;
+  static final int _sqliteErrorSnapshot = 769;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_ACCESS = 3338;
+  static final int _sqliteIoerrAccess = 3338;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_AUTH = 7178;
+  static final int _sqliteIoerrAuth = 7178;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_BEGIN_ATOMIC = 7434;
+  static final int _sqliteIoerrBeginAtomic = 7434;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_BLOCKED = 2826;
+  static final int _sqliteIoerrBlocked = 2826;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_CHECKRESERVEDLOCK = 3594;
+  static final int _sqliteIoerrCheckreservedlock = 3594;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_CLOSE = 4106;
+  static final int _sqliteIoerrClose = 4106;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_COMMIT_ATOMIC = 7690;
+  static final int _sqliteIoerrCommitAtomic = 7690;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_CONVPATH = 6666;
+  static final int _sqliteIoerrConvpath = 6666;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_DATA = 8202;
+  static final int _sqliteIoerrData = 8202;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_DELETE = 2570;
+  static final int _sqliteIoerrDelete = 2570;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_DELETE_NOENT = 5898;
+  static final int _sqliteIoerrDeleteNoent = 5898;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_DIR_CLOSE = 4362;
+  static final int _sqliteIoerrDirClose = 4362;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_DIR_FSYNC = 1290;
+  static final int _sqliteIoerrDirFsync = 1290;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_FSTAT = 1802;
+  static final int _sqliteIoerrFstat = 1802;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_FSYNC = 1034;
+  static final int _sqliteIoerrFsync = 1034;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_GETTEMPPATH = 6410;
+  static final int _sqliteIoerrFettemppath = 6410;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_LOCK = 3850;
+  static final int _sqliteIoerrLock = 3850;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_MMAP = 6154;
+  static final int _sqliteIoerrMmap = 6154;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_NOMEM = 308;
+  static final int _sqliteIoerrNomem = 308;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_RDLOCK = 231;
+  static final int _sqliteIoerrRdlock = 231;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_READ = 266;
+  static final int _sqliteIoerrRead = 266;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_ROLLBACK_ATOMIC = 7946;
+  static final int _sqliteIoerrRollbackAtomic = 7946;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_SEEK = 5642;
+  static final int _sqliteIoerrSeek = 5642;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_SHMLOCK = 5130;
+  static final int _sqliteIoerrShmlock = 5130;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_SHMMAP = 5386;
+  static final int _sqliteIoerrShmmap = 5386;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_SHMOPEN = 4618;
+  static final int _sqliteIoerrShmopen = 4618;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_SHMSIZE = 4874;
+  static final int _sqliteIoerrShmsize = 4874;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_SHORT_READ = 522;
+  static final int _sqliteIoerrShortRead = 522;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_TRUNCATE = 1546;
+  static final int _sqliteIoerrTruncate = 1546;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_UNLOCK = 2058;
+  static final int _sqliteIoerrUnlock = 2058;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_VNODE = 6922;
+  static final int _sqliteIoerrVnode = 6922;
   // ignore: unused_field
-  static final int _SQLITE_IOERR_WRITE = 778;
+  static final int _sqliteIoerrWrite = 778;
   // ignore: unused_field
-  static final int _SQLITE_LOCKED_SHAREDCACHE = 262;
+  static final int _sqliteLockedSharedcache = 262;
 
   /// The [MoorStore]
   final MoorStore store;
@@ -209,25 +209,25 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
   /// Used to create a consistent response when there is a internal error
   ResponseError _toResponseError(SqliteException sqle,
       {String? context, String? target}) {
-    if (sqle.resultCode == _SQLITE_AUTH) {
+    if (sqle.resultCode == _sqliteAuth) {
       return ResponseError.authorization(
           message: sqle.message, context: context, target: target);
-    } else if (sqle.extendedResultCode == _SQLITE_BUSY_TIMEOUT) {
+    } else if (sqle.extendedResultCode == _sqliteBusyTimeout) {
       return ResponseError.backendTimeout(
           message: sqle.message, context: context, target: target);
-    } else if (sqle.resultCode == _SQLITE_ABORT ||
-        sqle.extendedResultCode == _SQLITE_ABORT_ROLLBACK) {
+    } else if (sqle.resultCode == _sqliteAbort ||
+        sqle.extendedResultCode == _sqliteAbortRollback) {
       return ResponseError.aborted(
           message: sqle.message, context: context, target: target);
-    } else if (sqle.extendedResultCode == _SQLITE_CONSTRAINT_PRIMARYKEY ||
-        sqle.extendedResultCode == _SQLITE_CONSTRAINT_UNIQUE ||
-        sqle.extendedResultCode == _SQLITE_CONSTRAINT_ROWID) {
+    } else if (sqle.extendedResultCode == _sqliteConstraintPrimarykey ||
+        sqle.extendedResultCode == _sqliteConstraintUnique ||
+        sqle.extendedResultCode == _sqliteConstraintRowid) {
       return ResponseError.conflict(
           message: sqle.message, context: context, target: target);
-    } else if (sqle.resultCode == _SQLITE_CONSTRAINT ||
-        sqle.extendedResultCode == _SQLITE_CONSTRAINT_CHECK ||
-        sqle.extendedResultCode == _SQLITE_CONSTRAINT_NOTNULL ||
-        sqle.extendedResultCode == _SQLITE_CONSTRAINT_FOREIGNKEY) {
+    } else if (sqle.resultCode == _sqliteConstraint ||
+        sqle.extendedResultCode == _sqliteConstraintCheck ||
+        sqle.extendedResultCode == _sqliteConstraintNotnull ||
+        sqle.extendedResultCode == _sqliteConstraintForeignkey) {
       return ResponseError.unprocessableEntity(
           message: sqle.message, context: context, target: target);
     }
@@ -254,11 +254,11 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             : FindUserResponse(
                 error: ResponseError.notFound(
                     message: 'User $userId not found',
-                    context: CONTEXT_USER,
+                    context: contextUser,
                     target: userId))),
         (sqle) => FindUserResponse(
             error:
-                _toResponseError(sqle, context: CONTEXT_USER, target: userId)));
+                _toResponseError(sqle, context: contextUser, target: userId)));
   }
 
   @override
@@ -268,7 +268,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .findAllIds()
             .then((value) => FindUserIdsResponse(ids: value)),
         (sqle) => FindUserIdsResponse(
-            error: _toResponseError(sqle, context: CONTEXT_SHADER)));
+            error: _toResponseError(sqle, context: contextShader)));
   }
 
   @override
@@ -278,7 +278,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             users:
                 results.map((user) => FindUserResponse(user: user)).toList())),
         (sqle) => FindUsersResponse(
-            error: _toResponseError(sqle, context: CONTEXT_USER)));
+            error: _toResponseError(sqle, context: contextUser)));
   }
 
   @override
@@ -286,8 +286,8 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
     return _catchSqlError<SaveUserResponse>(
         store.userDao.save(user).then((response) => SaveUserResponse()),
         (sqle) => SaveUserResponse(
-            error: _toResponseError(sqle,
-                context: CONTEXT_USER, target: user.id)));
+            error:
+                _toResponseError(sqle, context: contextUser, target: user.id)));
   }
 
   @override
@@ -295,7 +295,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
     return _catchSqlError<SaveUsersResponse>(
         store.userDao.saveAll(users).then((reponse) => SaveUsersResponse()),
         (sqle) => SaveUsersResponse(
-            error: _toResponseError(sqle, context: CONTEXT_USER)));
+            error: _toResponseError(sqle, context: contextUser)));
   }
 
   @override
@@ -306,7 +306,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .then((reponse) => DeleteUserResponse()),
         (sqle) => DeleteUserResponse(
             error:
-                _toResponseError(sqle, context: CONTEXT_USER, target: userId)));
+                _toResponseError(sqle, context: contextUser, target: userId)));
   }
 
   @override
@@ -317,11 +317,11 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             : FindShaderResponse(
                 error: ResponseError.notFound(
                     message: 'Shader $shaderId not found',
-                    context: CONTEXT_SHADER,
+                    context: contextShader,
                     target: shaderId))),
         (sqle) => FindShaderResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_SHADER, target: shaderId)));
+                context: contextShader, target: shaderId)));
   }
 
   @override
@@ -331,7 +331,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .findAllIds()
             .then((value) => FindShaderIdsResponse(ids: value)),
         (sqle) => FindShaderIdsResponse(
-            error: _toResponseError(sqle, context: CONTEXT_SHADER)));
+            error: _toResponseError(sqle, context: contextShader)));
   }
 
   @override
@@ -347,7 +347,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
                 num: num ?? options.shaderCount)
             .then((results) => FindShaderIdsResponse(ids: results)),
         (sqle) => FindShaderIdsResponse(
-            error: _toResponseError(sqle, context: CONTEXT_SHADER)));
+            error: _toResponseError(sqle, context: contextShader)));
   }
 
   @override
@@ -358,7 +358,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
                     FindShaderResponse(shader: sr.shader))))
             .then((shaders) => FindShadersResponse(shaders: shaders)),
         (sqle) => FindShadersResponse(
-            error: _toResponseError(sqle, context: CONTEXT_SHADER)));
+            error: _toResponseError(sqle, context: contextShader)));
   }
 
   @override
@@ -377,7 +377,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
                     .map((shader) => FindShaderResponse(shader: shader))
                     .toList())),
         (sqle) => FindShadersResponse(
-            error: _toResponseError(sqle, context: CONTEXT_SHADER)));
+            error: _toResponseError(sqle, context: contextShader)));
   }
 
   @override
@@ -388,7 +388,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
                 .map((shader) => FindShaderResponse(shader: shader))
                 .toList())),
         (sqle) => FindShadersResponse(
-            error: _toResponseError(sqle, context: CONTEXT_SHADER)));
+            error: _toResponseError(sqle, context: contextShader)));
   }
 
   @override
@@ -397,7 +397,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
         store.shaderDao.save(shader).then((reponse) => SaveShaderResponse()),
         (sqle) => SaveShaderResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_SHADER, target: shader.info.id)));
+                context: contextShader, target: shader.info.id)));
   }
 
   @override
@@ -407,7 +407,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .saveAll(shaders)
             .then((reponse) => SaveShadersResponse()),
         (sqle) => SaveShadersResponse(
-            error: _toResponseError(sqle, context: CONTEXT_SHADER)));
+            error: _toResponseError(sqle, context: contextShader)));
   }
 
   @override
@@ -418,7 +418,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .then((reponse) => DeleteShaderResponse()),
         (sqle) => DeleteShaderResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_SHADER, target: shaderId)));
+                context: contextShader, target: shaderId)));
   }
 
   @override
@@ -429,11 +429,11 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             : FindCommentResponse(
                 error: ResponseError.notFound(
                     message: 'Comment $commentId not found',
-                    context: CONTEXT_COMMENT,
+                    context: contextComment,
                     target: commentId))),
         (sqle) => FindCommentResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_COMMENT, target: commentId)));
+                context: contextComment, target: commentId)));
   }
 
   @override
@@ -443,7 +443,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .findAllIds()
             .then((value) => FindCommentIdsResponse(ids: value)),
         (sqle) => FindCommentIdsResponse(
-            error: _toResponseError(sqle, context: CONTEXT_COMMENT)));
+            error: _toResponseError(sqle, context: contextComment)));
   }
 
   @override
@@ -454,7 +454,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
                 comments: results.map((r) => r.copyWith()).toList())),
         (sqle) => FindCommentsResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_COMMENT, target: shaderId)));
+                context: contextComment, target: shaderId)));
   }
 
   @override
@@ -464,7 +464,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .findAll()
             .then((value) => FindCommentsResponse(comments: value)),
         (sqle) => FindCommentsResponse(
-            error: _toResponseError(sqle, context: CONTEXT_COMMENT)));
+            error: _toResponseError(sqle, context: contextComment)));
   }
 
   @override
@@ -475,7 +475,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .save(comments)
             .then((reponse) => SaveShaderCommentsResponse()),
         (sqle) => SaveShaderCommentsResponse(
-            error: _toResponseError(sqle, context: CONTEXT_COMMENT)));
+            error: _toResponseError(sqle, context: contextComment)));
   }
 
   @override
@@ -486,7 +486,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .then((reponse) => DeleteCommentResponse()),
         (sqle) => DeleteCommentResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_COMMENT, target: commentId)));
+                context: contextComment, target: commentId)));
   }
 
   @override
@@ -506,7 +506,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
                     .toList())),
         (sqle) => FindShadersResponse(
             error:
-                _toResponseError(sqle, context: CONTEXT_USER, target: userId)));
+                _toResponseError(sqle, context: contextUser, target: userId)));
   }
 
   @override
@@ -523,7 +523,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .then((results) => FindShaderIdsResponse(ids: results.toList())),
         (sqle) => FindShaderIdsResponse(
             error:
-                _toResponseError(sqle, context: CONTEXT_USER, target: userId)));
+                _toResponseError(sqle, context: contextUser, target: userId)));
   }
 
   @override
@@ -534,7 +534,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .then((results) => FindShaderIdsResponse(ids: results.toList())),
         (sqle) => FindShaderIdsResponse(
             error:
-                _toResponseError(sqle, context: CONTEXT_USER, target: userId)));
+                _toResponseError(sqle, context: contextUser, target: userId)));
   }
 
   @override
@@ -546,11 +546,11 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
                 : FindPlaylistResponse(
                     error: ResponseError.notFound(
                         message: 'Playlist $playlistId not found',
-                        context: CONTEXT_PLAYLIST,
+                        context: contextPlaylist,
                         target: playlistId))),
         (sqle) => FindPlaylistResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_PLAYLIST, target: playlistId)));
+                context: contextPlaylist, target: playlistId)));
   }
 
   @override
@@ -560,7 +560,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .findAllIds()
             .then((value) => FindPlaylistIdsResponse(ids: value)),
         (sqle) => FindPlaylistIdsResponse(
-            error: _toResponseError(sqle, context: CONTEXT_PLAYLIST)));
+            error: _toResponseError(sqle, context: contextPlaylist)));
   }
 
   @override
@@ -571,7 +571,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
                 .map((playlist) => FindPlaylistResponse(playlist: playlist))
                 .toList())),
         (sqle) => FindPlaylistsResponse(
-            error: _toResponseError(sqle, context: CONTEXT_PLAYLIST)));
+            error: _toResponseError(sqle, context: contextPlaylist)));
   }
 
   @override
@@ -587,7 +587,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
                     .toList())),
         (sqle) => FindShadersResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_PLAYLIST, target: playlistId)));
+                context: contextPlaylist, target: playlistId)));
   }
 
   @override
@@ -600,7 +600,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .then((shaderIds) => FindShaderIdsResponse(ids: shaderIds)),
         (sqle) => FindShaderIdsResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_PLAYLIST, target: playlistId)));
+                context: contextPlaylist, target: playlistId)));
   }
 
   @override
@@ -612,7 +612,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .then((shaderIds) => FindShaderIdsResponse(ids: shaderIds)),
         (sqle) => FindShaderIdsResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_PLAYLIST, target: playlistId)));
+                context: contextPlaylist, target: playlistId)));
   }
 
   @override
@@ -624,7 +624,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .then((reponse) => SavePlaylistResponse()),
         (sqle) => SavePlaylistResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_PLAYLIST, target: playlist.id)));
+                context: contextPlaylist, target: playlist.id)));
   }
 
   @override
@@ -636,7 +636,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .then((reponse) => SavePlaylistShadersResponse()),
         (sqle) => SavePlaylistShadersResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_PLAYLIST, target: playlistId)));
+                context: contextPlaylist, target: playlistId)));
   }
 
   @override
@@ -647,7 +647,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             .then((reponse) => DeletePlaylistResponse()),
         (sqle) => DeletePlaylistResponse(
             error: _toResponseError(sqle,
-                context: CONTEXT_PLAYLIST, target: playlistId)));
+                context: contextPlaylist, target: playlistId)));
   }
 }
 

@@ -8,7 +8,10 @@ import 'package:shadertoy/shadertoy_api.dart';
 
 import 'hybrid_client.dart';
 
+/// A default task runner which prints to stdout the logs and does a simple
+/// `Future.wait` on the tasks
 class DefaultTaskRunner implements SyncTaskRunner {
+  /// The [DefaultTaskRunner] constructor
   const DefaultTaskRunner();
 
   @override
@@ -25,55 +28,106 @@ class DefaultTaskRunner implements SyncTaskRunner {
   }
 }
 
+/// Base definition of a synchronization task
 abstract class SyncTask<T extends APIResponse> with IterableMixin<APIResponse> {
+  /// The list of responses
   final List<T> responses;
 
+  /// The first response
   T get response => responses.first;
 
-  SyncTask._(List<T> responses) : responses = responses;
+  /// Initializes the [SyncTask] with a list of responses
+  ///
+  /// * [responses]: The list of responses
+  SyncTask._(this.responses);
 
+  /// Initializes the [SyncTask] with a singular response
+  ///
+  /// * [response]: The response
   SyncTask.one(T response) : this._([response]);
-
-  SyncTask.all({List<T>? responses}) : responses = responses ?? [];
 
   @override
   Iterator<APIResponse> get iterator => responses.iterator;
 }
 
-class DownloadTask extends SyncTask<DownloadFileResponse> {
-  DownloadTask(DownloadFileResponse response) : super.one(response);
+/// A download synchronization task
+class DownloadSyncTask extends SyncTask<DownloadFileResponse> {
+  /// The [DownloadSyncTask] constructor
+  ///
+  /// * [response]: The [DownloadFileResponse] associated with this task
+  DownloadSyncTask(DownloadFileResponse response) : super.one(response);
 }
 
+/// A base class defining the result of a synchronization task
 class SyncResult<T extends SyncTask> {
+  /// The list of added tasks
   final List<T> added;
+
+  /// The list of removed tasks
   final List<T> removed;
 
+  /// Sanitizes the picture path
+  ///
+  /// * [path]: The picture path
   String picturePath(String path) =>
       p.isAbsolute(path) ? path.substring(1) : path;
 
+  /// The [SyncResult] constructur
+  ///
+  /// * [added]: The list of added entities
+  /// * [removed]: The list of removed entities
   SyncResult({List<T>? added, List<T>? removed})
       : added = added ?? const [],
         removed = removed ?? const [];
 }
 
-class DownloadSyncResult extends SyncResult<DownloadTask> {
-  DownloadSyncResult({List<DownloadTask>? added, List<DownloadTask>? removed})
+/// The result of a download synchronization task
+class DownloadSyncResult extends SyncResult<DownloadSyncTask> {
+  /// The [DownloadSyncResult] constructor
+  ///
+  /// * [added]: The list of added [DownloadSyncTask]s
+  /// * [removed]: The list of removed [DownloadSyncTask]s
+  DownloadSyncResult(
+      {List<DownloadSyncTask>? added, List<DownloadSyncTask>? removed})
       : super(added: added, removed: removed);
 }
 
+/// The processor of synchronization tasks
 abstract class SyncProcessor {
+  /// The [ShadertoyHybridClient] instance
   final ShadertoyHybridClient client;
+
+  /// The [ShadertoyStore] instance
   final ShadertoyStore store;
+
+  /// The [SyncTaskRunner] that will be used in this processor
   final SyncTaskRunner runner;
+
+  /// The number of concurrent tasks
   final int concurrency;
+
+  /// The maximum timeout waiting for a task completion
   final int timeout;
 
+  /// The [SyncProcessor] constructur
+  ///
+  /// * [client]: The [ShadertoyHybridClient] instance
+  /// * [store]: The [ShadertoyStore] instance
+  /// * [runner]: The [SyncTaskRunner] that will be used in this processor
+  /// * [concurrency]: The number of concurrent tasks
+  /// * [timeout]: The maximum timeout waiting for a task completion
   SyncProcessor(this.client, this.store,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
       : runner = runner ?? const DefaultTaskRunner(),
         concurrency = concurrency ?? 10,
         timeout = timeout ?? 30;
 
+  /// Lists the files on a directory according with a [Glob] expression
+  ///
+  /// * [dir]: The directory
+  /// * [glob]: The glob class
+  /// * [recusive]: If the file list should be recursive
+  /// * [followLinks]: If the links should be followed
   @protected
   Stream<String> listFiles(Directory dir, Glob glob,
       {bool recursive = false, bool followLinks = false}) {
@@ -83,12 +137,20 @@ abstract class SyncProcessor {
         .where((path) => glob.matches(path));
   }
 
+  /// Reads the bytes of a [File] and creates a [DownloadFileResponse] from them
+  ///
+  /// * [file]: The file
   Future<DownloadFileResponse> _getDownloadFileResponse(File file) {
     return file
         .readAsBytes()
         .then((bytes) => DownloadFileResponse(bytes: bytes));
   }
 
+  /// Creates a [DownloadFileResponse] with a error
+  ///
+  /// * [e]: The error cause
+  /// * [mediaPath]: The media path
+  /// * [context]: An optional context
   @protected
   DownloadFileResponse getMediaError(dynamic e, String mediaPath,
       {String? context}) {
@@ -97,8 +159,14 @@ abstract class SyncProcessor {
             message: e.toString(), context: context, target: mediaPath));
   }
 
+  /// Creates a media file on a [FileSystem]
+  ///
+  /// * [fs]: The [FileSystem]
+  /// * [mediaPath]: The media path
+  /// * [mediaFilePath]: The media file path
+  /// * [context]: An optional context
   @protected
-  Future<DownloadTask> addMedia(
+  Future<DownloadSyncTask> addMedia(
       FileSystem fs, String mediaPath, String mediaFilePath,
       {String? context}) {
     final mediaFile = fs.file(mediaFilePath);
@@ -118,22 +186,26 @@ abstract class SyncProcessor {
                 return Future.value(DownloadFileResponse(
                     error: error?.copyWith(context: context)));
               }))
-        .then((df) => DownloadTask(df))
-        .catchError(
-            (e) => DownloadTask(getMediaError(e, mediaPath, context: context)));
+        .then((df) => DownloadSyncTask(df))
+        .catchError((e) =>
+            DownloadSyncTask(getMediaError(e, mediaPath, context: context)));
   }
 
+  /// Deletes a media file from a [FileSystem]
+  ///
+  /// * [fs]: The [FileSystem]
+  /// * [context]: An optional context
   @protected
-  Future<DownloadTask> deleteMedia(FileSystem fs, String mediaFilePath,
+  Future<DownloadSyncTask> deleteMedia(FileSystem fs, String mediaFilePath,
       {String? context}) {
     final mediaFile = fs.file(mediaFilePath);
 
     return mediaFile.exists().then((exists) => exists
         ? _getDownloadFileResponse(mediaFile)
-            .then(
-                (dfr) => mediaFile.delete().then((value) => DownloadTask(dfr)))
-            .catchError((e) =>
-                DownloadTask(getMediaError(e, mediaFilePath, context: context)))
-        : Future.value(DownloadTask(DownloadFileResponse())));
+            .then((dfr) =>
+                mediaFile.delete().then((value) => DownloadSyncTask(dfr)))
+            .catchError((e) => DownloadSyncTask(
+                getMediaError(e, mediaFilePath, context: context)))
+        : Future.value(DownloadSyncTask(DownloadFileResponse())));
   }
 }

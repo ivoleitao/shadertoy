@@ -10,7 +10,7 @@ void main() {
     expect(converter.toJson(true), 1);
   });
 
-  test('Converts \"false\" to false and \"true\" to true and vice-versa', () {
+  test('Converts "false" to false and "true" to true and vice-versa', () {
     var converter = StringToBoolConverter();
     expect(converter.fromJson('false'), false);
     expect(converter.toJson(false), 'false');

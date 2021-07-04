@@ -16,7 +16,7 @@ void main() {
       userId: 'userId1',
       description: 'description1',
       likes: 1,
-      privacy: ShaderPrivacy.public_api,
+      privacy: ShaderPrivacy.publicApi,
       flags: 1,
       tags: ['test1'],
       hasLiked: true);

@@ -34,11 +34,11 @@ class ShadertoyTestClient extends ShadertoyBaseClient {
 }
 
 void main() {
-  final BaseUrl = 'https://www.test.com';
-  final client = ShadertoyTestClient(BaseUrl);
+  final baseUrl = 'https://www.test.com';
+  final client = ShadertoyTestClient(baseUrl);
 
   test('Test a client', () {
     expect(client.context, isNotNull);
-    expect(client.context.baseUrl, BaseUrl);
+    expect(client.context.baseUrl, baseUrl);
   });
 }

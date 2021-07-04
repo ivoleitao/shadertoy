@@ -38,7 +38,7 @@ extension SiteMockAdaptater on MockAdapter {
   MockAdapter addLogoutRoute(ShadertoySiteOptions options, int statusCode,
       Map<String, List<String>> responseHeaders) {
     return textRoute('/signout', '',
-        requestHeaders: {HttpHeaders.refererHeader: '${options.baseUrl}'},
+        requestHeaders: {HttpHeaders.refererHeader: options.baseUrl},
         statusCode: statusCode,
         responseHeaders: responseHeaders);
   }
@@ -46,7 +46,7 @@ extension SiteMockAdaptater on MockAdapter {
   MockAdapter addLogoutSocketErrorRoute(
       ShadertoySiteOptions options, String message) {
     return errorRoute('/signout',
-        headers: {HttpHeaders.refererHeader: '${options.baseUrl}'},
+        headers: {HttpHeaders.refererHeader: options.baseUrl},
         type: DioErrorType.other,
         error: SocketException(message));
   }
@@ -298,6 +298,6 @@ extension SiteMockAdaptater on MockAdapter {
   MockAdapter addDownloadShaderMedia(
       Uint8List bytes, String shaderId, ShadertoySiteOptions options) {
     return addDownloadFile(
-        '${ShadertoyContext.shaderPicturePath(shaderId)}', bytes, options);
+        ShadertoyContext.shaderPicturePath(shaderId), bytes, options);
   }
 }

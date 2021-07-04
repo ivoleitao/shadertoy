@@ -4,28 +4,42 @@ import 'package:shadertoy/shadertoy_api.dart';
 import 'hybrid_client.dart';
 import 'sync.dart';
 
+/// A playlist synchronization task
 class PlaylistSyncTask extends SyncTask<FindPlaylistResponse> {
+  /// The [PlaylistSyncTask] constructor
+  ///
+  /// * [response]: The [FindPlaylistResponse] associated with this task
   PlaylistSyncTask(FindPlaylistResponse response) : super.one(response);
 }
 
+/// The result of a playlist synchronization task
 class PlaylistSyncResult extends SyncResult<PlaylistSyncTask> {
+  /// The current task
   final List<PlaylistSyncTask> current;
 
+  /// The current playlist ids
   Set<String> get currentPlaylistIds => current
       .map((task) => task.response.playlist?.id)
       .whereType<String>()
       .toSet();
 
+  /// The added playlist ids
   Set<String> get addedPlaylistIds => added
       .map((task) => task.response.playlist?.id)
       .whereType<String>()
       .toSet();
 
+  /// The removed playlist ids
   Set<String> get removedPlaylistIds => removed
       .map((task) => task.response.playlist?.id)
       .whereType<String>()
       .toSet();
 
+  /// The [PlaylistSyncResult] constructor
+  ///
+  /// * [current]: The current [PlaylistSyncTask]
+  /// * [added]: The list of added [PlaylistSyncTask]s
+  /// * [removed]: The list of removed [PlaylistSyncTask]s
   PlaylistSyncResult(
       {this.current = const [],
       List<PlaylistSyncTask>? added,
@@ -33,20 +47,35 @@ class PlaylistSyncResult extends SyncResult<PlaylistSyncTask> {
       : super(added: added, removed: removed);
 }
 
+/// The processor of playlist synchronization tasks
 class PlaylistSyncProcessor extends SyncProcessor {
+  /// The [PlaylistSyncProcessor] constructur
+  ///
+  /// * [client]: The [ShadertoyHybridClient] instance
+  /// * [store]: The [ShadertoyStore] instance
+  /// * [runner]: The [SyncTaskRunner] that will be used in this processor
+  /// * [concurrency]: The number of concurrent tasks
+  /// * [timeout]: The maximum timeout waiting for a task completion
   PlaylistSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
       : super(client, store,
             runner: runner, concurrency: concurrency, timeout: timeout);
 
+  /// Creates a [FindPlaylistResponse] with a error
+  ///
+  /// * [e]: The error cause
+  /// * [playlistId]: The playlist id
   FindPlaylistResponse getPlaylistError(dynamic e, String playlistId) {
     return FindPlaylistResponse(
         error: ResponseError.unknown(
             message: e.toString(),
-            context: CONTEXT_PLAYLIST,
+            context: contextPlaylist,
             target: playlistId));
   }
 
+  /// Saves a playlist with id equal to [playlistId]
+  ///
+  /// * [playlistId]: The playlist id
   Future<PlaylistSyncTask> _addPlaylist(String playlistId) {
     return client
         .findPlaylistById(playlistId)
@@ -72,6 +101,9 @@ class PlaylistSyncProcessor extends SyncProcessor {
         .catchError((e) => PlaylistSyncTask(getPlaylistError(e, playlistId)));
   }
 
+  /// Saves a list of playlists with [playlistIds]
+  ///
+  /// * [playlistIds]: The list playlist ids
   Future<List<PlaylistSyncTask>> _addPlaylists(Set<String> playlistIds) async {
     final tasks = <Future<PlaylistSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
@@ -84,6 +116,9 @@ class PlaylistSyncProcessor extends SyncProcessor {
         message: 'Saving ${playlistIds.length} playlist(s): ');
   }
 
+  /// Deletes a playlist with id [playlistId]
+  ///
+  /// * [playlistId]: The playlist id
   Future<PlaylistSyncTask> _deletePlaylist(String playlistId) {
     return store
         .findPlaylistById(playlistId)
@@ -93,6 +128,9 @@ class PlaylistSyncProcessor extends SyncProcessor {
         .catchError((e) => PlaylistSyncTask(getPlaylistError(e, playlistId)));
   }
 
+  /// Deletes a list of playlists with [playlistIds]
+  ///
+  /// * [playlistIds]: The list playlist ids
   Future<List<PlaylistSyncTask>> _deletePlaylists(
       Set<String> playlistIds) async {
     final tasks = <Future<PlaylistSyncTask>>[];
@@ -106,6 +144,9 @@ class PlaylistSyncProcessor extends SyncProcessor {
         message: 'Deleting ${playlistIds.length} playlist(s): ');
   }
 
+  /// Synchronizes a list of [playlistIds]
+  ///
+  /// * [playlistIds]: The list playlist ids
   Future<PlaylistSyncResult> _syncPlaylists(List<String> playlistIds) async {
     final localResponse = await store.findAllPlaylists();
     if (localResponse.ok) {
@@ -139,6 +180,9 @@ class PlaylistSyncProcessor extends SyncProcessor {
     return PlaylistSyncResult();
   }
 
+  /// Synchronizes a list of [playlistIds]
+  ///
+  /// * [playlistIds]: The list playlist ids
   Future<PlaylistSyncResult> syncPlaylists(List<String> playlistIds) async {
     final playlistSyncResult = await _syncPlaylists(playlistIds);
 

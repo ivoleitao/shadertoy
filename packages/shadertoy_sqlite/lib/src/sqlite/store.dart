@@ -28,7 +28,7 @@ part 'store.g.dart';
 /// The Moor storage abstraction
 class MoorStore extends _$MoorStore {
   /// The current schema version
-  static const int SchemaVersion = 1;
+  static const int _schemaVersion = 1;
 
   /// Creates a [MoorStore]
   ///
@@ -36,7 +36,7 @@ class MoorStore extends _$MoorStore {
   MoorStore(QueryExecutor executor) : super(executor);
 
   @override
-  int get schemaVersion => SchemaVersion;
+  int get schemaVersion => _schemaVersion;
 
   @override
   MigrationStrategy get migration {

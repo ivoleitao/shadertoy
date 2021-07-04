@@ -256,7 +256,6 @@ void main() {
       final fsi = await findShaderIdsResponseFixture(shaders);
       final adapter = newAdapter(wsOptions)
         ..addFindAllShaderIdsRoute(fsi, wsOptions);
-      ;
       final api = newClient(adapter, wsOptions: wsOptions);
       // act
       final sr = await api.findAllShaderIds();
@@ -321,7 +320,7 @@ void main() {
       final fsi = await findShaderIdsResponseFixture(shaders);
       final adapter = newAdapter(wsOptions)
         ..addFindShaderIdsRoute(fsi, wsOptions, term: term);
-      ;
+
       final api = newClient(adapter, wsOptions: wsOptions);
       // act
       final sr = await api.findShaderIds(term: term);

@@ -2,28 +2,28 @@ import 'package:shadertoy/src/context.dart';
 import 'package:test/test.dart';
 
 void main() {
-  var BaseUrl = 'https://www.shadertoy.com';
-  var context1 = ShadertoyContext(BaseUrl);
+  var baseUrl = 'https://www.shadertoy.com';
+  var context1 = ShadertoyContext(baseUrl);
 
   test('Test a context', () {
-    expect(context1.baseUrl, BaseUrl);
-    expect(context1.signInUrl, '$BaseUrl/${ShadertoyContext.SignInPath}');
-    expect(context1.signOutUrl, '$BaseUrl/${ShadertoyContext.SignOutPath}');
-    expect(context1.shaderBrowseUrl, '$BaseUrl/${ShadertoyContext.BrowsePath}');
+    expect(context1.baseUrl, baseUrl);
+    expect(context1.signInUrl, '$baseUrl/${ShadertoyContext.signInPath}');
+    expect(context1.signOutUrl, '$baseUrl/${ShadertoyContext.signOutPath}');
+    expect(context1.shaderBrowseUrl, '$baseUrl/${ShadertoyContext.browsePath}');
     expect(context1.getShaderViewPath('MsGczV'),
-        '${ShadertoyContext.ViewPath}/MsGczV');
+        '${ShadertoyContext.viewPath}/MsGczV');
     expect(context1.getShaderViewUrl('MsGczV'),
-        '$BaseUrl/${ShadertoyContext.ViewPath}/MsGczV');
+        '$baseUrl/${ShadertoyContext.viewPath}/MsGczV');
     expect(context1.getShaderEmbedPath('MsGczV'),
-        '${ShadertoyContext.EmbedPath}/MsGczV');
+        '${ShadertoyContext.embedPath}/MsGczV');
     expect(
         context1.getShaderEmbedUrl('MsGczV',
             gui: true, t: 20, paused: true, muted: true),
-        '$BaseUrl/${ShadertoyContext.EmbedPath}/MsGczV?gui=true&t=20&paused=true&muted=true');
+        '$baseUrl/${ShadertoyContext.embedPath}/MsGczV?gui=true&t=20&paused=true&muted=true');
     expect(context1.getShaderPicturePath('MsGczV'),
-        '${ShadertoyContext.ShaderMediaPath}/MsGczV.jpg');
+        '${ShadertoyContext.shaderMediaPath}/MsGczV.jpg');
     expect(context1.getShaderPictureUrl('MsGczV'),
-        '$BaseUrl/${ShadertoyContext.ShaderMediaPath}/MsGczV.jpg');
+        '$baseUrl/${ShadertoyContext.shaderMediaPath}/MsGczV.jpg');
   });
 
   test('Convert a context to a JSON serializable map and back', () {

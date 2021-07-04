@@ -1,6 +1,8 @@
-## 2.0.0-dev.1
+## 2.0.0
 
-- TODO
+- Migrated from `shadertoy_api` package
+- Null safe
+- Migrated from `pedating` to `lints` package
 
 ## 1.0.21
 

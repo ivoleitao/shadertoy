@@ -1,5 +1,5 @@
 # shadertoy
-A Shadertoy client API definition for Dart
+A Shadertoy client and storage API for Dart
 
 [![Pub Package](https://img.shields.io/pub/v/shadertoy.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy)
 [![Build Status](https://github.com/ivoleitao/shadertoy/workflows/build/badge.svg)](https://github.com/ivoleitao/shadertoy/actions)
@@ -9,7 +9,7 @@ A Shadertoy client API definition for Dart
 
 ## Introduction
 
-Provides a definition of the contracts and entities needed to create a Shadertoy dart client.
+Provides a definition of the contracts and entities needed to create implementations of the shadertoy site and REST API's and storage model.
 
 Three main types of contracts are defined in this library:
 * A **Client API**, for the REST interfaces defined in the Shadertoy [howto](https://www.shadertoy.com/howto#q2) that allow the user to browse shaders available with `public+api` privacy settings. Note that the number of operations available with this API are limited albeit enough for simple browsing usage. To start using this type of client a API key should be obtained for a properly registered user on the [apps](https://www.shadertoy.com/myapps) page and the client implementation should support providing it at the time of the construction

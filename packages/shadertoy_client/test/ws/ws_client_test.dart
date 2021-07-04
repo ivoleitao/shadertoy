@@ -60,8 +60,8 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'Unexpected response: ',
-              context: CONTEXT_SHADER,
-              target: '$shaderId'));
+              context: contextShader,
+              target: shaderId));
     });
 
     test('Find shader by id with unexpected plain text return', () async {
@@ -82,8 +82,8 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'Unexpected response: $text',
-              context: CONTEXT_SHADER,
-              target: '$shaderId'));
+              context: contextShader,
+              target: shaderId));
     });
 
     test('Find shader by id with Dio error', () async {
@@ -104,7 +104,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_SHADER,
+              context: contextShader,
               target: 'Ms2SD1'));
     });
 
@@ -160,8 +160,8 @@ void main() {
           sr.shaders?[0].error,
           ResponseError.unknown(
               message: 'Unexpected response: $text',
-              context: CONTEXT_SHADER,
-              target: '$shaderId'));
+              context: contextShader,
+              target: shaderId));
     });
 
     test('Find shaders by id set with Dio error', () async {
@@ -183,7 +183,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_SHADER,
+              context: contextShader,
               target: 'Ms2SD1'));
     });
 
@@ -227,7 +227,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.unknown(
-              message: 'SocketException: $message', context: CONTEXT_SHADER));
+              message: 'SocketException: $message', context: contextShader));
     });
 
     test('Find all shader ids', () async {
@@ -245,7 +245,7 @@ void main() {
       final fsi = await findShaderIdsResponseFixture(shaders);
       final adapter = newAdapter(options)
         ..addFindAllShaderIdsRoute(fsi, options);
-      ;
+
       final api = newClient(options, adapter);
       // act
       final sr = await api.findAllShaderIds();
@@ -271,7 +271,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.unknown(
-              message: 'Unexpected response: $text', context: CONTEXT_SHADER));
+              message: 'Unexpected response: $text', context: contextShader));
     });
 
     test('Find shader ids with term', () async {
@@ -286,7 +286,7 @@ void main() {
       final fsi = await findShaderIdsResponseFixture(shaders);
       final adapter = newAdapter(options)
         ..addFindShaderIdsRoute(fsi, options, term: term);
-      ;
+
       final api = newClient(options, adapter);
       // act
       final sr = await api.findShaderIds(term: term);
@@ -309,7 +309,7 @@ void main() {
       final adapter = newAdapter(options)
         ..addFindShaderIdsRoute(fsi, options,
             term: term, filters: filters, sort: sort, from: from, num: num);
-      ;
+
       final api = newClient(options, adapter);
       // act
       final sr = await api.findShaderIds(
@@ -347,7 +347,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.unknown(
-              message: 'Unexpected response: $text', context: CONTEXT_SHADER));
+              message: 'Unexpected response: $text', context: contextShader));
     });
   });
 }

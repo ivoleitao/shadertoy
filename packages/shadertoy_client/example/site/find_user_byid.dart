@@ -12,7 +12,7 @@ void main(List<String> arguments) async {
   print('Following: ${result.user?.following}');
   print('Followers: ${result.user?.followers}');
   print('About:');
-  print('${result.user?.about}');
+  print(result.user?.about);
 
   print(jsonEncode(result.user?.toJson()));
 }

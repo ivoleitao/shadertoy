@@ -14,7 +14,7 @@ abstract class ExtendedClientCommand
 abstract class HybridCommand extends ClientCommand<ShadertoyHybrid> {}
 
 abstract class BaseCommand extends Command {
-  static const String _DEFAULT_JSON_INDENT = '  ';
+  static const String _defaultJsonIndent = '  ';
 
   BaseCommand() {
     argParser.addFlag('verbose',
@@ -25,7 +25,7 @@ abstract class BaseCommand extends Command {
     return argResults?['verbose'] ?? false;
   }
 
-  String formatJson(Object object, {String indent = _DEFAULT_JSON_INDENT}) {
+  String formatJson(Object object, {String indent = _defaultJsonIndent}) {
     final encoder = JsonEncoder.withIndent(indent);
     return encoder.convert(object);
   }
@@ -34,7 +34,7 @@ abstract class BaseCommand extends Command {
     print(message);
   }
 
-  void logJson(Object object, {String indent = _DEFAULT_JSON_INDENT}) {
+  void logJson(Object object, {String indent = _defaultJsonIndent}) {
     log(formatJson(object, indent: indent));
   }
 }

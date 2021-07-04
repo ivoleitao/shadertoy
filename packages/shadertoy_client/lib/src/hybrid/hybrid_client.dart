@@ -12,9 +12,18 @@ import 'package:shadertoy_client/src/ws/ws_options.dart';
 
 import 'playlist_sync.dart';
 
+/// The definition of a generic interface whose implementation is able to
+/// process synchronization tasks
 abstract class SyncTaskRunner {
+  /// Logs a message
+  ///
+  /// * [message]: The message to log
   void log(String message);
 
+  /// Processes synchronization tasks
+  ///
+  /// * [tasks]: The tasks to process
+  /// * [message]: An optional message to display
   Future<List<T>> process<T extends IterableMixin<APIResponse>>(
       List<Future<T>> tasks,
       {String? message});

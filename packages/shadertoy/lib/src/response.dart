@@ -11,34 +11,34 @@ part 'response.g.dart';
 /// The list of errors
 enum ErrorCode {
   /// Authentication error
-  AUTHENTICATION,
+  authentication,
 
   /// Authorization error
-  AUTHORIZATION,
+  authorization,
 
   /// Backend timeout error
-  BACKEND_TIMEOUT,
+  backendTimeout,
 
   /// Backend status error
-  BACKEND_STATUS,
+  backendStatus,
 
   /// Invalid backend response error
-  BACKEND_RESPONSE,
+  backendResponse,
 
   /// Not found error
-  NOT_FOUND,
+  notFound,
 
   /// Operation aborted error
-  ABORTED,
+  aborted,
 
   /// Conflict error
-  CONFLICT,
+  conflict,
 
   /// Unprocessable error
-  UNPROCESSABLE_ENTITY,
+  unprocessableEntity,
 
   /// Unknowkn error
-  UNKNOWN
+  unknown
 }
 
 /// Error information class
@@ -76,7 +76,7 @@ class ResponseError with EquatableMixin {
   ResponseError.authentication(
       {required String message, String? context, String? target})
       : this(
-            code: ErrorCode.AUTHENTICATION,
+            code: ErrorCode.authentication,
             message: message,
             context: context,
             target: target);
@@ -89,7 +89,7 @@ class ResponseError with EquatableMixin {
   ResponseError.authorization(
       {required String message, String? context, String? target})
       : this(
-            code: ErrorCode.AUTHORIZATION,
+            code: ErrorCode.authorization,
             message: message,
             context: context,
             target: target);
@@ -102,7 +102,7 @@ class ResponseError with EquatableMixin {
   ResponseError.backendTimeout(
       {required String message, String? context, String? target})
       : this(
-            code: ErrorCode.BACKEND_TIMEOUT,
+            code: ErrorCode.backendTimeout,
             message: message,
             context: context,
             target: target);
@@ -115,7 +115,7 @@ class ResponseError with EquatableMixin {
   ResponseError.backendStatus(
       {required String message, String? context, String? target})
       : this(
-            code: ErrorCode.BACKEND_STATUS,
+            code: ErrorCode.backendStatus,
             message: message,
             context: context,
             target: target);
@@ -128,7 +128,7 @@ class ResponseError with EquatableMixin {
   ResponseError.backendResponse(
       {required String message, String? context, String? target})
       : this(
-            code: ErrorCode.BACKEND_RESPONSE,
+            code: ErrorCode.backendResponse,
             message: message,
             context: context,
             target: target);
@@ -141,7 +141,7 @@ class ResponseError with EquatableMixin {
   ResponseError.notFound(
       {required String message, String? context, String? target})
       : this(
-            code: ErrorCode.NOT_FOUND,
+            code: ErrorCode.notFound,
             message: message,
             context: context,
             target: target);
@@ -154,7 +154,7 @@ class ResponseError with EquatableMixin {
   ResponseError.aborted(
       {required String message, String? context, String? target})
       : this(
-            code: ErrorCode.ABORTED,
+            code: ErrorCode.aborted,
             message: message,
             context: context,
             target: target);
@@ -167,7 +167,7 @@ class ResponseError with EquatableMixin {
   ResponseError.unprocessableEntity(
       {required String message, String? context, String? target})
       : this(
-            code: ErrorCode.UNPROCESSABLE_ENTITY,
+            code: ErrorCode.unprocessableEntity,
             message: message,
             context: context,
             target: target);
@@ -180,12 +180,12 @@ class ResponseError with EquatableMixin {
   ResponseError.conflict(
       {required String message, String? context, String? target})
       : this(
-            code: ErrorCode.CONFLICT,
+            code: ErrorCode.conflict,
             message: message,
             context: context,
             target: target);
 
-  /// Builds a unknown [ResponseError] with [ErrorCode.UNKNOWN] and:
+  /// Builds a unknown [ResponseError] with [ErrorCode.unknown] and:
   ///
   /// * [message]: The error message
   /// * [context]: The context of execution when the error ocurred
@@ -193,7 +193,7 @@ class ResponseError with EquatableMixin {
   ResponseError.unknown(
       {required String message, String? context, String? target})
       : this(
-            code: ErrorCode.UNKNOWN,
+            code: ErrorCode.unknown,
             message: message,
             context: context,
             target: target);

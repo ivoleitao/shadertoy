@@ -3,13 +3,13 @@ import 'package:shadertoy/shadertoy_api.dart';
 /// Options for the Shadertoy Sqlite store
 class ShadertoySqliteOptions extends ShadertoyClientOptions {
   /// The default number of shaders fetched for a paged call.
-  static const int DefaultShaderCount = 12;
+  static const int defaultShaderCount = 12;
 
   /// The default number of shaders fetched for a user paged call.
-  static const int DefaultUserShaderCount = 8;
+  static const int defaultUserShaderCount = 8;
 
   /// The default number of shaders fetched for a playlist paged call.
-  static const int DefaultPlaylistShaderCount = 15;
+  static const int defaultPlaylistShaderCount = 15;
 
   /// The number of shaders requested for paged call
   final int shaderCount;
@@ -31,9 +31,9 @@ class ShadertoySqliteOptions extends ShadertoyClientOptions {
       int? userShaderCount,
       int? playlistShaderCount,
       ErrorMode? errorHandling})
-      : shaderCount = shaderCount ?? DefaultShaderCount,
-        userShaderCount = userShaderCount ?? DefaultUserShaderCount,
-        playlistShaderCount = playlistShaderCount ?? DefaultPlaylistShaderCount,
+      : shaderCount = shaderCount ?? defaultShaderCount,
+        userShaderCount = userShaderCount ?? defaultUserShaderCount,
+        playlistShaderCount = playlistShaderCount ?? defaultPlaylistShaderCount,
         super(errorHandling: errorHandling) {
     assert(this.shaderCount >= 1);
     assert(this.userShaderCount >= 1);

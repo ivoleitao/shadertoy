@@ -8,48 +8,68 @@ import 'hybrid_client.dart';
 import 'shader_sync.dart';
 import 'sync.dart';
 
+/// A user synchronization task
 class UserSyncTask extends SyncTask<FindUserResponse> {
+  /// The [UserSyncTask] constructor
+  ///
+  /// * [response]: The [FindUserResponse] associated with this task
   UserSyncTask(FindUserResponse response) : super.one(response);
 }
 
+/// The result of a user synchronization task
 class UserSyncResult extends SyncResult<UserSyncTask> {
+  /// The current task
   final List<UserSyncTask> current;
 
+  /// The current users
   Iterable<User> get _currentUsers =>
       current.map((task) => task.response.user).whereType<User>();
 
+  /// The current user ids
   Set<String> get currentUserIds =>
       _currentUsers.map((user) => user.id).toSet();
 
+  /// The current user picture paths
   Set<String> get currentUserPicturePaths => _currentUsers
       .map((user) => user.picture)
       .whereType<String>()
       .map((picture) => picturePath(picture))
       .toSet();
 
+  /// The added users
   Iterable<User> get _addedUsers =>
       added.map((task) => task.response.user).whereType<User>();
 
+  /// The added user ids
   Set<String> get addedUserIds => _addedUsers.map((user) => user.id).toSet();
 
+  /// The added user picture paths
   Set<String> get addedUserPicturePaths => _addedUsers
       .map((user) => user.picture)
       .whereType<String>()
       .map((picture) => picturePath(picture))
       .toSet();
 
+  /// The removed users
   Iterable<User> get _removedUsers =>
       removed.map((task) => task.response.user).whereType<User>();
 
+  /// The removed user ids
   Set<String> get removedUserIds =>
       _removedUsers.map((user) => user.id).toSet();
 
+  /// The removed user picture paths
   Set<String> get removedUserPicturePaths => _removedUsers
       .map((user) => user.picture)
       .whereType<String>()
       .map((picture) => picturePath(picture))
       .toSet();
 
+  /// The [UserSyncResult] constructor
+  ///
+  /// * [current]: The current [UserSyncTask]
+  /// * [added]: The list of added [UserSyncTask]s
+  /// * [removed]: The list of removed [UserSyncTask]s
   UserSyncResult(
       {this.current = const [],
       List<UserSyncTask>? added,
@@ -57,21 +77,37 @@ class UserSyncResult extends SyncResult<UserSyncTask> {
       : super(added: added, removed: removed);
 }
 
+/// The processor of user synchronization tasks
 class UserSyncProcessor extends SyncProcessor {
-  static final Glob _UserMediaFiles = Glob(
-      '**/{${ShadertoyContext.UserMediaPath}/*/{*.jpg,*.png,*.jpeg,*.gif},${ShadertoyContext.ImgPath}/profile.jpg}');
+  /// A [Glob] defining the location of the local user media files
+  static final Glob _userMediaFiles = Glob(
+      '**/{${ShadertoyContext.userMediaPath}/*/{*.jpg,*.png,*.jpeg,*.gif},${ShadertoyContext.imgPath}/profile.jpg}');
 
+  /// The [UserSyncProcessor] constructur
+  ///
+  /// * [client]: The [ShadertoyHybridClient] instance
+  /// * [store]: The [ShadertoyStore] instance
+  /// * [runner]: The [SyncTaskRunner] that will be used in this processor
+  /// * [concurrency]: The number of concurrent tasks
+  /// * [timeout]: The maximum timeout waiting for a task completion
   UserSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
       : super(client, store,
             runner: runner, concurrency: concurrency, timeout: timeout);
 
+  /// Creates a [FindUserResponse] with a error
+  ///
+  /// * [e]: The error cause
+  /// * [userId]: The user id
   FindUserResponse getUserError(dynamic e, String userId) {
     return FindUserResponse(
         error: ResponseError.unknown(
-            message: e.toString(), context: CONTEXT_USER, target: userId));
+            message: e.toString(), context: contextUser, target: userId));
   }
 
+  /// Saves a user with id equal to [userId]
+  ///
+  /// * [userId]: The user id
   Future<UserSyncTask> _addUser(String userId) {
     return client
         .findUserById(userId)
@@ -87,6 +123,9 @@ class UserSyncProcessor extends SyncProcessor {
         .catchError((e) => UserSyncTask(getUserError(e, userId)));
   }
 
+  /// Saves a list of users with [userIds]
+  ///
+  /// * [userIds]: The list user ids
   Future<List<UserSyncTask>> _addUsers(Set<String> userIds) async {
     final tasks = <Future<UserSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
@@ -99,6 +138,9 @@ class UserSyncProcessor extends SyncProcessor {
         message: 'Saving ${userIds.length} user(s): ');
   }
 
+  /// Deletes a user with id [userId]
+  ///
+  /// * [userId]: The user id
   Future<UserSyncTask> _deleteUser(String userId) {
     return store
         .findUserById(userId)
@@ -107,6 +149,9 @@ class UserSyncProcessor extends SyncProcessor {
         .catchError((e) => UserSyncTask(getUserError(e, userId)));
   }
 
+  /// Deletes a list of users with [userIds]
+  ///
+  /// * [userIds]: The list user ids
   Future<List<UserSyncTask>> _deleteUsers(Set<String> userIds) async {
     final tasks = <Future<UserSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
@@ -119,6 +164,9 @@ class UserSyncProcessor extends SyncProcessor {
         message: 'Deleting ${userIds.length} user(s): ');
   }
 
+  /// Synchronizes a list of users from a previously synchronized list of shaders
+  ///
+  /// * [shaderSync]: The shader synchronization result
   Future<UserSyncResult> _syncUsers(ShaderSyncResult shaderSync) async {
     final localResponse = await store.findAllUsers();
     if (localResponse.ok) {
@@ -150,42 +198,55 @@ class UserSyncProcessor extends SyncProcessor {
     return UserSyncResult();
   }
 
-  Future<List<DownloadTask>> _addUserPicture(
+  /// Stores a list of user pictures
+  ///
+  /// * [fs]: The [FileSystem]
+  /// * [pathMap]: A map where the key is the remote path and the value the local path
+  Future<List<DownloadSyncTask>> _addUserPicture(
       FileSystem fs, Map<String, String> pathMap) async {
-    final tasks = <Future<DownloadTask>>[];
+    final tasks = <Future<DownloadSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     pathMap.forEach((userPicturePath, userPictureFilePath) {
       tasks.add(taskPool.withResource(() => addMedia(
           fs, userPicturePath, userPictureFilePath,
-          context: CONTEXT_USER)));
+          context: contextUser)));
     });
 
-    return runner.process<DownloadTask>(tasks,
+    return runner.process<DownloadSyncTask>(tasks,
         message: 'Saving ${pathMap.length} user picture(s)');
   }
 
-  Future<List<DownloadTask>> _deleteUserPicture(
+  /// Deletes a list of user pictures
+  ///
+  /// * [fs]: The [FileSystem]
+  /// * [pathSet]: A set of user picture paths to delete
+  Future<List<DownloadSyncTask>> _deleteUserPicture(
       FileSystem fs, Set<String> pathSet) async {
-    final tasks = <Future<DownloadTask>>[];
+    final tasks = <Future<DownloadSyncTask>>[];
 
     for (final userPictureFilePath in pathSet) {
-      tasks.add(deleteMedia(fs, userPictureFilePath, context: CONTEXT_USER));
+      tasks.add(deleteMedia(fs, userPictureFilePath, context: contextUser));
     }
 
-    return runner.process<DownloadTask>(tasks,
+    return runner.process<DownloadSyncTask>(tasks,
         message: 'Deleting ${pathSet.length} user pictures: ');
   }
 
+  /// Synchronizes the pictures from a user
+  ///
+  /// * [fs]: The [FileSystem]
+  /// * [dir]: The target directory on the [FileSystem]
+  /// * [userSync]: The user synchronization result
   Future<DownloadSyncResult> _syncUserPictures(
       FileSystem fs, Directory dir, UserSyncResult userSync) async {
     final localUserPictures = <String>{};
 
-    await for (final path in listFiles(dir, _UserMediaFiles, recursive: true)) {
+    await for (final path in listFiles(dir, _userMediaFiles, recursive: true)) {
       localUserPictures.add(p.relative(path, from: dir.path));
     }
 
-    final userPictureLocalPath = (path) => p.join(dir.path, path);
+    userPictureLocalPath(path) => p.join(dir.path, path);
 
     final currentUserPicturePaths = userSync.currentUserPicturePaths;
     final addUserPicturePaths = {
@@ -208,6 +269,11 @@ class UserSyncProcessor extends SyncProcessor {
     return DownloadSyncResult(added: added, removed: removed);
   }
 
+  /// Synchronizes the pictures from a user
+  ///
+  /// * [fs]: The [FileSystem]
+  /// * [dir]: The target directory on the [FileSystem]
+  /// * [userSync]: The user synchronization result
   Future<UserSyncResult> syncUsers(ShaderSyncResult shaderSync,
       {FileSystem? fs, Directory? dir}) async {
     final userSyncResult = await _syncUsers(shaderSync);

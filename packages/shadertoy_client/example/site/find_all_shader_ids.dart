@@ -7,5 +7,7 @@ void main(List<String> arguments) async {
 
   final result = await client.findAllShaderIds();
   print('${result.total} shader id(s)');
-  result.ids?.forEach((element) => stdout.write('$element '));
+  for (var element in result.ids ?? []) {
+    stdout.write('$element ');
+  }
 }

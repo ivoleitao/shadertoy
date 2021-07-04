@@ -6,10 +6,10 @@ void main() {
   test('Builds a error from a string message and vice-versa', () {
     var converter = ResponseErrorConverter();
     expect(converter.fromJson('message'),
-        ResponseError(code: ErrorCode.UNKNOWN, message: 'message'));
+        ResponseError(code: ErrorCode.unknown, message: 'message'));
     expect(
         converter
-            .toJson(ResponseError(code: ErrorCode.UNKNOWN, message: 'message')),
+            .toJson(ResponseError(code: ErrorCode.unknown, message: 'message')),
         'message');
   });
 }

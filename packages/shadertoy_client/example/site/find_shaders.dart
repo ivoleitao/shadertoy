@@ -7,6 +7,7 @@ void main(List<String> arguments) async {
 
   final result = await client.findShaders(term: 'elevated');
   print('${result.total} shader id(s)');
-  result.shaders
-      ?.forEach((response) => stdout.write('${response.shader?.info.id} '));
+  for (var response in result.shaders ?? []) {
+    stdout.write('${response.shader?.info.id} ');
+  }
 }

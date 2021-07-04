@@ -9,7 +9,7 @@ class ShadertoyWSOptions extends ShadertoyHttpOptions {
   /// The default base API path to use for the REST calls
   ///
   /// Currently points to the v1 of the API
-  static const String DefaultApiPath = '/api/v1';
+  static const String defaultApiPath = '/api/v1';
 
   /// The API key that should be appended for each call
   final String apiKey;
@@ -20,7 +20,7 @@ class ShadertoyWSOptions extends ShadertoyHttpOptions {
   /// Builds a [ShadertoyWSOptions]
   ///
   /// * [apiKey]: The API key
-  /// * [apiPath]: The base api path, defaults to [ShadertoyWSOptions.DefaultApiPath]
+  /// * [apiPath]: The base api path, defaults to [ShadertoyWSOptions.defaultApiPath]
   /// * [baseUrl]: The Shadertoy base url
   /// * [poolMaxAllocatedResources]: The maximum number of resources allocated for parallel calls
   /// * [poolTimeout]: The timeout before giving up on a call
@@ -37,7 +37,7 @@ class ShadertoyWSOptions extends ShadertoyHttpOptions {
       int? shaderCount,
       ErrorMode? errorHandling})
       : assert(apiKey.isNotEmpty, 'apiKey not empty'),
-        apiPath = apiPath ?? DefaultApiPath,
+        apiPath = apiPath ?? defaultApiPath,
         super(
             baseUrl: baseUrl,
             supportsCookies: false,

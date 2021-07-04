@@ -65,7 +65,7 @@ void main() {
       final adapter = newAdapter(options)
         ..addLoginRoute(options, 302, {
           HttpHeaders.locationHeader: [
-            '/${ShadertoyContext.SignInPath}?error=1'
+            '/${ShadertoyContext.signInPath}?error=1'
           ]
         });
       final api = newClient(options, adapter);
@@ -80,7 +80,7 @@ void main() {
           sr.error,
           ResponseError.authentication(
               message: 'Login error',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: options.user));
     });
 
@@ -103,7 +103,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'Invalid location header',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: options.user));
     });
 
@@ -126,7 +126,7 @@ void main() {
           lr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: user));
     });
 
@@ -218,7 +218,7 @@ void main() {
           lor.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: user));
     });
   });
@@ -258,7 +258,7 @@ void main() {
           sr.error,
           ResponseError.notFound(
               message: 'Shader not found',
-              context: CONTEXT_SHADER,
+              context: contextShader,
               target: 'Ms2SD1'));
     });
 
@@ -281,7 +281,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_SHADER,
+              context: contextShader,
               target: 'Ms2SD1'));
     });
 
@@ -333,7 +333,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.unknown(
-              message: 'SocketException: $message', context: CONTEXT_SHADER));
+              message: 'SocketException: $message', context: contextShader));
     });
 
     test('Find shaders', () async {
@@ -452,7 +452,7 @@ void main() {
           sr.error,
           ResponseError.backendResponse(
               message:
-                  'No script block matches with "${ShadertoySiteClient.IdArrayRegExp.pattern}" pattern'));
+                  'No script block matches with "${ShadertoySiteClient.idArrayRegExp.pattern}" pattern'));
     });
 
     test('Find shaders with Dio error', () async {
@@ -471,7 +471,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.unknown(
-              message: 'SocketException: $message', context: CONTEXT_SHADER));
+              message: 'SocketException: $message', context: contextShader));
     });
 
     test('Find shaders with query, one result', () async {
@@ -688,7 +688,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.unknown(
-              message: 'SocketException: $message', context: CONTEXT_SHADER));
+              message: 'SocketException: $message', context: contextShader));
     });
 
     test('Find all shader ids with Dio error on the second page', () async {
@@ -708,7 +708,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.unknown(
-              message: 'SocketException: $message', context: CONTEXT_SHADER));
+              message: 'SocketException: $message', context: contextShader));
     });
 
     test(
@@ -778,7 +778,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.unknown(
-              message: 'SocketException: $message', context: CONTEXT_SHADER));
+              message: 'SocketException: $message', context: contextShader));
     });
   });
 
@@ -855,7 +855,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.notFound(
-              message: error, context: CONTEXT_USER, target: userId));
+              message: error, context: contextUser, target: userId));
     });
 
     test('Find user by id with empty response', () async {
@@ -876,7 +876,7 @@ void main() {
           sr.error,
           ResponseError.backendResponse(
               message: 'Unexpected HTML response body: ',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: userId));
     });
 
@@ -898,7 +898,7 @@ void main() {
           sr.error,
           ResponseError.backendResponse(
               message: 'Obtained an invalid number of user sections: 2',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: userId));
     });
 
@@ -919,7 +919,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: userId));
     });
 
@@ -940,7 +940,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: userId));
     });
 
@@ -962,7 +962,7 @@ void main() {
           sr.error,
           ResponseError.backendResponse(
               message: 'Unexpected HTML response body: ',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: userId));
     });
 
@@ -1151,7 +1151,7 @@ void main() {
           ResponseError.backendResponse(
               message:
                   'Page 2 of 2 page(s) was not successfully fetched: Obtained an invalid number of results: -1',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: userId));
     });
 
@@ -1245,7 +1245,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: userId));
     });
 
@@ -1297,7 +1297,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_USER,
+              context: contextUser,
               target: userId));
     });
   });
@@ -1366,7 +1366,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_SHADER,
+              context: contextShader,
               target: shaderId));
     });
   });
@@ -1415,7 +1415,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.notFound(
-              message: error, context: CONTEXT_PLAYLIST, target: playlistId));
+              message: error, context: contextPlaylist, target: playlistId));
     });
 
     test('Find playlist by id with empty response', () async {
@@ -1436,7 +1436,7 @@ void main() {
           sr.error,
           ResponseError.backendResponse(
               message: 'Unexpected HTML response body: ',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 
@@ -1457,7 +1457,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 
@@ -1479,7 +1479,7 @@ void main() {
           sr.error,
           ResponseError.backendResponse(
               message: 'Unable to get the playlist name from the document',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 
@@ -1502,7 +1502,7 @@ void main() {
           ResponseError.backendResponse(
               message:
                   'Unable to get the playlist description from the document',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 
@@ -1524,7 +1524,7 @@ void main() {
           sr.error,
           ResponseError.backendResponse(
               message: 'Unable to get the playlist user id from the document',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 
@@ -1671,7 +1671,7 @@ void main() {
           sr.error,
           ResponseError.backendResponse(
               message: 'Obtained an invalid number of results: -1',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 
@@ -1703,7 +1703,7 @@ void main() {
           ResponseError.backendResponse(
               message:
                   'Page 2 of 2 page(s) was not successfully fetched: Obtained an invalid number of results: -1',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 
@@ -1775,7 +1775,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 
@@ -1831,7 +1831,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
 
@@ -1887,7 +1887,7 @@ void main() {
           sr.error,
           ResponseError.unknown(
               message: 'SocketException: $message',
-              context: CONTEXT_PLAYLIST,
+              context: contextPlaylist,
               target: playlistId));
     });
   });
@@ -1928,7 +1928,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.notFound(
-              message: error, context: CONTEXT_SHADER, target: shaderId));
+              message: error, context: contextShader, target: shaderId));
     });
 
     test('Download media', () async {

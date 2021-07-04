@@ -34,12 +34,14 @@ String tabulate(List<List<String>> models, List<String> header) {
   addRow(header, rowList);
   final topBar = List.generate(cols, (i) => '-' * colLength[i]);
   addRow(topBar, rowList);
-  models.forEach((model) => addRow(model, rowList));
-  rowList.forEach((row) {
+  for (final model in models) {
+    addRow(model, rowList);
+  }
+  for (final row in rowList) {
     var rowText = row.join();
     rowText = rowText.substring(0, rowText.length - 2);
     retString += rowText + '\n';
-  });
+  }
 
   return retString;
 }

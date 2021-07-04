@@ -11,7 +11,7 @@ void main() {
       userId: 'userId1',
       description: 'description1',
       likes: 1,
-      privacy: ShaderPrivacy.public_api,
+      privacy: ShaderPrivacy.publicApi,
       flags: 1,
       tags: ['test1'],
       hasLiked: true);
@@ -24,7 +24,7 @@ void main() {
     expect(info1.userId, 'userId1');
     expect(info1.description, 'description1');
     expect(info1.likes, 1);
-    expect(info1.privacy, ShaderPrivacy.public_api);
+    expect(info1.privacy, ShaderPrivacy.publicApi);
     expect(info1.flags, 1);
     expect(info1.tags, ['test1']);
     expect(info1.hasLiked, true);

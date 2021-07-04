@@ -17,7 +17,7 @@ void main(List<String> arguments) async {
 
   final client = newShadertoyWSClient(apiKey);
   final result = await client.findShaderById('Mt3XW8');
-  print('${result.shader?.info.id}');
+  print(result.shader?.info.id);
   print('\tName: ${result.shader?.info.name}');
   print('\tUserName: ${result.shader?.info.userId}');
   print('\tDate: ${result.shader?.info.date}');
@@ -30,6 +30,8 @@ void main(List<String> arguments) async {
   print('\tFlags: ${result.shader?.info.flags}');
   print('\tLiked: ${result.shader?.info.hasLiked}');
   print('\tRender Passes: ${result.shader?.renderPasses.length}');
-  result.shader?.renderPasses.forEach((element) => print(
-      '\t\t${element.name} has ${element.inputs.length} input(s) and ${element.outputs.length} output(s)'));
+  for (var element in result.shader?.renderPasses ?? []) {
+    print(
+        '\t\t${element.name} has ${element.inputs.length} input(s) and ${element.outputs.length} output(s)');
+  }
 }

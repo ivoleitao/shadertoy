@@ -34,7 +34,7 @@ class ShadertoyWSClient extends ShadertoyHttpClient<ShadertoyWSOptions>
       'key': options.apiKey
     }).then((Response<dynamic> response) => jsonResponse<FindShaderResponse>(
         response, (data) => FindShaderResponse.fromJson(data),
-        context: CONTEXT_SHADER, target: shaderId));
+        context: contextShader, target: shaderId));
   }
 
   @override
@@ -42,8 +42,8 @@ class ShadertoyWSClient extends ShadertoyHttpClient<ShadertoyWSOptions>
     return catchDioError<FindShaderResponse>(
         _getShaderById(shaderId),
         (de) => FindShaderResponse(
-            error: toResponseError(de,
-                context: CONTEXT_SHADER, target: shaderId)));
+            error:
+                toResponseError(de, context: contextShader, target: shaderId)));
   }
 
   /// Finds shaders by ids
@@ -119,7 +119,7 @@ class ShadertoyWSClient extends ShadertoyHttpClient<ShadertoyWSOptions>
                 num: num ?? options.shaderCount)
             .then((r) => _getShadersByIdSet((r.ids ?? []).toSet())),
         (de) => FindShadersResponse(
-            error: toResponseError(de, context: CONTEXT_SHADER)));
+            error: toResponseError(de, context: contextShader)));
   }
 
   @override
@@ -131,7 +131,7 @@ class ShadertoyWSClient extends ShadertoyHttpClient<ShadertoyWSOptions>
             jsonResponse<FindShaderIdsResponse>(
                 response, (data) => FindShaderIdsResponse.fromJson(data))),
         (de) => FindShaderIdsResponse(
-            error: toResponseError(de, context: CONTEXT_SHADER)));
+            error: toResponseError(de, context: contextShader)));
   }
 
   @override
@@ -145,6 +145,6 @@ class ShadertoyWSClient extends ShadertoyHttpClient<ShadertoyWSOptions>
             from: from,
             num: num ?? options.shaderCount),
         (de) => FindShaderIdsResponse(
-            error: toResponseError(de, context: CONTEXT_SHADER)));
+            error: toResponseError(de, context: contextShader)));
   }
 }
