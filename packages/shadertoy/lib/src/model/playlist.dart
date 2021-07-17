@@ -25,8 +25,6 @@ class Playlist extends Equatable {
   /// The playlist description
   final String description;
 
-  @JsonKey(name: 'published')
-
   /// Builds a [Playlist]
   ///
   /// * [id]: The playlist id

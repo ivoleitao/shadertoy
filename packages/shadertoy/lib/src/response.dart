@@ -68,7 +68,7 @@ class ResponseError with EquatableMixin {
   ResponseError(
       {required this.code, required this.message, this.context, this.target});
 
-  /// Builds a authentication [ResponseError] with [ErrorCode.AUTHENTICATION] and:
+  /// Builds a authentication [ResponseError] with [ErrorCode.authentication] and:
   ///
   /// * [message]: The error message
   /// * [context]: The context of execution when the error ocurred
@@ -81,7 +81,7 @@ class ResponseError with EquatableMixin {
             context: context,
             target: target);
 
-  /// Builds a authorization [ResponseError] with [ErrorCode.AUTHORIZATION] and:
+  /// Builds a authorization [ResponseError] with [ErrorCode.authorization] and:
   ///
   /// * [message]: The error message
   /// * [context]: The context of execution when the error ocurred
@@ -94,7 +94,7 @@ class ResponseError with EquatableMixin {
             context: context,
             target: target);
 
-  /// Builds a backend timeout [ResponseError] with [ErrorCode.BACKEND_TIMEOUT] and:
+  /// Builds a backend timeout [ResponseError] with [ErrorCode.backendTimeout] and:
   ///
   /// * [message]: The error message
   /// * [context]: The context of execution when the error ocurred
@@ -107,7 +107,7 @@ class ResponseError with EquatableMixin {
             context: context,
             target: target);
 
-  /// Builds a backend status [ResponseError] with [ErrorCode.BACKEND_STATUS] and:
+  /// Builds a backend status [ResponseError] with [ErrorCode.backendStatus] and:
   ///
   /// * [message]: The error message
   /// * [context]: The context of execution when the error ocurred
@@ -120,7 +120,7 @@ class ResponseError with EquatableMixin {
             context: context,
             target: target);
 
-  /// Builds a backend response [ResponseError] with [ErrorCode.BACKEND_RESPONSE] and:
+  /// Builds a backend response [ResponseError] with [ErrorCode.backendResponse] and:
   ///
   /// * [message]: The error message
   /// * [context]: The context of execution when the error ocurred
@@ -133,7 +133,7 @@ class ResponseError with EquatableMixin {
             context: context,
             target: target);
 
-  /// Builds a not found [ResponseError] with [ErrorCode.NOT_FOUND] and:
+  /// Builds a not found [ResponseError] with [ErrorCode.notFound] and:
   ///
   /// * [message]: The error message
   /// * [context]: The context of execution when the error ocurred
@@ -146,7 +146,7 @@ class ResponseError with EquatableMixin {
             context: context,
             target: target);
 
-  /// Builds a aborted [ResponseError] with [ErrorCode.ABORTED] and:
+  /// Builds a aborted [ResponseError] with [ErrorCode.aborted] and:
   ///
   /// * [message]: The error message
   /// * [context]: The context of execution when the error ocurred
@@ -159,7 +159,7 @@ class ResponseError with EquatableMixin {
             context: context,
             target: target);
 
-  /// Builds a unprocessable entity [ResponseError] with [ErrorCode.UNPROCESSABLE_ENTITY] and:
+  /// Builds a unprocessable entity [ResponseError] with [ErrorCode.unprocessableEntity] and:
   ///
   /// * [message]: The error message
   /// * [context]: The context of execution when the error ocurred
@@ -172,7 +172,7 @@ class ResponseError with EquatableMixin {
             context: context,
             target: target);
 
-  /// Builds a conflict [ResponseError] with [ErrorCode.CONFLICT] and:
+  /// Builds a conflict [ResponseError] with [ErrorCode.conflict] and:
   ///
   /// * [message]: The error message
   /// * [context]: The context of execution when the error ocurred

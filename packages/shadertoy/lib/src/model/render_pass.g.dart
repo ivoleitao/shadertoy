@@ -6,20 +6,18 @@ part of 'render_pass.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-RenderPass _$RenderPassFromJson(Map<String, dynamic> json) {
-  return RenderPass(
-    name: json['name'] as String,
-    type: _$enumDecode(_$RenderPassTypeEnumMap, json['type']),
-    description: json['description'] as String?,
-    code: json['code'] as String,
-    inputs: (json['inputs'] as List<dynamic>)
-        .map((e) => Input.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    outputs: (json['outputs'] as List<dynamic>)
-        .map((e) => Output.fromJson(e as Map<String, dynamic>))
-        .toList(),
-  );
-}
+RenderPass _$RenderPassFromJson(Map<String, dynamic> json) => RenderPass(
+      name: json['name'] as String,
+      type: _$enumDecode(_$RenderPassTypeEnumMap, json['type']),
+      description: json['description'] as String?,
+      code: json['code'] as String,
+      inputs: (json['inputs'] as List<dynamic>)
+          .map((e) => Input.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      outputs: (json['outputs'] as List<dynamic>)
+          .map((e) => Output.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
 
 Map<String, dynamic> _$RenderPassToJson(RenderPass instance) =>
     <String, dynamic>{

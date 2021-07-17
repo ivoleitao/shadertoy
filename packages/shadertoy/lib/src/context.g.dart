@@ -6,11 +6,10 @@ part of 'context.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ShadertoyContext _$ShadertoyContextFromJson(Map<String, dynamic> json) {
-  return ShadertoyContext(
-    json['baseUrl'] as String,
-  );
-}
+ShadertoyContext _$ShadertoyContextFromJson(Map<String, dynamic> json) =>
+    ShadertoyContext(
+      json['baseUrl'] as String,
+    );
 
 Map<String, dynamic> _$ShadertoyContextToJson(ShadertoyContext instance) =>
     <String, dynamic>{

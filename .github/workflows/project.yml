@@ -1,4 +1,4 @@
-name: Stash Project
+name: Shadertoy Project
 
 on:
   issues:
@@ -17,4 +17,4 @@ jobs:
       uses: srggrs/assign-one-project-github-action@1.2.1
       if: github.event.action == 'opened'
       with:
-        project: 'https://github.com/ivoleitao/stash/projects/1'
+        project: 'https://github.com/ivoleitao/shadertoy/projects/1'

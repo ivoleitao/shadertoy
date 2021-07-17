@@ -6,18 +6,16 @@ part of 'input.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Input _$InputFromJson(Map<String, dynamic> json) {
-  return Input(
-    id: Input._idFromJson(json['id']),
-    src: json['src'] as String?,
-    filePath: json['filepath'] as String?,
-    previewFilePath: json['previewfilepath'] as String?,
-    type: _$enumDecodeNullable(_$InputTypeEnumMap, json['ctype']),
-    channel: json['channel'] as int,
-    sampler: Sampler.fromJson(json['sampler'] as Map<String, dynamic>),
-    published: json['published'] as int,
-  );
-}
+Input _$InputFromJson(Map<String, dynamic> json) => Input(
+      id: Input._idFromJson(json['id']),
+      src: json['src'] as String?,
+      filePath: json['filepath'] as String?,
+      previewFilePath: json['previewfilepath'] as String?,
+      type: _$enumDecodeNullable(_$InputTypeEnumMap, json['ctype']),
+      channel: json['channel'] as int,
+      sampler: Sampler.fromJson(json['sampler'] as Map<String, dynamic>),
+      published: json['published'] as int,
+    );
 
 Map<String, dynamic> _$InputToJson(Input instance) => <String, dynamic>{
       'id': instance.id,

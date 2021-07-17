@@ -6,12 +6,10 @@ part of 'output.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Output _$OutputFromJson(Map<String, dynamic> json) {
-  return Output(
-    id: Output._idFromJson(json['id']),
-    channel: json['channel'] as int,
-  );
-}
+Output _$OutputFromJson(Map<String, dynamic> json) => Output(
+      id: Output._idFromJson(json['id']),
+      channel: json['channel'] as int,
+    );
 
 Map<String, dynamic> _$OutputToJson(Output instance) => <String, dynamic>{
       'id': instance.id,

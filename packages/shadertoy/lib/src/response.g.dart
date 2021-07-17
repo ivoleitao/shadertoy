@@ -6,36 +6,33 @@ part of 'response.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) {
-  return LoginResponse(
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) =>
+    LoginResponse(
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$LoginResponseToJson(LoginResponse instance) =>
     <String, dynamic>{
       'Error': const ResponseErrorConverter().toJson(instance.error),
     };
 
-LogoutResponse _$LogoutResponseFromJson(Map<String, dynamic> json) {
-  return LogoutResponse(
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+LogoutResponse _$LogoutResponseFromJson(Map<String, dynamic> json) =>
+    LogoutResponse(
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$LogoutResponseToJson(LogoutResponse instance) =>
     <String, dynamic>{
       'Error': const ResponseErrorConverter().toJson(instance.error),
     };
 
-FindUserResponse _$FindUserResponseFromJson(Map<String, dynamic> json) {
-  return FindUserResponse(
-    user: json['User'] == null
-        ? null
-        : User.fromJson(json['User'] as Map<String, dynamic>),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+FindUserResponse _$FindUserResponseFromJson(Map<String, dynamic> json) =>
+    FindUserResponse(
+      user: json['User'] == null
+          ? null
+          : User.fromJson(json['User'] as Map<String, dynamic>),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindUserResponseToJson(FindUserResponse instance) =>
     <String, dynamic>{
@@ -43,15 +40,14 @@ Map<String, dynamic> _$FindUserResponseToJson(FindUserResponse instance) =>
       'User': instance.user?.toJson(),
     };
 
-FindUsersResponse _$FindUsersResponseFromJson(Map<String, dynamic> json) {
-  return FindUsersResponse(
-    total: json['Users'] as int?,
-    users: (json['Results'] as List<dynamic>?)
-        ?.map((e) => FindUserResponse.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+FindUsersResponse _$FindUsersResponseFromJson(Map<String, dynamic> json) =>
+    FindUsersResponse(
+      total: json['Users'] as int?,
+      users: (json['Results'] as List<dynamic>?)
+          ?.map((e) => FindUserResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindUsersResponseToJson(FindUsersResponse instance) =>
     <String, dynamic>{
@@ -60,12 +56,12 @@ Map<String, dynamic> _$FindUsersResponseToJson(FindUsersResponse instance) =>
       'Results': instance.users?.map((e) => e.toJson()).toList(),
     };
 
-FindUserIdsResponse _$FindUserIdsResponseFromJson(Map<String, dynamic> json) {
-  return FindUserIdsResponse(
-    ids: (json['Results'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+FindUserIdsResponse _$FindUserIdsResponseFromJson(Map<String, dynamic> json) =>
+    FindUserIdsResponse(
+      ids:
+          (json['Results'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindUserIdsResponseToJson(
         FindUserIdsResponse instance) =>
@@ -74,14 +70,13 @@ Map<String, dynamic> _$FindUserIdsResponseToJson(
       'Results': instance.ids,
     };
 
-FindShaderResponse _$FindShaderResponseFromJson(Map<String, dynamic> json) {
-  return FindShaderResponse(
-    shader: json['Shader'] == null
-        ? null
-        : Shader.fromJson(json['Shader'] as Map<String, dynamic>),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+FindShaderResponse _$FindShaderResponseFromJson(Map<String, dynamic> json) =>
+    FindShaderResponse(
+      shader: json['Shader'] == null
+          ? null
+          : Shader.fromJson(json['Shader'] as Map<String, dynamic>),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindShaderResponseToJson(FindShaderResponse instance) =>
     <String, dynamic>{
@@ -90,12 +85,12 @@ Map<String, dynamic> _$FindShaderResponseToJson(FindShaderResponse instance) =>
     };
 
 FindShaderIdsResponse _$FindShaderIdsResponseFromJson(
-    Map<String, dynamic> json) {
-  return FindShaderIdsResponse(
-    ids: (json['Results'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+        Map<String, dynamic> json) =>
+    FindShaderIdsResponse(
+      ids:
+          (json['Results'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindShaderIdsResponseToJson(
         FindShaderIdsResponse instance) =>
@@ -104,15 +99,14 @@ Map<String, dynamic> _$FindShaderIdsResponseToJson(
       'Results': instance.ids,
     };
 
-FindShadersResponse _$FindShadersResponseFromJson(Map<String, dynamic> json) {
-  return FindShadersResponse(
-    total: json['Shaders'] as int?,
-    shaders: (json['Results'] as List<dynamic>?)
-        ?.map((e) => FindShaderResponse.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+FindShadersResponse _$FindShadersResponseFromJson(Map<String, dynamic> json) =>
+    FindShadersResponse(
+      total: json['Shaders'] as int?,
+      shaders: (json['Results'] as List<dynamic>?)
+          ?.map((e) => FindShaderResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindShadersResponseToJson(
         FindShadersResponse instance) =>
@@ -122,20 +116,20 @@ Map<String, dynamic> _$FindShadersResponseToJson(
       'Results': instance.shaders?.map((e) => e.toJson()).toList(),
     };
 
-CommentsResponse _$CommentsResponseFromJson(Map<String, dynamic> json) {
-  return CommentsResponse(
-    texts: (json['text'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    dates: (json['date'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    userIds:
-        (json['username'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    userPictures: (json['userpicture'] as List<dynamic>?)
-        ?.map((e) => e as String)
-        .toList(),
-    ids: (json['id'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    hidden: (json['hidden'] as List<dynamic>?)?.map((e) => e as int).toList(),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+CommentsResponse _$CommentsResponseFromJson(Map<String, dynamic> json) =>
+    CommentsResponse(
+      texts: (json['text'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      dates: (json['date'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      userIds: (json['username'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      userPictures: (json['userpicture'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      ids: (json['id'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      hidden: (json['hidden'] as List<dynamic>?)?.map((e) => e as int).toList(),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$CommentsResponseToJson(CommentsResponse instance) =>
     <String, dynamic>{
@@ -148,14 +142,13 @@ Map<String, dynamic> _$CommentsResponseToJson(CommentsResponse instance) =>
       'hidden': instance.hidden,
     };
 
-FindCommentResponse _$FindCommentResponseFromJson(Map<String, dynamic> json) {
-  return FindCommentResponse(
-    comment: json['Comment'] == null
-        ? null
-        : Comment.fromJson(json['Comment'] as Map<String, dynamic>),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+FindCommentResponse _$FindCommentResponseFromJson(Map<String, dynamic> json) =>
+    FindCommentResponse(
+      comment: json['Comment'] == null
+          ? null
+          : Comment.fromJson(json['Comment'] as Map<String, dynamic>),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindCommentResponseToJson(
         FindCommentResponse instance) =>
@@ -165,12 +158,12 @@ Map<String, dynamic> _$FindCommentResponseToJson(
     };
 
 FindCommentIdsResponse _$FindCommentIdsResponseFromJson(
-    Map<String, dynamic> json) {
-  return FindCommentIdsResponse(
-    ids: (json['Results'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+        Map<String, dynamic> json) =>
+    FindCommentIdsResponse(
+      ids:
+          (json['Results'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindCommentIdsResponseToJson(
         FindCommentIdsResponse instance) =>
@@ -179,15 +172,15 @@ Map<String, dynamic> _$FindCommentIdsResponseToJson(
       'Results': instance.ids,
     };
 
-FindCommentsResponse _$FindCommentsResponseFromJson(Map<String, dynamic> json) {
-  return FindCommentsResponse(
-    total: json['Comments'] as int?,
-    comments: (json['Results'] as List<dynamic>?)
-        ?.map((e) => Comment.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+FindCommentsResponse _$FindCommentsResponseFromJson(
+        Map<String, dynamic> json) =>
+    FindCommentsResponse(
+      total: json['Comments'] as int?,
+      comments: (json['Results'] as List<dynamic>?)
+          ?.map((e) => Comment.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindCommentsResponseToJson(
         FindCommentsResponse instance) =>
@@ -197,14 +190,14 @@ Map<String, dynamic> _$FindCommentsResponseToJson(
       'Results': instance.comments?.map((e) => e.toJson()).toList(),
     };
 
-FindPlaylistResponse _$FindPlaylistResponseFromJson(Map<String, dynamic> json) {
-  return FindPlaylistResponse(
-    playlist: json['Playlist'] == null
-        ? null
-        : Playlist.fromJson(json['Playlist'] as Map<String, dynamic>),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+FindPlaylistResponse _$FindPlaylistResponseFromJson(
+        Map<String, dynamic> json) =>
+    FindPlaylistResponse(
+      playlist: json['Playlist'] == null
+          ? null
+          : Playlist.fromJson(json['Playlist'] as Map<String, dynamic>),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindPlaylistResponseToJson(
         FindPlaylistResponse instance) =>
@@ -214,12 +207,12 @@ Map<String, dynamic> _$FindPlaylistResponseToJson(
     };
 
 FindPlaylistIdsResponse _$FindPlaylistIdsResponseFromJson(
-    Map<String, dynamic> json) {
-  return FindPlaylistIdsResponse(
-    ids: (json['Results'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+        Map<String, dynamic> json) =>
+    FindPlaylistIdsResponse(
+      ids:
+          (json['Results'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindPlaylistIdsResponseToJson(
         FindPlaylistIdsResponse instance) =>
@@ -229,15 +222,14 @@ Map<String, dynamic> _$FindPlaylistIdsResponseToJson(
     };
 
 FindPlaylistsResponse _$FindPlaylistsResponseFromJson(
-    Map<String, dynamic> json) {
-  return FindPlaylistsResponse(
-    total: json['Playlists'] as int?,
-    playlists: (json['Results'] as List<dynamic>?)
-        ?.map((e) => FindPlaylistResponse.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
-  );
-}
+        Map<String, dynamic> json) =>
+    FindPlaylistsResponse(
+      total: json['Playlists'] as int?,
+      playlists: (json['Results'] as List<dynamic>?)
+          ?.map((e) => FindPlaylistResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
 
 Map<String, dynamic> _$FindPlaylistsResponseToJson(
         FindPlaylistsResponse instance) =>

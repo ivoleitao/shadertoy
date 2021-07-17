@@ -6,15 +6,13 @@ part of 'sampler.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Sampler _$SamplerFromJson(Map<String, dynamic> json) {
-  return Sampler(
-    filter: _$enumDecode(_$FilterTypeEnumMap, json['filter']),
-    wrap: _$enumDecode(_$WrapTypeEnumMap, json['wrap']),
-    vflip: const StringToBoolConverter().fromJson(json['vflip'] as String),
-    srgb: const StringToBoolConverter().fromJson(json['srgb'] as String),
-    internal: json['internal'] as String,
-  );
-}
+Sampler _$SamplerFromJson(Map<String, dynamic> json) => Sampler(
+      filter: _$enumDecode(_$FilterTypeEnumMap, json['filter']),
+      wrap: _$enumDecode(_$WrapTypeEnumMap, json['wrap']),
+      vflip: const StringToBoolConverter().fromJson(json['vflip'] as String),
+      srgb: const StringToBoolConverter().fromJson(json['srgb'] as String),
+      internal: json['internal'] as String,
+    );
 
 Map<String, dynamic> _$SamplerToJson(Sampler instance) => <String, dynamic>{
       'filter': _$FilterTypeEnumMap[instance.filter],
