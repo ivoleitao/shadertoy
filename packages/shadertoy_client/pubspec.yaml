@@ -1,6 +1,5 @@
 name: shadertoy_client
 version: 2.0.1
-publish_to: none
 description: >-
   An http client implementation of the shadertoy API using
   Dio Http client. Supports the REST API (using an application key) 
