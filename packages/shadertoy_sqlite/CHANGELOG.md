@@ -1,6 +1,7 @@
 ## 2.0.0
 
-- 
+- Null safe
+- Migrated from `pedanting` to `lints` package
 
 ## 1.0.4
 

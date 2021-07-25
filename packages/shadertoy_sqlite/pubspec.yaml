@@ -1,6 +1,5 @@
 name: shadertoy_sqlite
 version: 2.0.0
-publish_to: none
 description: >-
   A implementation of the shadertoy storage API using
   Sqlite as the storage backend
@@ -12,8 +11,9 @@ environment:
 dependencies:
   enum_to_string: ^2.0.1
   moor: ^4.4.1
-  shadertoy:
-    path: ../shadertoy
+  shadertoy: ^2.0.0
+  # shadertoy:
+  #  path: ../shadertoy
 
 dev_dependencies:
   lints: ^1.0.1
