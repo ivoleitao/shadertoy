@@ -263,7 +263,8 @@ void main(List<String> arguments) async {
 
 ## Model
 
-![Shadertoy Storage Model](model.svg?raw=true)
+![Shadertoy Model](https://github.com/ivoleitao/shadertoy/blob/develop/packages/shadertoy_sqlite/model.svg?raw=true)
+
 ## Contributing
 
 This is a unofficial [Shadertoy](https://www.shadertoy.com) storage API. It is developed by best effort, in the motto of "Scratch your own itch!", meaning APIs that are meaningful for the author use cases.

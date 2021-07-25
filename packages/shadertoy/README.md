@@ -221,7 +221,7 @@ All the base and extended client API features plus the following:
 
 ## Model
 
-![Shadertoy API Model](model.svg?raw=true)
+![Shadertoy Model](https://github.com/ivoleitao/shadertoy/blob/develop/packages/shadertoy/model.svg?raw=true)
 
 ## Contributing
 
