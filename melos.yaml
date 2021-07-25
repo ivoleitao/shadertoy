@@ -99,7 +99,7 @@ scripts:
 
   pana:
     run: |
-      melos exec -c 1 -- \
+      melos exec --scope="shadertoy" --scope="shadertoy_client"  --scope="shadertoy_sqlite" -- \
         "../../tool/pana.sh"
     description: |
       Run `pana` in all packages.
