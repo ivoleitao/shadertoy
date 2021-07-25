@@ -23,7 +23,7 @@ dependencies:
   html: ^0.15.0
   intl: ^0.17.0
   glob: ^2.0.1
-  shadertoy: ^2.0.0
+  shadertoy: ^2.0.1
   # shadertoy:
   #  path: ../shadertoy
 

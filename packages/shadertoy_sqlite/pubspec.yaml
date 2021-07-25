@@ -12,7 +12,7 @@ environment:
 dependencies:
   enum_to_string: ^2.0.1
   moor: ^4.4.1
-  shadertoy: ^2.0.0
+  shadertoy: ^2.0.1
   # shadertoy:
   #  path: ../shadertoy
 
