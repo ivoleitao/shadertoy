@@ -1,3 +1,7 @@
+## 2.0.1
+
+- Corrected broken links in the README file
+
 ## 2.0.0
 
 - Migrated from `shadertoy_api` package
