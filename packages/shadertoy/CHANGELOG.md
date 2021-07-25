@@ -2,7 +2,7 @@
 
 - Migrated from `shadertoy_api` package
 - Null safe
-- Migrated from `pedating` to `lints` package
+- Migrated from `pedanting` to `lints` package
 
 ## 1.0.21
 
