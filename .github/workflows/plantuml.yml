@@ -25,7 +25,7 @@ jobs:
       - name: Generate SVG Diagrams
         uses: cloudbees/plantuml-github-action@master
         with:
-          args: -v -tsvg ${{ steps.getfile.outputs.files }}
+          args: -v -tsvg ${{ steps.getfile.outputs.files }} -o .github/assets
       - name: Push Local Changes
         uses: stefanzweifel/git-auto-commit-action@v4.1.2
         with:
