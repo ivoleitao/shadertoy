@@ -2,10 +2,9 @@
 A [shadertoy](https://github.com/ivoleitao/shadertoy) storage implementation on sqlite using the [moor](https://pub.dev/packages/moor) package
 
 [![Pub Package](https://img.shields.io/pub/v/shadertoy_sqlite.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_sqlite)
-[![Build Status](https://github.com/ivoleitao/shadertoy_sqlite/workflows/build/badge.svg)](https://github.com/ivoleitao/shadertoy_sqlite/actions)
-[![Coverage Status](https://codecov.io/gh/ivoleitao/shadertoy_sqlite/graph/badge.svg)](https://codecov.io/gh/ivoleitao/shadertoy_sqlite)
+[![Coverage Status](https://codecov.io/gh/ivoleitao/shadertoy/graph/badge.svg?flag=shadertoy_sqlite)](https://codecov.io/gh/ivoleitao/shadertoy)
 [![Package Documentation](https://img.shields.io/badge/doc-shadertoy_sqlite-blue.svg)](https://www.dartdocs.org/documentation/shadertoy_sqlite/latest)
-[![GitHub License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
 

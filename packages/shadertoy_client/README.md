@@ -2,8 +2,7 @@
 A [shadertoy](https://github.com/ivoleitao/shadertoy) HTTP client implementation usin the [dio](https://pub.dev/packages/dio) package
 
 [![Pub Package](https://img.shields.io/pub/v/shadertoy_client.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_client)
-[![Build Status](https://github.com/ivoleitao/shadertoy_api/workflows/build/badge.svg)](https://github.com/ivoleitao/shadertoy_client/actions)
-[![Coverage Status](https://codecov.io/gh/ivoleitao/shadertoy_client/graph/badge.svg)](https://codecov.io/gh/ivoleitao/shadertoy_client)
+[![Coverage Status](https://codecov.io/gh/ivoleitao/shadertoy/graph/badge.svg?flag=shadertoy_client)](https://codecov.io/gh/ivoleitao/shadertoy)
 [![Package Documentation](https://img.shields.io/badge/doc-shadertoy_client-blue.svg)](https://www.dartdocs.org/documentation/shadertoy_client/latest)
 [![GitHub License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -356,7 +355,7 @@ All the REST and site client features but optionally constraining the requests t
 
 ## Contributing
 
-This is a unofficial [Shadertoy](https://www.shadertoy.com) client API. It is developed by best effort, in the motto of "Scratch your own itch!", meaning APIs that are meaningful for the author use cases.
+This is the unofficial [Shadertoy](https://www.shadertoy.com) client API. It is developed by best effort, in the motto of "Scratch your own itch!", meaning APIs that are meaningful for the author use cases.
 
 If you would like to contribute with other parts of the API, feel free to make a Github [pull request](https://github.com/ivoleitao/shadertoy/pulls) as I'm always looking for contributions for:
 * Tests

@@ -1,9 +1,10 @@
 # shadertoy
 
+[![Build Status](https://github.com/ivoleitao/shadertoy/actions/workflows/build.yml/badge.svg)](https://github.com/ivoleitao/shadertoy/actions/workflows/build.yml)
 [![Pub Package](https://img.shields.io/pub/v/shadertoy.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy)
-[![Build Status](https://github.com/ivoleitao/shadertoy/workflows/build/badge.svg)](https://github.com/ivoleitao/shadertoy/actions)
-[![Coverage Status](https://codecov.io/gh/ivoleitao/shadertoy/graph/badge.svg)](https://codecov.io/gh/ivoleitao/shadertoy)
+[![Coverage Status](https://codecov.io/gh/ivoleitao/shadertoy/graph/badge.svg?flag=shadertoy)](https://codecov.io/gh/ivoleitao/shadertoy)
 [![Package Documentation](https://img.shields.io/badge/doc-shadertoy-blue.svg)](https://www.dartdocs.org/documentation/shadertoy/latest)
+[![Github Stars](https://img.shields.io/github/stars/ivoleitao/shadertoy.svg)](https://github.com/ivoleitao/shadertoy)
 [![GitHub License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
