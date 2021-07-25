@@ -16,10 +16,10 @@ dependencies:
   shadertoy: ^2.0.1
   # shadertoy:
   #  path: ../shadertoy
-  shadertoy_client: ^2.0.0
+  shadertoy_client: ^2.0.1
   # shadertoy_client:
   #  path: ../shadertoy_client
-  shadertoy_sqlite: ^2.0.0
+  shadertoy_sqlite: ^2.0.1
   # shadertoy_sqlite:
   #  path: ../shadertoy_sqlite
 
