@@ -7,6 +7,7 @@
 - Migrated from `shadertoy_api` package
 - Null safe
 - Migrated from `pedanting` to `lints` package
+- Changed to melos
 
 ## 1.0.21
 
