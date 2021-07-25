@@ -8,12 +8,12 @@
 
 ## Overview
 
-The `shadertoy` library provides the support to interact with the [Shadertoy](https://www.shadertoy.com) site and REST API's defining the data model and contracts supporting querying and storage of shaders, comments, users, playlists and website media.
+The `shadertoy` library provides the support to interact with the [Shadertoy](https://www.shadertoy.com) site and REST API's defining the data model and contracts to query and store the shaders, comments, users, playlists and website media.
 
 ## Features
 
-* :pushpin: **REST API** - Supports all the REST APIs defined in the Shadertoy [howto](https://www.shadertoy.com/howto#q2) 
-* :globe_with_meridians: **Site API** - Supports the fetching of information directly from the [Shadertoy](https://www.shadertoy.com) allowing querying of comments, users, playlists and website media. 
+* :pushpin: **REST API** - Supports all the Shadertoy REST APIs (as defined [here](https://www.shadertoy.com/howto#q2))
+* :globe_with_meridians: **Site API** - Supports scrapping of data directly from the [Shadertoy](https://www.shadertoy.com) site allowing the API users query comments, users, playlists and website media. 
 * :link: **Hybrid API** - Respects `public+api` privacy settings of the shaders while providing support for additional operations, namely the access to shader comments, user, playlists and website media
 * :loop: **Extensible** - Plug novel storage and client implementations reusing the APIs and entities defined on the `shadertoy` package
 
@@ -36,16 +36,16 @@ The following storage implementations are available
 
 ## Tools
 
-The following tools make use of the client and / or storage APIs
+The following tools relly on the use of the client and / or storage APIs
 
 |Package|Pub|Description|
 |-------|---|-----------|
-| [shadertoy_cli](https://github.com/ivoleitao/shadertoy_cli) | [![Pub](https://img.shields.io/pub/v/shadertoy_cli.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_cli) | A command line tool to interact with storage and client implementations of the `shadertoy` API's|
+| [shadertoy_cli](https://github.com/ivoleitao/shadertoy_cli) | [![Pub](https://img.shields.io/pub/v/shadertoy_cli.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_cli) | A command line tool to interact with storage and client implementations of the `Shadertoy` API's|
 
 ## Getting Started
 
 
-Select one of the client or storage implementations (or both) and add the package to your `pubspec.yaml` replacing x.x.x with the latest version of the implementation. The example below uses the `shadertoy_client` package which implements the `shadertoy` REST, site and hybrid contracts interacting with the Shadertoy site and REST APIs via the [dio](https://pub.dev/packages/dio) package:
+Select one of the client or storage implementations (or both) and add the package to your `pubspec.yaml` replacing x.x.x with the latest version of the implementation. The example below uses the `shadertoy_client` package which implements the `shadertoy` REST, site and hybrid contracts:
 
 
 ```dart
@@ -67,7 +67,7 @@ import 'package:shadertoy_client/shadertoy_client.dart';
 
 ## Usage
 
-Instantiate a `ShadertoyClient` implementation, for example the one provided by the package [shadertoy_client](https://pub.dev/packages/shadertoy_client), to access the client API:
+Instantiate a `ShadertoyClient` implementation, for example the one provided by the package [shadertoy_client](https://pub.dev/packages/shadertoy_client) to access the client API:
 
 ```dart
 // Created a client to the REST API using the API key `apiKey`
@@ -87,7 +87,7 @@ if (result.ok) {
     print('Error: ${result.error.message}')
 }
 ```
-In alternative instantiate a `ShadertoyExtendedClient` implementation, for example the one provided by the package [shadertoy_client](https://pub.dev/packages/shadertoy_client), to access the site API:
+In alternati instantiate a `ShadertoyExtendedClient` implementation, for example the one provided by the package [shadertoy_client](https://pub.dev/packages/shadertoy_client), to access the site API:
 
 ```dart
 final client = newShadertoySiteClient();
@@ -107,10 +107,12 @@ if (result.ok) {
 }
 ```
 
-As mentioned, to respect the shader privacy constraints but still benefit from a larger set of operations only available through the site APIs the hybrid API can be used. Start by instancianting a suitable hybrid API implementation, for example the one provided by the `shadertoy_client`API:
+As mentioned in the feature list, to (optionally) respect the shader privacy constraints but still benefit from a larger set of operations some of them available only through the site API, the hybrid API can be used. Start by instancianting a suitable hybrid API implementation, for example the one provided by the `shadertoy_client` API:
 
 ```dart
 // Creates a hybrid client using the REST API key `apiKey`
+// This effectivly filters the shaders and provides only the ones respecting the shader 
+// `public+api` privacy settings
 final client = newShadertoyHybridClient(apiKey: apiKey);
 ```
 
@@ -129,7 +131,7 @@ if (result.ok) {
 }
 ```
 
-To create a database providing the same set of read operations as the previous APIs but also the ability to save shaders as well as other entities a `ShadertoyStore` contract is also provided. A `ShadertoyStore` implementation should be provided, for example, the one available on [shadertoy_sqlite](https://pub.dev/packages/shadertoy_sqlite):
+To create a database providing the same set of read operations as the previous APIs but also the ability to save shaders as well as other entities a `ShadertoyStore` contract is also provided. To make use of the `ShadertoyStore` a suitable implementation should be provided, for example, the one available on [shadertoy_sqlite](https://pub.dev/packages/shadertoy_sqlite):
 
 ```dart
 // Creates a new store with an in-memory executor
@@ -154,10 +156,10 @@ if (result.ok) {
 ```
 ## APIs
 
-* The **client API** targetting the REST interfaces defined in the Shadertoy [howto](https://www.shadertoy.com/howto#q2) which allow the user to browse shaders available with `public+api` privacy settings. Note that the number of operations available with this API are limited albeit enough for simple browsing usage. To start using the clients implementing this API an API key needs to be obtained through a properly registered user on the [apps](https://www.shadertoy.com/myapps) page of the user section on the Shadertoy [website](https://www.shadertoy.com).
+* The **client API** targetting the REST interfaces defined in the Shadertoy [howto](https://www.shadertoy.com/howto#q2) which allow the user to browse shaders available with `public+api` privacy settings. Note that the number of operations available with this API are limited albeit enough for simple browsing usage. To start using an API key needs to be obtained through a properly registered user on the [apps](https://www.shadertoy.com/myapps) page of the user section on the Shadertoy [website](https://www.shadertoy.com).
 * The **extended client API** provides access to the same methods as the previous API but adds features that are only available on the site API, namely, the support to fetch users, playlists, shader comments and website media. Note that the shaders returned by this API are not constrained by the `public+api` privacy settings.
-* The **hybrid API** complements the basic **client API** allowing the base REST API client to benefit from the additional features os the **extended client API** still respecting the `public+api` constrains imposed by the shader creators. In a nutshell it allows the REST API users to access user, shader comments and website media of the `public+api` shaders
-* The **store API**, defines contracts supporting the creation of data stores thus providing a way to work offline with the downloaded shaders instead of hitting the Shadertoy APIs. It supports all the methods as the previous API plus the storage primitives.
+* The **hybrid API** complements the basic **client API** allowing the base REST API client to benefit from the additional features os the **extended client API** still (optionally) respecting the `public+api` constrains imposed by the shader creators. In a nutshell it allows the REST API users to access user, shader comments and website media of the `public+api` shaders if configured with an API key
+* The **store API**, defines contracts supporting the creation of data stores thus providing a way to work offline with the downloaded shaders instead of relying on the Shadertoy APIs. It supports all the methods as the previous API plus the storage primitives.
 
 ### Client API
 
@@ -185,6 +187,10 @@ All the client API features plus the following:
 | `findShadersByPlaylistId` | Fetches the shaders of a playlist id. All the query results are paginated through the `from` and `num` parameters |
 | `findShaderIdsByPlaylistId` | Fetches the shader ids of a playlist id. All the query results are paginated through the `from` and `num` parameters |
 | `findShaderIdsByPlaylistId` | Fetches all the shader ids of a playlist id |
+
+### Hybrid Client
+
+All the client and extendec client features but optionally constraining the requests to shaders with `public+api` privacy settings.
 
 ### Store API
 
@@ -219,7 +225,7 @@ All the base and extended client API features plus the following:
 
 ## Contributing
 
-This a unofficial [Shadertoy](https://www.shadertoy.com) client library API. It is developed by best effort, in the motto of "Scratch your own itch!", meaning APIs that are meaningful for the author use cases.
+This is a unofficial [Shadertoy](https://www.shadertoy.com) client API. It is developed by best effort, in the motto of "Scratch your own itch!", meaning APIs that are meaningful for the author use cases.
 
 If you would like to contribute with other parts of the API, feel free to make a Github [pull request](https://github.com/ivoleitao/shadertoy/pulls) as I'm always looking for contributions for:
 * Tests
@@ -236,4 +242,4 @@ Please file feature requests and bugs at the [issue tracker][tracker].
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/ivoleitao/shadertoy/blob/develop/LICENSE) file for details
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/ivoleitao/shadertoy/blob/develop/packages/shadertoy/LICENSE) file for details

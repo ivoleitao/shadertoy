@@ -1,5 +1,5 @@
 # shadertoy_client
-A [Shadertoy API](https://github.com/ivoleitao/shadertoy_api) HTTP client implementation
+A [shadertoy](https://github.com/ivoleitao/shadertoy) HTTP client implementation usin the [dio](https://pub.dev/packages/dio) package
 
 [![Pub Package](https://img.shields.io/pub/v/shadertoy_client.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_client)
 [![Build Status](https://github.com/ivoleitao/shadertoy_api/workflows/build/badge.svg)](https://github.com/ivoleitao/shadertoy_client/actions)
@@ -7,55 +7,23 @@ A [Shadertoy API](https://github.com/ivoleitao/shadertoy_api) HTTP client implem
 [![Package Documentation](https://img.shields.io/badge/doc-shadertoy_client-blue.svg)](https://www.dartdocs.org/documentation/shadertoy_client/latest)
 [![GitHub License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Introduction
+## Overview
 
-This package implements the client APIs defined in the [shadertoy_api](https://pub.dev/packages/shadertoy_api) package providing access to the [Shadertoy](https://www.shadertoy.com) REST and Site APIs. 
-
-## Capabilities
-
-The following clients are provided:
-
-**WS Client**
-
-* `Find shader` by id
-* `Find shaders` by a list of id's
-* `Query shaders` by term, tags and sort them by *name*, *likes*, *views*, *newness* and by *hotness* (proportional to popularity and inversely proportional to lifetime). All the query results are paginated through the `from` and `num` parameters
-* `Find all shader ids`
-* `Query shader ids` by term, tags and sort them by *name*, *likes*, *views*, *newness* and by *hotness* (proportional to popularity and inversely proportional to lifetime). All the query results are paginated through the `from` and `num` parameters
-
-**Site Client**
-
-All the WS client features plus the following:
-* `Login`
-* `Logout`
-* `Find user by id`
-* `Query shaders by user id`, tags and sort them by *name*, *likes*, *views*, *newness* and by *hotness* (proportional to popularity and inversely proportional to lifetime). All the query results are paginated through the `from` and `num` parameters
-* `Query shaders by user id`, tags and sort them by *name*, *likes*, *views*, *newness* and by *hotness* (proportional to popularity and inversely proportional to lifetime). All the query results are paginated through the `from` and `num` parameters
-* `Find all shader ids by user id`
-* `Find comments` by shader id
-* `Find playlist` by id.
-* `Query shaders by playlist id`. All the query results are paginated through the `from` and `num` parameters
-* `Query shader ids by playlist id`. All the query results are paginated through the `from` and `num` parameters 
-* `Download preview`, i.e. the the shader thumbnails
-* `Download media`, any other media provided by the Shadertoy website
-
-**Hybrid Client**
-
-All the WS and site client features but optionally constraining the requests to shaders with public+api privacy settings.
+This package implements the client APIs defined in the [shadertoy](https://pub.dev/packages/shadertoy) package providing access to the [Shadertoy](https://www.shadertoy.com) REST and Site APIs. 
 
 ## Getting Started
 
-Add this to your `pubspec.yaml` (or create it):
+Add `shadertoy_client` to your `pubspec.yaml` replacing x.x.x with the latest version available:
 
 ```dart
 dependencies:
-    shadertoy_client: ^1.0.12
+    shadertoy_client: ^x.x.x
 ```
 
 Run the following command to install dependencies:
 
 ```dart
-pub get
+dart pub get
 ```
 
 Finally, to start developing import the library:
@@ -69,7 +37,7 @@ import 'package:shadertoy_client/shadertoy_client.dart';
 You can use this library with one of the following classes:
 * [`ShadertoyWSClient`](https://github.com/ivoleitao/shadertoy_client/blob/develop/lib/src/ws/ws_client.dart), for the REST API. This client can only provide shaders made available with the `public+api` privacy settings
 * [`ShadertoySiteClient`](https://github.com/ivoleitao/shadertoy_client/blob/develop/lib/src/site/site_client.dart) for the Site API. This client provides all the shaders currently available in the [Shadertoy](https://www.shadertoy.com) website
-* [`ShadertoyHybridClient`](https://github.com/ivoleitao/shadertoy_client/blob/develop/lib/src/hybrid/hybrid_client.dart), which allows the user to constrain the requests to shaders with `public+api` privacy settings while complementing the base REST API with some additional operations only available in the Site API.
+* [`ShadertoyHybridClient`](https://github.com/ivoleitao/shadertoy_client/blob/develop/lib/src/hybrid/hybrid_client.dart), which allows the user to (optionally) constrain the requests to shaders with `public+api` privacy settings while complementing the base REST API with some additional operations only available in the Site API.
 
 ### ShadertoyWSClient
 
@@ -353,21 +321,56 @@ Output:
 Found 62 comments
 ```
 
+## APIs
+
+### REST API
+
+| Operation | Description |
+| --------- | ----------- |
+| `findShaderById` | Finds a shader by id |
+| `findShadersByIdSet` | Finds shaders by a set of ids|
+| `findShaders` | Queries shaders by term, tags and sort them by *name*, *likes*, *views*, *newness* and by *hotness* (proportional to popularity and inversely proportional to lifetime). All the query results are paginated through the `from` and `num` parameters |
+| `findAllShaderIds` | Fetches all the shader ids |
+| `findShaderIds` | Queries shader ids by term, tags and sort them by *name*, *likes*, *views*, *newness* and by *hotness* (proportional to popularity and inversely proportional to lifetime). All the query results are paginated through the `from` and `num` parameters |
+
+### Site API
+
+All the REST API features plus the following:
+
+
+| Operation | Description |
+| --------- | ----------- |
+| `findUserById` | Finds a Shadertoy user by id |
+| `findShadersByUserId` | Queries shaders by user id, tags and allows sorting by *name*, *likes*, *views*, *newness* and *hotness* (proportional to popularity and inversely proportional to lifetime). All the query results are paginated and the pages fetched with the `from` and `num` parameters |
+|`findShaderIdsByUserId`|Queries shader ids by user id, tags and allows sorting by *name*, *likes*, *views*, *newness* and *hotness* (proportional to popularity and inversely proportional to lifetime). All the query results are paginated and the pages fetched with the `from` and `num` parameters |
+| `findAllShaderIdsByUserId` | Fetches all the shader ids by user id |
+| `findCommentsByShaderId` | Fetches the comments of a shader id |
+| `findPlaylistById` | Fetches a playlist by id |
+| `findShadersByPlaylistId` | Fetches the shaders of a playlist id. All the query results are paginated through the `from` and `num` parameters |
+| `findShaderIdsByPlaylistId` | Fetches the shader ids of a playlist id. All the query results are paginated through the `from` and `num` parameters |
+| `findShaderIdsByPlaylistId` | Fetches all the shader ids of a playlist id |
+
+### Hybrid Client
+
+All the REST and site client features but optionally constraining the requests to shaders with public+api privacy settings.
+
 ## Contributing
 
-This a unofficial [Shadertoy](https://www.shadertoy.com) client library. It is developed by best effort, in the motto of "Scratch your own itch!", meaning APIs that are meaningful for the author use cases.
+This is a unofficial [Shadertoy](https://www.shadertoy.com) client API. It is developed by best effort, in the motto of "Scratch your own itch!", meaning APIs that are meaningful for the author use cases.
 
-If you would like to contribute with other parts of the API, feel free to make a [Github pull request](https://github.com/ivoleitao/shadertoy_client/pulls) as I'm always looking for contributions for:
+If you would like to contribute with other parts of the API, feel free to make a Github [pull request](https://github.com/ivoleitao/shadertoy/pulls) as I'm always looking for contributions for:
 * Tests
 * Documentation
 * New APIs
+
+See [CONTRIBUTING.md](https://github.com/ivoleitao/shadertoy/blob/develop/CONTRIBUTING.md) for ways to get started.
 
 ## Features and Bugs
 
 Please file feature requests and bugs at the [issue tracker][tracker].
 
-[tracker]: https://github.com/ivoleitao/shadertoy_client/issues/new
+[tracker]: https://github.com/ivoleitao/shadertoy/issues/new
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/ivoleitao/shadertoy_client/LICENSE) file for details
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/ivoleitao/shadertoy/blob/develop/packages/shadertoy_client/LICENSE) file for details
