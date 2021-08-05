@@ -35,14 +35,6 @@ The following storage implementations are available
 |-------|---|-----------|
 | [shadertoy_sqlite](https://github.com/ivoleitao/shadertoy/tree/develop/packages/shadertoy_sqlite) | [![Pub](https://img.shields.io/pub/v/shadertoy_sqlite.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_sqlite) | A Sqlite storage implementation using the [moor](https://pub.dev/packages/moor) package|
 
-## Tools
-
-The following tools relly on the use of the client and / or storage APIs
-
-|Package|Pub|Description|
-|-------|---|-----------|
-| [shadertoy_cli](https://github.com/ivoleitao/shadertoy/tree/develop/packages/shadertoy_cli) | [![Pub](https://img.shields.io/pub/v/shadertoy_cli.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_cli) | A command line tool to interact with storage and client implementations of the `Shadertoy` API's|
-
 ## Getting Started
 
 

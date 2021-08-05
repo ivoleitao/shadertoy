@@ -69,7 +69,7 @@ abstract class DatabaseCommand extends SyncCommand {
     final fs = LocalFileSystem();
     final dir = fs.directory(fsPath)..createSync(recursive: true);
     client.rsync(store, mode,
-        fs: fs,
+        fs: null,
         dir: dir,
         runner: this,
         concurrency: concurrency,

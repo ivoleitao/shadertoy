@@ -1,3 +1,7 @@
+## 2.0.3
+
+- Updated README
+
 ## 2.0.2
 
 - Updated dependencies
