@@ -5,7 +5,9 @@ import 'package:shadertoy_client/shadertoy_client.dart';
 
 import 'sync.dart';
 
+/// Base command supporting the synchronization into a file based db the shadertoy data
 abstract class DatabaseCommand extends SyncCommand {
+  /// Builds a [DatabaseCommand]
   DatabaseCommand() {
     argParser
       ..addOption('path',
@@ -18,8 +20,16 @@ abstract class DatabaseCommand extends SyncCommand {
           help: 'The database name',
           valueHelp: 'name',
           defaultsTo: 'shadertoy')
-      ..addMultiOption('shader',
-          abbr: 's', help: 'The id(s) of the shader(s)', valueHelp: 'id')
+      ..addOption('mode',
+          abbr: 'm',
+          help: 'The synchronization mode',
+          valueHelp: 'mode',
+          allowed: ['full', 'latest'],
+          allowedHelp: {
+            'full': 'Full synchronization',
+            'latest': 'Only new shaders/users'
+          },
+          defaultsTo: 'latest')
       ..addMultiOption('playlist',
           abbr: 'l',
           help: 'The id(s) of the playlist(s)',
@@ -27,13 +37,18 @@ abstract class DatabaseCommand extends SyncCommand {
           defaultsTo: ['week', 'featured']);
   }
 
+  /// Abstracts the creation of a new [ShadertoyStore]
+  ///
+  /// [dbPath]: The path to the database file
   ShadertoyStore newStore(String dbPath);
 
   @override
   void call(ShadertoyHybrid client) async {
     final String fsPath = argResults?['path'];
     final String name = argResults?['name'];
-    final List<String> shaderIds = argResults?['shader'];
+    final String modeArg = argResults?['mode'];
+    final mode =
+        modeArg == 'full' ? HybridSyncMode.full : HybridSyncMode.latest;
     final List<String> playlistIds = argResults?['playlist'];
 
     final String concurrencyArg = argResults?['concurrency'];
@@ -53,13 +68,12 @@ abstract class DatabaseCommand extends SyncCommand {
     final store = newStore(p.join(fsPath, '$name.sdb'));
     final fs = LocalFileSystem();
     final dir = fs.directory(fsPath)..createSync(recursive: true);
-    client.rsync(store,
+    client.rsync(store, mode,
         fs: fs,
         dir: dir,
         runner: this,
         concurrency: concurrency,
         timeout: timeout,
-        shaderIds: shaderIds,
         playlistIds: playlistIds);
   }
 }

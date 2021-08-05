@@ -1,3 +1,8 @@
+## 2.0.2
+
+- Updated dependencies
+- Fixed a problem with the Input as it was not registering the type on the site API
+
 ## 2.0.1
 
 - Corrected broken links in the README file

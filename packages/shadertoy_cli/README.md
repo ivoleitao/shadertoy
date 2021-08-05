@@ -8,11 +8,150 @@ A [shadertoy](https://github.com/ivoleitao/shadertoy) command line tool
 
 ## Overview
 
+A command line tool to interact with the shadertoy rest and site apis
 
-## Getting Started
+## Installing
 
+```sh
+$ dart pub global activate shadertoy
+```
 
-## Usage
+## Commands
+
+```sh
+$ shadertoy help
+```
+
+```sh
+Command line shadertoy client
+
+Usage: shadertoy <command> [arguments]
+
+Global options:
+-h, --help    Print this usage information.
+
+Available commands:
+  search     Search shaders
+  shader     Gets one or more shaders by id
+  comments   Gets shader comments by id
+  user       Gets one or more users by id
+  playlist   Gets one or more playlists by id
+
+Run "shadertoy help <command>" for more information about a command.
+```
+
+### search
+
+```sh
+$ shadertoy help search
+```
+```sh
+Search shaders
+
+Usage: shadertoy search [arguments]
+-h, --help                   Print this usage information.
+-v, --[no-]verbose           Verbose logging
+-u, --user=<user>            The user
+-p, --password=<password>    The password
+-k, --apiKey=<apiKey>        The api key
+-f, --file=<file>            The database location
+-t, --term=<term>            The search term
+-i, --tag=<filter>           Search filter
+-s, --sort=<sort>            Search sort
+
+          [hot]              Hotness
+          [love]             Love
+          [name]             Name
+          [newest]           Newness
+          [popular]          Popularity
+
+    --from=<from>            Start from
+                             (defaults to "0")
+    --num=<num>              Number of results
+                             (defaults to "12")
+
+Run "shadertoy help" to see global options.
+```
+
+### shader
+
+```sh
+$ shadertoy help shader
+```
+```sh
+Gets one or more shaders by id
+
+Usage: shadertoy shader [arguments]
+-h, --help                   Print this usage information.
+-v, --[no-]verbose           Verbose logging
+-u, --user=<user>            The user
+-p, --password=<password>    The password
+-k, --apiKey=<apiKey>        The api key
+-f, --file=<file>            The database location
+-i, --ids=<ids>              The id(s) of the shader(s)
+
+Run "shadertoy help" to see global options.
+```
+
+### comments
+
+```sh
+$ shadertoy help comments
+```
+```sh
+Gets shader comments by id
+
+Usage: shadertoy comments [arguments]
+-h, --help                   Print this usage information.
+-v, --[no-]verbose           Verbose logging
+-u, --user=<user>            The user
+-p, --password=<password>    The password
+-k, --apiKey=<apiKey>        The api key
+-f, --file=<file>            The database location
+-i, --id=<id>                The id of the shader
+
+Run "shadertoy help" to see global options.
+```
+
+### user
+
+```sh
+$ shadertoy help user
+```
+```sh
+Gets one or more users by id
+
+Usage: shadertoy user [arguments]
+-h, --help                   Print this usage information.
+-v, --[no-]verbose           Verbose logging
+-u, --user=<user>            The user
+-p, --password=<password>    The password
+-k, --apiKey=<apiKey>        The api key
+-f, --file=<file>            The database location
+-i, --ids=<ids>              The id(s) of the user(s)
+
+Run "shadertoy help" to see global options.
+```
+
+### playlist
+
+```sh
+$ shadertoy help playlist
+```
+```sh
+Gets one or more playlists by id
+
+Usage: shadertoy playlist [arguments]
+-h, --help                   Print this usage information.
+-v, --[no-]verbose           Verbose logging
+-u, --user=<user>            The user
+-p, --password=<password>    The password
+-k, --apiKey=<apiKey>        The api key
+-f, --file=<file>            The database location
+-i, --ids=<ids>              The id(s) of the playlist
+
+Run "shadertoy help" to see global options.
+```
 
 ## Contributing
 

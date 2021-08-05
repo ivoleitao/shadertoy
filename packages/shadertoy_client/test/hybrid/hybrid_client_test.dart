@@ -357,6 +357,130 @@ void main() {
       expect(sr.error, isNull);
       expect(sr, await findShaderIdsResponseFixture(shaders, count: 43698));
     });
+
+    test('Find new shader ids with WS client', () async {
+      // prepare
+      final options = newWSOptions();
+      final num = options.shaderCount;
+      final shaders1 = [
+        'shaders/voxel_game_evolution.json', // wsByWV 1587452922
+        'shaders/kleinian_variations.json', // ldSyRd 1493419573
+        'shaders/rhodium_fractalscape.json', // ltKGzc 1476023128
+        'shaders/rapping_fractal.json', // 4sKSzt 1466044200
+        'shaders/fight_them_all_fractal.json', // XsGXzK 1465452238
+        'shaders/rave_fractal.json', // MsKXDw 1464836517
+        'shaders/simplex_noise_fire_milkdrop_beat.json', // XsKGzc 1455834915
+        'shaders/smashing_fractals.json', // wsfXRn 1550436200
+        'shaders/fractal_explorer_multi_res.json', // MdV3Wz 1454184710
+        'shaders/fractal_explorer_dof.json', // MdyGRW 1453409227
+        'shaders/trilobyte_bipolar_daisy_complex.json', // Xs3fDS 1526469729
+        'shaders/trilobyte_julia_fractal_smasher.json' // ls3fD7 1525386682
+      ];
+      final shaders2 = [
+        'shaders/trilobyte_multi_turing_pattern.json', // tsfSz4 1550782157
+        'shaders/surfer_boy.json', // ldd3DX 1542803894
+        'shaders/turn_burn.json', // MlscWX 1509015241
+        'shaders/alien_corridor.json', // 4slyRs 1490564246
+        'shaders/blueprint_of_architekt.json', // 4tySDW 1485002916
+        'shaders/crossy_penguin.json', // 4dKXDG 1466337141
+        'shaders/gargantua_with_hdr_bloom.json', // lstSRS 1460054893
+        'shaders/multiple_transparency.json', // XtyGWD 1474559035
+        'shaders/ice_primitives.json', // MscXzn 1457308502
+        'shaders/elephant.json', // 4dKGWm 1454853751
+        'shaders/three_pass_dof.json', // MsG3Dz 1453999525
+        'shaders/full_scene_radial_blur.json' // XsKGRW 1453904549
+      ];
+      final shaders3 = [
+        'shaders/basic_montecarlo.json', // MsdGzl, 1451942717
+        'shaders/volcanic.json', // XsX3RB 1372830991
+        'shaders/elevated.json' // MdX3Rr 1360495251
+      ];
+      final fsi1 = await findShaderIdsResponseFixture(shaders1);
+      final fsi2 = await findShaderIdsResponseFixture(shaders2);
+      final fsi3 = await findShaderIdsResponseFixture(shaders3);
+      final storeShaderIds = {'XsX3RB', 'MdX3Rr'};
+      final adapter = newAdapter(options)
+        ..addFindShaderIdsRoute(fsi1, options,
+            sort: Sort.newest, from: 0, num: num)
+        ..addFindShaderIdsRoute(fsi2, options,
+            sort: Sort.newest, from: num, num: num)
+        ..addFindShaderIdsRoute(fsi3, options,
+            sort: Sort.newest, from: num * 2, num: num);
+
+      final api = newClient(adapter, wsOptions: options);
+      // act
+      final sr = await api.findNewShaderIds(storeShaderIds);
+      // assert
+      expect(sr, isNotNull);
+      expect(sr.error, isNull);
+      expect(
+          sr,
+          FindShaderIdsResponse(ids: [
+            ...?fsi1.ids,
+            ...?fsi2.ids,
+            ...['MsdGzl']
+          ]));
+    });
+
+    test('Find new shader ids with site client', () async {
+      // prepare
+      final options = newSiteOptions();
+      final num = options.shaderCount;
+      final shaders1 = [
+        'shaders/voxel_game_evolution.json', // wsByWV 1587452922
+        'shaders/kleinian_variations.json', // ldSyRd 1493419573
+        'shaders/rhodium_fractalscape.json', // ltKGzc 1476023128
+        'shaders/rapping_fractal.json', // 4sKSzt 1466044200
+        'shaders/fight_them_all_fractal.json', // XsGXzK 1465452238
+        'shaders/rave_fractal.json', // MsKXDw 1464836517
+        'shaders/simplex_noise_fire_milkdrop_beat.json', // XsKGzc 1455834915
+        'shaders/smashing_fractals.json', // wsfXRn 1550436200
+        'shaders/fractal_explorer_multi_res.json', // MdV3Wz 1454184710
+        'shaders/fractal_explorer_dof.json', // MdyGRW 1453409227
+        'shaders/trilobyte_bipolar_daisy_complex.json', // Xs3fDS 1526469729
+        'shaders/trilobyte_julia_fractal_smasher.json' // ls3fD7 1525386682
+      ];
+      final shaders2 = [
+        'shaders/trilobyte_multi_turing_pattern.json', // tsfSz4 1550782157
+        'shaders/surfer_boy.json', // ldd3DX 1542803894
+        'shaders/turn_burn.json', // MlscWX 1509015241
+        'shaders/alien_corridor.json', // 4slyRs 1490564246
+        'shaders/blueprint_of_architekt.json', // 4tySDW 1485002916
+        'shaders/crossy_penguin.json', // 4dKXDG 1466337141
+        'shaders/gargantua_with_hdr_bloom.json', // lstSRS 1460054893
+        'shaders/multiple_transparency.json', // XtyGWD 1474559035
+        'shaders/ice_primitives.json', // MscXzn 1457308502
+        'shaders/elephant.json', // 4dKGWm 1454853751
+        'shaders/three_pass_dof.json', // MsG3Dz 1453999525
+        'shaders/full_scene_radial_blur.json' // XsKGRW 1453904549
+      ];
+      final shaders3 = [
+        'shaders/basic_montecarlo.json', // MsdGzl, 1451942717
+        'shaders/volcanic.json', // XsX3RB 1372830991
+        'shaders/elevated.json' // MdX3Rr 1360495251
+      ];
+      final response1 = await textFixture('results/new_page_1.html');
+      final response2 = await textFixture('results/new_page_2.html');
+      final response3 = await textFixture('results/new_page_3.html');
+      final storeShaderIds = {'XsX3RB', 'MdX3Rr'};
+      final adapter = newAdapter()
+        ..addResultsRoute(response1, options,
+            sort: Sort.newest, from: 0, num: num)
+        ..addResultsRoute(response2, options,
+            sort: Sort.newest, from: num, num: num)
+        ..addResultsRoute(response3, options,
+            sort: Sort.newest, from: num * 2, num: num);
+      final api = newClient(adapter, siteOptions: options);
+      // act
+      final sr = await api.findNewShaderIds(storeShaderIds);
+      // assert
+      expect(sr, isNotNull);
+      expect(sr.error, isNull);
+      expect(
+          sr,
+          await findShaderIdsResponseFixture(
+              [...shaders1, ...shaders2, shaders3[0]]));
+    });
   });
 
   group('Users', () {

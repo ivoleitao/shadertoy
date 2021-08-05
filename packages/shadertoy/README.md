@@ -14,8 +14,8 @@ The `shadertoy` library provides the support to interact with the [Shadertoy](ht
 ## Features
 
 * :pushpin: **REST API** - Supports all the Shadertoy REST APIs (as defined [here](https://www.shadertoy.com/howto#q2))
-* :globe_with_meridians: **Site API** - Supports scrapping of data directly from the [Shadertoy](https://www.shadertoy.com) site allowing the API users query comments, users, playlists and website media. 
-* :link: **Hybrid API** - Respects `public+api` privacy settings of the shaders while providing support for additional operations, namely the access to shader comments, user, playlists and website media
+* :globe_with_meridians: **Site API** - Supports scrapping of data directly from the [Shadertoy](https://www.shadertoy.com) site allowing the retrieval of users query comments, users, playlists and website media. 
+* :link: **Hybrid API** - Respects `public+api` privacy settings of the shaders while providing support for additional operations, namely the retrieval of shader comments, user, playlists and website media
 * :loop: **Extensible** - Plug novel storage and client implementations reusing the APIs and entities defined on the `shadertoy` package
 
 ## Client Implementations
@@ -24,7 +24,7 @@ The following client implementations are available
 
 |Package|Pub|Description|
 |-------|---|-----------|
-| [shadertoy_client](https://github.com/ivoleitao/shadertoy_client) | [![Pub](https://img.shields.io/pub/v/shadertoy_client.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_client) | HTTP client to the Shadertoy REST and Site API using the [dio](https://pub.dev/packages/dio) package|
+| [shadertoy_client](https://github.com/ivoleitao/shadertoy/tree/develop/packages/shadertoy_client) | [![Pub](https://img.shields.io/pub/v/shadertoy_client.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_client) | HTTP client to the Shadertoy REST and Site API using the [dio](https://pub.dev/packages/dio) package|
 
 
 ## Storage Implementations
@@ -33,7 +33,7 @@ The following storage implementations are available
 
 |Package|Pub|Description|
 |-------|---|-----------|
-| [shadertoy_sqlite](https://github.com/ivoleitao/shadertoy_sqlite) | [![Pub](https://img.shields.io/pub/v/shadertoy_sqlite.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_sqlite) | A Sqlite storage implementation using the [moor](https://pub.dev/packages/moor) package|
+| [shadertoy_sqlite](https://github.com/ivoleitao/shadertoy/tree/develop/packages/shadertoy_sqlite) | [![Pub](https://img.shields.io/pub/v/shadertoy_sqlite.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_sqlite) | A Sqlite storage implementation using the [moor](https://pub.dev/packages/moor) package|
 
 ## Tools
 
@@ -41,12 +41,12 @@ The following tools relly on the use of the client and / or storage APIs
 
 |Package|Pub|Description|
 |-------|---|-----------|
-| [shadertoy_cli](https://github.com/ivoleitao/shadertoy_cli) | [![Pub](https://img.shields.io/pub/v/shadertoy_cli.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_cli) | A command line tool to interact with storage and client implementations of the `Shadertoy` API's|
+| [shadertoy_cli](https://github.com/ivoleitao/shadertoy/tree/develop/packages/shadertoy_cli) | [![Pub](https://img.shields.io/pub/v/shadertoy_cli.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_cli) | A command line tool to interact with storage and client implementations of the `Shadertoy` API's|
 
 ## Getting Started
 
 
-Select one of the client or storage implementations (or both) and add the package to your `pubspec.yaml` replacing x.x.x with the latest version of the implementation. The example below uses the `shadertoy_client` package which implements the `shadertoy` REST, site and hybrid contracts:
+Select one of the client or storage implementations (or both) and add the package to your `pubspec.yaml` replacing x.x.x with the latest version of the implementation. The example below uses the `shadertoy_client` package which implements the `shadertoy` REST and site APIs:
 
 
 ```dart
@@ -88,7 +88,7 @@ if (result.ok) {
     print('Error: ${result.error.message}')
 }
 ```
-In alternati instantiate a `ShadertoyExtendedClient` implementation, for example the one provided by the package [shadertoy_client](https://pub.dev/packages/shadertoy_client), to access the site API:
+In alternative instantiate a `ShadertoyExtendedClient` implementation, for example the one provided by the package [shadertoy_client](https://pub.dev/packages/shadertoy_client), to access the site API:
 
 ```dart
 final client = newShadertoySiteClient();
@@ -108,7 +108,7 @@ if (result.ok) {
 }
 ```
 
-As mentioned in the feature list, to (optionally) respect the shader privacy constraints but still benefit from a larger set of operations some of them available only through the site API, the hybrid API can be used. Start by instancianting a suitable hybrid API implementation, for example the one provided by the `shadertoy_client` API:
+As mentioned in the feature list, to (optionally) respect the shader privacy constraints but still benefit from a larger set of operations (some of them available only through the site API), the hybrid API can be used. Start by instancianting a suitable hybrid API implementation, for example the one provided by the `shadertoy_client` package:
 
 ```dart
 // Creates a hybrid client using the REST API key `apiKey`

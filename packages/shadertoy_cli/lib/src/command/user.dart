@@ -2,12 +2,14 @@ import 'package:shadertoy/shadertoy_api.dart';
 
 import 'multi.dart';
 
+/// Shadertoy user command
 class UserCommand extends MultiCommand {
   @override
   final name = 'user';
   @override
   final description = 'Gets one or more users by id';
 
+  /// Builds a [UserCommand]
   UserCommand() {
     argParser.addMultiOption('ids',
         abbr: 'i', help: 'The id(s) of the user(s)', valueHelp: 'ids');

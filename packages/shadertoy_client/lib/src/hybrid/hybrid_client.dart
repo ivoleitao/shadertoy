@@ -3,6 +3,8 @@ import 'dart:collection';
 import 'package:dio/dio.dart';
 import 'package:file/file.dart';
 import 'package:shadertoy/shadertoy_api.dart';
+import 'package:shadertoy_client/shadertoy_client.dart';
+import 'package:shadertoy_client/src/hybrid/playlist_sync.dart';
 import 'package:shadertoy_client/src/hybrid/shader_sync.dart';
 import 'package:shadertoy_client/src/hybrid/user_sync.dart';
 import 'package:shadertoy_client/src/site/site_client.dart';
@@ -10,7 +12,16 @@ import 'package:shadertoy_client/src/site/site_options.dart';
 import 'package:shadertoy_client/src/ws/ws_client.dart';
 import 'package:shadertoy_client/src/ws/ws_options.dart';
 
-import 'playlist_sync.dart';
+/// The sync mode of the hybrid client
+enum HybridSyncMode {
+  /// Retrieves all the shaders / users from the shadertoy website adding / removing
+  /// from the storage
+  full,
+
+  /// Retrieves only the new shaders / users from the shadertoy webisite adding them to
+  /// the storage
+  latest
+}
 
 /// The definition of a generic interface whose implementation is able to
 /// process synchronization tasks
@@ -31,23 +42,32 @@ abstract class SyncTaskRunner {
 
 /// An hybrid interface implementing both [ShadertoySite] and [ShadertoyWS]
 abstract class ShadertoyHybrid implements ShadertoySite, ShadertoyWS {
+  /// Returns a new [FindShaderIdsResponse] with a list of the new shader ids.
+  ///
+  /// * [storeShaderIds]: The list of stored shader ids
+  ///
+  /// Upon success a list of new shader ids is provided
+  ///
+  /// In case of error a [ResponseError] is set and no shader id list is
+  /// provided
+  Future<FindShaderIdsResponse> findNewShaderIds(Set<String> storeShaderIds);
+
   /// Synchronizes the [store] with the remote shadertoy data. It can optionally
   /// download shader and user assets if [fs] is specified
   ///
   /// * [store]: A [ShadertoyStore] implementation
+  /// * [mode]: Specifies the mode used on the synchronization, either full or newest
   /// * [fs]: A [FileSystem] implementation to store shader and user assets
   /// * [dir]: A path on the [FileSystem]
   /// * [concurrency]: Maximum number of simultaneous requests
   /// * [timeout]: Request timeout in seconds
-  /// * [shaderIds]: If specified only the this shader id's will be sync
   /// * [playlistIds]: The playlists to synchronize
-  void rsync(ShadertoyStore store,
+  void rsync(ShadertoyStore store, HybridSyncMode mode,
       {FileSystem? fs,
       Directory? dir,
       SyncTaskRunner? runner,
       int? concurrency,
       int? timeout,
-      List<String>? shaderIds,
       List<String> playlistIds});
 }
 
@@ -61,6 +81,9 @@ abstract class ShadertoyHybrid implements ShadertoySite, ShadertoyWS {
 /// available through the site implementation
 class ShadertoyHybridClient extends ShadertoyBaseClient
     implements ShadertoyHybrid {
+  /// The hybrid options (either an instance of [ShadertoySiteOptions] or [ShadertoyWSOptions] if provided)
+  late final ShadertoyHttpOptions _options;
+
   /// The site client
   late final ShadertoySiteClient _siteClient;
 
@@ -78,8 +101,10 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
     client ??= Dio(BaseOptions(baseUrl: siteOptions.baseUrl));
     _siteClient = ShadertoySiteClient(siteOptions, client: client);
     if (wsOptions != null) {
+      _options = wsOptions;
       _hybridClient = ShadertoyWSClient(wsOptions, client: client);
     } else {
+      _options = siteOptions;
       _hybridClient = _siteClient;
     }
   }
@@ -124,6 +149,30 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
       {String? term, Set<String>? filters, Sort? sort, int? from, int? num}) {
     return _hybridClient.findShaderIds(
         term: term, filters: filters, sort: sort, from: from, num: num);
+  }
+
+  @override
+  Future<FindShaderIdsResponse> findNewShaderIds(
+      Set<String> storeShaderIds) async {
+    final newShaderIds = <String>[];
+    var addShaderIds = <String>{};
+    var from = 0;
+    final num = _options.shaderCount;
+    do {
+      final clientResponse = await _hybridClient.findShaderIds(
+          sort: Sort.newest, from: from, num: num);
+      if (!clientResponse.ok) {
+        return clientResponse;
+      }
+      final shaderIds = clientResponse.ids ?? [];
+      final clientShaderIds = shaderIds.toSet();
+      addShaderIds = clientShaderIds.difference(storeShaderIds);
+      shaderIds.retainWhere((shaderId) => addShaderIds.contains(shaderId));
+      newShaderIds.addAll(shaderIds);
+      from += num;
+    } while (addShaderIds.isNotEmpty && addShaderIds.length == num);
+
+    return FindShaderIdsResponse(ids: newShaderIds);
   }
 
   @override
@@ -191,27 +240,26 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
   }
 
   @override
-  void rsync(ShadertoyStore store,
+  void rsync(ShadertoyStore store, HybridSyncMode mode,
       {FileSystem? fs,
       Directory? dir,
       SyncTaskRunner? runner,
       int? concurrency,
       int? timeout,
-      List<String>? shaderIds,
       List<String> playlistIds = const <String>[]}) async {
     final shaderProcessor = ShaderSyncProcessor(this, store,
         runner: runner, concurrency: concurrency, timeout: timeout);
-    final shaderSyncResult = await shaderProcessor.syncShaders(
-        fs: fs, dir: dir, shaderIds: shaderIds);
+    final shaderSyncResult =
+        await shaderProcessor.syncShaders(mode, fs: fs, dir: dir);
 
     final userProcessor = UserSyncProcessor(this, store,
         runner: runner, concurrency: concurrency, timeout: timeout);
-    await userProcessor.syncUsers(shaderSyncResult, fs: fs, dir: dir);
+    final userSyncResult =
+        await userProcessor.syncUsers(shaderSyncResult, mode, fs: fs, dir: dir);
 
-    if (shaderIds == null) {
-      final playlistProcessor = PlaylistSyncProcessor(this, store,
-          runner: runner, concurrency: concurrency, timeout: timeout);
-      await playlistProcessor.syncPlaylists(playlistIds);
-    }
+    final playlistProcessor = PlaylistSyncProcessor(this, store,
+        runner: runner, concurrency: concurrency, timeout: timeout);
+    await playlistProcessor.syncPlaylists(
+        shaderSyncResult, userSyncResult, playlistIds);
   }
 }

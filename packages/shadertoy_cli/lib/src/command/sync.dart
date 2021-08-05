@@ -1,13 +1,14 @@
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:progress_bar/progress_bar.dart';
 import 'package:shadertoy/shadertoy_api.dart';
-import 'package:shadertoy_cli/src/command/http.dart';
-import 'package:shadertoy_cli/src/control/progress_bar.dart';
-import 'package:shadertoy_cli/src/control/table.dart';
+import 'package:shadertoy_cli/src/command/client.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 
-abstract class SyncCommand extends HttpCommand implements SyncTaskRunner {
+/// Provides the base for a command that performs a synchronization between the
+/// shadertoy client and a shadertoy store
+abstract class SyncCommand extends ClientCommand implements SyncTaskRunner {
   SyncCommand() {
     argParser
       ..addOption('concurrency',
@@ -22,19 +23,74 @@ abstract class SyncCommand extends HttpCommand implements SyncTaskRunner {
           defaultsTo: '30');
   }
 
+  /// Provides a way of outputing a table in the command line interface with
+  /// and [header] and a [body]
+  ///
+  /// * [header]: The header data
+  /// * [body]: The body data
+  String _tabulate(List<String> header, List<List<String>> body) {
+    var retString = '';
+    final cols = header.length;
+    final colLength = List.filled(cols, 0, growable: true);
+    if (body.any((model) => model.length != cols)) {
+      throw Exception('Column\'s no. of each model does not match.');
+    }
+
+    //preparing colLength.
+    for (var i = 0; i < cols; i++) {
+      final _chunk = <String>[];
+      _chunk.add(header[i]);
+      for (var model in body) {
+        _chunk.add(model[i]);
+      }
+      colLength[i] = ([for (var c in _chunk) c.length]..sort()).last;
+    }
+    // here we got prepared colLength.
+
+    String fillSpace(int maxSpace, String text) {
+      return text.padLeft(maxSpace) + ' | ';
+    }
+
+    void addRow(List<String> model, List<List<String>> row) {
+      final l = <String>[];
+      for (var i = 0; i < cols; i++) {
+        final max = colLength[i];
+        l.add(fillSpace(max, model[i]));
+      }
+      row.add(l);
+    }
+
+    final rowList = <List<String>>[];
+    addRow(header, rowList);
+    final topBar = List.generate(cols, (i) => '-' * colLength[i]);
+    addRow(topBar, rowList);
+    for (final model in body) {
+      addRow(model, rowList);
+    }
+    for (final row in rowList) {
+      var rowText = row.join();
+      rowText = rowText.substring(0, rowText.length - 2);
+      retString += rowText + '\n';
+    }
+
+    return retString;
+  }
+
   @override
   Future<List<T>> process<T extends IterableMixin<APIResponse>>(
       List<Future<T>> tasks,
       {String? message,
-      String title = '',
       int progressBarWidth = 10}) async {
     var responses = <T>[];
 
     if (tasks.isNotEmpty) {
       if (verbose || !stdout.hasTerminal) {
+        if (message != null) {
+          log(message);
+        }
         responses = await Future.wait(tasks);
       } else {
-        final bar = ProgressBar('$title[:bar] :percent :etas',
+        final bar = ProgressBar('${message ?? ''}: [:bar] :percent :eta',
             total: tasks.length, width: progressBarWidth);
         final barTasks = <Future<T>>[];
         for (var i = 0; i < tasks.length; i++) {
@@ -62,7 +118,7 @@ abstract class SyncCommand extends HttpCommand implements SyncTaskRunner {
       }
 
       if (table.isNotEmpty) {
-        stderr.write(tabulate(table, const ['Context', 'Target', 'Message']));
+        stderr.write(_tabulate(const ['Context', 'Target', 'Message'], table));
       }
     }
 

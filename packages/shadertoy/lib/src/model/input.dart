@@ -64,10 +64,20 @@ class Input extends Equatable {
   /// The preview file path
   final String? previewFilePath;
 
+  @JsonKey(name: 'type')
+
+  /// The input type with 'type' source
+  final InputType? type1;
+
   @JsonKey(name: 'ctype')
 
-  /// The input type
-  final InputType? type;
+  /// The input type with 'ctype' source
+  final InputType? type2;
+
+  @JsonKey(ignore: true)
+
+  /// Returns either the [type1] value or the [type2] value
+  InputType? get type => type1 ?? type2;
 
   @JsonKey(name: 'channel')
 
@@ -90,7 +100,9 @@ class Input extends Equatable {
   /// * [src]: The source
   /// * [filePath]: The file path
   /// * [previewFilePath]: The preview file path
-  /// * [type]: The type
+  /// * [type]: The type. If present [type1] and [type2] values are ignored and both fields set with [type]
+  /// * [type1]: The type1
+  /// * [type2]: The type2
   /// * [channel]: The channel number
   /// * [sampler]: The sampler
   /// * [published]: The published
@@ -99,13 +111,18 @@ class Input extends Equatable {
       this.src,
       this.filePath,
       this.previewFilePath,
-      this.type,
+      InputType? type,
+      InputType? type1,
+      InputType? type2,
       required this.channel,
       required this.sampler,
-      required this.published});
+      required this.published})
+      : type1 = type ?? type1,
+        type2 = type ?? type2;
 
   @override
-  List<Object?> get props => [id, src, type, channel, sampler, published];
+  List<Object?> get props =>
+      [id, src, type1, type2, channel, sampler, published];
 
   /// Creates a [Input] from json map
   factory Input.fromJson(Map<String, dynamic> json) => _$InputFromJson(json);
@@ -117,7 +134,11 @@ class Input extends Equatable {
   ///
   /// * [id]: The input id
   /// * [src]: The source
-  /// * [type]: The type
+  /// * [filePath]: The file path
+  /// * [previewFilePath]: The preview file path
+  /// * [type]: The type. If present [type1] and [type2] values are ignored and both fields set with [type]
+  /// * [type1]: The type1
+  /// * [type2]: The type2
   /// * [channel]: The channel number
   /// * [sampler]: The sampler
   /// * [published]: The published
@@ -127,6 +148,8 @@ class Input extends Equatable {
     String? filePath,
     String? previewFilePath,
     InputType? type,
+    InputType? type1,
+    InputType? type2,
     int? channel,
     Sampler? sampler,
     int? published,
@@ -136,7 +159,8 @@ class Input extends Equatable {
       src: src ?? this.src,
       filePath: filePath ?? this.filePath,
       previewFilePath: previewFilePath ?? this.previewFilePath,
-      type: type ?? this.type,
+      type1: (type ?? type1) ?? this.type1,
+      type2: (type ?? type2) ?? this.type2,
       channel: channel ?? this.channel,
       sampler: sampler ?? this.sampler,
       published: published ?? this.published,

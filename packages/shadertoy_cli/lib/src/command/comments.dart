@@ -2,12 +2,14 @@ import 'package:shadertoy/shadertoy_api.dart';
 
 import 'multi.dart';
 
+/// Shadertoy comments command
 class CommentsCommand extends MultiCommand {
   @override
   final name = 'comments';
   @override
   final description = 'Gets shader comments by id';
 
+  /// Builds a [CommentsCommand]
   CommentsCommand() {
     argParser.addOption('id',
         abbr: 'i', help: 'The id of the shader', valueHelp: 'id');

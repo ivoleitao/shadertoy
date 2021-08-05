@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import 'package:pool/pool.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy/shadertoy_util.dart';
+import 'package:shadertoy_client/shadertoy_client.dart';
 
 import 'hybrid_client.dart';
 import 'sync.dart';
@@ -21,17 +22,33 @@ class ShaderSyncResult extends SyncResult<ShaderSyncTask> {
   /// The current task
   final List<ShaderSyncTask> current;
 
-  /// The current shader info
-  Iterable<Info> get _currentShaderInfo =>
-      current.map((task) => task.response.shader?.info).whereType<Info>();
+  /// Obtains a list of shaders and optionally applies a filter
+  ///
+  /// [tasks]: The list of tasks to consider
+  /// [test]: A filter to apply to the list of shaders
+  Iterable<Shader> _shaders(List<ShaderSyncTask> tasks,
+      {bool Function(Shader)? test}) {
+    final shaders =
+        tasks.map((task) => task.response.shader).whereType<Shader>();
+    if (test != null) {
+      return shaders.where(test);
+    }
+    return shaders;
+  }
 
   /// The current shader ids
   Set<String> get currentShaderIds =>
-      _currentShaderInfo.map((info) => info.id).toSet();
+      _shaders(current).map((shader) => shader.info.id).toSet();
+
+  /// The filtered list of current shader ids
+  ///
+  /// * [test]: The filter
+  Set<String> currentShaderIdsWhere({bool Function(Shader)? test}) =>
+      _shaders(current, test: test).map((shader) => shader.info.id).toSet();
 
   /// The current user ids
   Set<String> get currentUserIds =>
-      _currentShaderInfo.map((info) => info.userId).toSet();
+      _shaders(current).map((shader) => shader.info.userId).toSet();
 
   /// Extracts the list of input source paths from a list of [ShaderSyncTask]s
   ///
@@ -62,24 +79,28 @@ class ShaderSyncResult extends SyncResult<ShaderSyncTask> {
   Set<String> get currentShaderInputSourcePaths =>
       _shaderInputSourcePaths(current);
 
-  /// The added shader infos
-  Iterable<Info> get _addedShaderInfo =>
-      added.map((task) => task.response.shader?.info).whereType<Info>();
-
   /// The added shader id's
   Set<String> get addedShaderIds =>
-      _addedShaderInfo.map((info) => info.id).toSet();
+      _shaders(added).map((shader) => shader.info.id).toSet();
+
+  /// The filtered list of added shader ids
+  ///
+  /// * [test]: The filter
+  Set<String> addedShaderIdsWhere({bool Function(Shader)? test}) =>
+      _shaders(added, test: test).map((shader) => shader.info.id).toSet();
 
   /// The added shader input source paths
   Set<String> get addedShaderInputSourcePaths => _shaderInputSourcePaths(added);
 
-  /// The removed shader infos
-  Iterable<Info> get _removedShaderInfo =>
-      removed.map((task) => task.response.shader?.info).whereType<Info>();
-
   /// The removed shader ids
   Set<String> get removedShaderIds =>
-      _removedShaderInfo.map((info) => info.id).toSet();
+      _shaders(removed).map((shader) => shader.info.id).toSet();
+
+  /// The filtered list of removed shader ids
+  ///
+  /// * [test]: The filter
+  Set<String> removedShaderIdsWhere({bool Function(Shader)? test}) =>
+      _shaders(removed, test: test).map((shader) => shader.info.id).toSet();
 
   /// The removed shader input source paths
   Set<String> get removedShaderInputSourcePaths =>
@@ -186,7 +207,7 @@ class ShaderSyncProcessor extends SyncProcessor {
     }
 
     return runner.process<ShaderSyncTask>(tasks,
-        message: 'Saving ${shaderIds.length} shader(s): ');
+        message: 'Saving ${shaderIds.length} shader(s)');
   }
 
   /// Deletes a shader with id [shaderId]
@@ -213,13 +234,13 @@ class ShaderSyncProcessor extends SyncProcessor {
     }
 
     return runner.process<ShaderSyncTask>(tasks,
-        message: 'Deleting ${shaderIds.length} shader(s): ');
+        message: 'Deleting ${shaderIds.length} shader(s)');
   }
 
   /// Synchronizes shaders
   ///
-  /// * [shaderIds]: An optional list of shader ids
-  Future<ShaderSyncResult> _syncShaders({List<String>? shaderIds}) async {
+  /// * [mode]: The sync mode
+  Future<ShaderSyncResult> _syncShaders(HybridSyncMode mode) async {
     final storeResponse = await store.findAllShaders();
 
     if (storeResponse.ok) {
@@ -228,22 +249,34 @@ class ShaderSyncProcessor extends SyncProcessor {
           storeShaders.map((fsr) => fsr.shader?.info).whereType<Info>();
       final storeShaderIds = storeInfos.map((info) => info.id).toSet();
 
-      final clientResponse = shaderIds == null || shaderIds.isEmpty
-          ? await client.findAllShaderIds()
-          : FindShaderIdsResponse(ids: shaderIds);
+      final clientResponse =
+          storeShaderIds.isEmpty || mode == HybridSyncMode.full
+              ? await client.findAllShaderIds()
+              : await client.findNewShaderIds(storeShaderIds);
+
+      /* final clientResponse =
+          FindShaderIdsResponse(ids: ['XslGRr', 'MdX3Rr', '4sfGWX']);
+          */
       if (clientResponse.ok) {
         final clientShaderIds = (clientResponse.ids ?? []).toSet();
+
         final addShaderIds = clientShaderIds.difference(storeShaderIds);
-        final removeShaderIds = storeShaderIds.difference(clientShaderIds);
-        final local = storeShaders.map((fsr) => ShaderSyncTask(fsr));
         final added = await _addShaders(addShaderIds)
             .then((value) => value.where((task) => task.response.ok).toList());
-        final removed = await _deleteShaders(removeShaderIds)
-            .then((value) => value.where((task) => task.response.ok).toList());
-        final removedShaderIds = removed
-            .map((ShaderSyncTask task) => task.response.shader?.info.id)
-            .whereType<String>();
-        final currentShaders = [...local, ...added]..removeWhere((element) =>
+
+        var removed = <ShaderSyncTask>[];
+        var removedShaderIds = Iterable.empty();
+        if (mode == HybridSyncMode.full) {
+          final removeShaderIds = storeShaderIds.difference(clientShaderIds);
+          removed = await _deleteShaders(removeShaderIds).then(
+              (value) => value.where((task) => task.response.ok).toList());
+          removedShaderIds = removed
+              .map((ShaderSyncTask task) => task.response.shader?.info.id)
+              .whereType<String>();
+        }
+
+        final stored = storeShaders.map((fsr) => ShaderSyncTask(fsr));
+        final currentShaders = [...stored, ...added]..removeWhere((element) =>
             removedShaderIds.contains(element.response.shader?.info.id ?? ''));
 
         return ShaderSyncResult(
@@ -268,15 +301,14 @@ class ShaderSyncProcessor extends SyncProcessor {
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     for (final shaderId in shaderIds) {
-      tasks.add(taskPool.withResource(() => store
+      tasks.add(taskPool.withResource(() => client
           .findCommentsByShaderId(shaderId)
           .then((cr) => CommentsSyncTask(cr))));
     }
 
     return runner
         .process<CommentsSyncTask>(tasks,
-            message:
-                'Downloading comments from ${shaderIds.length} shader(s): ')
+            message: 'Downloading comments of ${shaderIds.length} shader(s)')
         .then((commentTasks) => [
               for (var commentTask in commentTasks)
                 if (commentTask.response.ok)
@@ -317,7 +349,7 @@ class ShaderSyncProcessor extends SyncProcessor {
     }
 
     return runner.process<CommentSyncTask>(tasks,
-        message: 'Saving ${comments.length} comment(s): ');
+        message: 'Saving ${comments.length} comment(s)');
   }
 
   /// Deletes a comment
@@ -342,14 +374,15 @@ class ShaderSyncProcessor extends SyncProcessor {
     }
 
     return runner.process<CommentSyncTask>(tasks,
-        message: 'Deleting ${comments.length} comment(s): ');
+        message: 'Deleting ${comments.length} comment(s)');
   }
 
   /// Synchronizes a list of comments from a previously synchronized list of shaders
   ///
   /// * [shaderSync]: The shader synchronization result
+  /// * [mode]: The synchronization mode
   Future<CommentTaskResult> _syncShaderComments(
-      ShaderSyncResult shaderSync) async {
+      ShaderSyncResult shaderSync, HybridSyncMode mode) async {
     final storeResponse = await store.findAllComments();
     if (storeResponse.ok) {
       final storeComments = storeResponse.comments ?? [];
@@ -359,8 +392,9 @@ class ShaderSyncProcessor extends SyncProcessor {
       final storeCommentIds = storeCommentMap.keys.toSet();
 
       final clientCommentMap = <String, Comment>{};
-      for (var commentTask
-          in await _clientComments(shaderSync.currentShaderIds)) {
+      for (var commentTask in await _clientComments(mode == HybridSyncMode.full
+          ? shaderSync.currentShaderIds
+          : shaderSync.addedShaderIds)) {
         final id = commentTask.response.comment?.id;
         final value = commentTask.response.comment;
         if (id != null && value != null) {
@@ -374,16 +408,19 @@ class ShaderSyncProcessor extends SyncProcessor {
         for (var entry in clientCommentMap.entries)
           if (addCommentIds.contains(entry.key)) entry.value
       ];
-      final removeCommentIds = storeCommentIds.difference(clientCommentIds);
-      final removeComments = [
-        for (var entry in storeCommentMap.entries)
-          if (removeCommentIds.contains(entry.key)) entry.value
-      ];
-
       final added = await _addComments(addComments)
           .then((value) => value.where((task) => task.response.ok).toList());
-      final removed = await _deleteComments(removeComments)
-          .then((value) => value.where((task) => task.response.ok).toList());
+
+      var removed = <CommentSyncTask>[];
+      if (mode == HybridSyncMode.full) {
+        final removeCommentIds = storeCommentIds.difference(clientCommentIds);
+        final removeComments = [
+          for (var entry in storeCommentMap.entries)
+            if (removeCommentIds.contains(entry.key)) entry.value
+        ];
+        removed = await _deleteComments(removeComments)
+            .then((value) => value.where((task) => task.response.ok).toList());
+      }
 
       return CommentTaskResult(added: added, removed: removed);
     } else {
@@ -410,7 +447,7 @@ class ShaderSyncProcessor extends SyncProcessor {
     });
 
     return runner.process<DownloadSyncTask>(tasks,
-        message: 'Saving ${pathMap.length} shader picture(s): ');
+        message: 'Saving ${pathMap.length} shader picture(s)');
   }
 
   /// Deletes a list of shader pictures
@@ -426,7 +463,7 @@ class ShaderSyncProcessor extends SyncProcessor {
     }
 
     return runner.process<DownloadSyncTask>(tasks,
-        message: 'Deleting ${pathSet.length} shader picture(s): ');
+        message: 'Deleting ${pathSet.length} shader picture(s)');
   }
 
   /// Synchronizes the pictures from a shader
@@ -434,19 +471,20 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// * [fs]: The [FileSystem]
   /// * [dir]: The target directory on the [FileSystem]
   /// * [shaderSync]: The shader synchronization result
-  Future<DownloadSyncResult> _syncShaderPictures(
-      FileSystem fs, Directory dir, ShaderSyncResult shaderSync) async {
-    final localShaderIds = <String>{};
+  /// * [mode]: The synchronization mode
+  Future<DownloadSyncResult> _syncShaderPictures(FileSystem fs, Directory dir,
+      ShaderSyncResult shaderSync, HybridSyncMode mode) async {
+    final storeShaderIds = <String>{};
     final shaderMediaPath = ShadertoyContext.shaderMediaPath;
     await for (final path
         in listFiles(dir, _shaderMediaFiles, recursive: true)) {
-      localShaderIds.add(fileNameToShaderId(p.basenameWithoutExtension(path)));
+      storeShaderIds.add(fileNameToShaderId(p.basenameWithoutExtension(path)));
     }
 
-    final localShaderInputSources = <String>{};
+    final storeShaderInputSources = <String>{};
     await for (final path
         in listFiles(dir, _shaderInputSourceFiles, recursive: true)) {
-      localShaderInputSources.add(p.relative(path, from: dir.path));
+      storeShaderInputSources.add(p.relative(path, from: dir.path));
     }
 
     shaderPictureRemotePath(shaderId) =>
@@ -455,29 +493,43 @@ class ShaderSyncProcessor extends SyncProcessor {
         dir.path, shaderMediaPath, '${shaderIdToFileName(shaderId)}.jpg');
     shaderInputSourceLocalPath(inputSource) => p.join(dir.path, inputSource);
 
-    final currentShaderIds = shaderSync.currentShaderIds;
+    hasPicture(Shader shader) {
+      for (RenderPass rp in shader.renderPasses) {
+        for (Input i in rp.inputs) {
+          if (i.type == InputType.webcam) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    final currentShaderIds = shaderSync.currentShaderIdsWhere(test: hasPicture);
     final currentShaderInputSources = shaderSync.currentShaderInputSourcePaths;
+
+    final addedShaderIds = shaderSync.addedShaderIdsWhere(test: hasPicture);
+    final removedShaderIds = shaderSync.removedShaderIdsWhere(test: hasPicture);
     final addShaderPaths = {
       for (var shaderId in {
-        ...shaderSync.addedShaderIds,
-        ...currentShaderIds.difference(localShaderIds)
+        ...addedShaderIds,
+        ...currentShaderIds.difference(storeShaderIds)
       })
         shaderPictureRemotePath(shaderId): shaderPictureLocalPath(shaderId)
     };
     for (var path in {
       ...shaderSync.addedShaderInputSourcePaths,
-      ...currentShaderInputSources.difference(localShaderInputSources)
+      ...currentShaderInputSources.difference(storeShaderInputSources)
     }) {
       addShaderPaths.putIfAbsent(path, () => shaderInputSourceLocalPath(path));
     }
 
     final removeShaderPaths = {
-      ...shaderSync.removedShaderIds,
-      ...localShaderIds.difference(currentShaderIds)
+      ...removedShaderIds,
+      ...storeShaderIds.difference(currentShaderIds)
     }.map((shaderId) => shaderPictureLocalPath(shaderId)).toSet();
     for (var path in {
       ...shaderSync.removedShaderInputSourcePaths,
-      ...localShaderInputSources.difference(currentShaderInputSources)
+      ...storeShaderInputSources.difference(currentShaderInputSources)
     }) {
       removeShaderPaths.add(shaderInputSourceLocalPath(path));
     }
@@ -494,14 +546,14 @@ class ShaderSyncProcessor extends SyncProcessor {
   ///
   /// * [fs]: The [FileSystem]
   /// * [dir]: The target directory on the [FileSystem]
-  /// * [shaderSync]: The shader synchronization result
-  Future<ShaderSyncResult> syncShaders(
-      {FileSystem? fs, Directory? dir, List<String>? shaderIds}) async {
-    final shaderSyncResult = await _syncShaders(shaderIds: shaderIds);
-    await _syncShaderComments(shaderSyncResult);
+  /// * [mode]: The synchronization mode
+  Future<ShaderSyncResult> syncShaders(HybridSyncMode mode,
+      {FileSystem? fs, Directory? dir}) async {
+    final shaderSyncResult = await _syncShaders(mode);
+    await _syncShaderComments(shaderSyncResult, mode);
     if (fs != null) {
       await _syncShaderPictures(
-          fs, dir ?? fs.currentDirectory, shaderSyncResult);
+          fs, dir ?? fs.currentDirectory, shaderSyncResult, mode);
     }
 
     return shaderSyncResult;

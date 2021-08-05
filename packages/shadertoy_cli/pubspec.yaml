@@ -1,5 +1,5 @@
 name: shadertoy_cli
-version: 2.0.1
+version: 2.0.2
 publish_to: none
 description: A sample command-line application.
 homepage: https://github.com/ivoleitao/shadertoy
@@ -8,22 +8,25 @@ environment:
   sdk: ">=2.13.0 <3.0.0"
 
 dependencies:
-  enum_to_string: ^2.0.1
   path: ^1.8.0
   args: ^2.1.1
+  progress_bar: ^1.0.0
   file: ^6.1.2
   moor: ^4.4.1
-  shadertoy: ^2.0.1
-  # shadertoy:
-  #  path: ../shadertoy
-  shadertoy_client: ^2.0.1
-  # shadertoy_client:
-  #  path: ../shadertoy_client
-  shadertoy_sqlite: ^2.0.1
-  # shadertoy_sqlite:
-  #  path: ../shadertoy_sqlite
+  # shadertoy: ^2.0.1
+  shadertoy:
+    path: ../shadertoy
+  # shadertoy_client: ^2.0.1
+  shadertoy_client:
+    path: ../shadertoy_client
+  # shadertoy_sqlite: ^2.0.1
+  shadertoy_sqlite:
+    path: ../shadertoy_sqlite
 
 dev_dependencies:
   lints: ^1.0.1
   test: ^1.17.10
   dependency_validator: ^3.1.0
+
+executables:
+  shadertoy: shadertoy_cli

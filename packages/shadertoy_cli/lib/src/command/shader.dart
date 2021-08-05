@@ -2,12 +2,14 @@ import 'package:shadertoy/shadertoy_api.dart';
 
 import 'multi.dart';
 
+/// Shadertoy shader command
 class ShaderCommand extends MultiCommand {
   @override
   final name = 'shader';
   @override
   final description = 'Gets one or more shaders by id';
 
+  /// Builds a [ShaderCommand]
   ShaderCommand() {
     argParser.addMultiOption('ids',
         abbr: 'i', help: 'The id(s) of the shader(s)', valueHelp: 'ids');

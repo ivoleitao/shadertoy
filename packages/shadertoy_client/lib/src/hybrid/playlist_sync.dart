@@ -1,15 +1,23 @@
+import 'dart:collection';
+
 import 'package:pool/pool.dart';
 import 'package:shadertoy/shadertoy_api.dart';
+import 'package:shadertoy_client/src/hybrid/user_sync.dart';
 
 import 'hybrid_client.dart';
+import 'shader_sync.dart';
 import 'sync.dart';
 
 /// A playlist synchronization task
 class PlaylistSyncTask extends SyncTask<FindPlaylistResponse> {
+  final FindShaderIdsResponse? extraResponse;
+
   /// The [PlaylistSyncTask] constructor
   ///
   /// * [response]: The [FindPlaylistResponse] associated with this task
-  PlaylistSyncTask(FindPlaylistResponse response) : super.one(response);
+  /// * [extraResponse]: The [FindShaderIdsResponse] associated with this task
+  PlaylistSyncTask(FindPlaylistResponse response, {this.extraResponse})
+      : super.one(response);
 }
 
 /// The result of a playlist synchronization task
@@ -75,45 +83,31 @@ class PlaylistSyncProcessor extends SyncProcessor {
 
   /// Saves a playlist with id equal to [playlistId]
   ///
-  /// * [playlistId]: The playlist id
-  Future<PlaylistSyncTask> _addPlaylist(String playlistId) {
-    return client
-        .findPlaylistById(playlistId)
-        .then((apiPlaylist) {
-          if (apiPlaylist.ok) {
-            return client
-                .findAllShaderIdsByPlaylistId(playlistId)
-                .then((apiShaders) {
-              final playlist = apiPlaylist.playlist;
-              final shaderIds = apiShaders.ids;
-              var pre = Future.value();
-              if (playlist != null && shaderIds != null) {
-                pre = store.savePlaylist(playlist, shaderIds: shaderIds);
-              }
-
-              return pre.then((value) => apiPlaylist);
-            });
-          }
-
-          return Future.value(apiPlaylist);
-        })
-        .then((pr) => PlaylistSyncTask(pr))
-        .catchError((e) => PlaylistSyncTask(getPlaylistError(e, playlistId)));
+  /// * [playlist]: The playlist
+  /// * [shaderIds]: The playlist shaders
+  Future<PlaylistSyncTask> _addPlaylist(
+      Playlist playlist, List<String> shaderIds) {
+    return store
+        .savePlaylist(playlist, shaderIds: shaderIds)
+        .then((_) => PlaylistSyncTask(FindPlaylistResponse(playlist: playlist)))
+        .catchError((e) => PlaylistSyncTask(getPlaylistError(e, playlist.id)));
   }
 
   /// Saves a list of playlists with [playlistIds]
   ///
-  /// * [playlistIds]: The list playlist ids
-  Future<List<PlaylistSyncTask>> _addPlaylists(Set<String> playlistIds) async {
+  /// * [playlists]: The map of playlists to shaders ids
+  Future<List<PlaylistSyncTask>> _addPlaylists(
+      Map<Playlist, Set<String>> playlists) async {
     final tasks = <Future<PlaylistSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
-    for (final playlistId in playlistIds) {
-      tasks.add(taskPool.withResource(() => _addPlaylist(playlistId)));
+    for (final playlistEntry in playlists.entries) {
+      tasks.add(taskPool.withResource(
+          () => _addPlaylist(playlistEntry.key, playlistEntry.value.toList())));
     }
 
     return runner.process<PlaylistSyncTask>(tasks,
-        message: 'Saving ${playlistIds.length} playlist(s): ');
+        message: 'Saving ${playlists.length} playlist(s)');
   }
 
   /// Deletes a playlist with id [playlistId]
@@ -130,39 +124,95 @@ class PlaylistSyncProcessor extends SyncProcessor {
 
   /// Deletes a list of playlists with [playlistIds]
   ///
-  /// * [playlistIds]: The list playlist ids
+  /// * [playlists]: The map of playlists to shaders ids
   Future<List<PlaylistSyncTask>> _deletePlaylists(
+      Map<Playlist, Set<String>> playlists) async {
+    final tasks = <Future<PlaylistSyncTask>>[];
+    final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
+
+    for (final playlist in playlists.keys) {
+      tasks.add(taskPool.withResource(() => _deletePlaylist(playlist.id)));
+    }
+
+    return runner.process<PlaylistSyncTask>(tasks,
+        message: 'Deleting ${playlists.length} playlist(s)');
+  }
+
+  Future<List<PlaylistSyncTask>> _clientPlaylists(
       Set<String> playlistIds) async {
     final tasks = <Future<PlaylistSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     for (final playlistId in playlistIds) {
-      tasks.add(taskPool.withResource(() => _deletePlaylist(playlistId)));
+      tasks.add(taskPool.withResource(() =>
+          client.findPlaylistById(playlistId).then((apiPlaylist) {
+            if (apiPlaylist.ok) {
+              return client
+                  .findAllShaderIdsByPlaylistId(playlistId)
+                  .then((apiShaders) {
+                return PlaylistSyncTask(apiPlaylist, extraResponse: apiShaders);
+              });
+            }
+
+            return Future.value(PlaylistSyncTask(apiPlaylist));
+          })));
     }
 
     return runner.process<PlaylistSyncTask>(tasks,
-        message: 'Deleting ${playlistIds.length} playlist(s): ');
+        message: 'Downloading ${playlistIds.length} playlist(s)');
   }
 
   /// Synchronizes a list of [playlistIds]
   ///
+  /// * [shaderSync]: The shader synchronization result
+  /// * [userSync]: The user synchronization result
   /// * [playlistIds]: The list playlist ids
-  Future<PlaylistSyncResult> _syncPlaylists(List<String> playlistIds) async {
-    final localResponse = await store.findAllPlaylists();
-    if (localResponse.ok) {
-      final localPlaylists = localResponse.playlists ?? [];
-      final localPlaylistIds = localPlaylists
+  Future<PlaylistSyncResult> _syncPlaylists(ShaderSyncResult shaderSync,
+      UserSyncResult userSync, List<String> playlistIds) async {
+    final storeResponse = await store.findAllPlaylists();
+
+    if (storeResponse.ok) {
+      final storePlaylists = storeResponse.playlists ?? [];
+      final storePlaylistIds = storePlaylists
           .map((fpr) => fpr.playlist?.id)
           .whereType<String>()
           .toSet();
-      final remotePlaylistIds = playlistIds.toSet();
 
-      final addPlaylistIds = remotePlaylistIds.difference(localPlaylistIds);
-      final removePlaylistIds = localPlaylistIds.difference(remotePlaylistIds);
-      final local = localPlaylists.map((fpr) => PlaylistSyncTask(fpr));
-      final added = await _addPlaylists(addPlaylistIds)
+      final requestesPlaylistIds = playlistIds.toSet();
+      final addPlaylistIds = requestesPlaylistIds.difference(storePlaylistIds);
+      final clientPlaylistShaderIds =
+          LinkedHashMap.of(<Playlist, Set<String>>{});
+      for (var playlistTask in await _clientPlaylists(addPlaylistIds)) {
+        final playlistResponse = playlistTask.response;
+        final playlistShaderIdsResponse = playlistTask.extraResponse;
+        if (playlistResponse.ok &&
+            playlistShaderIdsResponse != null &&
+            playlistShaderIdsResponse.ok) {
+          final shaderIds = shaderSync.currentShaderIds;
+          final userIds = userSync.currentUserIds;
+          final playlist = playlistResponse.playlist;
+          final playlistShaderIds =
+              (playlistShaderIdsResponse.ids ?? []).toSet();
+
+          if (playlist != null && userIds.contains(playlist.userId)) {
+            final filteredShaderIds = playlistShaderIds.intersection(shaderIds);
+            if (filteredShaderIds.isNotEmpty) {
+              clientPlaylistShaderIds[playlist] = filteredShaderIds;
+            }
+          }
+        }
+      }
+
+      final addPlaylists =
+          LinkedHashMap<Playlist, Set<String>>.from(clientPlaylistShaderIds)
+            ..removeWhere((key, value) => storePlaylistIds.contains(key.id));
+      final removePlaylists =
+          LinkedHashMap<Playlist, Set<String>>.from(clientPlaylistShaderIds)
+            ..removeWhere((key, value) => !storePlaylistIds.contains(key.id));
+      final local = storePlaylists.map((fpr) => PlaylistSyncTask(fpr));
+      final added = await _addPlaylists(addPlaylists)
           .then((value) => value.where((task) => task.response.ok).toList());
-      final removed = await _deletePlaylists(removePlaylistIds)
+      final removed = await _deletePlaylists(removePlaylists)
           .then((value) => value.where((task) => task.response.ok).toList());
       final removedPlaylistIds = removed
           .map((PlaylistSyncTask task) => task.response.playlist?.id)
@@ -174,7 +224,7 @@ class PlaylistSyncProcessor extends SyncProcessor {
           current: currentPlaylists, added: added, removed: removed);
     } else {
       runner.log(
-          'Error obtaining shader ids from the local store: ${localResponse.error?.message}');
+          'Error obtaining shader ids from the local store: ${storeResponse.error?.message}');
     }
 
     return PlaylistSyncResult();
@@ -182,9 +232,13 @@ class PlaylistSyncProcessor extends SyncProcessor {
 
   /// Synchronizes a list of [playlistIds]
   ///
+  /// * [shaderSync]: The shader synchronization result
+  /// * [userSync]: The user synchronization result
   /// * [playlistIds]: The list playlist ids
-  Future<PlaylistSyncResult> syncPlaylists(List<String> playlistIds) async {
-    final playlistSyncResult = await _syncPlaylists(playlistIds);
+  Future<PlaylistSyncResult> syncPlaylists(ShaderSyncResult shaderSync,
+      UserSyncResult userSync, List<String> playlistIds) async {
+    final playlistSyncResult =
+        await _syncPlaylists(shaderSync, userSync, playlistIds);
 
     return playlistSyncResult;
   }

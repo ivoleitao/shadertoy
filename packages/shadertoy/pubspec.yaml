@@ -1,5 +1,5 @@
 name: shadertoy
-version: 2.0.1
+version: 2.0.2
 description: >-
   Main entities and contracts supported by the shadertoy REST and WEB APIs. 
   Can be used to create shadertoy web or persistent clients.

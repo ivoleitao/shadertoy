@@ -2,12 +2,14 @@ import 'package:shadertoy/shadertoy_api.dart';
 
 import 'multi.dart';
 
+/// Shadertoy playlist command
 class PlaylistCommand extends MultiCommand {
   @override
   final name = 'playlist';
   @override
   final description = 'Gets one or more playlists by id';
 
+  /// Builds a [PlaylistCommand]
   PlaylistCommand() {
     argParser.addMultiOption('ids',
         abbr: 'i', help: 'The id(s) of the playlist', valueHelp: 'ids');

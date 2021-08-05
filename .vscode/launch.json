@@ -232,18 +232,31 @@
             "type": "dart"
         },
         {
-            "name": "CLI: Sqlite",
+            "name": "CLI: Sqlite Full",
             "program": "packages/shadertoy_cli/bin/shadertoy.dart",
             "args": [
                 "sqlite",
                 "-k",
                 "BdHtWh",
                 "-f",
-                ".dart_tool/shadertoy",
-                "-s",
-                "MdX3Rr",
-                "-s",
-                "Mt3XW8"
+                ".dart_tool/ws",
+                "-m",
+                "full"
+            ],
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "CLI: Sqlite Latest",
+            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "args": [
+                "sqlite",
+                "-k",
+                "BdHtWh",
+                "-f",
+                ".dart_tool/ws",
+                "-m",
+                "latest"
             ],
             "request": "launch",
             "type": "dart"

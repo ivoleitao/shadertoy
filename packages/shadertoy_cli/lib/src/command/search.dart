@@ -3,12 +3,14 @@ import 'package:shadertoy/shadertoy_api.dart';
 
 import 'multi.dart';
 
+/// Shadertoy search command
 class SearchCommand extends MultiCommand {
   @override
   final name = 'search';
   @override
   final description = 'Search shaders';
 
+  /// Builds a [SearchCommand]
   SearchCommand() {
     argParser
       ..addOption('term', abbr: 't', help: 'The search term', valueHelp: 'term')

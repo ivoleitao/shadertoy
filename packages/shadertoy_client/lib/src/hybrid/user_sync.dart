@@ -135,7 +135,7 @@ class UserSyncProcessor extends SyncProcessor {
     }
 
     return runner.process<UserSyncTask>(tasks,
-        message: 'Saving ${userIds.length} user(s): ');
+        message: 'Saving ${userIds.length} user(s)');
   }
 
   /// Deletes a user with id [userId]
@@ -161,13 +161,15 @@ class UserSyncProcessor extends SyncProcessor {
     }
 
     return runner.process<UserSyncTask>(tasks,
-        message: 'Deleting ${userIds.length} user(s): ');
+        message: 'Deleting ${userIds.length} user(s)');
   }
 
   /// Synchronizes a list of users from a previously synchronized list of shaders
   ///
   /// * [shaderSync]: The shader synchronization result
-  Future<UserSyncResult> _syncUsers(ShaderSyncResult shaderSync) async {
+  /// * [mode]: The synchronization mode
+  Future<UserSyncResult> _syncUsers(
+      ShaderSyncResult shaderSync, HybridSyncMode mode) async {
     final localResponse = await store.findAllUsers();
     if (localResponse.ok) {
       final localUsers = localResponse.users ?? [];
@@ -180,11 +182,16 @@ class UserSyncProcessor extends SyncProcessor {
       final local = localUsers.map((fur) => UserSyncTask(fur));
       final added = await _addUsers(addUserIds)
           .then((value) => value.where((task) => task.response.ok).toList());
-      final removed = await _deleteUsers(removeUserIds)
-          .then((value) => value.where((task) => task.response.ok).toList());
-      final removedUserIds = removed
-          .map((UserSyncTask task) => task.response.user?.id)
-          .whereType<String>();
+
+      var removed = <UserSyncTask>[];
+      var removedUserIds = Iterable.empty();
+      if (mode == HybridSyncMode.full) {
+        removed = await _deleteUsers(removeUserIds)
+            .then((value) => value.where((task) => task.response.ok).toList());
+        removedUserIds = removed
+            .map((UserSyncTask task) => task.response.user?.id)
+            .whereType<String>();
+      }
       final currentUsers = [...local, ...added]..removeWhere((element) =>
           removedUserIds.contains(element.response.user?.id ?? ''));
 
@@ -230,7 +237,7 @@ class UserSyncProcessor extends SyncProcessor {
     }
 
     return runner.process<DownloadSyncTask>(tasks,
-        message: 'Deleting ${pathSet.length} user pictures: ');
+        message: 'Deleting ${pathSet.length} user pictures');
   }
 
   /// Synchronizes the pictures from a user
@@ -238,8 +245,9 @@ class UserSyncProcessor extends SyncProcessor {
   /// * [fs]: The [FileSystem]
   /// * [dir]: The target directory on the [FileSystem]
   /// * [userSync]: The user synchronization result
-  Future<DownloadSyncResult> _syncUserPictures(
-      FileSystem fs, Directory dir, UserSyncResult userSync) async {
+  /// * [mode]: The synchronization mode
+  Future<DownloadSyncResult> _syncUserPictures(FileSystem fs, Directory dir,
+      UserSyncResult userSync, HybridSyncMode mode) async {
     final localUserPictures = <String>{};
 
     await for (final path in listFiles(dir, _userMediaFiles, recursive: true)) {
@@ -274,11 +282,14 @@ class UserSyncProcessor extends SyncProcessor {
   /// * [fs]: The [FileSystem]
   /// * [dir]: The target directory on the [FileSystem]
   /// * [userSync]: The user synchronization result
-  Future<UserSyncResult> syncUsers(ShaderSyncResult shaderSync,
+  /// * [mode]: The synchronization mode
+  Future<UserSyncResult> syncUsers(
+      ShaderSyncResult shaderSync, HybridSyncMode mode,
       {FileSystem? fs, Directory? dir}) async {
-    final userSyncResult = await _syncUsers(shaderSync);
+    final userSyncResult = await _syncUsers(shaderSync, mode);
     if (fs != null) {
-      await _syncUserPictures(fs, dir ?? fs.currentDirectory, userSyncResult);
+      await _syncUserPictures(
+          fs, dir ?? fs.currentDirectory, userSyncResult, mode);
     }
 
     return userSyncResult;

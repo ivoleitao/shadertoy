@@ -1,3 +1,8 @@
+## 2.0.2
+
+- Updated dependencies
+- Fixed problems with the sync command
+
 ## 2.0.1
 
 - Corrected broken links in the README file
