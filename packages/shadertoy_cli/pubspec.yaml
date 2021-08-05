@@ -13,9 +13,9 @@ dependencies:
   progress_bar: ^1.0.0
   file: ^6.1.2
   moor: ^4.4.1
-  # shadertoy: ^2.0.1
-  shadertoy:
-    path: ../shadertoy
+  shadertoy: ^2.0.1
+  # shadertoy:
+  #  path: ../shadertoy
   # shadertoy_client: ^2.0.1
   shadertoy_client:
     path: ../shadertoy_client

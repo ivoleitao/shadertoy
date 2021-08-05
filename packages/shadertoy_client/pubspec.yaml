@@ -23,9 +23,9 @@ dependencies:
   html: ^0.15.0
   intl: ^0.17.0
   glob: ^2.0.1
-  # shadertoy: ^2.0.1
-  shadertoy:
-   path: ../shadertoy
+  shadertoy: ^2.0.2
+  # shadertoy:
+  #  path: ../shadertoy
 
 dev_dependencies:
   lints: ^1.0.1
