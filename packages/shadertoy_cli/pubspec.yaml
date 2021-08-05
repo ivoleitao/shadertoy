@@ -1,6 +1,5 @@
 name: shadertoy_cli
 version: 2.0.3
-publish_to: none
 description: A sample command-line application.
 homepage: https://github.com/ivoleitao/shadertoy
 
