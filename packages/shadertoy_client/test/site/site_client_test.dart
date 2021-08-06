@@ -626,7 +626,7 @@ void main() {
       expect(sr, isNotNull);
       expect(sr.error, isNull);
       expect(sr, await findShadersResponseFixture(shaders));
-    }, timeout: Timeout(Duration(seconds: 60)));
+    });
 
     test('Find all shader ids', () async {
       // prepare
@@ -780,7 +780,7 @@ void main() {
           ResponseError.unknown(
               message: 'SocketException: $message', context: contextShader));
     });
-  });
+  }, timeout: Timeout(Duration(seconds: 60)));
 
   group('Users', () {
     test('Find user iq by id', () async {
@@ -1300,7 +1300,7 @@ void main() {
               context: contextUser,
               target: userId));
     });
-  });
+  }, timeout: Timeout(Duration(seconds: 60)));
 
   group('Comments', () {
     test('Find comments by shader id', () async {
@@ -1890,7 +1890,7 @@ void main() {
               context: contextPlaylist,
               target: playlistId));
     });
-  });
+  }, timeout: Timeout(Duration(seconds: 60)));
 
   group('Downloads', () {
     test('Download shader picture', () async {

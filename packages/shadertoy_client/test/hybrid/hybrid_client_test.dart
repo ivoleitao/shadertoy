@@ -481,7 +481,7 @@ void main() {
           await findShaderIdsResponseFixture(
               [...shaders1, ...shaders2, shaders3[0]]));
     });
-  });
+  }, timeout: Timeout(Duration(seconds: 60)));
 
   group('Users', () {
     test('Find user by id', () async {
@@ -568,7 +568,7 @@ void main() {
           await findShaderIdsResponseFixture(shaders,
               count: siteOptions.pageUserShaderCount));
     });
-  });
+  }, timeout: Timeout(Duration(seconds: 60)));
 
   group('Comments', () {
     test('Find comments by shader id', () async {
@@ -709,7 +709,7 @@ void main() {
           await findShaderIdsResponseFixture(shaders,
               count: siteOptions.pagePlaylistShaderCount));
     });
-  });
+  }, timeout: Timeout(Duration(seconds: 60)));
 
   group('Downloads', () {
     test('Download shader picture', () async {
