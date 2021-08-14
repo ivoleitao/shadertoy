@@ -1,9 +1,9 @@
 import 'package:shadertoy/shadertoy_api.dart';
 
-import 'multi.dart';
+import 'extended.dart';
 
 /// Shadertoy shader command
-class ShaderCommand extends MultiCommand {
+class ShaderCommand extends ExtendedCommand {
   @override
   final name = 'shader';
   @override

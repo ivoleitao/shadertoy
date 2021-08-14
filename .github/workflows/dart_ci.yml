@@ -1,4 +1,4 @@
-name: Shadertoy Build
+name: Dart CI
 
 on:
   schedule:
@@ -9,7 +9,7 @@ on:
     paths:
       - 'melos.yaml'
       - 'packages/**'
-      - '.github/workflows/build.yml'
+      - '.github/workflows/dart_ci.yml'
 
   pull_request:
     branches:
@@ -17,10 +17,11 @@ on:
     paths:
       - 'melos.yaml'
       - 'packages/**'
-      - '.github/workflows/build.yml'
+      - '.github/workflows/dart_ci.yml'
 
 jobs:
-  build:
+  ci:
+    name: CI
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

@@ -1,10 +1,10 @@
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 
-import 'multi.dart';
+import 'extended.dart';
 
 /// Shadertoy search command
-class SearchCommand extends MultiCommand {
+class SearchCommand extends ExtendedCommand {
   @override
   final name = 'search';
   @override

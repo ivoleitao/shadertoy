@@ -16,8 +16,14 @@ abstract class ClientCommand<T extends ShadertoyClient> {
 abstract class ExtendedClientCommand
     extends ClientCommand<ShadertoyExtendedClient> {}
 
+/// An abstaction for a [ShadertoyWS] command
+abstract class WSClientCommand extends ClientCommand<ShadertoyWS> {}
+
+/// An abstaction for a [ShadertoySite] command
+abstract class SiteClientCommand extends ClientCommand<ShadertoySite> {}
+
 /// An abstaction for a [ShadertoyHybrid] command
-abstract class HybridCommand extends ClientCommand<ShadertoyHybrid> {}
+abstract class HybridClientCommand extends ClientCommand<ShadertoyHybrid> {}
 
 /// Base Shadertoy command class
 abstract class BaseCommand extends Command {

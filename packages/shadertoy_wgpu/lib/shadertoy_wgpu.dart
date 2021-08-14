@@ -1,0 +1,1 @@
+library shadertoy_wgpu;

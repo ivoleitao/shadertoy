@@ -1,4 +1,4 @@
-name: Shadertoy Plantuml
+name: Plantuml
 on:
   push:
     paths:

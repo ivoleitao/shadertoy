@@ -3,12 +3,13 @@ import 'dart:io';
 
 import 'package:progress_bar/progress_bar.dart';
 import 'package:shadertoy/shadertoy_api.dart';
-import 'package:shadertoy_cli/src/command/client.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
+
+import 'hybrid.dart';
 
 /// Provides the base for a command that performs a synchronization between the
 /// shadertoy client and a shadertoy store
-abstract class SyncCommand extends ClientCommand implements SyncTaskRunner {
+abstract class SyncCommand extends HybridCommand implements SyncTaskRunner {
   SyncCommand() {
     argParser
       ..addOption('concurrency',

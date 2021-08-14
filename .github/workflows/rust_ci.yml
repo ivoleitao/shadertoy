@@ -1,0 +1,50 @@
+name: Rust Lib
+
+on:
+  schedule:
+    - cron: '*/30 8 * * *'
+  push:
+    branches:
+      - develop
+    paths:
+      - 'crates/**'
+      - '.github/workflows/rust_ci.yml'
+
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'crates/**'
+      - '.github/workflows/rust_ci.yml'
+
+jobs:
+  ci:
+    name: CI
+
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        toolchain: ['stable']
+        crate: ['shadertoy_wgpu_ffi']
+        arch: ['x86_64-unknown-linux-gnu']
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Set up rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.arch }}
+          override: true
+
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Build
+        uses: marcopolo/cargo@master
+        with:
+          use-cross: true
+          command: build
+          working-directory: crates/${{ matrix.crate }}
+          args: --release --target ${{ matrix.arch }}

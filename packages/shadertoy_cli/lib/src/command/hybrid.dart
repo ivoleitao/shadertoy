@@ -1,13 +1,14 @@
 import 'package:shadertoy_client/shadertoy_client.dart';
 
-import 'api.dart';
 import 'base.dart';
+import 'multi.dart';
 
-/// Provides a base definition of a command that interacts with a
-/// shadertoy http client
-abstract class ClientCommand extends APICommand implements HybridCommand {
-  /// Builds an [ClientCommand]
-  ClientCommand();
+/// Provides a base definition of a command that interacts with the
+/// Shadertoy hybrid API
+abstract class HybridCommand extends MultiCommand
+    implements HybridClientCommand {
+  /// Builds an [HybridCommand]
+  HybridCommand();
 
   @override
   void run() {

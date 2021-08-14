@@ -1,9 +1,9 @@
 import 'package:shadertoy/shadertoy_api.dart';
 
-import 'multi.dart';
+import 'extended.dart';
 
 /// Shadertoy comments command
-class CommentsCommand extends MultiCommand {
+class CommentsCommand extends ExtendedCommand {
   @override
   final name = 'comments';
   @override

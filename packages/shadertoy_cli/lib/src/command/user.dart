@@ -1,9 +1,9 @@
 import 'package:shadertoy/shadertoy_api.dart';
 
-import 'multi.dart';
+import 'extended.dart';
 
 /// Shadertoy user command
-class UserCommand extends MultiCommand {
+class UserCommand extends ExtendedCommand {
   @override
   final name = 'user';
   @override

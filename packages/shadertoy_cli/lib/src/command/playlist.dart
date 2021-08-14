@@ -1,9 +1,9 @@
 import 'package:shadertoy/shadertoy_api.dart';
 
-import 'multi.dart';
+import 'extended.dart';
 
 /// Shadertoy playlist command
-class PlaylistCommand extends MultiCommand {
+class PlaylistCommand extends ExtendedCommand {
   @override
   final name = 'playlist';
   @override
