@@ -12,25 +12,26 @@ import 'strategy/package_relative_strategy_stub.dart'
 import 'strategy/script_relative_strategy.dart';
 import 'strategy/system_resolution_strategy.dart';
 
-/// Its expected that internal libraries are prefixed with es
-/// This is also referenced in CMakeLists.txt file in
-/// [blob_builder tool](tool/blob_builder/CMakeLists.txt)
-const _esprefix = 'es';
-
 /// Provides the capability to locate and open native shared libraries.
 ///
 /// There are several mechanisms used to resolve shared libraries.
 /// The implementation for each mechanism is defined by subclasses of
 /// [LoadLibraryStrategy].
 mixin LibraryResolver {
-  /// Mixer Responsibility: Return the module id for path resolution.
-  String get moduleId;
+  /// Mixer Responsibility: Return the package name for path resolution.
+  String get packageName;
+
+  /// Mixer Responsibility: Return the library name for path resolution.
+  String get libraryName;
+
+  /// Mixer Responsibility: Return the optional module name for path resolution.
+  String? get moduleName => null;
 
   /// Ordered list of strategies for resolving and opening shared libraries.
   final List<LoadLibraryStrategy> _strategies = [];
 
   /// Open the shared library whose path is resolved either by the supplied
-  /// [path] or by the mixer [moduleId].
+  /// [path] or by the mixer [moduleName].
   ///
   /// If [path] is provided, then it acts as an override to any other lookup
   /// mechanisms.
@@ -71,8 +72,9 @@ mixin LibraryResolver {
       throw Exception('Unsupported platform!');
     }
 
-    final result = os + bitness;
-    return '$_esprefix$moduleId-$result.$extension';
+    return moduleName != null
+        ? '${libraryName}_$moduleName-$os$bitness.$extension'
+        : '$libraryName-$os$bitness.$extension';
   }
 
   /// Add the [strategy] to the list of [_strategies].

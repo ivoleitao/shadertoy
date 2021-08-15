@@ -1,16 +1,25 @@
 import 'dart:ffi';
 
+import 'package:shadertoy_wgpu/src/resolver/library_resolver.dart';
+
 import 'constants.dart';
 import 'functions.dart';
-import 'resolver/library_resolver.dart';
 import 'types.dart';
 
-/// An [WgpuLibrary] is the gateway to the native shadertoy_wgpu shared library.
+/// [WgpuLibrary] is the gateway to the native shadertoy_wgpu shared library.
 ///
 /// It has a series of mixins for making available constants, types and
 /// functions that are described in C header files.
 class WgpuLibrary
     with LibraryResolver, WgpuConstants, WgpuTypes, WgpuFunctions {
+  /// Unique name of this package.
+  @override
+  String get packageName => 'shadertoy_wgpu';
+
+  /// Unique name of this library.
+  @override
+  String get libraryName => 'shadertoy_wgpu';
+
   /// Library path the user can define to override normal resolution.
   static String? _userDefinedLibraryPath;
 
@@ -22,7 +31,7 @@ class WgpuLibrary
   /// Throw a [StateError] if this library has already been initialized.
   static set userDefinedLibraryPath(String? path) {
     if (_initialized == true) {
-      throw StateError('WgpuLibrary already initialized.');
+      throw StateError('Wgpu library already initialized.');
     }
     _userDefinedLibraryPath = path;
   }
@@ -38,11 +47,7 @@ class WgpuLibrary
   /// Dart native library object.
   late final DynamicLibrary? _libraryImpl;
 
-  /// Unique id of this library module.
-  @override
-  String get moduleId => 'wgpu';
-
-  /// Return the [Lz4Library] singleton library instance.
+  /// Return the [WgpuLibrary] singleton library instance.
   factory WgpuLibrary() {
     return _instance;
   }

@@ -11,10 +11,6 @@ import 'load_library_strategy.dart';
 /// and detect if there is a shared library file whose name conforms to the
 /// convention described above.
 class ScriptRelativeStrategy extends LoadLibraryStrategy {
-  /// Return the [String] id of the [ScriptRelativeStrategy].
-  @override
-  String get strategyId => 'Script-Relative-Strategy';
-
   /// Return the opened [DynamicLibrary] if the library was resolved via
   /// script relative resolution, [:null:] otherwise.
   @override

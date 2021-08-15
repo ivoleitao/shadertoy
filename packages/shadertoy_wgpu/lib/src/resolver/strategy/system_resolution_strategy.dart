@@ -13,10 +13,6 @@ class SystemResolutionStrategy extends LoadLibraryStrategy {
   /// Construct an instance of this strategy with the [path] to open.
   SystemResolutionStrategy(this.path) : super();
 
-  /// Return the [String] id of the [SystemResolutionStrategy].
-  @override
-  String get strategyId => 'Os-Resolution-Strategy';
-
   /// Return the opened [DynamicLibrary] if the library was resolved via
   /// os path resolution, [:null:] otherwise.
   @override

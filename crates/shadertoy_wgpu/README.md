@@ -1,4 +1,4 @@
-# shadertoy_wgpu_ffi
+# shadertoy_wgpu
 
 [![Github Stars](https://img.shields.io/github/stars/ivoleitao/shadertoy.svg)](https://github.com/ivoleitao/shadertoy)
 [![GitHub License](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

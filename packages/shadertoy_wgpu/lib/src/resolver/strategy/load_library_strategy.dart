@@ -5,9 +5,6 @@ import '../library_resolver.dart';
 /// An [LoadLibraryStrategy] is the mechanism used to resolve and open a shared
 /// library.
 ///
-/// All [LoadLibraryStrategy] subclasses will have a
-/// [LoadLibraryStrategy.strategyId] so they can easily be identified.
-///
 /// An [LoadLibraryStrategy] will be requested to add itself to a list of
 /// strategies.
 ///
@@ -15,9 +12,6 @@ import '../library_resolver.dart';
 /// [LoadLibraryStrategy.openFor] which will answer [:true:] if successful,
 /// [:false:] if not successful.
 abstract class LoadLibraryStrategy {
-  /// Return the [String] id of the strategy.
-  String get strategyId;
-
   /// Add this strategy to the list of strategies.
   ///
   /// By default, this strategy will be appended to the end of the list of

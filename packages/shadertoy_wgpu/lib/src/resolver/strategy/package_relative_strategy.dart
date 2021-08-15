@@ -5,40 +5,33 @@ import 'dart:isolate' show Isolate;
 import '../library_resolver.dart';
 import 'load_library_strategy.dart';
 
-/// Package name used as the root for package uri resolution.
-const _espackage = 'es_compression';
-
 /// An [PackageRelativeStrategy] will attempt to resolve the shared
 /// library via a location based on a package-relative convention.
 ///
 /// **Prebuilt Libraries:** There is a library layout convention used for
-/// locating prebuilt shared libraries. This strategy requires a
-/// [LibraryResolver.moduleId], which is a [String] identifier used to fully resolve
-/// prebuilt library locations on the filesystem.
+/// locating prebuilt shared libraries. This strategy requires a:
+/// * [LibraryResolver.packageName], which is a [String] identifier to fully
+/// resolve a dart package (package:{packageName})
+/// * [LibraryResolver.libraryName], which is a [String] identifier to fully
+/// resolve a dart library (package:{packageName}/{libraryName}.dart)
+/// * [LibraryResolver.moduleName], which is a [String] identifier to fully
+/// resolve the location of the library blobs as every library should be defined
+/// in its own subdirectory of lib/src (package:{packageName}/src/{moduleName})
 ///
-/// **Library layout convention:** The following convention is used for locating
-/// prebuilt shared libraries. Every compression library is defined in its own
-/// subdirectory of lib/src.
-/// For example, the LZ4 implementation is in *lib/src/lz4*. The
-/// [LibraryResolver.moduleId] is the basename in this path, in this example *lz4*.
-/// There will exist a *blobs* subdirectory of the module or
-/// */lib/src/lz4/blobs* in the example. The blobs directory will contain the
-/// shared libraries which have the name of the form
-/// es$moduleId_c-$os$bitness.$extension.
-/// In the case of lz4 on Win64, it is named *eslz4_c-win64.dll*.
+/// The blobs directory will contain the shared libraries which have the name in
+/// the form $libraryName_$moduleName-$os$bitness.$extension. In the case of this
+/// library on Win64, it is named *shadertoy_wgpu_ffi-win64.dll*.
 class PackageRelativeStrategy extends LoadLibraryStrategy {
-  /// Return the [String] id of the [PackageRelativeStrategy].
-  @override
-  String get strategyId => 'Package-Relative-Strategy';
-
   /// Return the opened [DynamicLibrary] if the library was resolved via
   /// package relative resolution, [:null:] otherwise.
   @override
   DynamicLibrary? openFor(LibraryResolver resolver) {
-    final moduleId = resolver.moduleId;
-    final packageLibrary = 'package:$_espackage/$moduleId.dart';
+    final packageName = resolver.packageName;
+    final libraryName = resolver.libraryName;
+    final moduleName = resolver.moduleName ?? 'ffi';
+    final packageLibrary = 'package:$packageName/$libraryName.dart';
     final packageUri = _resolvePackagedLibraryLocation(packageLibrary);
-    final blobs = packageUri?.resolve('src/$moduleId/blobs/');
+    final blobs = packageUri?.resolve('src/$moduleName/blobs/');
     final filePath = blobs?.resolve(resolver.defaultLibraryFileName);
     if (filePath == null) return null;
     return open(filePath.toFilePath());

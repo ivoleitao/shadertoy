@@ -1,5 +1,5 @@
 [package]
-name = "shadertoy_wgpu_ffi"
+name = "shadertoy_wgpu"
 version = "2.0.3"
 authors = ["Ivo Leitão <ivo.leitao@gmail.com>"]
 edition = "2018"
@@ -8,11 +8,11 @@ readme = "README.md"
 homepage = "https://github.com/ivoleitao/shadertoy"
 repository = "https://github.com/ivoleitao/shadertoy"
 license = "MIT"
-keywords = ["wgpu", "graphics", "shadertoy", "ffi"]
+keywords = ["wgpu", "graphics", "shadertoy"]
 categories = ["graphics", "rendering", "multimedia::images", "multimedia::video"]
 
 [lib]
-name = "wgpu_ffi"
+name = "shadertoy_wgpu"
 crate-type = ["cdylib"]
 
 [dependencies]

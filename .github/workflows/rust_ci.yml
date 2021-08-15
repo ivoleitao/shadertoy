@@ -23,21 +23,31 @@ jobs:
 
     strategy:
       matrix:
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        crate: ['shadertoy_wgpu_ffi']
+        host: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        crate: ['shadertoy_wgpu']
+        package: ['shadertoy_wgpu']
+        library: ['shadertoy_wgpu']
         include:
-          - os: ubuntu-latest
+          - host: ubuntu-latest
             toolchain: stable
             target: x86_64-unknown-linux-gnu
-          - os: windows-latest
-            toolchain: stable
-            target: x86_64-pc-windows-msvc            
-          - os: macos-latest
+            os: linux
+            bitness: 64
+            extension: so
+          - host: macos-latest
             toolchain: stable
             target: x86_64-apple-darwin            
+            os: mac
+            bitness: 64
+            extension: dylib
+          - host: windows-latest
+            toolchain: stable
+            target: x86_64-pc-windows-msvc            
+            os: win
+            bitness: 64
+            extension: dll
 
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.host }}
 
     steps:
       - name: Set up rust
@@ -58,14 +68,7 @@ jobs:
           working-directory: crates/${{ matrix.crate }}
           args: --release --target ${{ matrix.target }}
 
-      - name: Print ${{ matrix.os }} target contents
-        if: matrix.os == 'ubuntu-latest'
-        run: ls crates/${{ matrix.crate }}/target/${{ matrix.target }}/release
-
-      - name: Print ${{ matrix.os }} target contents
-        if: matrix.os == 'windows-latest'
-        run: dir crates\${{ matrix.crate }}\target\${{ matrix.target }}\release
-
-      - name: Print ${{ matrix.os }} target contents
-        if: matrix.os == 'macos-latest'
-        run: ls crates/${{ matrix.crate }}/target/${{ matrix.target }}/release
+      - name: Copy crates/${{ matrix.crate }}/target/${{ matrix.target }}/release/lib${{ matrix.crate }}.${{ matrix.extension }} to packages/${{ matrix.package }}/lib/src/ffi/blobs/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
+        run: | 
+          cp crates/${{ matrix.crate }}/target/${{ matrix.target }}/release/lib${{ matrix.crate }}.${{ matrix.extension }} packages/${{ matrix.package }}/lib/src/ffi/blobs/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
+        shell: bash

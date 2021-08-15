@@ -8,10 +8,6 @@ import 'load_library_strategy.dart';
 /// The purpose of this is to be a placeholder for build
 /// configurations that do not support `dart:cli`.
 class PackageRelativeStrategy extends LoadLibraryStrategy {
-  /// Return the [String] id of the [PackageRelativeStrategy].
-  @override
-  String get strategyId => 'Package-Relative-Strategy';
-
   /// Return [:null:].
   @override
   DynamicLibrary? openFor(LibraryResolver resolver) {
