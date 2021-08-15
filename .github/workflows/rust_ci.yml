@@ -1,4 +1,4 @@
-name: Rust Lib
+name: Rust CI
 
 on:
   schedule:
