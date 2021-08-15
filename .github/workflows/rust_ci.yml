@@ -23,10 +23,19 @@ jobs:
 
     strategy:
       matrix:
-        os: ['ubuntu-latest']
-        toolchain: ['stable']
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
         crate: ['shadertoy_wgpu_ffi']
-        arch: ['x86_64-unknown-linux-gnu']
+        include:
+          - os: ubuntu-latest
+            toolchain: stable
+            arch: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            toolchain: stable
+            target: x86_64-pc-windows-msvc            
+          - os: macos-latest
+            toolchain: stable
+            target: x86_64-apple-darwin            
+
 
     runs-on: ${{ matrix.os }}
 
