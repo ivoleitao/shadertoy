@@ -70,5 +70,11 @@ jobs:
 
       - name: Copy crates/${{ matrix.crate }}/target/${{ matrix.target }}/release/lib${{ matrix.crate }}.${{ matrix.extension }} to packages/${{ matrix.package }}/lib/src/ffi/blobs/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
         run: | 
+          mkdir packages/${{ matrix.package }}/lib/src/ffi/blobs 
           cp crates/${{ matrix.crate }}/target/${{ matrix.target }}/release/lib${{ matrix.crate }}.${{ matrix.extension }} packages/${{ matrix.package }}/lib/src/ffi/blobs/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
         shell: bash
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          default_author: github_actions
