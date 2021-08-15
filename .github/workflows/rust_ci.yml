@@ -70,9 +70,8 @@ jobs:
 
       - name: Copy shared libraries
         run: | 
-          mkdir packages/${{ matrix.package }}/lib/src/ffi/blobs 
-          ls crates/${{ matrix.crate }}/target/${{ matrix.target }}/release 
-          cp crates/${{ matrix.crate }}/target/${{ matrix.target }}/release/lib${{ matrix.crate }}.${{ matrix.extension }} packages/${{ matrix.package }}/lib/src/ffi/blobs/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
+          mkdir -p packages/${{ matrix.package }}/lib/src/ffi/blobs 
+          cp crates/${{ matrix.crate }}/target/${{ matrix.target }}/release/${{ matrix.crate }}.${{ matrix.extension }} packages/${{ matrix.package }}/lib/src/ffi/blobs/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
         shell: bash
 
       - name: Commit changes
