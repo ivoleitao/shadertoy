@@ -60,12 +60,12 @@ jobs:
 
       - name: Print ${{ matrix.os }} target contents
         if: matrix.os == 'ubuntu-latest'
-        run: ls crates/${{ matrix.crate }}/target
+        run: ls crates/${{ matrix.crate }}/target/${{ matrix.target }}/release
 
       - name: Print ${{ matrix.os }} target contents
         if: matrix.os == 'windows-latest'
-        run: dir crates\${{ matrix.crate }}\target
+        run: dir crates\${{ matrix.crate }}\target\${{ matrix.target }}\release
 
       - name: Print ${{ matrix.os }} target contents
         if: matrix.os == 'macos-latest'
-        run: ls crates/${{ matrix.crate }}/target
+        run: ls crates/${{ matrix.crate }}/target/${{ matrix.target }}/release
