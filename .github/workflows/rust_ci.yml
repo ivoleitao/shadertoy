@@ -31,18 +31,21 @@ jobs:
           - host: ubuntu-latest
             toolchain: stable
             target: x86_64-unknown-linux-gnu
+            prefix: lib
             os: linux
             bitness: 64
             extension: so
           - host: macos-latest
             toolchain: stable
             target: x86_64-apple-darwin            
+            prefix: lib
             os: mac
             bitness: 64
             extension: dylib
           - host: windows-latest
             toolchain: stable
             target: x86_64-pc-windows-msvc            
+            prefix:
             os: win
             bitness: 64
             extension: dll
@@ -71,7 +74,7 @@ jobs:
       - name: Copy shared libraries
         run: | 
           mkdir -p packages/${{ matrix.package }}/lib/src/ffi/blobs 
-          cp crates/${{ matrix.crate }}/target/${{ matrix.target }}/release/${{ matrix.crate }}.${{ matrix.extension }} packages/${{ matrix.package }}/lib/src/ffi/blobs/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
+          cp crates/${{ matrix.crate }}/target/${{ matrix.target }}/release/${{ matrix.prefix }}${{ matrix.library }}.${{ matrix.extension }} packages/${{ matrix.package }}/lib/src/ffi/blobs/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
         shell: bash
 
       - name: Commit changes
