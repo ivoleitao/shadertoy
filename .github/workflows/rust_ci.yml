@@ -50,10 +50,10 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Build
+      - name: Build ${{ matrix.crate }}
         uses: marcopolo/cargo@master
         with:
           use-cross: true
           command: build
           working-directory: crates/${{ matrix.crate }}
-          args: --release --target ${{ matrix.target }}
+          args: --release --verbose --target ${{ matrix.target }}
