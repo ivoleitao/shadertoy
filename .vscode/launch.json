@@ -187,7 +187,7 @@
         },
         {
             "name": "CLI : User",
-            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "program": "packages/shadertoy_cli/bin/shadertoy_cli.dart",
             "args": [
                 "user",
                 "-i",
@@ -198,9 +198,20 @@
         },
         {
             "name": "CLI : Shader",
-            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "program": "packages/shadertoy_cli/bin/shadertoy_cli.dart",
             "args": [
                 "shader",
+                "-i",
+                "WlVyRV"
+            ],
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "CLI : Image",
+            "program": "packages/shadertoy_cli/bin/shadertoy_cli.dart",
+            "args": [
+                "image",
                 "-k",
                 "BdHtWh",
                 "-i",
@@ -211,7 +222,7 @@
         },
         {
             "name": "CLI : Shader Comments",
-            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "program": "packages/shadertoy_cli/bin/shadertoy_cli.dart",
             "args": [
                 "comments",
                 "-i",
@@ -222,7 +233,7 @@
         },
         {
             "name": "CLI : Playlist",
-            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "program": "packages/shadertoy_cli/bin/shadertoy_cli.dart",
             "args": [
                 "playlist",
                 "-i",
@@ -233,7 +244,7 @@
         },
         {
             "name": "CLI: Sqlite Full",
-            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "program": "packages/shadertoy_cli/bin/shadertoy_cli.dart",
             "args": [
                 "sqlite",
                 "-k",
@@ -248,7 +259,7 @@
         },
         {
             "name": "CLI: Sqlite Latest",
-            "program": "packages/shadertoy_cli/bin/shadertoy.dart",
+            "program": "packages/shadertoy_cli/bin/shadertoy_cli.dart",
             "args": [
                 "sqlite",
                 "-k",

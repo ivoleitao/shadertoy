@@ -16,11 +16,7 @@ class PreviewCommand extends SiteCommand {
       ..addOption('id',
           abbr: 'i', help: 'The id of the shader', valueHelp: 'id')
       ..addOption('path',
-          abbr: 'f', help: 'The target file path', valueHelp: 'path')
-      ..addOption('width',
-          abbr: 'w', help: 'The width of the image', valueHelp: 'width')
-      ..addOption('height',
-          abbr: 'h', help: 'The height of the image', valueHelp: 'height');
+          abbr: 'f', help: 'The target file path', valueHelp: 'path');
   }
 
   @override

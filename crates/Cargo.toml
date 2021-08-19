@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    "shadertoy_wgpu",
+    "shadertoy_wgpu_ffi"
+]
+
+[profile.release]
+opt-level = 3
+
+lto = true

@@ -63,10 +63,9 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Build ${{ matrix.crate }}
+      - name: Building ${{ matrix.crate }} crate
         uses: marcopolo/cargo@master
         with:
-          use-cross: true
           command: build
           working-directory: crates/${{ matrix.crate }}
           args: --release --target ${{ matrix.target }}

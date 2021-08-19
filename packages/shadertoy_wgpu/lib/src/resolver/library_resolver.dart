@@ -8,7 +8,7 @@ import 'dart:io';
 import 'strategy/envvar_strategy.dart';
 import 'strategy/load_library_strategy.dart';
 import 'strategy/package_relative_strategy_stub.dart'
-    if (dart.library.cli) 'package_relative_strategy.dart';
+    if (dart.library.cli) 'strategy/package_relative_strategy.dart';
 import 'strategy/script_relative_strategy.dart';
 import 'strategy/system_resolution_strategy.dart';
 

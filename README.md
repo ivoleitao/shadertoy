@@ -1,1 +1,0 @@
-./packages/shadertoy/README.md
