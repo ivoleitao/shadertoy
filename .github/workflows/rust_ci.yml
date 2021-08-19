@@ -74,7 +74,7 @@ jobs:
       - name: Copy shared libraries
         run: | 
           mkdir -p packages/${{ matrix.package }}/lib/src/ffi/blobs 
-          cp crates/${{ matrix.crate }}/target/${{ matrix.target }}/release/${{ matrix.prefix }}${{ matrix.library }}.${{ matrix.extension }} packages/${{ matrix.package }}/lib/src/ffi/blobs/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
+          cp crates/target/${{ matrix.target }}/release/${{ matrix.prefix }}${{ matrix.library }}.${{ matrix.extension }} packages/${{ matrix.package }}/lib/src/ffi/blobs/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
         shell: bash
 
       - name: Commit changes
