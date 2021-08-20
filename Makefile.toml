@@ -2,7 +2,7 @@
 CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
 CARGO_MAKE_WORKING_DIRECTORY = "crates"
 LIBRARY_FILE_EXT = { source = "${CARGO_MAKE_RUST_TARGET_OS}", default_value = "unknown", mapping = { linux = "so", macos = "dylib", windows = "dll", openbsd = "so" } }
-LIBRARY_SOURCE_NAME = { source = "${CARGO_MAKE_RUST_TARGET_OS}", default_value = "shadertoy_wgpu_ffi", mapping = { macos = "libshadertoy_wgpu_ffi" } }
+LIBRARY_SOURCE_NAME = { source = "${CARGO_MAKE_RUST_TARGET_OS}", default_value = "shadertoy_wgpu_ffi", mapping = { linux = "libshadertoy_wgpu_ffi" } }
 LIBRARY_TARGET_NAME = "shadertoy_wgpu_ffi"
 
 
@@ -14,5 +14,10 @@ args = ["build", "--release", "--target", "${CARGO_MAKE_RUST_TARGET_TRIPLE}"]
 script_runner = "@duckscript"
 script = '''
 cm_run_task build-release
+
+echo target/${CARGO_MAKE_RUST_TARGET_TRIPLE}/release/${LIBRARY_SOURCE_NAME}.${LIBRARY_FILE_EXT} 
+echo target/dist/${LIBRARY_TARGET_NAME}-${CARGO_MAKE_RUST_TARGET_ARCH}.${LIBRARY_FILE_EXT}
+
+
 cp target/${CARGO_MAKE_RUST_TARGET_TRIPLE}/release/${LIBRARY_SOURCE_NAME}.${LIBRARY_FILE_EXT} target/dist/${LIBRARY_TARGET_NAME}-${CARGO_MAKE_RUST_TARGET_ARCH}.${LIBRARY_FILE_EXT}
 '''
