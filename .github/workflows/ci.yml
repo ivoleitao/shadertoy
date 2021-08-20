@@ -74,15 +74,16 @@ jobs:
           working-directory: crates
           args: --release --target ${{ matrix.target }}
 
-      - name: Prepare shared libraries
+      - name: Preparing artifacts
         run: | 
           mkdir -p crates/target/dist
           cp crates/target/${{ matrix.target }}/release/${{ matrix.prefix }}${{ matrix.library }}.${{ matrix.extension }} crates/target/dist/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
         shell: bash
 
-      - uses: actions/upload-artifact@v2
+      - name: Uploading artifacts
+        uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
+          name: ${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
           path: crates/target/dist/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
   dart:
     name: Dart
@@ -107,6 +108,12 @@ jobs:
 
       - name: Checkout sources
         uses: actions/checkout@v2
+
+      # - name: Download shared libraries 
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: 'my-artifact'
+      #    path: packages/shadertoy_wgpu/lib/src/ffi/blobs
 
       - name: Install tools
         run: |
@@ -134,9 +141,9 @@ jobs:
         run: |
           melos run doc
 
-      - name: Publish dry run
+      - name: Verify
         run: |
-          melos publish
+          melos run verify
 
       #- name: Commit changes
       #  uses: EndBug/add-and-commit@v7

@@ -97,12 +97,12 @@ scripts:
     description: |
       Run `dart test` and collects coverage in all packages.
 
-  pana:
+  verify:
     run: |
-      melos exec --scope="shadertoy" --scope="shadertoy_client"  --scope="shadertoy_sqlite" -- \
-        "../../tool/pana.sh"
+      melos exec --no-private -- \
+        "dart pub publish --dry-run"
     description: |
-      Run `pana` in all packages.
+      Verify package
 
   codecov:
     run: |
