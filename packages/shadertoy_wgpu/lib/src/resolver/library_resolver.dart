@@ -18,6 +18,8 @@ import 'strategy/system_resolution_strategy.dart';
 /// The implementation for each mechanism is defined by subclasses of
 /// [LoadLibraryStrategy].
 mixin LibraryResolver {
+  static const String defaultModuleName = 'ffi';
+
   /// Mixer Responsibility: Return the package name for path resolution.
   String get packageName;
 
@@ -25,7 +27,7 @@ mixin LibraryResolver {
   String get libraryName;
 
   /// Mixer Responsibility: Return the optional module name for path resolution.
-  String? get moduleName => null;
+  String get moduleName => defaultModuleName;
 
   /// Ordered list of strategies for resolving and opening shared libraries.
   final List<LoadLibraryStrategy> _strategies = [];
@@ -72,9 +74,7 @@ mixin LibraryResolver {
       throw Exception('Unsupported platform!');
     }
 
-    return moduleName != null
-        ? '${libraryName}_$moduleName-$os$bitness.$extension'
-        : '$libraryName-$os$bitness.$extension';
+    return '${libraryName}_$moduleName-$os$bitness.$extension';
   }
 
   /// Add the [strategy] to the list of [_strategies].

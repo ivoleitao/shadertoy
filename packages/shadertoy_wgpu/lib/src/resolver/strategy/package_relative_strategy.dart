@@ -28,7 +28,7 @@ class PackageRelativeStrategy extends LoadLibraryStrategy {
   DynamicLibrary? openFor(LibraryResolver resolver) {
     final packageName = resolver.packageName;
     final libraryName = resolver.libraryName;
-    final moduleName = resolver.moduleName ?? 'ffi';
+    final moduleName = resolver.moduleName;
     final packageLibrary = 'package:$packageName/$libraryName.dart';
     final packageUri = _resolvePackagedLibraryLocation(packageLibrary);
     final blobs = packageUri?.resolve('src/$moduleName/blobs/');

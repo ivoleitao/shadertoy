@@ -43,9 +43,7 @@ class EnvVarStrategy extends LoadLibraryStrategy {
   String? _envLibraryFilePath(LibraryResolver resolver) {
     final libraryName = resolver.libraryName;
     final moduleName = resolver.moduleName;
-    final varName = moduleName != null
-        ? '${libraryName.toUpperCase()}_${moduleName.toUpperCase()}'
-        : libraryName.toUpperCase();
+    final varName = '${libraryName.toUpperCase()}_${moduleName.toUpperCase()}';
     var envPath = Platform.environment['{$varName}_LIBRARY_PATH'];
     if (envPath != null) {
       if (FileSystemEntity.typeSync(envPath) ==
