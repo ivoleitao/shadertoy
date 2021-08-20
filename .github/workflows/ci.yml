@@ -28,30 +28,16 @@ jobs:
     strategy:
       matrix:
         host: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        library: ['shadertoy_wgpu_ffi']
-        package: ['shadertoy_wgpu']
         include:
           - host: ubuntu-latest
             toolchain: stable
             target: x86_64-unknown-linux-gnu
-            prefix: lib
-            os: linux
-            bitness: 64
-            extension: so
           - host: macos-latest
             toolchain: stable
             target: x86_64-apple-darwin            
-            prefix: lib
-            os: mac
-            bitness: 64
-            extension: dylib
           - host: windows-latest
             toolchain: stable
             target: x86_64-pc-windows-msvc            
-            prefix:
-            os: win
-            bitness: 64
-            extension: dll
 
     runs-on: ${{ matrix.host }}
 
@@ -60,31 +46,29 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
-          target: ${{ matrix.arch }}
+          target: ${{ matrix.target }}
           override: true
+
+      - name: Install tools
+        uses: davidB/rust-cargo-make@v1
+        with:
+          version: 'latest'
 
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Building workspace
-        uses: marcopolo/cargo@master
+      - name: Build
+        uses: actions-rs/cargo@v1
         with:
           use-cross: true
-          command: build
-          working-directory: crates
-          args: --release --target ${{ matrix.target }}
-
-      - name: Preparing artifacts
-        run: | 
-          mkdir -p crates/target/dist
-          cp crates/target/${{ matrix.target }}/release/${{ matrix.prefix }}${{ matrix.library }}.${{ matrix.extension }} crates/target/dist/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
-        shell: bash
+          command: make
+          args: dist
 
       - name: Uploading artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
-          path: crates/target/dist/${{ matrix.library }}-${{ matrix.os }}${{ matrix.bitness }}.${{ matrix.extension }}
+          name: dist
+          path: crates/target/dist
   dart:
     name: Dart
     needs: rust
@@ -106,18 +90,18 @@ jobs:
         with:
           sdk: ${{ matrix.sdk }}
 
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      # - name: Download shared libraries 
-      #  uses: actions/download-artifact@v2
-      #  with:
-      #    name: 'my-artifact'
-      #    path: packages/shadertoy_wgpu/lib/src/ffi/blobs
-
       - name: Install tools
         run: |
           pub global activate melos
+
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Download shared libraries 
+        uses: actions/download-artifact@v2
+        with:
+          name: 'dist'
+          path: packages/shadertoy_wgpu/lib/src/ffi
 
       - name: Bootstrap
         run: |
