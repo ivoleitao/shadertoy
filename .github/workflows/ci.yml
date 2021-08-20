@@ -60,7 +60,7 @@ jobs:
         with:
           use-cross: true
           command: make
-          args: dist
+          args: ci-dist
 
       - name: Uploading artifacts
         uses: actions/upload-artifact@v2
@@ -127,7 +127,7 @@ jobs:
         run: |
           melos run verify
 
-      #- name: Commit changes
-      #  uses: EndBug/add-and-commit@v7
-      #  with:
-      #    default_author: github_actions
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          default_author: github_actions
