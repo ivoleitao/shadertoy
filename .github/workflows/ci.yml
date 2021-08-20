@@ -33,13 +33,10 @@ jobs:
         include:
           - host: ubuntu-latest
             toolchain: stable
-            target: x86_64-unknown-linux-gnu
           - host: macos-latest
             toolchain: stable
-            target: x86_64-apple-darwin            
           - host: windows-latest
             toolchain: stable
-            target: x86_64-pc-windows-msvc            
 
     runs-on: ${{ matrix.host }}
 
@@ -48,7 +45,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
-          target: ${{ matrix.target }}
           override: true
 
       - name: Install tools

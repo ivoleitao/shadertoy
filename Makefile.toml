@@ -17,8 +17,12 @@ cm_run_task build-release
 
 echo target/${CARGO_MAKE_RUST_TARGET_TRIPLE}/release/${LIBRARY_SOURCE_NAME}.${LIBRARY_FILE_EXT} 
 echo target/dist/${LIBRARY_TARGET_NAME}-${CARGO_MAKE_RUST_TARGET_ARCH}.${LIBRARY_FILE_EXT}
+echo 1==
 ls target
+echo 2==
 ls target/${CARGO_MAKE_RUST_TARGET_TRIPLE}
+echo 3==
+ls target/${CARGO_MAKE_RUST_TARGET_TRIPLE}/release
 
 cp target/${CARGO_MAKE_RUST_TARGET_TRIPLE}/release/${LIBRARY_SOURCE_NAME}.${LIBRARY_FILE_EXT} target/dist/${LIBRARY_TARGET_NAME}-${CARGO_MAKE_RUST_TARGET_ARCH}.${LIBRARY_FILE_EXT}
 '''
