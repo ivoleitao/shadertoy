@@ -1,0 +1,72 @@
+name: Dart CI
+
+on:
+  schedule:
+    - cron: '*/30 8 * * *'
+  push:
+    branches:
+      - develop
+    paths:
+      - 'melos.yaml'
+      - 'packages/**'
+      - '.github/workflows/dart-ci.yml'
+
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - 'melos.yaml'
+      - 'packages/**'
+      - '.github/workflows/dart-ci.yml'
+
+jobs:
+  dart:
+    name: Dart CI
+
+    strategy:
+      matrix:
+        host: ['ubuntu-latest']
+        sdk: ['stable']
+
+    runs-on: ${{ matrix.host }}
+
+    steps:
+      - name: Setup os
+        if: matrix.host == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install libsqlite3-dev -y
+
+      - name: Set up dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
+
+      - name: Install packages
+        run: |
+          dart pub global activate melos
+
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Bootstrap
+        run: |
+          melos bootstrap
+          
+      - name: Linter
+        run: |
+          melos run format
+          melos run analyze
+          melos run dependency-validator
+
+      - name: Test
+        run: |
+          melos run test
+
+      - name: Documentation
+        run: |
+          melos run doc
+
+      - name: Verify
+        run: |
+          melos run verify

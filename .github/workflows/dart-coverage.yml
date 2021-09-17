@@ -6,7 +6,7 @@ on:
       - master
     paths:
       - 'packages/**'
-      - '.github/workflows/coverage.yml'
+      - '.github/workflows/dart-coverage.yml'
 
 jobs:
   coverage:
@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Setup os
+      - name: Install libraries
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
@@ -36,7 +36,7 @@ jobs:
 
       - name: Install tools
         run: |
-          pub global activate melos
+          dart pub global activate melos
           
       - name: Bootstrap
         run: |
@@ -45,7 +45,4 @@ jobs:
       - name: Coverage
         run: |
           melos run coverage
-
-      - name: Upload coverage
-        run: |
           melos run codecov
