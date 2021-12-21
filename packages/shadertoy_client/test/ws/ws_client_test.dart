@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 import 'package:test/test.dart';
@@ -332,7 +331,7 @@ void main() {
       final adapter = newAdapter(options)
           .addTextResponseRoute('shaders/query/$term', text, options, {
         'filter': filters.toList(),
-        'sort': [EnumToString.convertToString(sort)],
+        'sort': [sort.name],
         'from': [from.toString()],
         'num': [num.toString()],
       });

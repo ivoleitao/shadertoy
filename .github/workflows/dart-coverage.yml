@@ -14,10 +14,10 @@ jobs:
 
     strategy:
       matrix:
-        os: ['ubuntu-latest']
+        host: ['ubuntu-latest']
         sdk: ['stable']
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.host }}
 
     steps:
       - name: Install libraries

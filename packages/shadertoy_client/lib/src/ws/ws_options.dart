@@ -1,5 +1,4 @@
 import 'package:shadertoy/shadertoy_api.dart';
-import 'package:shadertoy_client/shadertoy_client.dart';
 import 'package:shadertoy_client/src/http_options.dart';
 
 /// Options for the Shadertoy REST API client

@@ -1,27 +1,17 @@
 name: Rust CI
 
 on:
-  schedule:
-    - cron: '*/30 8 * * *'
   push:
     branches:
-      - develop
+      - master
     paths:
       - 'Makefile.toml'      
       - 'crates/**'
-      - '.github/workflows/rust-ci.yml'
-
-  pull_request:
-    branches:
-      - develop
-    paths:
-      - 'Makefile.toml'      
-      - 'crates/**'
-      - '.github/workflows/rust-ci.yml'
+      - '.github/workflows/rust-release.yml'
 
 jobs:
-  ci:
-    name: Rust CI
+  build:
+    name: Rust Build
 
     strategy:
       matrix:
@@ -50,4 +40,28 @@ jobs:
         with:
           use-cross: true
           command: make
-          args: build
+          args: dist
+
+      - name: Uploading artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: crates/target/dist
+  release:
+    name: Rust Dist
+
+    needs: build
+
+    strategy:
+      matrix:
+        host: ['ubuntu-latest']
+        sdk: ['stable']
+
+    runs-on: ${{ matrix.host }}
+
+    steps:
+      - name: Download shared libraries 
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: dist

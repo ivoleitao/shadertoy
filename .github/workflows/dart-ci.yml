@@ -20,7 +20,7 @@ on:
       - '.github/workflows/dart-ci.yml'
 
 jobs:
-  dart:
+  ci:
     name: Dart CI
 
     strategy:
@@ -44,6 +44,7 @@ jobs:
 
       - name: Install packages
         run: |
+          dart pub global activate dartdoc
           dart pub global activate melos
 
       - name: Checkout sources
@@ -57,7 +58,6 @@ jobs:
         run: |
           melos run format
           melos run analyze
-          melos run dependency-validator
 
       - name: Test
         run: |

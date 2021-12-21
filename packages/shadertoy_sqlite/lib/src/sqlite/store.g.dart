@@ -134,14 +134,8 @@ class UserEntry extends DataClass implements Insertable<UserEntry> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      id.hashCode,
-      $mrjc(
-          picture.hashCode,
-          $mrjc(
-              memberSince.hashCode,
-              $mrjc(following.hashCode,
-                  $mrjc(followers.hashCode, about.hashCode))))));
+  int get hashCode =>
+      Object.hash(id, picture, memberSince, following, followers, about);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -257,34 +251,40 @@ class $UserTableTable extends UserTable
   final String? _alias;
   $UserTableTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
       'id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _pictureMeta = const VerificationMeta('picture');
+  @override
   late final GeneratedColumn<String?> picture = GeneratedColumn<String?>(
       'picture', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false);
+      type: const StringType(), requiredDuringInsert: false);
   final VerificationMeta _memberSinceMeta =
       const VerificationMeta('memberSince');
+  @override
   late final GeneratedColumn<DateTime?> memberSince =
       GeneratedColumn<DateTime?>('member_since', aliasedName, false,
-          typeName: 'INTEGER', requiredDuringInsert: true);
+          type: const IntType(), requiredDuringInsert: true);
   final VerificationMeta _followingMeta = const VerificationMeta('following');
+  @override
   late final GeneratedColumn<int?> following = GeneratedColumn<int?>(
       'following', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   final VerificationMeta _followersMeta = const VerificationMeta('followers');
+  @override
   late final GeneratedColumn<int?> followers = GeneratedColumn<int?>(
       'followers', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   final VerificationMeta _aboutMeta = const VerificationMeta('about');
+  @override
   late final GeneratedColumn<String?> about = GeneratedColumn<String?>(
       'about', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false);
+      type: const StringType(), requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
       [id, picture, memberSince, following, followers, about];
@@ -545,30 +545,8 @@ class ShaderEntry extends DataClass implements Insertable<ShaderEntry> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      id.hashCode,
-      $mrjc(
-          userId.hashCode,
-          $mrjc(
-              version.hashCode,
-              $mrjc(
-                  name.hashCode,
-                  $mrjc(
-                      date.hashCode,
-                      $mrjc(
-                          description.hashCode,
-                          $mrjc(
-                              views.hashCode,
-                              $mrjc(
-                                  likes.hashCode,
-                                  $mrjc(
-                                      privacy.hashCode,
-                                      $mrjc(
-                                          flags.hashCode,
-                                          $mrjc(
-                                              tagsJson.hashCode,
-                                              renderPassesJson
-                                                  .hashCode))))))))))));
+  int get hashCode => Object.hash(id, userId, version, name, date, description,
+      views, likes, privacy, flags, tagsJson, renderPassesJson);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -761,63 +739,75 @@ class $ShaderTableTable extends ShaderTable
   final String? _alias;
   $ShaderTableTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
       'id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _versionMeta = const VerificationMeta('version');
+  @override
   late final GeneratedColumn<String?> version = GeneratedColumn<String?>(
       'version', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
   late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
       'name', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
   late final GeneratedColumn<DateTime?> date = GeneratedColumn<DateTime?>(
       'date', aliasedName, false,
-      typeName: 'INTEGER', requiredDuringInsert: true);
+      type: const IntType(), requiredDuringInsert: true);
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
+  @override
   late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
       'description', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false);
+      type: const StringType(), requiredDuringInsert: false);
   final VerificationMeta _viewsMeta = const VerificationMeta('views');
+  @override
   late final GeneratedColumn<int?> views = GeneratedColumn<int?>(
       'views', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   final VerificationMeta _likesMeta = const VerificationMeta('likes');
+  @override
   late final GeneratedColumn<int?> likes = GeneratedColumn<int?>(
       'likes', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   final VerificationMeta _privacyMeta = const VerificationMeta('privacy');
+  @override
   late final GeneratedColumn<String?> privacy = GeneratedColumn<String?>(
       'privacy', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _flagsMeta = const VerificationMeta('flags');
+  @override
   late final GeneratedColumn<int?> flags = GeneratedColumn<int?>(
       'flags', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   final VerificationMeta _tagsJsonMeta = const VerificationMeta('tagsJson');
+  @override
   late final GeneratedColumn<String?> tagsJson = GeneratedColumn<String?>(
       'tags_json', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: false,
       defaultValue: Constant('[]'));
   final VerificationMeta _renderPassesJsonMeta =
       const VerificationMeta('renderPassesJson');
+  @override
   late final GeneratedColumn<String?> renderPassesJson =
       GeneratedColumn<String?>('render_passes_json', aliasedName, false,
-          typeName: 'TEXT', requiredDuringInsert: true);
+          type: const StringType(), requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1061,16 +1051,8 @@ class CommentEntry extends DataClass implements Insertable<CommentEntry> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      id.hashCode,
-      $mrjc(
-          shaderId.hashCode,
-          $mrjc(
-              userId.hashCode,
-              $mrjc(
-                  picture.hashCode,
-                  $mrjc(date.hashCode,
-                      $mrjc(comment.hashCode, hidden.hashCode)))))));
+  int get hashCode =>
+      Object.hash(id, shaderId, userId, picture, date, comment, hidden);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1201,35 +1183,42 @@ class $CommentTableTable extends CommentTable
   final String? _alias;
   $CommentTableTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
       'id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _shaderIdMeta = const VerificationMeta('shaderId');
+  @override
   late final GeneratedColumn<String?> shaderId = GeneratedColumn<String?>(
       'shader_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL REFERENCES Shader(id) ON DELETE CASCADE');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _pictureMeta = const VerificationMeta('picture');
+  @override
   late final GeneratedColumn<String?> picture = GeneratedColumn<String?>(
       'picture', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false);
+      type: const StringType(), requiredDuringInsert: false);
   final VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
   late final GeneratedColumn<DateTime?> date = GeneratedColumn<DateTime?>(
       'date', aliasedName, false,
-      typeName: 'INTEGER', requiredDuringInsert: true);
+      type: const IntType(), requiredDuringInsert: true);
   final VerificationMeta _commentMeta = const VerificationMeta('comment');
+  @override
   late final GeneratedColumn<String?> comment = GeneratedColumn<String?>(
       'comment', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _hiddenMeta = const VerificationMeta('hidden');
+  @override
   late final GeneratedColumn<bool?> hidden = GeneratedColumn<bool?>(
       'hidden', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const BoolType(),
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (hidden IN (0, 1))',
       defaultValue: const Constant(false));
@@ -1391,8 +1380,7 @@ class PlaylistEntry extends DataClass implements Insertable<PlaylistEntry> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(id.hashCode,
-      $mrjc(userId.hashCode, $mrjc(name.hashCode, description.hashCode))));
+  int get hashCode => Object.hash(id, userId, name, description);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1486,22 +1474,26 @@ class $PlaylistTableTable extends PlaylistTable
   final String? _alias;
   $PlaylistTableTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
       'id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
   late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
       'user_id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
   late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
       'name', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
+  @override
   late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
       'description', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [id, userId, name, description];
   @override
@@ -1634,8 +1626,7 @@ class PlaylistShaderEntry extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf(
-      $mrjc(playlistId.hashCode, $mrjc(shaderId.hashCode, order.hashCode)));
+  int get hashCode => Object.hash(playlistId, shaderId, order);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1715,21 +1706,24 @@ class $PlaylistShaderTableTable extends PlaylistShaderTable
   final String? _alias;
   $PlaylistShaderTableTable(this._db, [this._alias]);
   final VerificationMeta _playlistIdMeta = const VerificationMeta('playlistId');
+  @override
   late final GeneratedColumn<String?> playlistId = GeneratedColumn<String?>(
       'playlist_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL REFERENCES Playlist(id) ON DELETE CASCADE');
   final VerificationMeta _shaderIdMeta = const VerificationMeta('shaderId');
+  @override
   late final GeneratedColumn<String?> shaderId = GeneratedColumn<String?>(
       'shader_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL REFERENCES Shader(id) ON DELETE CASCADE');
   final VerificationMeta _orderMeta = const VerificationMeta('order');
+  @override
   late final GeneratedColumn<int?> order = GeneratedColumn<int?>(
       'order', aliasedName, false,
-      typeName: 'INTEGER', requiredDuringInsert: true);
+      type: const IntType(), requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [playlistId, shaderId, order];
   @override

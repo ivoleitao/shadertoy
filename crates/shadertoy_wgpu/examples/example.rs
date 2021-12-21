@@ -4,7 +4,7 @@ use shadertoy_wgpu::Renderer;
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
-   let json = r#"{
+    let json = r#"{
       "ver":"0.1",
       "info":{
          "id":"WlVyRV",
@@ -235,7 +235,7 @@ fn main() -> Result<(), Box<dyn Error>> {
          }
       ]
    }"#;
-   let renderer = Renderer::new(json)?;
+    let renderer = Renderer::new(json)?;
 
-   Ok(())
+    Ok(())
 }

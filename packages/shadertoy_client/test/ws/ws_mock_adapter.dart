@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/src/ws/ws_options.dart';
 
@@ -87,7 +86,7 @@ extension WSMockAdaptater on MockAdapter {
     }
 
     if (sort != null) {
-      queryParameters['sort'] = [EnumToString.convertToString(sort)];
+      queryParameters['sort'] = [sort.name];
     }
 
     if (from != null) {

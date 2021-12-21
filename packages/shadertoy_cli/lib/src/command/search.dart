@@ -1,4 +1,3 @@
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 
 import 'extended.dart';
@@ -54,7 +53,7 @@ class SearchCommand extends ExtendedCommand {
     final qr = await client.findShaderIds(
         term: term,
         filters: filter?.toSet(),
-        sort: sort != null ? EnumToString.fromString(Sort.values, sort) : null,
+        sort: sort != null ? Sort.values.byName(sort) : null,
         from: from,
         num: num);
 

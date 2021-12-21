@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/src/site/site_options.dart';
 
@@ -102,7 +101,7 @@ extension SiteMockAdaptater on MockAdapter {
     }
 
     if (sort != null) {
-      queryParameters['sort'] = [EnumToString.convertToString(sort)];
+      queryParameters['sort'] = [sort.name];
     }
 
     if (from != null) {
@@ -165,7 +164,7 @@ extension SiteMockAdaptater on MockAdapter {
     }
 
     if (sort != null) {
-      queryParameters['sort'] = [EnumToString.convertToString(sort)];
+      queryParameters['sort'] = [sort.name];
     }
 
     if (from != null) {

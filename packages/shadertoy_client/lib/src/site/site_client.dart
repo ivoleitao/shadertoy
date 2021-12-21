@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:html/dom.dart' show Document, Element, Node;
 import 'package:html/parser.dart' show parse;
 import 'package:intl/intl.dart';
@@ -255,14 +254,15 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
 
   /// Parses the number of returned shader's from the html
   /// returned in the Shadertoy browse [page](https://www.shadertoy.com/browse)
-  /// the results [page](https://www.shadertoy.com/results) or the user page,
-  /// [iq](https://www.shadertoy.com/user/iq) user page for example
+  /// the results [page](https://www.shadertoy.com/results) or the playlist page
+  /// [week](https://www.shadertoy.com/playlist/week) for example
   ///
   /// [doc]: The [Document] with the page DOM
   ///
   /// Returns null in case of a unsucessful match
   int? _parseResultsPager(Document doc) {
-    var elements = doc.querySelectorAll('#content>#controls>*>div');
+    var elements = doc.querySelectorAll(
+        '#content>#controls>div>span,#content>#controls>div>div');
     if (elements.isNotEmpty) {
       for (var element in elements) {
         final numResultsMatch = numResultsRegExp.firstMatch(element.text);
@@ -393,7 +393,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
     }
 
     if (sort != null) {
-      queryParameters.add('sort=${EnumToString.convertToString(sort)}');
+      queryParameters.add('sort=${sort.name}');
     }
 
     if (from != null) {
@@ -554,7 +554,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
     }
 
     if (sort != null) {
-      queryParameters.add('sort=${EnumToString.convertToString(sort)}');
+      queryParameters.add('sort=${sort.name}');
     }
 
     if (from != null) {

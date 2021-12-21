@@ -1,5 +1,4 @@
 import 'package:dotenv/dotenv.dart' show load, env;
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 
 void main(List<String> arguments) async {
@@ -24,8 +23,7 @@ void main(List<String> arguments) async {
   print('\tDescription: ${result.shader?.info.description}');
   print('\tViews: ${result.shader?.info.views}');
   print('\tLikes: ${result.shader?.info.likes}');
-  print(
-      '\tPublish Status: ${EnumToString.convertToString(result.shader?.info.privacy)}');
+  print('\tPublish Status: ${result.shader?.info.privacy.name}');
   print('\tTags: ${result.shader?.info.tags.join(',')}');
   print('\tFlags: ${result.shader?.info.flags}');
   print('\tLiked: ${result.shader?.info.hasLiked}');

@@ -1,4 +1,3 @@
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 
 void main(List<String> arguments) async {
@@ -16,8 +15,7 @@ void main(List<String> arguments) async {
     print('\tDescription: ${sr.shader?.info.description}');
     print('\tViews: ${sr.shader?.info.views}');
     print('\tLikes: ${sr.shader?.info.likes}');
-    print(
-        '\tPrivacy: ${EnumToString.convertToString(sr.shader?.info.privacy)}');
+    print('\tPrivacy: ${sr.shader?.info.privacy.name}');
     print('\tTags: ${sr.shader?.info.tags.join(',')}');
     print('\tFlags: ${sr.shader?.info.flags}');
     print('\tLiked: ${sr.shader?.info.hasLiked}');

@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:dio/dio.dart';
 import 'package:file/file.dart';
 import 'package:shadertoy/shadertoy_api.dart';
-import 'package:shadertoy_client/shadertoy_client.dart';
+import 'package:shadertoy_client/src/http_options.dart';
 import 'package:shadertoy_client/src/hybrid/playlist_sync.dart';
 import 'package:shadertoy_client/src/hybrid/shader_sync.dart';
 import 'package:shadertoy_client/src/hybrid/user_sync.dart';

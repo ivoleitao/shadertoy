@@ -1,16 +1,16 @@
 name: shadertoy_wgpu
 version: 2.0.3
+publish_to: none
 description: >-
   shadertoy-wgpu description.
 homepage: https://github.com/ivoleitao/shadertoy
 
 environment:
-  sdk: ">=2.13.0 <3.0.0"
+  sdk: ">=2.15.0 <3.0.0"
 
 dependencies:
   ffi: ^1.1.2
 
 dev_dependencies:
   lints: ^1.0.1 
-  test: ^1.17.10
-  dependency_validator: ^3.1.0
+  test: ^1.20.1

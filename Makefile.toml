@@ -5,24 +5,26 @@ LIBRARY_FILE_EXT = { source = "${CARGO_MAKE_RUST_TARGET_OS}", default_value = "u
 LIBRARY_SOURCE_NAME = { source = "${CARGO_MAKE_RUST_TARGET_OS}", default_value = "libshadertoy_wgpu_ffi", mapping = { windows = "shadertoy_wgpu_ffi" } }
 LIBRARY_TARGET_NAME = "shadertoy_wgpu_ffi"
 
-[tasks.release]
-command = "cargo"
-args = ["build", "--release"]
-
-[tasks.dist]
+[tasks.dist-old]
 script_runner = "@duckscript"
 script = '''
 cm_run_task release
 cp target/release/${LIBRARY_SOURCE_NAME}.${LIBRARY_FILE_EXT} ../packages/shadertoy_wgpu/lib/src/ffi/blobs/${LIBRARY_TARGET_NAME}-${CARGO_MAKE_RUST_TARGET_ARCH}.${LIBRARY_FILE_EXT}
 '''
 
-[tasks.ci-release]
+[tasks.release]
 command = "cargo"
 args = ["build", "--release", "--target", "${CARGO_MAKE_RUST_TARGET_TRIPLE}"]
 
-[tasks.ci-dist]
+[tasks.dist]
 script_runner = "@duckscript"
 script = '''
-cm_run_task ci-release
+cm_run_task release
 cp target/${CARGO_MAKE_RUST_TARGET_TRIPLE}/release/${LIBRARY_SOURCE_NAME}.${LIBRARY_FILE_EXT} target/dist/${LIBRARY_TARGET_NAME}-${CARGO_MAKE_RUST_TARGET_ARCH}.${LIBRARY_FILE_EXT}
 '''
+
+[tasks.ci]
+dependencies = [
+    "format",
+    "build"
+]

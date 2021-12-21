@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:moor/moor.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
@@ -33,7 +32,7 @@ class ShaderDao extends DatabaseAccessor<MoorStore> with _$ShaderDaoMixin {
         userId: entry.userId,
         description: entry.description,
         likes: entry.likes,
-        privacy: EnumToString.fromString(ShaderPrivacy.values, entry.privacy)!,
+        privacy: ShaderPrivacy.values.byName(entry.privacy),
         flags: entry.flags,
         tags: (jsonDecode(entry.tagsJson) as List<dynamic>)
             .map((e) => e as String)
@@ -287,7 +286,7 @@ class ShaderDao extends DatabaseAccessor<MoorStore> with _$ShaderDaoMixin {
         description: entity.info.description,
         views: entity.info.views,
         likes: entity.info.likes,
-        privacy: EnumToString.convertToString(entity.info.privacy),
+        privacy: entity.info.privacy.name,
         flags: entity.info.flags,
         tagsJson: json.encode(entity.info.tags),
         renderPassesJson: json.encode(
