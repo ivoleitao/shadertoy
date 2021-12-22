@@ -1773,6 +1773,379 @@ class $PlaylistShaderTableTable extends PlaylistShaderTable
   }
 }
 
+class SyncEntry extends DataClass implements Insertable<SyncEntry> {
+  /// The type
+  final String type;
+
+  /// The sub type
+  final String subType;
+
+  /// The target
+  final String target;
+
+  /// The status.
+  final String status;
+
+  /// The message.
+  final String? message;
+
+  /// The creation time
+  final DateTime created;
+
+  /// The update time
+  final DateTime updated;
+  SyncEntry(
+      {required this.type,
+      required this.subType,
+      required this.target,
+      required this.status,
+      this.message,
+      required this.created,
+      required this.updated});
+  factory SyncEntry.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return SyncEntry(
+      type: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
+      subType: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}sub_type'])!,
+      target: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}target'])!,
+      status: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}status'])!,
+      message: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}message']),
+      created: const DateTimeType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created'])!,
+      updated: const DateTimeType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}updated'])!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['type'] = Variable<String>(type);
+    map['sub_type'] = Variable<String>(subType);
+    map['target'] = Variable<String>(target);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || message != null) {
+      map['message'] = Variable<String?>(message);
+    }
+    map['created'] = Variable<DateTime>(created);
+    map['updated'] = Variable<DateTime>(updated);
+    return map;
+  }
+
+  SyncTableCompanion toCompanion(bool nullToAbsent) {
+    return SyncTableCompanion(
+      type: Value(type),
+      subType: Value(subType),
+      target: Value(target),
+      status: Value(status),
+      message: message == null && nullToAbsent
+          ? const Value.absent()
+          : Value(message),
+      created: Value(created),
+      updated: Value(updated),
+    );
+  }
+
+  factory SyncEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return SyncEntry(
+      type: serializer.fromJson<String>(json['type']),
+      subType: serializer.fromJson<String>(json['subType']),
+      target: serializer.fromJson<String>(json['target']),
+      status: serializer.fromJson<String>(json['status']),
+      message: serializer.fromJson<String?>(json['message']),
+      created: serializer.fromJson<DateTime>(json['created']),
+      updated: serializer.fromJson<DateTime>(json['updated']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'type': serializer.toJson<String>(type),
+      'subType': serializer.toJson<String>(subType),
+      'target': serializer.toJson<String>(target),
+      'status': serializer.toJson<String>(status),
+      'message': serializer.toJson<String?>(message),
+      'created': serializer.toJson<DateTime>(created),
+      'updated': serializer.toJson<DateTime>(updated),
+    };
+  }
+
+  SyncEntry copyWith(
+          {String? type,
+          String? subType,
+          String? target,
+          String? status,
+          String? message,
+          DateTime? created,
+          DateTime? updated}) =>
+      SyncEntry(
+        type: type ?? this.type,
+        subType: subType ?? this.subType,
+        target: target ?? this.target,
+        status: status ?? this.status,
+        message: message ?? this.message,
+        created: created ?? this.created,
+        updated: updated ?? this.updated,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('SyncEntry(')
+          ..write('type: $type, ')
+          ..write('subType: $subType, ')
+          ..write('target: $target, ')
+          ..write('status: $status, ')
+          ..write('message: $message, ')
+          ..write('created: $created, ')
+          ..write('updated: $updated')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(type, subType, target, status, message, created, updated);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncEntry &&
+          other.type == this.type &&
+          other.subType == this.subType &&
+          other.target == this.target &&
+          other.status == this.status &&
+          other.message == this.message &&
+          other.created == this.created &&
+          other.updated == this.updated);
+}
+
+class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
+  final Value<String> type;
+  final Value<String> subType;
+  final Value<String> target;
+  final Value<String> status;
+  final Value<String?> message;
+  final Value<DateTime> created;
+  final Value<DateTime> updated;
+  const SyncTableCompanion({
+    this.type = const Value.absent(),
+    this.subType = const Value.absent(),
+    this.target = const Value.absent(),
+    this.status = const Value.absent(),
+    this.message = const Value.absent(),
+    this.created = const Value.absent(),
+    this.updated = const Value.absent(),
+  });
+  SyncTableCompanion.insert({
+    required String type,
+    required String subType,
+    required String target,
+    required String status,
+    this.message = const Value.absent(),
+    required DateTime created,
+    required DateTime updated,
+  })  : type = Value(type),
+        subType = Value(subType),
+        target = Value(target),
+        status = Value(status),
+        created = Value(created),
+        updated = Value(updated);
+  static Insertable<SyncEntry> custom({
+    Expression<String>? type,
+    Expression<String>? subType,
+    Expression<String>? target,
+    Expression<String>? status,
+    Expression<String?>? message,
+    Expression<DateTime>? created,
+    Expression<DateTime>? updated,
+  }) {
+    return RawValuesInsertable({
+      if (type != null) 'type': type,
+      if (subType != null) 'sub_type': subType,
+      if (target != null) 'target': target,
+      if (status != null) 'status': status,
+      if (message != null) 'message': message,
+      if (created != null) 'created': created,
+      if (updated != null) 'updated': updated,
+    });
+  }
+
+  SyncTableCompanion copyWith(
+      {Value<String>? type,
+      Value<String>? subType,
+      Value<String>? target,
+      Value<String>? status,
+      Value<String?>? message,
+      Value<DateTime>? created,
+      Value<DateTime>? updated}) {
+    return SyncTableCompanion(
+      type: type ?? this.type,
+      subType: subType ?? this.subType,
+      target: target ?? this.target,
+      status: status ?? this.status,
+      message: message ?? this.message,
+      created: created ?? this.created,
+      updated: updated ?? this.updated,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (subType.present) {
+      map['sub_type'] = Variable<String>(subType.value);
+    }
+    if (target.present) {
+      map['target'] = Variable<String>(target.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (message.present) {
+      map['message'] = Variable<String?>(message.value);
+    }
+    if (created.present) {
+      map['created'] = Variable<DateTime>(created.value);
+    }
+    if (updated.present) {
+      map['updated'] = Variable<DateTime>(updated.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncTableCompanion(')
+          ..write('type: $type, ')
+          ..write('subType: $subType, ')
+          ..write('target: $target, ')
+          ..write('status: $status, ')
+          ..write('message: $message, ')
+          ..write('created: $created, ')
+          ..write('updated: $updated')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SyncTableTable extends SyncTable
+    with TableInfo<$SyncTableTable, SyncEntry> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  $SyncTableTable(this._db, [this._alias]);
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+      'type', aliasedName, false,
+      type: const StringType(), requiredDuringInsert: true);
+  final VerificationMeta _subTypeMeta = const VerificationMeta('subType');
+  @override
+  late final GeneratedColumn<String?> subType = GeneratedColumn<String?>(
+      'sub_type', aliasedName, false,
+      type: const StringType(), requiredDuringInsert: true);
+  final VerificationMeta _targetMeta = const VerificationMeta('target');
+  @override
+  late final GeneratedColumn<String?> target = GeneratedColumn<String?>(
+      'target', aliasedName, false,
+      type: const StringType(), requiredDuringInsert: true);
+  final VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String?> status = GeneratedColumn<String?>(
+      'status', aliasedName, false,
+      type: const StringType(), requiredDuringInsert: true);
+  final VerificationMeta _messageMeta = const VerificationMeta('message');
+  @override
+  late final GeneratedColumn<String?> message = GeneratedColumn<String?>(
+      'message', aliasedName, true,
+      type: const StringType(), requiredDuringInsert: false);
+  final VerificationMeta _createdMeta = const VerificationMeta('created');
+  @override
+  late final GeneratedColumn<DateTime?> created = GeneratedColumn<DateTime?>(
+      'created', aliasedName, false,
+      type: const IntType(), requiredDuringInsert: true);
+  final VerificationMeta _updatedMeta = const VerificationMeta('updated');
+  @override
+  late final GeneratedColumn<DateTime?> updated = GeneratedColumn<DateTime?>(
+      'updated', aliasedName, false,
+      type: const IntType(), requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [type, subType, target, status, message, created, updated];
+  @override
+  String get aliasedName => _alias ?? 'Sync';
+  @override
+  String get actualTableName => 'Sync';
+  @override
+  VerificationContext validateIntegrity(Insertable<SyncEntry> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('sub_type')) {
+      context.handle(_subTypeMeta,
+          subType.isAcceptableOrUnknown(data['sub_type']!, _subTypeMeta));
+    } else if (isInserting) {
+      context.missing(_subTypeMeta);
+    }
+    if (data.containsKey('target')) {
+      context.handle(_targetMeta,
+          target.isAcceptableOrUnknown(data['target']!, _targetMeta));
+    } else if (isInserting) {
+      context.missing(_targetMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('message')) {
+      context.handle(_messageMeta,
+          message.isAcceptableOrUnknown(data['message']!, _messageMeta));
+    }
+    if (data.containsKey('created')) {
+      context.handle(_createdMeta,
+          created.isAcceptableOrUnknown(data['created']!, _createdMeta));
+    } else if (isInserting) {
+      context.missing(_createdMeta);
+    }
+    if (data.containsKey('updated')) {
+      context.handle(_updatedMeta,
+          updated.isAcceptableOrUnknown(data['updated']!, _updatedMeta));
+    } else if (isInserting) {
+      context.missing(_updatedMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {type, subType, target};
+  @override
+  SyncEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return SyncEntry.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  $SyncTableTable createAlias(String alias) {
+    return $SyncTableTable(_db, alias);
+  }
+}
+
 abstract class _$MoorStore extends GeneratedDatabase {
   _$MoorStore(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   late final $UserTableTable userTable = $UserTableTable(this);
@@ -1781,10 +2154,12 @@ abstract class _$MoorStore extends GeneratedDatabase {
   late final $PlaylistTableTable playlistTable = $PlaylistTableTable(this);
   late final $PlaylistShaderTableTable playlistShaderTable =
       $PlaylistShaderTableTable(this);
+  late final $SyncTableTable syncTable = $SyncTableTable(this);
   late final UserDao userDao = UserDao(this as MoorStore);
   late final ShaderDao shaderDao = ShaderDao(this as MoorStore);
   late final CommentDao commentDao = CommentDao(this as MoorStore);
   late final PlaylistDao playlistDao = PlaylistDao(this as MoorStore);
+  late final SyncDao syncDao = SyncDao(this as MoorStore);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
@@ -1793,6 +2168,7 @@ abstract class _$MoorStore extends GeneratedDatabase {
         shaderTable,
         commentTable,
         playlistTable,
-        playlistShaderTable
+        playlistShaderTable,
+        syncTable
       ];
 }

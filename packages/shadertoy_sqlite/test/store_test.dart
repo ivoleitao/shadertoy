@@ -1341,4 +1341,538 @@ void main() {
       expect(fspr2.shaders, isEmpty);
     });
   });
+
+  group('Sync', () {
+    test('Save shader', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shader = await shaderFixture('shaders/happy_jumping.json');
+      // act
+      final response = await store.saveShader(shader);
+      // assert
+      expect(response, isNotNull);
+      expect(response.error, isNull);
+    });
+    /*
+    test('Save shaders', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaders = await shadersFixture(
+          ['shaders/seascape.json', 'shaders/happy_jumping.json']);
+      // act
+      final response = await store.saveShaders(shaders);
+      // assert
+      expect(response, isNotNull);
+      expect(response.error, isNull);
+    });
+
+    test('Save shader twice', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final originalShader = await shaderFixture('shaders/happy_jumping.json');
+      final updatedShader = originalShader.copyWith(version: 'a');
+      // act
+      await store.saveShader(originalShader);
+      final savedShader1 = await store.findShaderById(originalShader.info.id);
+      await store.saveShader(updatedShader);
+      final savedShader2 = await store.findShaderById(originalShader.info.id);
+      // assert
+      expect(savedShader1.shader, originalShader);
+      expect(savedShader2.shader, updatedShader);
+    });
+
+    test('Find shader by id', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shader = await shaderFixture('shaders/happy_jumping.json');
+      await store.saveShader(shader);
+      // act
+      final response = await store.findShaderById(shader.info.id);
+      // assert
+      expect(response, isNotNull);
+      expect(response.error, isNull);
+      expect(response.shader, shader);
+    });
+
+    test('Find shader by id with not found response', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderId = 'xxxx';
+      // act
+      final response = await store.findShaderById(shaderId);
+      // assert
+      expect(response, isNotNull);
+      expect(response.error, isNotNull);
+      expect(
+          response.error,
+          ResponseError.notFound(
+              message: 'Shader $shaderId not found',
+              context: contextShader,
+              target: shaderId));
+    });
+
+    test('Find shaders by id set', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/seascape.json',
+        'shaders/happy_jumping.json'
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store
+          .findShadersByIdSet({shaders[0].info.id, shaders[1].info.id});
+      // assert
+      expect(response, await findShadersResponseFixture(shaderPaths));
+    });
+
+    test('Find shader ids by query', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/clouds.json',
+        'shaders/elevated.json',
+        'shaders/rainforest.json',
+        'shaders/raymarching_part_1.json',
+        'shaders/raymarching_part_2.json',
+        'shaders/raymarching_part_3.json',
+        'shaders/raymarching_part_4.json',
+        'shaders/raymarching_part_6.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/volcanic.json',
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store
+          .findShaderIds(term: 'Elevated', filters: {'procedural', '3d'});
+      // assert
+      final actualIds = response.ids ?? [];
+      final expected =
+          await findShaderIdsResponseFixture(['shaders/elevated.json']);
+      final expectedIds = expected.ids ?? [];
+      expect(actualIds, containsAllInOrder(expectedIds));
+    });
+
+    test('Find all shader ids', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/seascape.json',
+        'shaders/happy_jumping.json'
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findAllShaderIds();
+      // assert
+      expect(response, isNotNull);
+      expect(response.error, isNull);
+      final actualIds = response.ids ?? [];
+      final expected = await findShaderIdsResponseFixture(shaderPaths);
+      final expectedIds = expected.ids ?? [];
+      expect(actualIds, containsAll(expectedIds));
+    });
+
+    test('Find shaders', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/clouds.json',
+        'shaders/creation.json',
+        'shaders/elevated.json',
+        'shaders/rainforest.json',
+        'shaders/raymarching_part_1.json',
+        'shaders/raymarching_part_2.json',
+        'shaders/raymarching_part_3.json',
+        'shaders/raymarching_part_4.json',
+        'shaders/raymarching_part_6.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/seascape.json',
+        'shaders/volcanic.json',
+        'shaders/snail.json',
+        'shaders/selfie_girl.json',
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findShaders();
+      // assert
+      final actual = response.shaders ?? [];
+      final expected = (await _hotSort(shaderPaths)).take(options.shaderCount);
+
+      expect(actual.length, options.shaderCount);
+      expect(actual, containsAllInOrder(expected));
+    });
+
+    test('Find shaders, sort by name asc', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/clouds.json',
+        'shaders/creation.json',
+        'shaders/elevated.json',
+        'shaders/rainforest.json',
+        'shaders/raymarching_part_1.json',
+        'shaders/raymarching_part_2.json',
+        'shaders/raymarching_part_3.json',
+        'shaders/raymarching_part_4.json',
+        'shaders/raymarching_part_6.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/seascape.json',
+        'shaders/volcanic.json',
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findShaders(sort: Sort.name);
+      // assert
+      final actual = response.shaders;
+      final expected = (await _nameSort(shaderPaths)).take(options.shaderCount);
+
+      expect(actual, containsAllInOrder(expected));
+    });
+
+    test('Find shaders, sort by popularity (views)', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/clouds.json',
+        'shaders/creation.json',
+        'shaders/elevated.json',
+        'shaders/rainforest.json',
+        'shaders/raymarching_part_1.json',
+        'shaders/raymarching_part_2.json',
+        'shaders/raymarching_part_3.json',
+        'shaders/raymarching_part_4.json',
+        'shaders/raymarching_part_6.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/seascape.json',
+        'shaders/volcanic.json',
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findShaders(sort: Sort.popular);
+      // assert
+      final actual = response.shaders;
+      final expected =
+          (await _popularitySort(shaderPaths)).take(options.shaderCount);
+
+      expect(actual, containsAllInOrder(expected));
+    });
+
+    test('Find shaders, sort by date desc', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/clouds.json',
+        'shaders/creation.json',
+        'shaders/elevated.json',
+        'shaders/rainforest.json',
+        'shaders/raymarching_part_1.json',
+        'shaders/raymarching_part_2.json',
+        'shaders/raymarching_part_3.json',
+        'shaders/raymarching_part_4.json',
+        'shaders/raymarching_part_6.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/seascape.json',
+        'shaders/volcanic.json',
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findShaders(sort: Sort.newest);
+      // assert
+      final actual = response.shaders;
+      final expected = (await _dateSort(shaderPaths)).take(options.shaderCount);
+
+      expect(actual, containsAllInOrder(expected));
+    });
+
+    test('Find shaders, sort by love (likes) desc', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/clouds.json',
+        'shaders/creation.json',
+        'shaders/elevated.json',
+        'shaders/expansive_reaction_diffusion.json',
+        'shaders/flame.json',
+        'shaders/fractal_land.json',
+        'shaders/protean_clouds.json',
+        'shaders/rainforest.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/seascape.json',
+        'shaders/star_nest.json',
+        'shaders/voxel_edges.json',
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findShaders(sort: Sort.love);
+      // assert
+      final actual = response.shaders;
+      final expected = (await _loveSort(shaderPaths)).take(options.shaderCount);
+
+      expect(actual, containsAllInOrder(expected));
+    });
+
+    test('Find shaders, sort by hot desc', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+
+      final shaderPaths = [
+        'shaders/day_at_the_lake.json',
+        'shaders/ed_209.json',
+        'shaders/happy_jumping.json',
+        'shaders/joe_gardner_soul_pixar.json',
+        'shaders/m_o_from_wall_e.json',
+        'shaders/normalized_blinn_phong.json',
+        'shaders/normalized_blinn_phong_test.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/seascape.json',
+        'shaders/second_order_pixel_sorter.json',
+        'shaders/selfie_girl.json',
+        'shaders/truchet_grid_inversion.json',
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findShaders(sort: Sort.hot);
+      // assert
+      final actual = response.shaders;
+      final expected = (await _hotSort(shaderPaths)).take(options.shaderCount);
+
+      expect(actual, containsAllInOrder(expected));
+    });
+
+    test('Find shaders by term', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/clouds.json',
+        'shaders/creation.json',
+        'shaders/elevated.json',
+        'shaders/rainforest.json',
+        'shaders/raymarching_part_1.json',
+        'shaders/raymarching_part_2.json',
+        'shaders/raymarching_part_3.json',
+        'shaders/raymarching_part_4.json',
+        'shaders/raymarching_part_6.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/seascape.json',
+        'shaders/volcanic.json',
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findShaders(term: 'volcanic');
+      // assert
+      final actualShaders = response.shaders ?? [];
+      final expected =
+          await findShadersResponseFixture(['shaders/volcanic.json']);
+      final expectedShaders = expected.shaders ?? [];
+
+      expect(actualShaders, containsAllInOrder(expectedShaders));
+    });
+
+    test('Find shaders by tag', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/clouds.json',
+        'shaders/creation.json',
+        'shaders/elevated.json',
+        'shaders/rainforest.json',
+        'shaders/raymarching_part_1.json',
+        'shaders/raymarching_part_2.json',
+        'shaders/raymarching_part_3.json',
+        'shaders/raymarching_part_4.json',
+        'shaders/raymarching_part_6.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/seascape.json',
+        'shaders/volcanic.json',
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findShaders(filters: {'waves', 'sea'});
+      // assert
+      final actualShaders = response.shaders;
+      final expected =
+          await findShadersResponseFixture(['shaders/seascape.json']);
+      final expectedShaders = expected.shaders ?? [];
+
+      expect(actualShaders, containsAllInOrder(expectedShaders));
+    });
+
+    test('Find shaders by query', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/clouds.json',
+        'shaders/creation.json',
+        'shaders/elevated.json',
+        'shaders/rainforest.json',
+        'shaders/raymarching_part_1.json',
+        'shaders/raymarching_part_2.json',
+        'shaders/raymarching_part_3.json',
+        'shaders/raymarching_part_4.json',
+        'shaders/raymarching_part_6.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/seascape.json',
+        'shaders/volcanic.json',
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store
+          .findShaders(term: 'Elevated', filters: {'procedural', '3d'});
+      // assert
+      final actualShaders = response.shaders;
+      final expected =
+          await findShadersResponseFixture(['shaders/elevated.json']);
+      final expectedShaders = expected.shaders ?? [];
+
+      expect(actualShaders, containsAllInOrder(expectedShaders));
+    });
+
+    /*
+    test('Find shaders with from and limit', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/clouds.json',
+        'shaders/creation.json',
+        'shaders/elevated.json',
+        'shaders/rainforest.json',
+        'shaders/raymarching_part_1.json',
+        'shaders/raymarching_part_2.json',
+        'shaders/raymarching_part_3.json',
+        'shaders/raymarching_part_4.json',
+        'shaders/raymarching_part_6.json',
+        'shaders/raymarching_primitives.json',
+        'shaders/seascape.json',
+        'shaders/volcanic.json',
+      ];
+      final shaders = shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findShaders(from: 6, num: 5);
+      // assert
+      final actual = response.shaders;
+      final expected = _hotSort(shaderPaths).sublist(6, 11);
+
+      expect(actual, containsAllInOrder(expected));
+    });
+    */
+
+    test('Find all shaders', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shaderPaths = [
+        'shaders/seascape.json',
+        'shaders/happy_jumping.json'
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      // act
+      final response = await store.findAllShaders();
+      // assert
+      expect(response, isNotNull);
+      expect(response.error, isNull);
+
+      final actualShaders = response.shaders;
+      final expected = await findShadersResponseFixture(shaderPaths);
+      final expectedShaders = expected.shaders ?? [];
+      expect(actualShaders, expectedShaders);
+    });
+
+    test('Delete shader by id', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shader = await shaderFixture('shaders/happy_jumping.json');
+      await store.saveShader(shader);
+      final fsr1 = await store.findShaderById(shader.info.id);
+      // act
+      final dsr = await store.deleteShaderById(shader.info.id);
+      final fsr2 = await store.findShaderById(shader.info.id);
+      // assert
+      expect(fsr1.shader, isNotNull);
+      expect(dsr, isNotNull);
+      expect(dsr.error, isNull);
+      expect(fsr2.shader, isNull);
+    });
+
+    test('Delete shader by id with comments', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final shader = await shaderFixture('shaders/elevated.json');
+      final shaderId = shader.info.id;
+      await store.saveShader(shader);
+      final comments = await commentsFixture('comment/$shaderId.json');
+      await store.saveShaderComments(comments);
+      final fcr1 = await store.findCommentsByShaderId(shaderId);
+      // act
+      final dsr = await store.deleteShaderById(shader.info.id);
+      final fcr2 = await store.findCommentsByShaderId(shaderId);
+      // assert
+      expect(fcr1.comments, isNotEmpty);
+      expect(dsr, isNotNull);
+      expect(dsr.error, isNull);
+      expect(fcr2.comments, isEmpty);
+    });
+
+    test('Delete shader by id with playlist reference', () async {
+      // prepare
+      final options = newOptions();
+      final store = newMoorStore(options);
+      final playlistId = 'week';
+      final shaderPaths = [
+        'shaders/seascape.json',
+        'shaders/happy_jumping.json'
+      ];
+      final shaders = await shadersFixture(shaderPaths);
+      await store.saveShaders(shaders);
+      final playlist = await playlistFixture('playlist/$playlistId.json');
+      await store.savePlaylist(playlist);
+      await store.savePlaylistShaders(
+          playlistId, shaders.map((shader) => shader.info.id).toList());
+      final fspr1 = await store.findShadersByPlaylistId(playlistId);
+      // act
+      final dsr = await store.deleteShaderById(shaders[0].info.id);
+      final fspr2 = await store.findShadersByPlaylistId(playlistId);
+      // assert
+      expect(fspr1.shaders, contains(FindShaderResponse(shader: shaders[0])));
+      expect(dsr, isNotNull);
+      expect(dsr.error, isNull);
+      expect(fspr2.shaders,
+          isNot(contains(FindShaderResponse(shader: shaders[0]))));
+    });
+    */
+  });
 }

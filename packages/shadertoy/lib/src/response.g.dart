@@ -238,3 +238,33 @@ Map<String, dynamic> _$FindPlaylistsResponseToJson(
       'Playlists': instance.total,
       'Results': instance.playlists?.map((e) => e.toJson()).toList(),
     };
+
+FindSyncResponse _$FindSyncResponseFromJson(Map<String, dynamic> json) =>
+    FindSyncResponse(
+      sync: json['Sync'] == null
+          ? null
+          : Sync.fromJson(json['Sync'] as Map<String, dynamic>),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
+
+Map<String, dynamic> _$FindSyncResponseToJson(FindSyncResponse instance) =>
+    <String, dynamic>{
+      'Error': const ResponseErrorConverter().toJson(instance.error),
+      'Sync': instance.sync?.toJson(),
+    };
+
+FindSyncsResponse _$FindSyncsResponseFromJson(Map<String, dynamic> json) =>
+    FindSyncsResponse(
+      total: json['Syncs'] as int?,
+      syncs: (json['Results'] as List<dynamic>?)
+          ?.map((e) => FindSyncResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      error: const ResponseErrorConverter().fromJson(json['Error'] as String?),
+    );
+
+Map<String, dynamic> _$FindSyncsResponseToJson(FindSyncsResponse instance) =>
+    <String, dynamic>{
+      'Error': const ResponseErrorConverter().toJson(instance.error),
+      'Syncs': instance.total,
+      'Results': instance.syncs?.map((e) => e.toJson()).toList(),
+    };

@@ -4,6 +4,7 @@ import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/comment.dart';
 import 'package:shadertoy/src/model/playlist.dart';
 import 'package:shadertoy/src/model/shader.dart';
+import 'package:shadertoy/src/model/sync.dart';
 import 'package:shadertoy/src/model/user.dart';
 
 part 'response.g.dart';
@@ -975,6 +976,115 @@ class DeletePlaylistResponse extends APIResponse with EquatableMixin {
   ///
   /// [error]: An error if there was error while deleting the playlist
   DeletePlaylistResponse({ResponseError? error}) : super(error: error);
+}
+
+@JsonSerializable()
+
+/// Find sync API response
+///
+/// The response returned upon the execution of a find sync API call
+/// When [FindSyncResponse.error] is *not null* there was an error in the find sync call
+/// When [FindSyncResponse.error] is *null* the [FindSyncResponse.sync] has the returned sync
+class FindSyncResponse extends APIResponse with EquatableMixin {
+  @JsonKey(name: 'Sync')
+
+  /// The sync returned, null when there is an error
+  final Sync? sync;
+
+  @override
+  List get props {
+    return [sync, error];
+  }
+
+  /// Builds an [FindSyncResponse]
+  ///
+  /// * [sync]: The sync
+  /// * [error]: An error
+  ///
+  /// Upon construction either [sync] or [error] should be provided, not both
+  FindSyncResponse({this.sync, ResponseError? error}) : super(error: error);
+
+  /// Creates a [FindSyncResponse] from json map
+  factory FindSyncResponse.fromJson(Map<String, dynamic> json) =>
+      _$FindSyncResponseFromJson(json);
+
+  /// Creates a json map from a [FindSyncResponse]
+  Map<String, dynamic> toJson() => _$FindSyncResponseToJson(this);
+}
+
+@JsonSerializable()
+
+/// Find syncs API response
+///
+/// The response returned upon the execution of a find syncs API call
+/// When [FindSyncsResponse.error] is *not null* there was an error in the find syncs call
+/// When [FindSyncsResponse.error] is *null* the [FindSyncsResponse.syncs] has the returned syncs
+class FindSyncsResponse extends APIResponse with EquatableMixin {
+  @JsonKey(name: 'Syncs')
+
+  /// The total number of syncs
+  final int total;
+
+  @JsonKey(name: 'Results')
+
+  /// The list of the syncs returned
+  final List<FindSyncResponse>? syncs;
+
+  @override
+  List get props {
+    return [total, syncs, error];
+  }
+
+  /// Builds a [FindSyncsResponse]
+  ///
+  /// [total]: The total number of syncs returned
+  /// [syncs]: The list of syncs
+  /// [error]: An error if there was error while fetching the syncs
+  FindSyncsResponse({int? total, this.syncs, ResponseError? error})
+      : total = total ?? syncs?.length ?? 0,
+        super(error: error);
+
+  /// Creates a [FindSyncsResponse] from json map
+  factory FindSyncsResponse.fromJson(Map<String, dynamic> json) =>
+      _$FindSyncsResponseFromJson(json);
+
+  /// Creates a json map from a [FindSyncsResponse]
+  Map<String, dynamic> toJson() => _$FindSyncsResponseToJson(this);
+}
+
+/// Save sync API response
+///
+/// The response returned upon the execution of the save sync API call
+/// When [SaveSyncResponse.error] is *not null* there was an error in the save sync call
+/// When [SaveSyncResponse.error] is *null* the save was sucessful
+class SaveSyncResponse extends APIResponse with EquatableMixin {
+  /// Builds a [SaveSyncResponse]
+  ///
+  /// [error]: An error if there was error while saving the sync
+  SaveSyncResponse({ResponseError? error}) : super(error: error);
+}
+
+/// Save syncs API response
+///
+/// The response returned upon the execution of the save syncs API call
+/// When [SaveSyncsResponse.error] is *null* the save was sucessful
+class SaveSyncsResponse extends APIResponse with EquatableMixin {
+  /// Builds a [SaveSyncsResponse]
+  ///
+  /// [error]: An error if there was error while saving the sync
+  SaveSyncsResponse({ResponseError? error}) : super(error: error);
+}
+
+/// Delete sync API response
+///
+/// The response returned upon the execution of the delete sync API call
+/// When [DeleteSyncResponse.error] is *not null* there was an error in the delete sync call
+/// When [DeleteSyncResponse.error] is *null* the delete was sucessful
+class DeleteSyncResponse extends APIResponse with EquatableMixin {
+  /// Builds a [DeleteSyncResponse]
+  ///
+  /// [error]: An error if there was error while deleting the sync
+  DeleteSyncResponse({ResponseError? error}) : super(error: error);
 }
 
 /// Download file API response

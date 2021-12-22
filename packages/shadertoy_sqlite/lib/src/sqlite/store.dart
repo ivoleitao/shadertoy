@@ -1,10 +1,12 @@
 import 'package:moor/moor.dart';
 import 'package:shadertoy_sqlite/src/sqlite/dao/comment_dao.dart';
 import 'package:shadertoy_sqlite/src/sqlite/dao/playlist_dao.dart';
+import 'package:shadertoy_sqlite/src/sqlite/dao/sync_dao.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/comment_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/playlist_shader_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/playlist_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/shader_table.dart';
+import 'package:shadertoy_sqlite/src/sqlite/table/sync_table.dart';
 
 import 'dao/shader_dao.dart';
 import 'dao/user_dao.dart';
@@ -17,12 +19,14 @@ part 'store.g.dart';
   ShaderTable,
   CommentTable,
   PlaylistTable,
-  PlaylistShaderTable
+  PlaylistShaderTable,
+  SyncTable
 ], daos: [
   UserDao,
   ShaderDao,
   CommentDao,
-  PlaylistDao
+  PlaylistDao,
+  SyncDao
 ])
 
 /// The Moor storage abstraction

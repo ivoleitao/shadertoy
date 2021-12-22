@@ -649,6 +649,89 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             error: _toResponseError(sqle,
                 context: contextPlaylist, target: playlistId)));
   }
+
+  @override
+  Future<FindSyncResponse> findSyncById(SyncType type, String target,
+      {String subType = Sync.defaultSubtype}) {
+    return _catchSqlError<FindSyncResponse>(
+        store.syncDao.findById(type, target, subType).then((value) => value !=
+                null
+            ? FindSyncResponse(sync: value)
+            : FindSyncResponse(
+                error: ResponseError.notFound(
+                    message:
+                        'Sync with type:$type, subType:$subType and target:$target not found',
+                    context: contextSync,
+                    target: '$type|$subType|$target'))),
+        (sqle) => FindSyncResponse(
+            error: _toResponseError(sqle,
+                context: contextShader, target: '$type|$subType|$target')));
+  }
+
+  @override
+  Future<FindSyncsResponse> findAllSyncs() {
+    return _catchSqlError<FindSyncsResponse>(
+        store.syncDao.findAll().then((results) => FindSyncsResponse(
+            syncs:
+                results.map((sync) => FindSyncResponse(sync: sync)).toList())),
+        (sqle) => FindSyncsResponse(
+            error: _toResponseError(sqle, context: contextShader)));
+  }
+
+  @override
+  Future<FindSyncsResponse> findSyncs(
+      {SyncType? type,
+      String? subType,
+      String? target,
+      SyncStatus? status,
+      DateTime? createdBefore,
+      DateTime? updatedBefore}) {
+    return _catchSqlError<FindSyncsResponse>(
+        store.syncDao
+            .find(
+                type: type,
+                subType: subType,
+                target: target,
+                status: status,
+                createdBefore: createdBefore,
+                updatedBefore: updatedBefore)
+            .then((results) => FindSyncsResponse(
+                syncs: results
+                    .map((sync) => FindSyncResponse(sync: sync))
+                    .toList())),
+        (sqle) => FindSyncsResponse(
+            error: _toResponseError(sqle, context: contextSync)));
+  }
+
+  @override
+  Future<SaveSyncResponse> saveSync(Sync sync) {
+    return _catchSqlError<SaveSyncResponse>(
+        store.syncDao.save(sync).then((reponse) => SaveSyncResponse()),
+        (sqle) => SaveSyncResponse(
+            error: _toResponseError(sqle,
+                context: contextSync,
+                target: '${sync.type}|${sync.subType}|${sync.target}')));
+  }
+
+  @override
+  Future<SaveSyncsResponse> saveSyncs(List<Sync> syncs) {
+    return _catchSqlError<SaveSyncsResponse>(
+        store.syncDao.saveAll(syncs).then((reponse) => SaveSyncsResponse()),
+        (sqle) => SaveSyncsResponse(
+            error: _toResponseError(sqle, context: contextShader)));
+  }
+
+  @override
+  Future<DeleteSyncResponse> deleteSync(SyncType type, target,
+      {String subType = Sync.defaultSubtype}) {
+    return _catchSqlError<DeleteSyncResponse>(
+        store.syncDao
+            .deleteById(type, target, subType)
+            .then((reponse) => DeleteSyncResponse()),
+        (sqle) => DeleteSyncResponse(
+            error: _toResponseError(sqle,
+                context: contextShader, target: '$type|$subType|$target')));
+  }
 }
 
 /// Creates a [ShadertoyStore] backed by a [ShadertoySqliteStore]

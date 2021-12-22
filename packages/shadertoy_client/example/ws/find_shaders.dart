@@ -19,6 +19,6 @@ void main(List<String> arguments) async {
   print('${result.total} shader id(s)');
 
   for (var response in result.shaders ?? []) {
-    print('${response.shader?.info.id} ');
+    print('${response.shader?.info.target} ');
   }
 }

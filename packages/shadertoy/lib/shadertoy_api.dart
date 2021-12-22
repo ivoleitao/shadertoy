@@ -12,6 +12,7 @@ export 'src/model/playlist.dart';
 export 'src/model/render_pass.dart';
 export 'src/model/sampler.dart';
 export 'src/model/shader.dart';
+export 'src/model/sync.dart';
 export 'src/model/user.dart';
 export 'src/request.dart';
 export 'src/response.dart';

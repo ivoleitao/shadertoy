@@ -2,6 +2,7 @@ import 'package:shadertoy/src/context.dart';
 import 'package:shadertoy/src/model/comment.dart';
 import 'package:shadertoy/src/model/playlist.dart';
 import 'package:shadertoy/src/model/shader.dart';
+import 'package:shadertoy/src/model/sync.dart';
 import 'package:shadertoy/src/model/user.dart';
 import 'package:shadertoy/src/response.dart';
 
@@ -35,6 +36,9 @@ const contextComment = 'comment';
 
 /// Playlist context
 const contextPlaylist = 'playlist';
+
+/// Sync context
+const contextSync = 'sync';
 
 /// The exception handling mode
 enum ErrorMode {
@@ -400,6 +404,65 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   ///
   /// In case of error a [ResponseError] is set and no playlist list is provided
   Future<FindPlaylistsResponse> findAllPlaylists();
+
+  /// Returns a [FindSyncResponse] for sync with [type], [subType] and [target]
+  ///
+  /// Upon success a [Sync] object is provided and error is set to null
+  ///
+  /// In case of error a [ResponseError] is set and no [Sync] is provided
+  Future<FindSyncResponse> findSyncById(SyncType type, String target,
+      {String subType = Sync.defaultSubtype});
+
+  /// Returns a filtered [FindSyncsResponse] with a list of syncs
+  ///
+  /// * [type]: The target type
+  /// * [subType]: The target sub type
+  /// * [target]: The target
+  /// * [status]: The status of the sync
+  /// * [createdBefore]: Syncs created before this date
+  /// * [updatedBefore]: Syncs updated before this date
+  ///
+  /// Upon success a list of [Syncs] objects is provided as well as the overall
+  /// number of records in total (not the number of syncs in the list, the
+  /// number of total results). The error is set to null
+  ///
+  /// In case of error a [ResponseError] is set and no [Sync] list is provided
+  Future<FindSyncsResponse> findSyncs(
+      {SyncType? type,
+      String? subType,
+      String? target,
+      SyncStatus? status,
+      DateTime? createdBefore,
+      DateTime? updatedBefore});
+
+  /// Returns a [FindSyncsResponse] with all the syncs
+  ///
+  /// Upon success a list of syncs is provided and error is set to null
+  ///
+  /// In case of error a [ResponseError] is set and no sync list is provided
+  Future<FindSyncsResponse> findAllSyncs();
+
+  /// Saves a [Sync]
+  ///
+  /// On success the [Sync] is saved
+  ///
+  /// In case of error a [ResponseError] is set on [SaveSyncResponse]
+  Future<SaveSyncResponse> saveSync(Sync sync);
+
+  /// Saves a list of [Sync]
+  ///
+  /// On success the list of [Sync] was saved
+  ///
+  /// In case of error a [ResponseError] is set on [SaveSyncsResponse]
+  Future<SaveSyncsResponse> saveSyncs(List<Sync> syncs);
+
+  /// Deletes a [Sync] by [type], [subType] and [target]
+  ///
+  /// On success the [Sync] identified by [type], [subType] and target is deleted
+  ///
+  /// In case of error a [ResponseError] is set on [DeleteUserResponse]
+  Future<DeleteSyncResponse> deleteSync(SyncType type, target,
+      {String subType = Sync.defaultSubtype});
 }
 
 /// A base implementation of Shadertoy stores
