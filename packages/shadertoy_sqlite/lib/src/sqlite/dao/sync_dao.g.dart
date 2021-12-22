@@ -6,6 +6,6 @@ part of 'sync_dao.dart';
 // DaoGenerator
 // **************************************************************************
 
-mixin _$SyncDaoMixin on DatabaseAccessor<MoorStore> {
+mixin _$SyncDaoMixin on DatabaseAccessor<DriftStore> {
   $SyncTableTable get syncTable => attachedDatabase.syncTable;
 }

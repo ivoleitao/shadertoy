@@ -11,11 +11,11 @@ part 'playlist_dao.g.dart';
     queries: {'playlistId': 'SELECT id FROM Playlist'})
 
 /// Playlist data access object
-class PlaylistDao extends DatabaseAccessor<MoorStore> with _$PlaylistDaoMixin {
+class PlaylistDao extends DatabaseAccessor<DriftStore> with _$PlaylistDaoMixin {
   /// Creates a [PlaylistDao]
   ///
-  /// * [store]: A pre-initialized [MoorStore] store
-  PlaylistDao(MoorStore store) : super(store);
+  /// * [store]: A pre-initialized [DriftStore] store
+  PlaylistDao(DriftStore store) : super(store);
 
   /// Converts a [PlaylistEntry] into a [Playlist]
   ///

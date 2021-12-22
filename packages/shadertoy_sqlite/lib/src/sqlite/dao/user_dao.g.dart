@@ -6,7 +6,7 @@ part of 'user_dao.dart';
 // DaoGenerator
 // **************************************************************************
 
-mixin _$UserDaoMixin on DatabaseAccessor<MoorStore> {
+mixin _$UserDaoMixin on DatabaseAccessor<DriftStore> {
   $UserTableTable get userTable => attachedDatabase.userTable;
   Selectable<String> userId() {
     return customSelect('SELECT id FROM User', variables: [], readsFrom: {

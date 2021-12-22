@@ -8,11 +8,11 @@ part 'sync_dao.g.dart';
 @DriftAccessor(tables: [SyncTable])
 
 /// Sync data access object
-class SyncDao extends DatabaseAccessor<MoorStore> with _$SyncDaoMixin {
+class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
   /// Creates a [SyncDao]
   ///
-  /// * [store]: A pre-initialized [MoorStore] store
-  SyncDao(MoorStore store) : super(store);
+  /// * [store]: A pre-initialized [DriftStore] store
+  SyncDao(DriftStore store) : super(store);
 
   /// Converts a [SyncEntry] into a [Sync]
   ///
@@ -23,8 +23,8 @@ class SyncDao extends DatabaseAccessor<MoorStore> with _$SyncDaoMixin {
       target: entry.target,
       status: SyncStatus.values.byName(entry.status),
       message: entry.message,
-      created: entry.created,
-      updated: entry.updated);
+      creationTime: entry.creationTime,
+      updateTime: entry.updateTime);
 
   /// Converts a [SyncEntry] into a [Sync] or returns null of [entry] is null
   ///
@@ -112,13 +112,13 @@ class SyncDao extends DatabaseAccessor<MoorStore> with _$SyncDaoMixin {
 
         if (hasCreatedBefore) {
           final hasCreatedBeforeExp =
-              entry.created.isSmallerThanValue(createdBefore);
+              entry.creationTime.isSmallerThanValue(createdBefore);
           exp = (exp == null ? hasCreatedBeforeExp : exp & hasCreatedBeforeExp);
         }
 
         if (hasUpdatedBefore) {
           final hasUpdatedBeforeExp =
-              entry.updated.isSmallerThanValue(updatedBefore);
+              entry.updateTime.isSmallerThanValue(updatedBefore);
           exp = (exp == null ? hasUpdatedBeforeExp : exp & hasUpdatedBeforeExp);
         }
 
@@ -164,8 +164,8 @@ class SyncDao extends DatabaseAccessor<MoorStore> with _$SyncDaoMixin {
         target: entity.target,
         status: entity.status.name,
         message: entity.message,
-        created: entity.created,
-        updated: entity.updated);
+        creationTime: entity.creationTime,
+        updateTime: entity.updateTime);
   }
 
   /// Saves a [Sync]

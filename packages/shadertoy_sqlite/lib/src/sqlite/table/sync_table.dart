@@ -23,10 +23,10 @@ class SyncTable extends Table {
   TextColumn get message => text().nullable()();
 
   /// The creation time
-  DateTimeColumn get created => dateTime()();
+  DateTimeColumn get creationTime => dateTime()();
 
   /// The update time
-  DateTimeColumn get updated => dateTime()();
+  DateTimeColumn get updateTime => dateTime()();
 
   @override
   Set<Column> get primaryKey => {type, subType, target};

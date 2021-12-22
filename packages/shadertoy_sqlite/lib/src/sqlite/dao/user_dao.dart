@@ -8,11 +8,11 @@ part 'user_dao.g.dart';
 @DriftAccessor(tables: [UserTable], queries: {'userId': 'SELECT id FROM User'})
 
 /// User data access object
-class UserDao extends DatabaseAccessor<MoorStore> with _$UserDaoMixin {
+class UserDao extends DatabaseAccessor<DriftStore> with _$UserDaoMixin {
   /// Creates a [UserDao]
   ///
-  /// * [store]: A pre-initialized [MoorStore] store
-  UserDao(MoorStore store) : super(store);
+  /// * [store]: A pre-initialized [DriftStore] store
+  UserDao(DriftStore store) : super(store);
 
   /// Converts a [UserEntry] into a [User]
   ///

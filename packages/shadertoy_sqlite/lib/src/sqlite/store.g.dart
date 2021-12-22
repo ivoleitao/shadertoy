@@ -1784,18 +1784,18 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
   final String? message;
 
   /// The creation time
-  final DateTime created;
+  final DateTime creationTime;
 
   /// The update time
-  final DateTime updated;
+  final DateTime updateTime;
   SyncEntry(
       {required this.type,
       required this.subType,
       required this.target,
       required this.status,
       this.message,
-      required this.created,
-      required this.updated});
+      required this.creationTime,
+      required this.updateTime});
   factory SyncEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return SyncEntry(
@@ -1809,10 +1809,10 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
           .mapFromDatabaseResponse(data['${effectivePrefix}status'])!,
       message: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message']),
-      created: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created'])!,
-      updated: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated'])!,
+      creationTime: const DateTimeType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}creation_time'])!,
+      updateTime: const DateTimeType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}update_time'])!,
     );
   }
   @override
@@ -1825,8 +1825,8 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
     if (!nullToAbsent || message != null) {
       map['message'] = Variable<String?>(message);
     }
-    map['created'] = Variable<DateTime>(created);
-    map['updated'] = Variable<DateTime>(updated);
+    map['creation_time'] = Variable<DateTime>(creationTime);
+    map['update_time'] = Variable<DateTime>(updateTime);
     return map;
   }
 
@@ -1839,8 +1839,8 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
       message: message == null && nullToAbsent
           ? const Value.absent()
           : Value(message),
-      created: Value(created),
-      updated: Value(updated),
+      creationTime: Value(creationTime),
+      updateTime: Value(updateTime),
     );
   }
 
@@ -1853,8 +1853,8 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
       target: serializer.fromJson<String>(json['target']),
       status: serializer.fromJson<String>(json['status']),
       message: serializer.fromJson<String?>(json['message']),
-      created: serializer.fromJson<DateTime>(json['created']),
-      updated: serializer.fromJson<DateTime>(json['updated']),
+      creationTime: serializer.fromJson<DateTime>(json['creationTime']),
+      updateTime: serializer.fromJson<DateTime>(json['updateTime']),
     );
   }
   @override
@@ -1866,8 +1866,8 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
       'target': serializer.toJson<String>(target),
       'status': serializer.toJson<String>(status),
       'message': serializer.toJson<String?>(message),
-      'created': serializer.toJson<DateTime>(created),
-      'updated': serializer.toJson<DateTime>(updated),
+      'creationTime': serializer.toJson<DateTime>(creationTime),
+      'updateTime': serializer.toJson<DateTime>(updateTime),
     };
   }
 
@@ -1877,16 +1877,16 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
           String? target,
           String? status,
           String? message,
-          DateTime? created,
-          DateTime? updated}) =>
+          DateTime? creationTime,
+          DateTime? updateTime}) =>
       SyncEntry(
         type: type ?? this.type,
         subType: subType ?? this.subType,
         target: target ?? this.target,
         status: status ?? this.status,
         message: message ?? this.message,
-        created: created ?? this.created,
-        updated: updated ?? this.updated,
+        creationTime: creationTime ?? this.creationTime,
+        updateTime: updateTime ?? this.updateTime,
       );
   @override
   String toString() {
@@ -1896,15 +1896,15 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
           ..write('target: $target, ')
           ..write('status: $status, ')
           ..write('message: $message, ')
-          ..write('created: $created, ')
-          ..write('updated: $updated')
+          ..write('creationTime: $creationTime, ')
+          ..write('updateTime: $updateTime')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(type, subType, target, status, message, created, updated);
+  int get hashCode => Object.hash(
+      type, subType, target, status, message, creationTime, updateTime);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1914,8 +1914,8 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
           other.target == this.target &&
           other.status == this.status &&
           other.message == this.message &&
-          other.created == this.created &&
-          other.updated == this.updated);
+          other.creationTime == this.creationTime &&
+          other.updateTime == this.updateTime);
 }
 
 class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
@@ -1924,16 +1924,16 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
   final Value<String> target;
   final Value<String> status;
   final Value<String?> message;
-  final Value<DateTime> created;
-  final Value<DateTime> updated;
+  final Value<DateTime> creationTime;
+  final Value<DateTime> updateTime;
   const SyncTableCompanion({
     this.type = const Value.absent(),
     this.subType = const Value.absent(),
     this.target = const Value.absent(),
     this.status = const Value.absent(),
     this.message = const Value.absent(),
-    this.created = const Value.absent(),
-    this.updated = const Value.absent(),
+    this.creationTime = const Value.absent(),
+    this.updateTime = const Value.absent(),
   });
   SyncTableCompanion.insert({
     required String type,
@@ -1941,22 +1941,22 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
     required String target,
     required String status,
     this.message = const Value.absent(),
-    required DateTime created,
-    required DateTime updated,
+    required DateTime creationTime,
+    required DateTime updateTime,
   })  : type = Value(type),
         subType = Value(subType),
         target = Value(target),
         status = Value(status),
-        created = Value(created),
-        updated = Value(updated);
+        creationTime = Value(creationTime),
+        updateTime = Value(updateTime);
   static Insertable<SyncEntry> custom({
     Expression<String>? type,
     Expression<String>? subType,
     Expression<String>? target,
     Expression<String>? status,
     Expression<String?>? message,
-    Expression<DateTime>? created,
-    Expression<DateTime>? updated,
+    Expression<DateTime>? creationTime,
+    Expression<DateTime>? updateTime,
   }) {
     return RawValuesInsertable({
       if (type != null) 'type': type,
@@ -1964,8 +1964,8 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
       if (target != null) 'target': target,
       if (status != null) 'status': status,
       if (message != null) 'message': message,
-      if (created != null) 'created': created,
-      if (updated != null) 'updated': updated,
+      if (creationTime != null) 'creation_time': creationTime,
+      if (updateTime != null) 'update_time': updateTime,
     });
   }
 
@@ -1975,16 +1975,16 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
       Value<String>? target,
       Value<String>? status,
       Value<String?>? message,
-      Value<DateTime>? created,
-      Value<DateTime>? updated}) {
+      Value<DateTime>? creationTime,
+      Value<DateTime>? updateTime}) {
     return SyncTableCompanion(
       type: type ?? this.type,
       subType: subType ?? this.subType,
       target: target ?? this.target,
       status: status ?? this.status,
       message: message ?? this.message,
-      created: created ?? this.created,
-      updated: updated ?? this.updated,
+      creationTime: creationTime ?? this.creationTime,
+      updateTime: updateTime ?? this.updateTime,
     );
   }
 
@@ -2006,11 +2006,11 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
     if (message.present) {
       map['message'] = Variable<String?>(message.value);
     }
-    if (created.present) {
-      map['created'] = Variable<DateTime>(created.value);
+    if (creationTime.present) {
+      map['creation_time'] = Variable<DateTime>(creationTime.value);
     }
-    if (updated.present) {
-      map['updated'] = Variable<DateTime>(updated.value);
+    if (updateTime.present) {
+      map['update_time'] = Variable<DateTime>(updateTime.value);
     }
     return map;
   }
@@ -2023,8 +2023,8 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
           ..write('target: $target, ')
           ..write('status: $status, ')
           ..write('message: $message, ')
-          ..write('created: $created, ')
-          ..write('updated: $updated')
+          ..write('creationTime: $creationTime, ')
+          ..write('updateTime: $updateTime')
           ..write(')'))
         .toString();
   }
@@ -2060,19 +2060,20 @@ class $SyncTableTable extends SyncTable
   late final GeneratedColumn<String?> message = GeneratedColumn<String?>(
       'message', aliasedName, true,
       type: const StringType(), requiredDuringInsert: false);
-  final VerificationMeta _createdMeta = const VerificationMeta('created');
+  final VerificationMeta _creationTimeMeta =
+      const VerificationMeta('creationTime');
   @override
-  late final GeneratedColumn<DateTime?> created = GeneratedColumn<DateTime?>(
-      'created', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: true);
-  final VerificationMeta _updatedMeta = const VerificationMeta('updated');
+  late final GeneratedColumn<DateTime?> creationTime =
+      GeneratedColumn<DateTime?>('creation_time', aliasedName, false,
+          type: const IntType(), requiredDuringInsert: true);
+  final VerificationMeta _updateTimeMeta = const VerificationMeta('updateTime');
   @override
-  late final GeneratedColumn<DateTime?> updated = GeneratedColumn<DateTime?>(
-      'updated', aliasedName, false,
+  late final GeneratedColumn<DateTime?> updateTime = GeneratedColumn<DateTime?>(
+      'update_time', aliasedName, false,
       type: const IntType(), requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [type, subType, target, status, message, created, updated];
+      [type, subType, target, status, message, creationTime, updateTime];
   @override
   String get aliasedName => _alias ?? 'Sync';
   @override
@@ -2110,17 +2111,21 @@ class $SyncTableTable extends SyncTable
       context.handle(_messageMeta,
           message.isAcceptableOrUnknown(data['message']!, _messageMeta));
     }
-    if (data.containsKey('created')) {
-      context.handle(_createdMeta,
-          created.isAcceptableOrUnknown(data['created']!, _createdMeta));
+    if (data.containsKey('creation_time')) {
+      context.handle(
+          _creationTimeMeta,
+          creationTime.isAcceptableOrUnknown(
+              data['creation_time']!, _creationTimeMeta));
     } else if (isInserting) {
-      context.missing(_createdMeta);
+      context.missing(_creationTimeMeta);
     }
-    if (data.containsKey('updated')) {
-      context.handle(_updatedMeta,
-          updated.isAcceptableOrUnknown(data['updated']!, _updatedMeta));
+    if (data.containsKey('update_time')) {
+      context.handle(
+          _updateTimeMeta,
+          updateTime.isAcceptableOrUnknown(
+              data['update_time']!, _updateTimeMeta));
     } else if (isInserting) {
-      context.missing(_updatedMeta);
+      context.missing(_updateTimeMeta);
     }
     return context;
   }
@@ -2139,8 +2144,8 @@ class $SyncTableTable extends SyncTable
   }
 }
 
-abstract class _$MoorStore extends GeneratedDatabase {
-  _$MoorStore(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+abstract class _$DriftStore extends GeneratedDatabase {
+  _$DriftStore(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   late final $UserTableTable userTable = $UserTableTable(this);
   late final $ShaderTableTable shaderTable = $ShaderTableTable(this);
   late final $CommentTableTable commentTable = $CommentTableTable(this);
@@ -2148,11 +2153,11 @@ abstract class _$MoorStore extends GeneratedDatabase {
   late final $PlaylistShaderTableTable playlistShaderTable =
       $PlaylistShaderTableTable(this);
   late final $SyncTableTable syncTable = $SyncTableTable(this);
-  late final UserDao userDao = UserDao(this as MoorStore);
-  late final ShaderDao shaderDao = ShaderDao(this as MoorStore);
-  late final CommentDao commentDao = CommentDao(this as MoorStore);
-  late final PlaylistDao playlistDao = PlaylistDao(this as MoorStore);
-  late final SyncDao syncDao = SyncDao(this as MoorStore);
+  late final UserDao userDao = UserDao(this as DriftStore);
+  late final ShaderDao shaderDao = ShaderDao(this as DriftStore);
+  late final CommentDao commentDao = CommentDao(this as DriftStore);
+  late final PlaylistDao playlistDao = PlaylistDao(this as DriftStore);
+  late final SyncDao syncDao = SyncDao(this as DriftStore);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override

@@ -1,5 +1,5 @@
-import 'package:drift/native.dart';
 import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite_options.dart';
@@ -188,15 +188,15 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
   // ignore: unused_field
   static final int _sqliteLockedSharedcache = 262;
 
-  /// The [MoorStore]
-  final MoorStore store;
+  /// The [DriftStore]
+  final DriftStore store;
 
   /// The [ShadertoySqliteOptions]
   final ShadertoySqliteOptions options;
 
   /// Creates a [ShadertoySqliteStore]
   ///
-  /// * [store]: A pre-initialized [MoorStore] store
+  /// * [store]: A pre-initialized [DriftStore] store
   /// * [options]: The [ShadertoySqliteOptions] used to configure this store
   ShadertoySqliteStore(this.store, this.options);
 
@@ -654,18 +654,17 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
   Future<FindSyncResponse> findSyncById(SyncType type, String target,
       {String subType = Sync.defaultSubtype}) {
     return _catchSqlError<FindSyncResponse>(
-        store.syncDao.findById(type, target, subType).then((value) => value !=
-                null
-            ? FindSyncResponse(sync: value)
-            : FindSyncResponse(
-                error: ResponseError.notFound(
-                    message:
-                        'Sync with type:$type, subType:$subType and target:$target not found',
-                    context: contextSync,
-                    target: '$type|$subType|$target'))),
+        store.syncDao.findById(type, subType, target).then((value) =>
+            value != null
+                ? FindSyncResponse(sync: value)
+                : FindSyncResponse(
+                    error: ResponseError.notFound(
+                        message: 'Sync $target not found',
+                        context: contextSync,
+                        target: target))),
         (sqle) => FindSyncResponse(
             error: _toResponseError(sqle,
-                context: contextShader, target: '$type|$subType|$target')));
+                context: contextShader, target: target)));
   }
 
   @override
@@ -709,8 +708,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
         store.syncDao.save(sync).then((reponse) => SaveSyncResponse()),
         (sqle) => SaveSyncResponse(
             error: _toResponseError(sqle,
-                context: contextSync,
-                target: '${sync.type}|${sync.subType}|${sync.target}')));
+                context: contextSync, target: sync.target)));
   }
 
   @override
@@ -722,15 +720,15 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
   }
 
   @override
-  Future<DeleteSyncResponse> deleteSync(SyncType type, target,
+  Future<DeleteSyncResponse> deleteSyncById(SyncType type, target,
       {String subType = Sync.defaultSubtype}) {
     return _catchSqlError<DeleteSyncResponse>(
         store.syncDao
-            .deleteById(type, target, subType)
+            .deleteById(type, subType, target)
             .then((reponse) => DeleteSyncResponse()),
         (sqle) => DeleteSyncResponse(
             error: _toResponseError(sqle,
-                context: contextShader, target: '$type|$subType|$target')));
+                context: contextShader, target: target)));
   }
 }
 
@@ -747,7 +745,7 @@ ShadertoyStore newShadertoySqliteStore(QueryExecutor executor,
     int? playlistShaderCount,
     ErrorMode? errorHandling}) {
   return ShadertoySqliteStore(
-      MoorStore(executor),
+      DriftStore(executor),
       ShadertoySqliteOptions(
           shaderCount: shaderCount,
           userShaderCount: userShaderCount,

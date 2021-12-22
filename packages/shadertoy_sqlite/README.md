@@ -1,5 +1,5 @@
 # shadertoy_sqlite
-A [shadertoy](https://github.com/ivoleitao/shadertoy) storage implementation on sqlite using the [moor](https://pub.dev/packages/moor) package
+A [shadertoy](https://github.com/ivoleitao/shadertoy) storage implementation on sqlite using the [drift](https://pub.dev/packages/drift) package
 
 [![Pub Package](https://img.shields.io/pub/v/shadertoy_sqlite.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_sqlite)
 [![Coverage Status](https://codecov.io/gh/ivoleitao/shadertoy/graph/badge.svg?flag=shadertoy_sqlite)](https://codecov.io/gh/ivoleitao/shadertoy)
@@ -8,7 +8,7 @@ A [shadertoy](https://github.com/ivoleitao/shadertoy) storage implementation on 
 
 ## Overview
 
-This package implements the storage APIs defined in the [shadertoy](https://pub.dev/packages/shadertoy) package on sqlite through the [moor](https://pub.dev/packages/moor) package
+This package implements the storage APIs defined in the [shadertoy](https://pub.dev/packages/shadertoy) package on sqlite through the [drift](https://pub.dev/packages/drift) package
 
 ## Getting Started
 
@@ -33,7 +33,7 @@ import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
 
 ## Usage
 
-To create a new store the `ShadertoyStore` implementation needs to be instanciated. The example bellow creates a new `moor` store with an in memory implementation (mostly used for test purposes)
+To create a new store the `ShadertoyStore` implementation needs to be instanciated. The example bellow creates a new `drift` store with an in memory implementation (mostly used for test purposes)
 
 ```dart
 final store = newShadertoySqliteStore(VmDatabase.memory(logStatements: logStatements));
@@ -42,7 +42,7 @@ final store = newShadertoySqliteStore(VmDatabase.memory(logStatements: logStatem
 A more real example would entail de creation of a database backed by a file like so:
 
 ```dart
-final store = newShadertoyMoorStore(VmDatabase(File('shadertoy.db')))
+final store = newShadertoyDriftStore(VmDatabase(File('shadertoy.db')))
 ```
 
 This allows the execution of persistent operations, for example storing the definition of a shader with:
@@ -60,8 +60,8 @@ if (ssr.ok) {
 A more complete example bellow:
 
 ```dart
-import 'package:moor/ffi.dart';
-import 'package:moor/moor.dart';
+import 'package:drift/ffi.dart';
+import 'package:drift/drift.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
 

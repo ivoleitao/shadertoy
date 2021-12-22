@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+part 'sync.g.dart';
+
 /// The sync type
 enum SyncType {
   /// User
@@ -59,15 +61,15 @@ class Sync extends Equatable {
   /// The last sync message
   final String? message;
 
-  @JsonKey(name: 'created')
+  @JsonKey(name: 'creationTime')
 
   /// The first time the target was synced
-  final DateTime created;
+  final DateTime creationTime;
 
-  @JsonKey(name: 'updated')
+  @JsonKey(name: 'updateTime')
 
   /// The last time the target was synced
-  final DateTime updated;
+  final DateTime updateTime;
 
   /// Builds a [Sync]
   ///
@@ -76,22 +78,28 @@ class Sync extends Equatable {
   /// * [target]: The target
   /// * [status]: The status of the sync
   /// * [message]: An optional sync message
-  /// * [created]: The shader description
-  /// * [updated]: The last time the target was synced
+  /// * [creationTime]: The first time the target was synced
+  /// * [updateTime]: The last time the target was synced
   const Sync(
       {required this.type,
       String? subType,
       required this.target,
       required this.status,
       this.message,
-      required this.created,
-      DateTime? updated})
+      required this.creationTime,
+      DateTime? updateTime})
       : subType = subType ?? defaultSubtype,
-        updated = updated ?? created;
+        updateTime = updateTime ?? creationTime;
 
   @override
   List<Object?> get props =>
-      [type, subType, target, status, message, created, updated];
+      [type, subType, target, status, message, creationTime, updateTime];
+
+  /// Creates a [Sync] from json map
+  factory Sync.fromJson(Map<String, dynamic> json) => _$SyncFromJson(json);
+
+  /// Creates a json map from a [Sync]
+  Map<String, dynamic> toJson() => _$SyncToJson(this);
 
   /// Builds a copy of a [Sync]
   ///
@@ -100,23 +108,23 @@ class Sync extends Equatable {
   /// * [target]: The target
   /// * [status]: The status of the sync
   /// * [message]: An optional sync message
-  /// * [created]: The shader description
-  /// * [updated]: The last time the target was synced
+  /// * [creationTime]: The shader description
+  /// * [updateTime]: The last time the target was synced
   Sync copyWith(
       {SyncType? type,
       String? subType,
       String? target,
       SyncStatus? status,
       String? message,
-      DateTime? created,
-      DateTime? updated}) {
+      DateTime? creationTime,
+      DateTime? updateTime}) {
     return Sync(
         type: type ?? this.type,
         subType: subType ?? this.subType,
         target: target ?? this.target,
         status: status ?? this.status,
         message: message ?? this.message,
-        created: created ?? this.created,
-        updated: updated ?? this.updated);
+        creationTime: creationTime ?? this.creationTime,
+        updateTime: updateTime ?? this.updateTime);
   }
 }

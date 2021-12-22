@@ -9,11 +9,11 @@ part 'comment_dao.g.dart';
     tables: [CommentTable], queries: {'commentId': 'SELECT id FROM Comment'})
 
 /// Comment data access object
-class CommentDao extends DatabaseAccessor<MoorStore> with _$CommentDaoMixin {
+class CommentDao extends DatabaseAccessor<DriftStore> with _$CommentDaoMixin {
   /// Creates a [CommentDao]
   ///
-  /// * [store]: A pre-initialized [MoorStore] store
-  CommentDao(MoorStore store) : super(store);
+  /// * [store]: A pre-initialized [DriftStore] store
+  CommentDao(DriftStore store) : super(store);
 
   /// Checks if a shader has comments
   ///

@@ -6,7 +6,7 @@ part of 'comment_dao.dart';
 // DaoGenerator
 // **************************************************************************
 
-mixin _$CommentDaoMixin on DatabaseAccessor<MoorStore> {
+mixin _$CommentDaoMixin on DatabaseAccessor<DriftStore> {
   $CommentTableTable get commentTable => attachedDatabase.commentTable;
   Selectable<String> commentId() {
     return customSelect('SELECT id FROM Comment', variables: [], readsFrom: {

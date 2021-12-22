@@ -461,7 +461,7 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   /// On success the [Sync] identified by [type], [subType] and target is deleted
   ///
   /// In case of error a [ResponseError] is set on [DeleteUserResponse]
-  Future<DeleteSyncResponse> deleteSync(SyncType type, target,
+  Future<DeleteSyncResponse> deleteSyncById(SyncType type, target,
       {String subType = Sync.defaultSubtype});
 }
 

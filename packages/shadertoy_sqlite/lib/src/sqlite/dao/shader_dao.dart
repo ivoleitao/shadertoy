@@ -14,11 +14,11 @@ part 'shader_dao.g.dart';
     queries: {'shaderId': 'SELECT id FROM Shader'})
 
 /// Shader data access object
-class ShaderDao extends DatabaseAccessor<MoorStore> with _$ShaderDaoMixin {
+class ShaderDao extends DatabaseAccessor<DriftStore> with _$ShaderDaoMixin {
   /// Creates a [ShaderDao]
   ///
-  /// * [store]: A pre-initialized [MoorStore] store
-  ShaderDao(MoorStore store) : super(store);
+  /// * [store]: A pre-initialized [DriftStore] store
+  ShaderDao(DriftStore store) : super(store);
 
   /// Converts a [ShaderEntry] into a [Info]
   ///

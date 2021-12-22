@@ -29,15 +29,15 @@ part 'store.g.dart';
   SyncDao
 ])
 
-/// The Moor storage abstraction
-class MoorStore extends _$MoorStore {
+/// The Drift storage abstraction
+class DriftStore extends _$DriftStore {
   /// The current schema version
   static const int _schemaVersion = 1;
 
-  /// Creates a [MoorStore]
+  /// Creates a [DriftStore]
   ///
   /// * [executor]: The selected [QueryExecutor]
-  MoorStore(QueryExecutor executor) : super(executor);
+  DriftStore(QueryExecutor executor) : super(executor);
 
   @override
   int get schemaVersion => _schemaVersion;

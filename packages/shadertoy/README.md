@@ -33,7 +33,7 @@ The following storage implementations are available
 
 |Package|Pub|Description|
 |-------|---|-----------|
-| [shadertoy_sqlite](https://github.com/ivoleitao/shadertoy/tree/develop/packages/shadertoy_sqlite) | [![Pub](https://img.shields.io/pub/v/shadertoy_sqlite.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_sqlite) | A Sqlite storage implementation using the [moor](https://pub.dev/packages/moor) package|
+| [shadertoy_sqlite](https://github.com/ivoleitao/shadertoy/tree/develop/packages/shadertoy_sqlite) | [![Pub](https://img.shields.io/pub/v/shadertoy_sqlite.svg?style=flat-square)](https://pub.dartlang.org/packages/shadertoy_sqlite) | A Sqlite storage implementation using the [drift](https://pub.dev/packages/drift) package|
 
 ## Getting Started
 

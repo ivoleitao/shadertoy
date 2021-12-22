@@ -6,7 +6,7 @@ part of 'playlist_dao.dart';
 // DaoGenerator
 // **************************************************************************
 
-mixin _$PlaylistDaoMixin on DatabaseAccessor<MoorStore> {
+mixin _$PlaylistDaoMixin on DatabaseAccessor<DriftStore> {
   $PlaylistTableTable get playlistTable => attachedDatabase.playlistTable;
   $PlaylistShaderTableTable get playlistShaderTable =>
       attachedDatabase.playlistShaderTable;
