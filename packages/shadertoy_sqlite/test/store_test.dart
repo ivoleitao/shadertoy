@@ -1,5 +1,5 @@
-import 'package:moor/ffi.dart';
-import 'package:moor/moor.dart' show QueryExecutor, moorRuntimeOptions;
+import 'package:drift/drift.dart' show QueryExecutor, driftRuntimeOptions;
+import 'package:drift/native.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite_options.dart';
@@ -14,7 +14,7 @@ void main() {
   }
 
   QueryExecutor memoryExecutor({bool logStatements = false}) {
-    return VmDatabase.memory(logStatements: logStatements);
+    return NativeDatabase.memory(logStatements: logStatements);
   }
 
   MoorStore newStore(QueryExecutor? executor) {
@@ -26,7 +26,7 @@ void main() {
     return ShadertoySqliteStore(newStore(executor), options);
   }
 
-  moorRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
 
   Future<List<FindShaderResponse>> _nameSort(List<String> shaderPaths) async {
     nameSort(FindShaderResponse fsr) => fsr.shader?.info.name ?? '';

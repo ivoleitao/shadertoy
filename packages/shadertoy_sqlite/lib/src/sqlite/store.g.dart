@@ -32,8 +32,7 @@ class UserEntry extends DataClass implements Insertable<UserEntry> {
       required this.following,
       required this.followers,
       this.about});
-  factory UserEntry.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory UserEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return UserEntry(
       id: const StringType()
@@ -82,7 +81,7 @@ class UserEntry extends DataClass implements Insertable<UserEntry> {
 
   factory UserEntry.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserEntry(
       id: serializer.fromJson<String>(json['id']),
       picture: serializer.fromJson<String?>(json['picture']),
@@ -94,7 +93,7 @@ class UserEntry extends DataClass implements Insertable<UserEntry> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'picture': serializer.toJson<String?>(picture),
@@ -333,7 +332,7 @@ class $UserTableTable extends UserTable
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   UserEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return UserEntry.fromData(data, _db,
+    return UserEntry.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -392,8 +391,7 @@ class ShaderEntry extends DataClass implements Insertable<ShaderEntry> {
       required this.flags,
       required this.tagsJson,
       required this.renderPassesJson});
-  factory ShaderEntry.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory ShaderEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return ShaderEntry(
       id: const StringType()
@@ -463,7 +461,7 @@ class ShaderEntry extends DataClass implements Insertable<ShaderEntry> {
 
   factory ShaderEntry.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return ShaderEntry(
       id: serializer.fromJson<String>(json['id']),
       userId: serializer.fromJson<String>(json['userId']),
@@ -481,7 +479,7 @@ class ShaderEntry extends DataClass implements Insertable<ShaderEntry> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'userId': serializer.toJson<String>(userId),
@@ -904,7 +902,7 @@ class $ShaderTableTable extends ShaderTable
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   ShaderEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ShaderEntry.fromData(data, _db,
+    return ShaderEntry.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -943,8 +941,7 @@ class CommentEntry extends DataClass implements Insertable<CommentEntry> {
       required this.date,
       required this.comment,
       required this.hidden});
-  factory CommentEntry.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory CommentEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return CommentEntry(
       id: const StringType()
@@ -994,7 +991,7 @@ class CommentEntry extends DataClass implements Insertable<CommentEntry> {
 
   factory CommentEntry.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return CommentEntry(
       id: serializer.fromJson<String>(json['id']),
       shaderId: serializer.fromJson<String>(json['shaderId']),
@@ -1007,7 +1004,7 @@ class CommentEntry extends DataClass implements Insertable<CommentEntry> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'shaderId': serializer.toJson<String>(shaderId),
@@ -1278,7 +1275,7 @@ class $CommentTableTable extends CommentTable
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   CommentEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return CommentEntry.fromData(data, _db,
+    return CommentEntry.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -1305,9 +1302,7 @@ class PlaylistEntry extends DataClass implements Insertable<PlaylistEntry> {
       required this.userId,
       required this.name,
       required this.description});
-  factory PlaylistEntry.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory PlaylistEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return PlaylistEntry(
       id: const StringType()
@@ -1341,7 +1336,7 @@ class PlaylistEntry extends DataClass implements Insertable<PlaylistEntry> {
 
   factory PlaylistEntry.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return PlaylistEntry(
       id: serializer.fromJson<String>(json['id']),
       userId: serializer.fromJson<String>(json['userId']),
@@ -1351,7 +1346,7 @@ class PlaylistEntry extends DataClass implements Insertable<PlaylistEntry> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'userId': serializer.toJson<String>(userId),
@@ -1537,7 +1532,7 @@ class $PlaylistTableTable extends PlaylistTable
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   PlaylistEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return PlaylistEntry.fromData(data, _db,
+    return PlaylistEntry.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -1559,8 +1554,7 @@ class PlaylistShaderEntry extends DataClass
   final int order;
   PlaylistShaderEntry(
       {required this.playlistId, required this.shaderId, required this.order});
-  factory PlaylistShaderEntry.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
+  factory PlaylistShaderEntry.fromData(Map<String, dynamic> data,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return PlaylistShaderEntry(
@@ -1591,7 +1585,7 @@ class PlaylistShaderEntry extends DataClass
 
   factory PlaylistShaderEntry.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return PlaylistShaderEntry(
       playlistId: serializer.fromJson<String>(json['playlistId']),
       shaderId: serializer.fromJson<String>(json['shaderId']),
@@ -1600,7 +1594,7 @@ class PlaylistShaderEntry extends DataClass
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'playlistId': serializer.toJson<String>(playlistId),
       'shaderId': serializer.toJson<String>(shaderId),
@@ -1763,7 +1757,7 @@ class $PlaylistShaderTableTable extends PlaylistShaderTable
   Set<GeneratedColumn> get $primaryKey => {playlistId, shaderId};
   @override
   PlaylistShaderEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return PlaylistShaderEntry.fromData(data, _db,
+    return PlaylistShaderEntry.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -1802,8 +1796,7 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
       this.message,
       required this.created,
       required this.updated});
-  factory SyncEntry.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory SyncEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return SyncEntry(
       type: const StringType()
@@ -1853,7 +1846,7 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
 
   factory SyncEntry.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return SyncEntry(
       type: serializer.fromJson<String>(json['type']),
       subType: serializer.fromJson<String>(json['subType']),
@@ -1866,7 +1859,7 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'type': serializer.toJson<String>(type),
       'subType': serializer.toJson<String>(subType),
@@ -2136,7 +2129,7 @@ class $SyncTableTable extends SyncTable
   Set<GeneratedColumn> get $primaryKey => {type, subType, target};
   @override
   SyncEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return SyncEntry.fromData(data, _db,
+    return SyncEntry.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 

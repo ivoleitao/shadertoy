@@ -1,11 +1,11 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/comment_table.dart';
 
 part 'comment_dao.g.dart';
 
-@UseDao(
+@DriftAccessor(
     tables: [CommentTable], queries: {'commentId': 'SELECT id FROM Comment'})
 
 /// Comment data access object

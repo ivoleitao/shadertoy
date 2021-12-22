@@ -1,11 +1,11 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/user_table.dart';
 
 part 'user_dao.g.dart';
 
-@UseDao(tables: [UserTable], queries: {'userId': 'SELECT id FROM User'})
+@DriftAccessor(tables: [UserTable], queries: {'userId': 'SELECT id FROM User'})
 
 /// User data access object
 class UserDao extends DatabaseAccessor<MoorStore> with _$UserDaoMixin {

@@ -1,10 +1,10 @@
-import 'package:moor/ffi.dart';
-import 'package:moor/moor.dart';
+import 'package:drift/native.dart';
+import 'package:drift/drift.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
 
 QueryExecutor memoryExecutor({bool logStatements = false}) {
-  return VmDatabase.memory(logStatements: logStatements);
+  return NativeDatabase.memory(logStatements: logStatements);
 }
 
 void main(List<String> arguments) async {

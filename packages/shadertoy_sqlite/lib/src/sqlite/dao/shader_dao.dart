@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/playlist_shader_table.dart';
@@ -9,7 +9,7 @@ import 'package:shadertoy_sqlite/src/sqlite/table/shader_table.dart';
 
 part 'shader_dao.g.dart';
 
-@UseDao(
+@DriftAccessor(
     tables: [ShaderTable, PlaylistTable, PlaylistShaderTable],
     queries: {'shaderId': 'SELECT id FROM Shader'})
 

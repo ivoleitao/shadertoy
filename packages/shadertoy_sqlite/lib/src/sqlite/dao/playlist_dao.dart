@@ -1,4 +1,4 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/playlist_shader_table.dart';
@@ -6,7 +6,7 @@ import 'package:shadertoy_sqlite/src/sqlite/table/playlist_table.dart';
 
 part 'playlist_dao.g.dart';
 
-@UseDao(
+@DriftAccessor(
     tables: [PlaylistTable, PlaylistShaderTable],
     queries: {'playlistId': 'SELECT id FROM Playlist'})
 

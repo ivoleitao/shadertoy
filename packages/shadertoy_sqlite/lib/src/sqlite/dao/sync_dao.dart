@@ -1,11 +1,11 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/sync_table.dart';
 
 part 'sync_dao.g.dart';
 
-@UseDao(tables: [SyncTable])
+@DriftAccessor(tables: [SyncTable])
 
 /// Sync data access object
 class SyncDao extends DatabaseAccessor<MoorStore> with _$SyncDaoMixin {

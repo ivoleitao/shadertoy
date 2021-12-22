@@ -1,4 +1,4 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:shadertoy_sqlite/src/sqlite/dao/comment_dao.dart';
 import 'package:shadertoy_sqlite/src/sqlite/dao/playlist_dao.dart';
 import 'package:shadertoy_sqlite/src/sqlite/dao/sync_dao.dart';
@@ -14,7 +14,7 @@ import 'table/user_table.dart';
 
 part 'store.g.dart';
 
-@UseMoor(tables: [
+@DriftDatabase(tables: [
   UserTable,
   ShaderTable,
   CommentTable,

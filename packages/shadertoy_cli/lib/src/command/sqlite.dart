@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:moor/ffi.dart';
+import 'package:drift/native.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
 
@@ -19,6 +19,6 @@ class SqliteCommand extends DatabaseCommand {
   @override
   ShadertoyStore newStore(String dbPath) {
     return newShadertoySqliteStore(
-        VmDatabase(File(dbPath), logStatements: verbose));
+        NativeDatabase(File(dbPath), logStatements: verbose));
   }
 }

@@ -10,7 +10,7 @@ environment:
   sdk: ">=2.15.0 <3.0.0"
 
 dependencies:
-  moor: ^4.6.1+1
+  drift: ^1.1.0
   #shadertoy: ^2.0.1
   shadertoy:
     path: ../shadertoy
@@ -21,4 +21,4 @@ dev_dependencies:
   test: ^1.20.1
   dio: ^4.0.4
   universal_platform: ^1.0.0+1
-  moor_generator: ^4.6.0+1
+  drift_dev: ^1.1.0
