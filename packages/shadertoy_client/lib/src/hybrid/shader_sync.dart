@@ -191,7 +191,7 @@ class ShaderSyncProcessor extends SyncProcessor {
 
           return apiShader;
         })
-        .then((sr) => ShaderSyncTask(sr))
+        .then((FindShaderResponse sr) => ShaderSyncTask(sr))
         .catchError((e) => ShaderSyncTask(_getShaderError(e, shaderId)));
   }
 

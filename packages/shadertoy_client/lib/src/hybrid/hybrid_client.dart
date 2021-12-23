@@ -18,7 +18,7 @@ enum HybridSyncMode {
   /// from the storage
   full,
 
-  /// Retrieves only the new shaders / users from the shadertoy webisite adding them to
+  /// Retrieves only the new shaders / users from the shadertoy website adding them to
   /// the storage
   latest
 }
