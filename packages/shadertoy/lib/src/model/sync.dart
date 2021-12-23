@@ -34,17 +34,10 @@ enum SyncStatus {
 
 /// Stores information about a sync operation
 class Sync extends Equatable {
-  static const defaultSubtype = 'default';
-
   @JsonKey(name: 'type')
 
   /// The target type
   final SyncType type;
-
-  @JsonKey(name: 'subType')
-
-  /// The target sub type
-  final String subType;
 
   @JsonKey(name: 'target')
 
@@ -74,7 +67,6 @@ class Sync extends Equatable {
   /// Builds a [Sync]
   ///
   /// * [type]: The target type
-  /// * [subType]: The target sub type
   /// * [target]: The target
   /// * [status]: The status of the sync
   /// * [message]: An optional sync message
@@ -82,18 +74,16 @@ class Sync extends Equatable {
   /// * [updateTime]: The last time the target was synced
   const Sync(
       {required this.type,
-      String? subType,
       required this.target,
       required this.status,
       this.message,
       required this.creationTime,
       DateTime? updateTime})
-      : subType = subType ?? defaultSubtype,
-        updateTime = updateTime ?? creationTime;
+      : updateTime = updateTime ?? creationTime;
 
   @override
   List<Object?> get props =>
-      [type, subType, target, status, message, creationTime, updateTime];
+      [type, target, status, message, creationTime, updateTime];
 
   /// Creates a [Sync] from json map
   factory Sync.fromJson(Map<String, dynamic> json) => _$SyncFromJson(json);
@@ -104,7 +94,6 @@ class Sync extends Equatable {
   /// Builds a copy of a [Sync]
   ///
   /// * [type]: The target type
-  /// * [subType]: The target sub type
   /// * [target]: The target
   /// * [status]: The status of the sync
   /// * [message]: An optional sync message
@@ -112,7 +101,6 @@ class Sync extends Equatable {
   /// * [updateTime]: The last time the target was synced
   Sync copyWith(
       {SyncType? type,
-      String? subType,
       String? target,
       SyncStatus? status,
       String? message,
@@ -120,7 +108,6 @@ class Sync extends Equatable {
       DateTime? updateTime}) {
     return Sync(
         type: type ?? this.type,
-        subType: subType ?? this.subType,
         target: target ?? this.target,
         status: status ?? this.status,
         message: message ?? this.message,

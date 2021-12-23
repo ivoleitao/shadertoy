@@ -405,18 +405,16 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   /// In case of error a [ResponseError] is set and no playlist list is provided
   Future<FindPlaylistsResponse> findAllPlaylists();
 
-  /// Returns a [FindSyncResponse] for sync with [type], [subType] and [target]
+  /// Returns a [FindSyncResponse] for sync with [type] and [target]
   ///
   /// Upon success a [Sync] object is provided and error is set to null
   ///
   /// In case of error a [ResponseError] is set and no [Sync] is provided
-  Future<FindSyncResponse> findSyncById(SyncType type, String target,
-      {String subType = Sync.defaultSubtype});
+  Future<FindSyncResponse> findSyncById(SyncType type, String target);
 
   /// Returns a filtered [FindSyncsResponse] with a list of syncs
   ///
   /// * [type]: The target type
-  /// * [subType]: The target sub type
   /// * [target]: The target
   /// * [status]: The status of the sync
   /// * [createdBefore]: Syncs created before this date
@@ -429,7 +427,6 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   /// In case of error a [ResponseError] is set and no [Sync] list is provided
   Future<FindSyncsResponse> findSyncs(
       {SyncType? type,
-      String? subType,
       String? target,
       SyncStatus? status,
       DateTime? createdBefore,
@@ -456,13 +453,12 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   /// In case of error a [ResponseError] is set on [SaveSyncsResponse]
   Future<SaveSyncsResponse> saveSyncs(List<Sync> syncs);
 
-  /// Deletes a [Sync] by [type], [subType] and [target]
+  /// Deletes a [Sync] by [type] and [target]
   ///
-  /// On success the [Sync] identified by [type], [subType] and target is deleted
+  /// On success the [Sync] identified by [type] and [target] is deleted
   ///
   /// In case of error a [ResponseError] is set on [DeleteUserResponse]
-  Future<DeleteSyncResponse> deleteSyncById(SyncType type, target,
-      {String subType = Sync.defaultSubtype});
+  Future<DeleteSyncResponse> deleteSyncById(SyncType type, target);
 }
 
 /// A base implementation of Shadertoy stores

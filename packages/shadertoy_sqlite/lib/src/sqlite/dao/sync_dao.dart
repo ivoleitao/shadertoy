@@ -19,7 +19,6 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
   /// * [entry]: The entry to convert
   Sync _toEntity(SyncEntry entry) => Sync(
       type: SyncType.values.byName(entry.type),
-      subType: entry.subType,
       target: entry.target,
       status: SyncStatus.values.byName(entry.status),
       message: entry.message,
@@ -32,17 +31,13 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
   Sync? _toEntityOrNull(SyncEntry? entry) =>
       entry != null ? _toEntity(entry) : null;
 
-  /// Get's the [Sync] with id [type], [subType] and [target]
+  /// Get's the [Sync] with id [type] and [target]
   ///
   /// * [type]: The type of the sync
-  /// * [subType]: The subtype of the sync
   /// * [target]: The target of the sync
-  Future<Sync?> findById(SyncType type, String subType, String target) {
+  Future<Sync?> findById(SyncType type, String target) {
     return (select(syncTable)
-          ..where((t) =>
-              t.type.equals(type.name) &
-              t.subType.equals(subType) &
-              t.target.equals(target)))
+          ..where((t) => t.type.equals(type.name) & t.target.equals(target)))
         .getSingleOrNull()
         .then(_toEntityOrNull);
   }
@@ -62,14 +57,12 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
   /// Executes a sync query
   ///
   /// * [type]: The target type
-  /// * [subType]: The target sub type
   /// * [target]: The target
   /// * [status]: The status of the sync
   /// * [createdBefore]: Syncs created before this date
   /// * [updatedBefore]: Syncs updated before this date
   Future<List<SyncEntry>> _getSyncQuery(
       {SyncType? type,
-      String? subType,
       String? target,
       SyncStatus? status,
       DateTime? createdBefore,
@@ -77,13 +70,11 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
     final query = select(syncTable);
 
     final hasType = type != null;
-    final hasSubType = subType != null && subType.isNotEmpty;
     final hasTarget = target != null && target.isNotEmpty;
     final hasStatus = status != null;
     final hasCreatedBefore = createdBefore != null;
     final hasUpdatedBefore = updatedBefore != null;
     if (hasType ||
-        hasSubType ||
         hasTarget ||
         hasStatus ||
         hasCreatedBefore ||
@@ -93,11 +84,6 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
 
         if (hasType) {
           exp = entry.type.equals(type.name);
-        }
-
-        if (hasSubType) {
-          final subTypeExp = entry.subType.equals(subType);
-          exp = (exp == null ? subTypeExp : exp & subTypeExp);
         }
 
         if (hasTarget) {
@@ -132,21 +118,18 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
   /// Query syncs
   ///
   /// * [type]: The target type
-  /// * [subType]: The target sub type
   /// * [target]: The target
   /// * [status]: The status of the sync
   /// * [createdBefore]: Syncs created before this date
   /// * [updatedBefore]: Syncs updated before this date
   Future<List<Sync>> find(
       {SyncType? type,
-      String? subType,
       String? target,
       SyncStatus? status,
       DateTime? createdBefore,
       DateTime? updatedBefore}) {
     return _getSyncQuery(
             type: type,
-            subType: subType,
             target: target,
             status: status,
             createdBefore: createdBefore,
@@ -160,7 +143,6 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
   SyncEntry _toEntry(Sync entity) {
     return SyncEntry(
         type: entity.type.name,
-        subType: entity.subType,
         target: entity.target,
         status: entity.status.name,
         message: entity.message,
@@ -193,17 +175,13 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
         mode: InsertMode.insertOrReplace));
   }
 
-  /// Deletes a [Sync] by [type], [subType] and [target]
+  /// Deletes a [Sync] by [type] and [target]
   ///
   /// * [type]: The type of the sync
-  /// * [subType]: The subtype of the sync
   /// * [target]: The target of the sync
-  Future<void> deleteById(SyncType type, String subType, String target) {
+  Future<void> deleteById(SyncType type, String target) {
     return (delete(syncTable)
-          ..where((t) =>
-              t.type.equals(type.name) &
-              t.subType.equals(subType) &
-              t.target.equals(target)))
+          ..where((t) => t.type.equals(type.name) & t.target.equals(target)))
         .go();
   }
 }

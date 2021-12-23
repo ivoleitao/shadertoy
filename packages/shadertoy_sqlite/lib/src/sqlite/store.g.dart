@@ -1771,9 +1771,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
   /// The type
   final String type;
 
-  /// The sub type
-  final String subType;
-
   /// The target
   final String target;
 
@@ -1790,7 +1787,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
   final DateTime updateTime;
   SyncEntry(
       {required this.type,
-      required this.subType,
       required this.target,
       required this.status,
       this.message,
@@ -1801,8 +1797,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
     return SyncEntry(
       type: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      subType: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}sub_type'])!,
       target: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}target'])!,
       status: const StringType()
@@ -1819,7 +1813,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['type'] = Variable<String>(type);
-    map['sub_type'] = Variable<String>(subType);
     map['target'] = Variable<String>(target);
     map['status'] = Variable<String>(status);
     if (!nullToAbsent || message != null) {
@@ -1833,7 +1826,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
   SyncTableCompanion toCompanion(bool nullToAbsent) {
     return SyncTableCompanion(
       type: Value(type),
-      subType: Value(subType),
       target: Value(target),
       status: Value(status),
       message: message == null && nullToAbsent
@@ -1849,7 +1841,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SyncEntry(
       type: serializer.fromJson<String>(json['type']),
-      subType: serializer.fromJson<String>(json['subType']),
       target: serializer.fromJson<String>(json['target']),
       status: serializer.fromJson<String>(json['status']),
       message: serializer.fromJson<String?>(json['message']),
@@ -1862,7 +1853,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'type': serializer.toJson<String>(type),
-      'subType': serializer.toJson<String>(subType),
       'target': serializer.toJson<String>(target),
       'status': serializer.toJson<String>(status),
       'message': serializer.toJson<String?>(message),
@@ -1873,7 +1863,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
 
   SyncEntry copyWith(
           {String? type,
-          String? subType,
           String? target,
           String? status,
           String? message,
@@ -1881,7 +1870,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
           DateTime? updateTime}) =>
       SyncEntry(
         type: type ?? this.type,
-        subType: subType ?? this.subType,
         target: target ?? this.target,
         status: status ?? this.status,
         message: message ?? this.message,
@@ -1892,7 +1880,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
   String toString() {
     return (StringBuffer('SyncEntry(')
           ..write('type: $type, ')
-          ..write('subType: $subType, ')
           ..write('target: $target, ')
           ..write('status: $status, ')
           ..write('message: $message, ')
@@ -1903,14 +1890,13 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
   }
 
   @override
-  int get hashCode => Object.hash(
-      type, subType, target, status, message, creationTime, updateTime);
+  int get hashCode =>
+      Object.hash(type, target, status, message, creationTime, updateTime);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SyncEntry &&
           other.type == this.type &&
-          other.subType == this.subType &&
           other.target == this.target &&
           other.status == this.status &&
           other.message == this.message &&
@@ -1920,7 +1906,6 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
 
 class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
   final Value<String> type;
-  final Value<String> subType;
   final Value<String> target;
   final Value<String> status;
   final Value<String?> message;
@@ -1928,7 +1913,6 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
   final Value<DateTime> updateTime;
   const SyncTableCompanion({
     this.type = const Value.absent(),
-    this.subType = const Value.absent(),
     this.target = const Value.absent(),
     this.status = const Value.absent(),
     this.message = const Value.absent(),
@@ -1937,21 +1921,18 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
   });
   SyncTableCompanion.insert({
     required String type,
-    required String subType,
     required String target,
     required String status,
     this.message = const Value.absent(),
     required DateTime creationTime,
     required DateTime updateTime,
   })  : type = Value(type),
-        subType = Value(subType),
         target = Value(target),
         status = Value(status),
         creationTime = Value(creationTime),
         updateTime = Value(updateTime);
   static Insertable<SyncEntry> custom({
     Expression<String>? type,
-    Expression<String>? subType,
     Expression<String>? target,
     Expression<String>? status,
     Expression<String?>? message,
@@ -1960,7 +1941,6 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
   }) {
     return RawValuesInsertable({
       if (type != null) 'type': type,
-      if (subType != null) 'sub_type': subType,
       if (target != null) 'target': target,
       if (status != null) 'status': status,
       if (message != null) 'message': message,
@@ -1971,7 +1951,6 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
 
   SyncTableCompanion copyWith(
       {Value<String>? type,
-      Value<String>? subType,
       Value<String>? target,
       Value<String>? status,
       Value<String?>? message,
@@ -1979,7 +1958,6 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
       Value<DateTime>? updateTime}) {
     return SyncTableCompanion(
       type: type ?? this.type,
-      subType: subType ?? this.subType,
       target: target ?? this.target,
       status: status ?? this.status,
       message: message ?? this.message,
@@ -1993,9 +1971,6 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
     final map = <String, Expression>{};
     if (type.present) {
       map['type'] = Variable<String>(type.value);
-    }
-    if (subType.present) {
-      map['sub_type'] = Variable<String>(subType.value);
     }
     if (target.present) {
       map['target'] = Variable<String>(target.value);
@@ -2019,7 +1994,6 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
   String toString() {
     return (StringBuffer('SyncTableCompanion(')
           ..write('type: $type, ')
-          ..write('subType: $subType, ')
           ..write('target: $target, ')
           ..write('status: $status, ')
           ..write('message: $message, ')
@@ -2039,11 +2013,6 @@ class $SyncTableTable extends SyncTable
   @override
   late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
       'type', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
-  final VerificationMeta _subTypeMeta = const VerificationMeta('subType');
-  @override
-  late final GeneratedColumn<String?> subType = GeneratedColumn<String?>(
-      'sub_type', aliasedName, false,
       type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _targetMeta = const VerificationMeta('target');
   @override
@@ -2073,7 +2042,7 @@ class $SyncTableTable extends SyncTable
       type: const IntType(), requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [type, subType, target, status, message, creationTime, updateTime];
+      [type, target, status, message, creationTime, updateTime];
   @override
   String get aliasedName => _alias ?? 'Sync';
   @override
@@ -2088,12 +2057,6 @@ class $SyncTableTable extends SyncTable
           _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
     } else if (isInserting) {
       context.missing(_typeMeta);
-    }
-    if (data.containsKey('sub_type')) {
-      context.handle(_subTypeMeta,
-          subType.isAcceptableOrUnknown(data['sub_type']!, _subTypeMeta));
-    } else if (isInserting) {
-      context.missing(_subTypeMeta);
     }
     if (data.containsKey('target')) {
       context.handle(_targetMeta,
@@ -2131,7 +2094,7 @@ class $SyncTableTable extends SyncTable
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {type, subType, target};
+  Set<GeneratedColumn> get $primaryKey => {type, target};
   @override
   SyncEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
     return SyncEntry.fromData(data,

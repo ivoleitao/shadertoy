@@ -651,17 +651,15 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
   }
 
   @override
-  Future<FindSyncResponse> findSyncById(SyncType type, String target,
-      {String subType = Sync.defaultSubtype}) {
+  Future<FindSyncResponse> findSyncById(SyncType type, String target) {
     return _catchSqlError<FindSyncResponse>(
-        store.syncDao.findById(type, subType, target).then((value) =>
-            value != null
-                ? FindSyncResponse(sync: value)
-                : FindSyncResponse(
-                    error: ResponseError.notFound(
-                        message: 'Sync $target not found',
-                        context: contextSync,
-                        target: target))),
+        store.syncDao.findById(type, target).then((value) => value != null
+            ? FindSyncResponse(sync: value)
+            : FindSyncResponse(
+                error: ResponseError.notFound(
+                    message: 'Sync $target not found',
+                    context: contextSync,
+                    target: target))),
         (sqle) => FindSyncResponse(
             error: _toResponseError(sqle,
                 context: contextShader, target: target)));
@@ -680,7 +678,6 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
   @override
   Future<FindSyncsResponse> findSyncs(
       {SyncType? type,
-      String? subType,
       String? target,
       SyncStatus? status,
       DateTime? createdBefore,
@@ -689,7 +686,6 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
         store.syncDao
             .find(
                 type: type,
-                subType: subType,
                 target: target,
                 status: status,
                 createdBefore: createdBefore,
@@ -720,11 +716,10 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
   }
 
   @override
-  Future<DeleteSyncResponse> deleteSyncById(SyncType type, target,
-      {String subType = Sync.defaultSubtype}) {
+  Future<DeleteSyncResponse> deleteSyncById(SyncType type, target) {
     return _catchSqlError<DeleteSyncResponse>(
         store.syncDao
-            .deleteById(type, subType, target)
+            .deleteById(type, target)
             .then((reponse) => DeleteSyncResponse()),
         (sqle) => DeleteSyncResponse(
             error: _toResponseError(sqle,

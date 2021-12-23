@@ -1398,13 +1398,11 @@ void main() {
           updateTime: creationTime.add(Duration(days: 1)));
       // act
       await store.saveSync(originalSync);
-      final savedSync1 = await store.findSyncById(
-          originalSync.type, originalSync.target,
-          subType: originalSync.subType);
+      final savedSync1 =
+          await store.findSyncById(originalSync.type, originalSync.target);
       await store.saveSync(updatedSync);
-      final savedSync2 = await store.findSyncById(
-          originalSync.type, originalSync.target,
-          subType: originalSync.subType);
+      final savedSync2 =
+          await store.findSyncById(originalSync.type, originalSync.target);
       // assert
       expect(savedSync1.sync, originalSync);
       expect(savedSync2.sync, updatedSync);
@@ -1422,8 +1420,7 @@ void main() {
           creationTime: creationTime);
       await store.saveSync(sync);
       // act
-      final response = await store.findSyncById(sync.type, sync.target,
-          subType: sync.subType);
+      final response = await store.findSyncById(sync.type, sync.target);
       // assert
       expect(response, isNotNull);
       expect(response.error, isNull);
@@ -1487,14 +1484,12 @@ void main() {
       final syncs = [
         Sync(
             type: SyncType.shader,
-            subType: 'a',
-            target: '3sBGRt',
+            target: '3sBGRa',
             status: SyncStatus.ok,
             creationTime: DateTime(2000, 1, 1, 0, 0, 0),
             updateTime: DateTime(2010, 1, 1, 0, 0, 0)),
         Sync(
             type: SyncType.shader,
-            subType: 'b',
             target: '3sBGRt',
             status: SyncStatus.error,
             creationTime: DateTime(2001, 1, 1, 0, 0, 0),
@@ -1511,7 +1506,6 @@ void main() {
       // act
       final response = await store.findSyncs(
           type: SyncType.shader,
-          subType: 'b',
           target: '3sBGRt',
           status: SyncStatus.error,
           createdBefore: DateTime(2002, 1, 1, 0, 0, 0),

@@ -10,9 +10,6 @@ class SyncTable extends Table {
   /// The type
   TextColumn get type => text()();
 
-  /// The sub type
-  TextColumn get subType => text()();
-
   /// The target
   TextColumn get target => text()();
 
@@ -29,5 +26,5 @@ class SyncTable extends Table {
   DateTimeColumn get updateTime => dateTime()();
 
   @override
-  Set<Column> get primaryKey => {type, subType, target};
+  Set<Column> get primaryKey => {type, target};
 }

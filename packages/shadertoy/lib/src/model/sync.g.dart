@@ -8,7 +8,6 @@ part of 'sync.dart';
 
 Sync _$SyncFromJson(Map<String, dynamic> json) => Sync(
       type: $enumDecode(_$SyncTypeEnumMap, json['type']),
-      subType: json['subType'] as String?,
       target: json['target'] as String,
       status: $enumDecode(_$SyncStatusEnumMap, json['status']),
       message: json['message'] as String?,
@@ -20,7 +19,6 @@ Sync _$SyncFromJson(Map<String, dynamic> json) => Sync(
 
 Map<String, dynamic> _$SyncToJson(Sync instance) => <String, dynamic>{
       'type': _$SyncTypeEnumMap[instance.type],
-      'subType': instance.subType,
       'target': instance.target,
       'status': _$SyncStatusEnumMap[instance.status],
       'message': instance.message,
