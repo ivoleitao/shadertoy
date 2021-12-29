@@ -354,6 +354,13 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   /// In case of error a [ResponseError] is set and no comment list is provided
   Future<FindCommentsResponse> findAllComments();
 
+  /// Saves a shader comment
+  ///
+  /// On success the comment was saved
+  ///
+  /// In case of error a [ResponseError] is set on [SaveShaderCommentResponse]
+  Future<SaveShaderCommentResponse> saveShaderComment(Comment comment);
+
   /// Saves a list of shaders comment
   ///
   /// On success the list of comment was saved

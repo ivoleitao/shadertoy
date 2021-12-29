@@ -6,11 +6,12 @@ import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/playlist_shader_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/playlist_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/shader_table.dart';
+import 'package:shadertoy_sqlite/src/sqlite/table/sync_table.dart';
 
 part 'shader_dao.g.dart';
 
 @DriftAccessor(
-    tables: [ShaderTable, PlaylistTable, PlaylistShaderTable],
+    tables: [ShaderTable, PlaylistTable, PlaylistShaderTable, SyncTable],
     queries: {'shaderId': 'SELECT id FROM Shader'})
 
 /// Shader data access object
@@ -322,7 +323,17 @@ class ShaderDao extends DatabaseAccessor<DriftStore> with _$ShaderDaoMixin {
   ///
   /// * [shaderId]: The id of the [Shader]
   Future<void> deleteById(String shaderId) {
-    return (delete(shaderTable)..where((shader) => shader.id.equals(shaderId)))
-        .go();
+    return transaction(() async {
+      // Delete any sync reference
+      await (delete(syncTable)
+            ..where((sync) =>
+                sync.type.equals(SyncType.shader.name) &
+                sync.target.equals(shaderId)))
+          .go();
+
+      // Delete the shader
+      await (delete(shaderTable)..where((shader) => shader.id.equals(shaderId)))
+          .go();
+    });
   }
 }

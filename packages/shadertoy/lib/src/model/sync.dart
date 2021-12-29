@@ -26,6 +26,9 @@ enum SyncStatus {
   /// Successfully synchronized
   ok,
 
+  /// Pending synchronization
+  pending,
+
   /// Error during synchronization
   error
 }

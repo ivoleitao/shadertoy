@@ -169,30 +169,81 @@ class ShaderSyncProcessor extends SyncProcessor {
 
   /// Creates a [FindShaderResponse] with a error
   ///
-  /// * [e]: The error cause
   /// * [shaderId]: The shader id
-  FindShaderResponse _getShaderError(dynamic e, String shaderId) {
+  /// * [fshader]: The shader response
+  /// * [response]: The response
+  /// * [e]: The error cause
+  FindShaderResponse _getShaderResponse(String shaderId,
+      {FindShaderResponse? fshader, APIResponse? response, dynamic e}) {
+    if (fshader != null && response != null && response.ok) {
+      return fshader;
+    }
+
     return FindShaderResponse(
-        error: ResponseError.unknown(
-            message: e.toString(), context: contextShader, target: shaderId));
+        error: response?.error ??
+            ResponseError.unknown(
+                message: e.toString(),
+                context: contextShader,
+                target: shaderId));
   }
 
   /// Saves a shader with id equal to [shaderId]
   ///
   /// * [shaderId]: The shader id
-  Future<ShaderSyncTask> _addShader(String shaderId) {
-    return client
-        .findShaderById(shaderId)
-        .then((apiShader) {
-          final shader = apiShader.shader;
-          if (shader != null) {
-            store.saveShader(shader);
+  Future<FindShaderResponse> _addShader(String shaderId) {
+    return client.findShaderById(shaderId).then((fshader) {
+      final shader = fshader.shader;
+      if (shader != null) {
+        return store.saveShader(shader).then((sshader) =>
+            _getShaderResponse(shaderId, fshader: fshader, response: sshader));
+      }
+
+      return Future.value(_getShaderResponse(shaderId, response: fshader));
+    });
+  }
+
+  /// Syncs a shader with id equal to [shaderId]
+  ///
+  /// * [shaderId]: The shader id
+  Future<ShaderSyncTask> _syncShader(String shaderId) {
+    return store.findSyncById(SyncType.shader, shaderId).then((fsync) {
+      final sync = fsync.sync;
+      if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
+        final preSync = sync != null
+            ? sync.copyWith(
+                status: SyncStatus.pending, updateTime: DateTime.now())
+            : Sync(
+                type: SyncType.shader,
+                target: shaderId,
+                status: SyncStatus.pending,
+                creationTime: DateTime.now());
+
+        return store.saveSync(preSync).then((ssync1) {
+          if (ssync1.ok) {
+            return _addShader(shaderId).then((FindShaderResponse fshader) {
+              final posSync = fshader.ok
+                  ? preSync.copyWith(
+                      status: SyncStatus.ok, updateTime: DateTime.now())
+                  : preSync.copyWith(
+                      status: SyncStatus.error,
+                      message: fshader.error?.message,
+                      updateTime: DateTime.now());
+
+              return store.saveSync(posSync).then((ssync2) {
+                return Future.value(ShaderSyncTask(_getShaderResponse(shaderId,
+                    fshader: fshader, response: ssync2)));
+              });
+            });
           }
 
-          return apiShader;
-        })
-        .then((FindShaderResponse sr) => ShaderSyncTask(sr))
-        .catchError((e) => ShaderSyncTask(_getShaderError(e, shaderId)));
+          return Future.value(
+              ShaderSyncTask(_getShaderResponse(shaderId, response: ssync1)));
+        });
+      }
+
+      return Future.value(
+          ShaderSyncTask(_getShaderResponse(shaderId, response: fsync)));
+    }).catchError((e) => ShaderSyncTask(_getShaderResponse(shaderId, e: e)));
   }
 
   /// Saves a list of shaders with [shaderIds]
@@ -203,7 +254,7 @@ class ShaderSyncProcessor extends SyncProcessor {
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     for (final shaderId in shaderIds) {
-      tasks.add(taskPool.withResource(() => _addShader(shaderId)));
+      tasks.add(taskPool.withResource(() => _syncShader(shaderId)));
     }
 
     return runner.process<ShaderSyncTask>(tasks,
@@ -219,7 +270,7 @@ class ShaderSyncProcessor extends SyncProcessor {
         .then((fsr) => store
             .deleteShaderById(shaderId)
             .then((value) => ShaderSyncTask(fsr)))
-        .catchError((e) => ShaderSyncTask(_getShaderError(e, shaderId)));
+        .catchError((e) => ShaderSyncTask(_getShaderResponse(shaderId, e: e)));
   }
 
   /// Deletes a list of shaders with [shaderIds]
@@ -249,14 +300,15 @@ class ShaderSyncProcessor extends SyncProcessor {
           storeShaders.map((fsr) => fsr.shader?.info).whereType<Info>();
       final storeShaderIds = storeInfos.map((info) => info.id).toSet();
 
+      /*
       final clientResponse =
           storeShaderIds.isEmpty || mode == HybridSyncMode.full
               ? await client.findAllShaderIds()
               : await client.findNewShaderIds(storeShaderIds);
-
-      /* final clientResponse =
+      */
+      final clientResponse =
           FindShaderIdsResponse(ids: ['XslGRr', 'MdX3Rr', '4sfGWX']);
-          */
+
       if (clientResponse.ok) {
         final clientShaderIds = (clientResponse.ids ?? []).toSet();
 
@@ -319,22 +371,76 @@ class ShaderSyncProcessor extends SyncProcessor {
 
   /// Creates a [FindCommentResponse] with a error
   ///
+  /// * [comment]: The comment
+  /// * [fcomment]: The comment response
+  /// * [response]: The response
   /// * [e]: The error cause
-  /// * [commentId]: The comment id
-  FindCommentResponse getCommentError(dynamic e, String commentId) {
+  FindCommentResponse _getCommentResponse(Comment comment,
+      {FindCommentResponse? fcomment, APIResponse? response, dynamic e}) {
+    if (response != null && response.ok) {
+      return fcomment ?? FindCommentResponse(comment: comment);
+    }
+
     return FindCommentResponse(
-        error: ResponseError.unknown(
-            message: e.toString(), context: contextComment, target: commentId));
+        error: response?.error ??
+            ResponseError.unknown(
+                message: e.toString(),
+                context: contextComment,
+                target: comment.id));
   }
 
   /// Saves a comment
   ///
   /// * [comment]: The comment to save
-  Future<CommentSyncTask> _addComment(Comment comment) {
+  Future<FindCommentResponse> _addComment(Comment comment) {
     return store
-        .saveShaderComments([comment])
-        .then((_) => CommentSyncTask(FindCommentResponse(comment: comment)))
-        .catchError((e) => CommentSyncTask(getCommentError(e, comment.id)));
+        .saveShaderComment(comment)
+        .then((scomment) => _getCommentResponse(comment, response: scomment));
+  }
+
+  /// Syncs a comment
+  ///
+  /// * [comment]: The comment
+  Future<CommentSyncTask> _syncComment(Comment comment) {
+    final commentId = comment.id;
+    return store.findSyncById(SyncType.comment, commentId).then((fsync) {
+      final sync = fsync.sync;
+      if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
+        final preSync = sync != null
+            ? sync.copyWith(
+                status: SyncStatus.pending, updateTime: DateTime.now())
+            : Sync(
+                type: SyncType.comment,
+                target: commentId,
+                status: SyncStatus.pending,
+                creationTime: DateTime.now());
+
+        return store.saveSync(preSync).then((ssync1) {
+          if (ssync1.ok) {
+            return _addComment(comment).then((FindCommentResponse fcomment) {
+              final posSync = fcomment.ok
+                  ? preSync.copyWith(
+                      status: SyncStatus.ok, updateTime: DateTime.now())
+                  : preSync.copyWith(
+                      status: SyncStatus.error,
+                      message: fcomment.error?.message,
+                      updateTime: DateTime.now());
+
+              return store.saveSync(posSync).then((ssync2) {
+                return Future.value(CommentSyncTask(_getCommentResponse(comment,
+                    fcomment: fcomment, response: ssync2)));
+              });
+            });
+          }
+
+          return Future.value(
+              CommentSyncTask(_getCommentResponse(comment, response: ssync1)));
+        });
+      }
+
+      return Future.value(
+          CommentSyncTask(_getCommentResponse(comment, response: fsync)));
+    }).catchError((e) => CommentSyncTask(_getCommentResponse(comment, e: e)));
   }
 
   /// Saves a list of comments
@@ -345,7 +451,7 @@ class ShaderSyncProcessor extends SyncProcessor {
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     for (final comment in comments) {
-      tasks.add(taskPool.withResource(() => _addComment(comment)));
+      tasks.add(taskPool.withResource(() => _syncComment(comment)));
     }
 
     return runner.process<CommentSyncTask>(tasks,
@@ -359,7 +465,7 @@ class ShaderSyncProcessor extends SyncProcessor {
     return store
         .deleteCommentById(comment.id)
         .then((value) => CommentSyncTask(FindCommentResponse(comment: comment)))
-        .catchError((e) => CommentSyncTask(getCommentError(e, comment.id)));
+        .catchError((e) => CommentSyncTask(_getCommentResponse(comment, e: e)));
   }
 
   /// Deletes a list of comments
@@ -441,9 +547,8 @@ class ShaderSyncProcessor extends SyncProcessor {
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     pathMap.forEach((shaderPicturePath, shaderPictureFilePath) {
-      tasks.add(taskPool.withResource(() => addMedia(
-          fs, shaderPicturePath, shaderPictureFilePath,
-          context: contextShader)));
+      tasks.add(taskPool.withResource(() => syncMedia(
+          fs, contextShader, shaderPicturePath, shaderPictureFilePath)));
     });
 
     return runner.process<DownloadSyncTask>(tasks,
@@ -453,17 +558,18 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// Deletes a list of shader pictures
   ///
   /// * [fs]: The [FileSystem]
-  /// * [pathSet]: A set of shader picture paths to delete
+  /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _deleteShaderPictures(
-      FileSystem fs, Set<String> pathSet) async {
+      FileSystem fs, Map<String, String> pathMap) async {
     final tasks = <Future<DownloadSyncTask>>[];
 
-    for (final shaderPictureFilePath in pathSet) {
-      tasks.add(deleteMedia(fs, shaderPictureFilePath, context: contextShader));
-    }
+    pathMap.forEach((shaderPicturePath, shaderPictureFilePath) {
+      tasks.add(deleteMedia(
+          fs, contextShader, shaderPicturePath, shaderPictureFilePath));
+    });
 
     return runner.process<DownloadSyncTask>(tasks,
-        message: 'Deleting ${pathSet.length} shader picture(s)');
+        message: 'Deleting ${pathMap.length} shader picture(s)');
   }
 
   /// Synchronizes the pictures from a shader
@@ -524,14 +630,18 @@ class ShaderSyncProcessor extends SyncProcessor {
     }
 
     final removeShaderPaths = {
-      ...removedShaderIds,
-      ...storeShaderIds.difference(currentShaderIds)
-    }.map((shaderId) => shaderPictureLocalPath(shaderId)).toSet();
+      for (var shaderId in {
+        ...removedShaderIds,
+        ...storeShaderIds.difference(currentShaderIds)
+      })
+        shaderPictureRemotePath(shaderId): shaderPictureLocalPath(shaderId)
+    };
     for (var path in {
       ...shaderSync.removedShaderInputSourcePaths,
       ...storeShaderInputSources.difference(currentShaderInputSources)
     }) {
-      removeShaderPaths.add(shaderInputSourceLocalPath(path));
+      removeShaderPaths.putIfAbsent(
+          path, () => shaderInputSourceLocalPath(path));
     }
 
     final added = await _addShaderPictures(fs, addShaderPaths)

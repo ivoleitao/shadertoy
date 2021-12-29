@@ -468,11 +468,21 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
   }
 
   @override
+  Future<SaveShaderCommentResponse> saveShaderComment(Comment comment) {
+    return _catchSqlError<SaveShaderCommentResponse>(
+        store.commentDao
+            .save(comment)
+            .then((reponse) => SaveShaderCommentResponse()),
+        (sqle) => SaveShaderCommentResponse(
+            error: _toResponseError(sqle, context: contextComment)));
+  }
+
+  @override
   Future<SaveShaderCommentsResponse> saveShaderComments(
       List<Comment> comments) {
     return _catchSqlError<SaveShaderCommentsResponse>(
         store.commentDao
-            .save(comments)
+            .saveAll(comments)
             .then((reponse) => SaveShaderCommentsResponse()),
         (sqle) => SaveShaderCommentsResponse(
             error: _toResponseError(sqle, context: contextComment)));

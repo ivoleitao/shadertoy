@@ -1,11 +1,13 @@
 import 'package:drift/drift.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
+import 'package:shadertoy_sqlite/src/sqlite/table/sync_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/user_table.dart';
 
 part 'user_dao.g.dart';
 
-@DriftAccessor(tables: [UserTable], queries: {'userId': 'SELECT id FROM User'})
+@DriftAccessor(
+    tables: [UserTable, SyncTable], queries: {'userId': 'SELECT id FROM User'})
 
 /// User data access object
 class UserDao extends DatabaseAccessor<DriftStore> with _$UserDaoMixin {
@@ -99,6 +101,16 @@ class UserDao extends DatabaseAccessor<DriftStore> with _$UserDaoMixin {
   ///
   /// * [userId]: The id of the [User]
   Future<void> deleteById(String userId) {
-    return (delete(userTable)..where((user) => user.id.equals(userId))).go();
+    return transaction(() async {
+      // Delete any sync reference
+      await (delete(syncTable)
+            ..where((sync) =>
+                sync.type.equals(SyncType.user.name) &
+                sync.target.equals(userId)))
+          .go();
+
+      // Delete the user
+      await (delete(userTable)..where((user) => user.id.equals(userId))).go();
+    });
   }
 }

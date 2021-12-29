@@ -8,6 +8,7 @@ part of 'comment_dao.dart';
 
 mixin _$CommentDaoMixin on DatabaseAccessor<DriftStore> {
   $CommentTableTable get commentTable => attachedDatabase.commentTable;
+  $SyncTableTable get syncTable => attachedDatabase.syncTable;
   Selectable<String> commentId() {
     return customSelect('SELECT id FROM Comment', variables: [], readsFrom: {
       commentTable,

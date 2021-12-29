@@ -97,30 +97,78 @@ class UserSyncProcessor extends SyncProcessor {
 
   /// Creates a [FindUserResponse] with a error
   ///
+  /// * [userId]: The shader id
+  /// * [fuser]: The user response
+  /// * [response]: The response
   /// * [e]: The error cause
-  /// * [userId]: The user id
-  FindUserResponse getUserError(dynamic e, String userId) {
+  FindUserResponse _getUserResponse(String userId,
+      {FindUserResponse? fuser, APIResponse? response, dynamic e}) {
+    if (fuser != null && response != null && response.ok) {
+      return fuser;
+    }
     return FindUserResponse(
-        error: ResponseError.unknown(
-            message: e.toString(), context: contextUser, target: userId));
+        error: response?.error ??
+            ResponseError.unknown(
+                message: e.toString(), context: contextUser, target: userId));
   }
 
   /// Saves a user with id equal to [userId]
   ///
   /// * [userId]: The user id
-  Future<UserSyncTask> _addUser(String userId) {
-    return client
-        .findUserById(userId)
-        .then((apiUser) {
-          final user = apiUser.user;
-          if (user != null) {
-            store.saveUser(user);
+  Future<FindUserResponse> _addUser(String userId) {
+    return client.findUserById(userId).then((fuser) {
+      final user = fuser.user;
+      if (user != null) {
+        return store.saveUser(user).then(
+            (suser) => _getUserResponse(userId, fuser: fuser, response: suser));
+      }
+
+      return Future.value(_getUserResponse(userId, response: fuser));
+    });
+  }
+
+  /// Syncs a user with id equal to [userId]
+  ///
+  /// * [userId]: The user id
+  Future<UserSyncTask> _syncUser(String userId) {
+    return store.findSyncById(SyncType.user, userId).then((fsync) {
+      final sync = fsync.sync;
+      if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
+        final preSync = sync != null
+            ? sync.copyWith(
+                status: SyncStatus.pending, updateTime: DateTime.now())
+            : Sync(
+                type: SyncType.user,
+                target: userId,
+                status: SyncStatus.pending,
+                creationTime: DateTime.now());
+
+        return store.saveSync(preSync).then((ssync1) {
+          if (ssync1.ok) {
+            return _addUser(userId).then((FindUserResponse fuser) {
+              final posSync = fuser.ok
+                  ? preSync.copyWith(
+                      status: SyncStatus.ok, updateTime: DateTime.now())
+                  : preSync.copyWith(
+                      status: SyncStatus.error,
+                      message: fuser.error?.message,
+                      updateTime: DateTime.now());
+
+              return store.saveSync(posSync).then((ssync2) {
+                return Future.value(UserSyncTask(
+                    _getUserResponse(userId, fuser: fuser, response: ssync2)));
+              });
+            });
           }
 
-          return apiUser;
-        })
-        .then((ur) => UserSyncTask(ur))
-        .catchError((e) => UserSyncTask(getUserError(e, userId)));
+          return Future.value(
+              UserSyncTask(_getUserResponse(userId, response: ssync1)));
+        });
+      }
+
+      return Future.value(
+          UserSyncTask(_getUserResponse(userId, response: fsync)));
+    }).catchError((e) => UserSyncTask(_getUserResponse(userId, e: e)));
   }
 
   /// Saves a list of users with [userIds]
@@ -131,7 +179,7 @@ class UserSyncProcessor extends SyncProcessor {
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     for (final userId in userIds) {
-      tasks.add(taskPool.withResource(() => _addUser(userId)));
+      tasks.add(taskPool.withResource(() => _syncUser(userId)));
     }
 
     return runner.process<UserSyncTask>(tasks,
@@ -146,7 +194,7 @@ class UserSyncProcessor extends SyncProcessor {
         .findUserById(userId)
         .then((fur) =>
             store.deleteUserById(userId).then((value) => UserSyncTask(fur)))
-        .catchError((e) => UserSyncTask(getUserError(e, userId)));
+        .catchError((e) => UserSyncTask(_getUserResponse(userId, e: e)));
   }
 
   /// Deletes a list of users with [userIds]
@@ -215,9 +263,8 @@ class UserSyncProcessor extends SyncProcessor {
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     pathMap.forEach((userPicturePath, userPictureFilePath) {
-      tasks.add(taskPool.withResource(() => addMedia(
-          fs, userPicturePath, userPictureFilePath,
-          context: contextUser)));
+      tasks.add(taskPool.withResource(() =>
+          syncMedia(fs, contextUser, userPicturePath, userPictureFilePath)));
     });
 
     return runner.process<DownloadSyncTask>(tasks,
@@ -227,17 +274,18 @@ class UserSyncProcessor extends SyncProcessor {
   /// Deletes a list of user pictures
   ///
   /// * [fs]: The [FileSystem]
-  /// * [pathSet]: A set of user picture paths to delete
+  /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _deleteUserPicture(
-      FileSystem fs, Set<String> pathSet) async {
+      FileSystem fs, Map<String, String> pathMap) async {
     final tasks = <Future<DownloadSyncTask>>[];
 
-    for (final userPictureFilePath in pathSet) {
-      tasks.add(deleteMedia(fs, userPictureFilePath, context: contextUser));
-    }
+    pathMap.forEach((userPicturePath, userPictureFilePath) {
+      tasks.add(
+          deleteMedia(fs, contextUser, userPicturePath, userPictureFilePath));
+    });
 
     return runner.process<DownloadSyncTask>(tasks,
-        message: 'Deleting ${pathSet.length} user pictures');
+        message: 'Deleting ${pathMap.length} user pictures');
   }
 
   /// Synchronizes the pictures from a user
@@ -264,11 +312,14 @@ class UserSyncProcessor extends SyncProcessor {
       })
         path: userPictureLocalPath(path)
     };
-    final removeUserPicturePaths = {
-      ...userSync.removedUserPicturePaths,
-      ...localUserPictures.difference(currentUserPicturePaths)
-    }.map((path) => userPictureLocalPath(path)).toSet();
 
+    final removeUserPicturePaths = {
+      for (var path in {
+        ...userSync.removedUserPicturePaths,
+        ...localUserPictures.difference(currentUserPicturePaths)
+      })
+        path: userPictureLocalPath(path)
+    };
     final added = await _addUserPicture(fs, addUserPicturePaths)
         .then((value) => value.where((task) => task.response.ok).toList());
     final removed = await _deleteUserPicture(fs, removeUserPicturePaths)

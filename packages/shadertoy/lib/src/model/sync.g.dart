@@ -36,5 +36,6 @@ const _$SyncTypeEnumMap = {
 
 const _$SyncStatusEnumMap = {
   SyncStatus.ok: 'ok',
+  SyncStatus.pending: 'pending',
   SyncStatus.error: 'error',
 };

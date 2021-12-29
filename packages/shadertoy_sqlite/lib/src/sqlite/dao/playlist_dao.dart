@@ -3,11 +3,12 @@ import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/playlist_shader_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/playlist_table.dart';
+import 'package:shadertoy_sqlite/src/sqlite/table/sync_table.dart';
 
 part 'playlist_dao.g.dart';
 
 @DriftAccessor(
-    tables: [PlaylistTable, PlaylistShaderTable],
+    tables: [PlaylistTable, PlaylistShaderTable, SyncTable],
     queries: {'playlistId': 'SELECT id FROM Playlist'})
 
 /// Playlist data access object
@@ -136,8 +137,18 @@ class PlaylistDao extends DatabaseAccessor<DriftStore> with _$PlaylistDaoMixin {
   ///
   /// * [playlistId]: The id of the [Playlist]
   Future<void> deleteById(String playlistId) {
-    return (delete(playlistTable)
-          ..where((playlist) => playlist.id.equals(playlistId)))
-        .go();
+    return transaction(() async {
+      // Delete any sync reference
+      await (delete(syncTable)
+            ..where((sync) =>
+                sync.type.equals(SyncType.playlist.name) &
+                sync.target.equals(playlistId)))
+          .go();
+
+      // Delete the playlist
+      await (delete(playlistTable)
+            ..where((playlist) => playlist.id.equals(playlistId)))
+          .go();
+    });
   }
 }

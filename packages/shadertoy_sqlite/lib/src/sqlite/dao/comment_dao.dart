@@ -2,11 +2,13 @@ import 'package:drift/drift.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/comment_table.dart';
+import 'package:shadertoy_sqlite/src/sqlite/table/sync_table.dart';
 
 part 'comment_dao.g.dart';
 
 @DriftAccessor(
-    tables: [CommentTable], queries: {'commentId': 'SELECT id FROM Comment'})
+    tables: [CommentTable, SyncTable],
+    queries: {'commentId': 'SELECT id FROM Comment'})
 
 /// Comment data access object
 class CommentDao extends DatabaseAccessor<DriftStore> with _$CommentDaoMixin {
@@ -81,26 +83,41 @@ class CommentDao extends DatabaseAccessor<DriftStore> with _$CommentDaoMixin {
     return select(commentTable).get().then(_toCommentEntities);
   }
 
+  /// Converts a [Comment] into a [CommentEntry]
+  ///
+  /// * [entity]: The entity to convert
+  CommentEntry _toCommentEntry(Comment comment) {
+    return CommentEntry(
+        id: comment.id,
+        userId: comment.userId,
+        picture: comment.picture,
+        shaderId: comment.shaderId,
+        date: comment.date,
+        comment: comment.text,
+        hidden: comment.hidden);
+  }
+
   /// Converts a list of [Comment] into a list of [CommentEntry]
   ///
   /// * [comments]: The list of [Comment] to convert
   List<CommentEntry> _toCommentEntries(List<Comment> comments) {
-    return comments
-        .map((comment) => CommentEntry(
-            id: comment.id,
-            userId: comment.userId,
-            picture: comment.picture,
-            shaderId: comment.shaderId,
-            date: comment.date,
-            comment: comment.text,
-            hidden: comment.hidden))
-        .toList();
+    return comments.map(_toCommentEntry).toList();
+  }
+
+  /// Saves a [Comment]
+  ///
+  /// * [comment]: The [Comment] to save
+  ///
+  /// Returns the rowid of the inserted row
+  Future<void> save(Comment comment) {
+    return into(commentTable)
+        .insert(_toCommentEntry(comment), mode: InsertMode.insertOrReplace);
   }
 
   /// Saves the comments of a shader
   ///
   /// * [comments]: The list of comments to save
-  Future<void> save(List<Comment> comments) {
+  Future<void> saveAll(List<Comment> comments) {
     return batch((b) => b.insertAll(commentTable, _toCommentEntries(comments),
         mode: InsertMode.insertOrReplace));
   }
@@ -109,8 +126,18 @@ class CommentDao extends DatabaseAccessor<DriftStore> with _$CommentDaoMixin {
   ///
   /// * [commentId]: The id of the [Comment]
   Future<void> deleteById(String commentId) {
-    return (delete(commentTable)
-          ..where((comment) => comment.id.equals(commentId)))
-        .go();
+    return transaction(() async {
+      // Delete any sync reference
+      await (delete(syncTable)
+            ..where((sync) =>
+                sync.type.equals(SyncType.comment.name) &
+                sync.target.equals(commentId)))
+          .go();
+
+      // Delete the comment
+      await (delete(commentTable)
+            ..where((comment) => comment.id.equals(commentId)))
+          .go();
+    });
   }
 }

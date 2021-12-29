@@ -71,26 +71,83 @@ class PlaylistSyncProcessor extends SyncProcessor {
 
   /// Creates a [FindPlaylistResponse] with a error
   ///
+  /// * [playlist]: The playlist
+  /// * [fplaylist]: The playlist response
+  /// * [response]: The response
   /// * [e]: The error cause
-  /// * [playlistId]: The playlist id
-  FindPlaylistResponse getPlaylistError(dynamic e, String playlistId) {
+  FindPlaylistResponse _getPlaylistResponse(Playlist playlist,
+      {FindPlaylistResponse? fplaylist, APIResponse? response, dynamic e}) {
+    if (response != null && response.ok) {
+      return fplaylist ?? FindPlaylistResponse(playlist: playlist);
+    }
+
     return FindPlaylistResponse(
-        error: ResponseError.unknown(
-            message: e.toString(),
-            context: contextPlaylist,
-            target: playlistId));
+        error: response?.error ??
+            ResponseError.unknown(
+                message: e.toString(),
+                context: contextPlaylist,
+                target: playlist.id));
   }
 
   /// Saves a playlist with id equal to [playlistId]
   ///
   /// * [playlist]: The playlist
   /// * [shaderIds]: The playlist shaders
-  Future<PlaylistSyncTask> _addPlaylist(
+  Future<FindPlaylistResponse> _addPlaylist(
       Playlist playlist, List<String> shaderIds) {
-    return store
-        .savePlaylist(playlist, shaderIds: shaderIds)
-        .then((_) => PlaylistSyncTask(FindPlaylistResponse(playlist: playlist)))
-        .catchError((e) => PlaylistSyncTask(getPlaylistError(e, playlist.id)));
+    return store.savePlaylist(playlist, shaderIds: shaderIds).then(
+        (splaylist) => _getPlaylistResponse(playlist, response: splaylist));
+  }
+
+  /// Syncs a [playlist] with [shaderIds]
+  ///
+  /// * [playlist]: The playlist
+  /// * [shaderIds]: The playlist shaders
+  Future<PlaylistSyncTask> _syncPlaylist(
+      Playlist playlist, List<String> shaderIds) {
+    final playlistId = playlist.id;
+    return store.findSyncById(SyncType.playlist, playlistId).then((fsync) {
+      final sync = fsync.sync;
+      if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
+        final preSync = sync != null
+            ? sync.copyWith(
+                status: SyncStatus.pending, updateTime: DateTime.now())
+            : Sync(
+                type: SyncType.playlist,
+                target: playlistId,
+                status: SyncStatus.pending,
+                creationTime: DateTime.now());
+
+        return store.saveSync(preSync).then((ssync1) {
+          if (ssync1.ok) {
+            return _addPlaylist(playlist, shaderIds)
+                .then((FindPlaylistResponse fplaylist) {
+              final posSync = fplaylist.ok
+                  ? preSync.copyWith(
+                      status: SyncStatus.ok, updateTime: DateTime.now())
+                  : preSync.copyWith(
+                      status: SyncStatus.error,
+                      message: fplaylist.error?.message,
+                      updateTime: DateTime.now());
+
+              return store.saveSync(posSync).then((ssync2) {
+                return Future.value(PlaylistSyncTask(_getPlaylistResponse(
+                    playlist,
+                    fplaylist: fplaylist,
+                    response: ssync2)));
+              });
+            });
+          }
+
+          return Future.value(PlaylistSyncTask(
+              _getPlaylistResponse(playlist, response: ssync1)));
+        });
+      }
+
+      return Future.value(
+          PlaylistSyncTask(_getPlaylistResponse(playlist, response: fsync)));
+    }).catchError(
+        (e) => PlaylistSyncTask(_getPlaylistResponse(playlist, e: e)));
   }
 
   /// Saves a list of playlists with [playlistIds]
@@ -102,24 +159,26 @@ class PlaylistSyncProcessor extends SyncProcessor {
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     for (final playlistEntry in playlists.entries) {
-      tasks.add(taskPool.withResource(
-          () => _addPlaylist(playlistEntry.key, playlistEntry.value.toList())));
+      tasks.add(taskPool.withResource(() =>
+          _syncPlaylist(playlistEntry.key, playlistEntry.value.toList())));
     }
 
     return runner.process<PlaylistSyncTask>(tasks,
         message: 'Saving ${playlists.length} playlist(s)');
   }
 
-  /// Deletes a playlist with id [playlistId]
+  /// Deletes a playlist
   ///
-  /// * [playlistId]: The playlist id
-  Future<PlaylistSyncTask> _deletePlaylist(String playlistId) {
+  /// * [playlist]: The playlist
+  Future<PlaylistSyncTask> _deletePlaylist(Playlist playlist) {
+    final playlistId = playlist.id;
     return store
         .findPlaylistById(playlistId)
         .then((fpr) => store
             .deletePlaylistById(playlistId)
             .then((value) => PlaylistSyncTask(fpr)))
-        .catchError((e) => PlaylistSyncTask(getPlaylistError(e, playlistId)));
+        .catchError(
+            (e) => PlaylistSyncTask(_getPlaylistResponse(playlist, e: e)));
   }
 
   /// Deletes a list of playlists with [playlistIds]
@@ -131,7 +190,7 @@ class PlaylistSyncProcessor extends SyncProcessor {
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     for (final playlist in playlists.keys) {
-      tasks.add(taskPool.withResource(() => _deletePlaylist(playlist.id)));
+      tasks.add(taskPool.withResource(() => _deletePlaylist(playlist)));
     }
 
     return runner.process<PlaylistSyncTask>(tasks,

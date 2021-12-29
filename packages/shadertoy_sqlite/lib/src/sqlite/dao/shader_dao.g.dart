@@ -11,6 +11,7 @@ mixin _$ShaderDaoMixin on DatabaseAccessor<DriftStore> {
   $PlaylistTableTable get playlistTable => attachedDatabase.playlistTable;
   $PlaylistShaderTableTable get playlistShaderTable =>
       attachedDatabase.playlistShaderTable;
+  $SyncTableTable get syncTable => attachedDatabase.syncTable;
   Selectable<String> shaderId() {
     return customSelect('SELECT id FROM Shader', variables: [], readsFrom: {
       shaderTable,

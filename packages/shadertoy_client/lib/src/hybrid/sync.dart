@@ -146,66 +146,113 @@ abstract class SyncProcessor {
         .then((bytes) => DownloadFileResponse(bytes: bytes));
   }
 
-  /// Creates a [DownloadFileResponse] with a error
+  /// Creates a [DownloadFileResponse]
   ///
-  /// * [e]: The error cause
+  /// * [context]: The context
   /// * [mediaPath]: The media path
-  /// * [context]: An optional context
-  @protected
-  DownloadFileResponse getMediaError(dynamic e, String mediaPath,
-      {String? context}) {
+  /// * [dfile]: The download file response
+  /// * [response]: The response
+  /// * [e]: The error cause
+  DownloadFileResponse _getDownloadResponse(String context, String mediaPath,
+      {DownloadFileResponse? dfile, APIResponse? response, dynamic e}) {
+    if (dfile != null && response != null && response.ok) {
+      return dfile;
+    }
     return DownloadFileResponse(
-        error: ResponseError.unknown(
-            message: e.toString(), context: context, target: mediaPath));
+        error: response?.error ??
+            ResponseError.unknown(
+                message: e.toString(), context: context, target: mediaPath));
   }
 
   /// Creates a media file on a [FileSystem]
   ///
   /// * [fs]: The [FileSystem]
+  /// * [context]: The context
   /// * [mediaPath]: The media path
   /// * [mediaFilePath]: The media file path
-  /// * [context]: An optional context
-  @protected
-  Future<DownloadSyncTask> addMedia(
-      FileSystem fs, String mediaPath, String mediaFilePath,
-      {String? context}) {
+  Future<DownloadFileResponse> _addMedia(
+      FileSystem fs, String context, String mediaPath, String mediaFilePath) {
     final mediaFile = fs.file(mediaFilePath);
 
-    return mediaFile
-        .exists()
-        .then((exists) => exists
-            ? _getDownloadFileResponse(mediaFile)
-            : client.downloadMedia('/' + mediaPath).then((apiFile) {
-                final bytes = apiFile.bytes;
-                final error = apiFile.error;
-                if (bytes != null) {
-                  return mediaFile.parent.create(recursive: true).then(
-                      (value) =>
-                          mediaFile.writeAsBytes(bytes).then((f) => apiFile));
-                }
-                return Future.value(DownloadFileResponse(
-                    error: error?.copyWith(context: context)));
-              }))
-        .then((df) => DownloadSyncTask(df))
-        .catchError((e) =>
-            DownloadSyncTask(getMediaError(e, mediaPath, context: context)));
+    return mediaFile.exists().then((exists) => exists
+        ? _getDownloadFileResponse(mediaFile)
+        : client.downloadMedia('/' + mediaPath).then((apiFile) {
+            final bytes = apiFile.bytes;
+            final error = apiFile.error;
+            if (bytes != null) {
+              return mediaFile.parent.create(recursive: true).then((value) =>
+                  mediaFile.writeAsBytes(bytes).then((f) => apiFile));
+            }
+            return Future.value(
+                DownloadFileResponse(error: error?.copyWith(context: context)));
+          }));
+  }
+
+  @protected
+  Future<DownloadSyncTask> syncMedia(
+      FileSystem fs, String context, String mediaPath, String mediaFilePath) {
+    return store.findSyncById(SyncType.asset, mediaPath).then((fsync) {
+      final sync = fsync.sync;
+      if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
+        final preSync = sync != null
+            ? sync.copyWith(
+                status: SyncStatus.pending, updateTime: DateTime.now())
+            : Sync(
+                type: SyncType.asset,
+                target: mediaPath,
+                status: SyncStatus.pending,
+                creationTime: DateTime.now());
+        return store.saveSync(preSync).then((ssync1) {
+          if (ssync1.ok) {
+            return _addMedia(fs, context, mediaPath, mediaFilePath)
+                .then((DownloadFileResponse dfile) {
+              final posSync = dfile.ok
+                  ? preSync.copyWith(
+                      status: SyncStatus.ok, updateTime: DateTime.now())
+                  : preSync.copyWith(
+                      status: SyncStatus.error,
+                      message: dfile.error?.message,
+                      updateTime: DateTime.now());
+
+              return store.saveSync(posSync).then((ssync2) {
+                return Future.value(DownloadSyncTask(_getDownloadResponse(
+                    context, mediaPath,
+                    dfile: dfile, response: ssync2)));
+              });
+            });
+          }
+
+          return Future.value(DownloadSyncTask(
+              _getDownloadResponse(context, mediaPath, response: ssync1)));
+        });
+      }
+      return Future.value(DownloadSyncTask(
+          _getDownloadResponse(context, mediaPath, response: fsync)));
+    }).catchError((e) =>
+        DownloadSyncTask(_getDownloadResponse(context, mediaPath, e: e)));
   }
 
   /// Deletes a media file from a [FileSystem]
   ///
   /// * [fs]: The [FileSystem]
   /// * [context]: An optional context
+  /// * [mediaPath]: The media path
+  /// * [mediaFilePath]: The media file path
   @protected
-  Future<DownloadSyncTask> deleteMedia(FileSystem fs, String mediaFilePath,
-      {String? context}) {
+  Future<DownloadSyncTask> deleteMedia(
+      FileSystem fs, String context, String mediaPath, String mediaFilePath) {
     final mediaFile = fs.file(mediaFilePath);
 
     return mediaFile.exists().then((exists) => exists
         ? _getDownloadFileResponse(mediaFile)
-            .then((dfr) =>
-                mediaFile.delete().then((value) => DownloadSyncTask(dfr)))
+            .then((dfr) => mediaFile.delete().then((_) {
+                  return store.deleteSyncById(SyncType.asset, mediaPath).then(
+                      (dsync) => DownloadSyncTask(_getDownloadResponse(
+                          context, mediaPath,
+                          response: dsync)));
+                }))
             .catchError((e) => DownloadSyncTask(
-                getMediaError(e, mediaFilePath, context: context)))
+                _getDownloadResponse(context, mediaFilePath, e: e)))
         : Future.value(DownloadSyncTask(DownloadFileResponse())));
   }
 }
