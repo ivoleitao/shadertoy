@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
@@ -689,7 +688,7 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
   Future<FindSyncsResponse> findSyncs(
       {SyncType? type,
       String? target,
-      SyncStatus? status,
+      Set<SyncStatus>? status,
       DateTime? createdBefore,
       DateTime? updatedBefore}) {
     return _catchSqlError<FindSyncsResponse>(
@@ -735,25 +734,4 @@ class ShadertoySqliteStore extends ShadertoyBaseStore {
             error: _toResponseError(sqle,
                 context: contextShader, target: target)));
   }
-}
-
-/// Creates a [ShadertoyStore] backed by a [ShadertoySqliteStore]
-///
-/// * [executor]: The [QueryExecutor] for this store
-/// * [shaderCount]: The number of shaders requested for a paged call
-/// * [userShaderCount]: The number of shaders requested for a user paged call
-/// * [playlistShaderCount]: The number of shaders requested for a playlist paged call
-/// * [errorHandling]: The error handling mode
-ShadertoyStore newShadertoySqliteStore(QueryExecutor executor,
-    {int? shaderCount,
-    int? userShaderCount,
-    int? playlistShaderCount,
-    ErrorMode? errorHandling}) {
-  return ShadertoySqliteStore(
-      DriftStore(executor),
-      ShadertoySqliteOptions(
-          shaderCount: shaderCount,
-          userShaderCount: userShaderCount,
-          playlistShaderCount: playlistShaderCount,
-          errorHandling: errorHandling));
 }

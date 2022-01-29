@@ -50,6 +50,27 @@ extension SiteMockAdaptater on MockAdapter {
         error: SocketException(message));
   }
 
+  MockAdapter addShaderRoute(Shader shader, ShadertoySiteOptions options) {
+    final data = FindShadersRequest({shader.info.id});
+
+    final formData =
+        FormData.fromMap({'s': jsonEncode(data), 'nt': 1, 'nl': 1});
+    return jsonRoute('/shadertoy', [shader],
+        requestHeaders: {
+          HttpHeaders.refererHeader: '${options.baseUrl}/browse'
+        },
+        formData: formData);
+  }
+
+  MockAdapter addShaderRouteList(
+      List<Shader> shaders, ShadertoySiteOptions options) {
+    for (var shader in shaders) {
+      addShaderRoute(shader, options);
+    }
+
+    return this;
+  }
+
   MockAdapter addShadersRoute(
       List<Shader> requestShaders, ShadertoySiteOptions options,
       {List<Shader>? responseShaders}) {
@@ -141,8 +162,16 @@ extension SiteMockAdaptater on MockAdapter {
   }
 
   MockAdapter addUserRoute(
-      String response, String userId, ShadertoySiteOptions options) {
+      String userId, String response, ShadertoySiteOptions options) {
     return htmlRoute('/user/$userId', response);
+  }
+
+  MockAdapter addUserRouteMap(
+      Map<String, String> userResponseMap, ShadertoySiteOptions options) {
+    for (var entry in userResponseMap.entries) {
+      addUserRoute(entry.key, entry.value, options);
+    }
+    return this;
   }
 
   MockAdapter addUserSocketErrorRoute(
@@ -294,9 +323,23 @@ extension SiteMockAdaptater on MockAdapter {
     return binaryRoute('/$path', bytes);
   }
 
-  MockAdapter addDownloadShaderMedia(
-      Uint8List bytes, String shaderId, ShadertoySiteOptions options) {
+  MockAdapter addDownloadMedia(
+      String path, Uint8List bytes, ShadertoySiteOptions options) {
+    return addDownloadFile(path, bytes, options);
+  }
+
+  MockAdapter addDownloadShaderPicture(
+      String shaderId, Uint8List bytes, ShadertoySiteOptions options) {
     return addDownloadFile(
         ShadertoyContext.shaderPicturePath(shaderId), bytes, options);
+  }
+
+  MockAdapter addDownloadMediaMap(
+      Map<String, Uint8List> mediaMap, ShadertoySiteOptions options) {
+    for (var entry in mediaMap.entries) {
+      addDownloadMedia(entry.key, entry.value, options);
+    }
+
+    return this;
   }
 }

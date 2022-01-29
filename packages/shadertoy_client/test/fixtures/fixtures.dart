@@ -21,6 +21,12 @@ Future<Uint8List> binaryHttpFixture(String path) => Dio()
 Future<Uint8List> binaryFixture(String path) =>
     _isWeb() ? binaryHttpFixture(path) : binaryFileFixture(path);
 
+Future<Uint8List> shaderIdBinaryFixture(String shaderId) =>
+    binaryFixture('media/shaders/$shaderId.jpg');
+
+Future<Uint8List> shaderBinaryFixture(Shader shader) =>
+    binaryFixture('media/shaders/${shader.info.id}.jpg');
+
 Future<String> textFileFixture(String path) =>
     _fileFixture(path).readAsString();
 

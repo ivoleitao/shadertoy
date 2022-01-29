@@ -11,8 +11,9 @@ dependencies:
   path: ^1.8.1
   args: ^2.1.1
   progress_bar: ^1.0.0
-  file: ^6.1.2
-  drift: ^1.1.0
+  stash: ^4.0.1
+  stash_sqlite: ^4.0.0
+  drift: ^1.2.0
   # shadertoy: ^2.0.3
   shadertoy:
     path: ../shadertoy

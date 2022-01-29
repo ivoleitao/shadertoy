@@ -423,7 +423,7 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   ///
   /// * [type]: The target type
   /// * [target]: The target
-  /// * [status]: The status of the sync
+  /// * [status]: A list of status
   /// * [createdBefore]: Syncs created before this date
   /// * [updatedBefore]: Syncs updated before this date
   ///
@@ -435,7 +435,7 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   Future<FindSyncsResponse> findSyncs(
       {SyncType? type,
       String? target,
-      SyncStatus? status,
+      Set<SyncStatus>? status,
       DateTime? createdBefore,
       DateTime? updatedBefore});
 

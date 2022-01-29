@@ -1,10 +1,12 @@
-import 'package:file/file.dart';
+import 'dart:typed_data';
+
 import 'package:glob/glob.dart';
 import 'package:path/path.dart' as p;
 import 'package:pool/pool.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy/shadertoy_util.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
+import 'package:stash/stash_api.dart' show Vault;
 
 import 'hybrid_client.dart';
 import 'sync.dart';
@@ -56,19 +58,9 @@ class ShaderSyncResult extends SyncResult<ShaderSyncTask> {
   Set<String> _shaderInputSourcePaths(List<ShaderSyncTask> tasks) {
     final paths = <String>{};
     for (final task in tasks) {
-      for (var rp in task.response.shader?.renderPasses ?? []) {
-        final inputs = rp.inputs;
-
-        if (inputs != null) {
-          for (var i in inputs) {
-            if (i.type == InputType.buffer || i.type == InputType.texture) {
-              final src = i.src ?? i.filePath;
-              if (src != null && src.isNotEmpty) {
-                paths.add(picturePath(src));
-              }
-            }
-          }
-        }
+      final shader = task.response.shader;
+      if (shader != null) {
+        paths.addAll(shader.inputSourcePaths());
       }
     }
 
@@ -149,22 +141,24 @@ class CommentTaskResult extends SyncResult<CommentSyncTask> {
 class ShaderSyncProcessor extends SyncProcessor {
   /// A [Glob] defining the location of the local shader media files
   static final Glob _shaderMediaFiles =
-      Glob('**/${ShadertoyContext.shaderMediaPath}/*.jpg');
+      Glob('${ShadertoyContext.shaderMediaPath}/*.jpg');
 
   /// A [Glob] defining the location of the local shader input source files
   static final Glob _shaderInputSourceFiles = Glob(
-      '**/{presets/*.jpg,media/{previz,a}/{*.png,*.jpg,*.mp3,*.bin,*.webm,*.ogv}}');
+      '{presets/*.jpg,media/{previz,a}/{*.png,*.jpg,*.mp3,*.bin,*.webm,*.ogv}}');
 
   /// The [ShaderSyncProcessor] constructur
   ///
   /// * [client]: The [ShadertoyHybridClient] instance
   /// * [store]: The [ShadertoyStore] instance
+  /// * [vault]: The [Vault] instance
   /// * [runner]: The [SyncTaskRunner] that will be used in this processor
   /// * [concurrency]: The number of concurrent tasks
   /// * [timeout]: The maximum timeout waiting for a task completion
   ShaderSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
+      Vault<Uint8List> vault,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
-      : super(client, store,
+      : super(client, store, vault,
             runner: runner, concurrency: concurrency, timeout: timeout);
 
   /// Creates a [FindShaderResponse] with a error
@@ -292,34 +286,38 @@ class ShaderSyncProcessor extends SyncProcessor {
   ///
   /// * [mode]: The sync mode
   Future<ShaderSyncResult> _syncShaders(HybridSyncMode mode) async {
-    final storeResponse = await store.findAllShaders();
+    final storeSyncsResponse = await store.findSyncs(
+        type: SyncType.shader, status: {SyncStatus.pending, SyncStatus.error});
+    final storeShadersResponse = await store.findAllShaders();
 
-    if (storeResponse.ok) {
-      final storeShaders = storeResponse.shaders ?? [];
+    if (storeSyncsResponse.ok && storeShadersResponse.ok) {
+      final storeSyncs = storeSyncsResponse.syncs ?? [];
+      final storeShaderIdsError =
+          storeSyncs.map((fsr) => fsr.sync?.target).whereType<String>();
+      final storeShaders = storeShadersResponse.shaders ?? [];
       final storeInfos =
           storeShaders.map((fsr) => fsr.shader?.info).whereType<Info>();
-      final storeShaderIds = storeInfos.map((info) => info.id).toSet();
+      final storeShaderIdsOk = storeInfos.map((info) => info.id).toSet();
 
-      /*
       final clientResponse =
-          storeShaderIds.isEmpty || mode == HybridSyncMode.full
+          storeShaderIdsOk.isEmpty || mode == HybridSyncMode.full
               ? await client.findAllShaderIds()
-              : await client.findNewShaderIds(storeShaderIds);
-      */
-      final clientResponse =
-          FindShaderIdsResponse(ids: ['XslGRr', 'MdX3Rr', '4sfGWX']);
+              : await client.findNewShaderIds(storeShaderIdsOk);
 
       if (clientResponse.ok) {
         final clientShaderIds = (clientResponse.ids ?? []).toSet();
 
-        final addShaderIds = clientShaderIds.difference(storeShaderIds);
+        final addShaderIds = {
+          ...clientShaderIds.difference(storeShaderIdsOk),
+          ...storeShaderIdsError
+        };
         final added = await _addShaders(addShaderIds)
             .then((value) => value.where((task) => task.response.ok).toList());
 
         var removed = <ShaderSyncTask>[];
         var removedShaderIds = Iterable.empty();
         if (mode == HybridSyncMode.full) {
-          final removeShaderIds = storeShaderIds.difference(clientShaderIds);
+          final removeShaderIds = storeShaderIdsOk.difference(clientShaderIds);
           removed = await _deleteShaders(removeShaderIds).then(
               (value) => value.where((task) => task.response.ok).toList());
           removedShaderIds = removed
@@ -338,8 +336,13 @@ class ShaderSyncProcessor extends SyncProcessor {
             'Error obtaining shader ids from the server: ${clientResponse.error?.message}');
       }
     } else {
-      runner.log(
-          'Error obtaining shader ids from the local store: ${storeResponse.error?.message}');
+      if (!storeSyncsResponse.ok) {
+        runner.log(
+            'Error obtaining syncs from the local store: ${storeSyncsResponse.error?.message}');
+      } else {
+        runner.log(
+            'Error obtaining shader ids from the local store: ${storeShadersResponse.error?.message}');
+      }
     }
 
     return ShaderSyncResult();
@@ -539,16 +542,15 @@ class ShaderSyncProcessor extends SyncProcessor {
 
   /// Stores a list of shader pictures
   ///
-  /// * [fs]: The [FileSystem]
   /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _addShaderPictures(
-      FileSystem fs, Map<String, String> pathMap) async {
+      Map<String, String> pathMap) async {
     final tasks = <Future<DownloadSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     pathMap.forEach((shaderPicturePath, shaderPictureFilePath) {
-      tasks.add(taskPool.withResource(() => syncMedia(
-          fs, contextShader, shaderPicturePath, shaderPictureFilePath)));
+      tasks.add(taskPool.withResource(() => syncMedia(SyncType.shaderAsset,
+          contextShader, shaderPicturePath, shaderPictureFilePath)));
     });
 
     return runner.process<DownloadSyncTask>(tasks,
@@ -557,15 +559,14 @@ class ShaderSyncProcessor extends SyncProcessor {
 
   /// Deletes a list of shader pictures
   ///
-  /// * [fs]: The [FileSystem]
   /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _deleteShaderPictures(
-      FileSystem fs, Map<String, String> pathMap) async {
+      Map<String, String> pathMap) async {
     final tasks = <Future<DownloadSyncTask>>[];
 
     pathMap.forEach((shaderPicturePath, shaderPictureFilePath) {
-      tasks.add(deleteMedia(
-          fs, contextShader, shaderPicturePath, shaderPictureFilePath));
+      tasks.add(deleteMedia(SyncType.shaderAsset, contextShader,
+          shaderPicturePath, shaderPictureFilePath));
     });
 
     return runner.process<DownloadSyncTask>(tasks,
@@ -574,97 +575,104 @@ class ShaderSyncProcessor extends SyncProcessor {
 
   /// Synchronizes the pictures from a shader
   ///
-  /// * [fs]: The [FileSystem]
-  /// * [dir]: The target directory on the [FileSystem]
   /// * [shaderSync]: The shader synchronization result
   /// * [mode]: The synchronization mode
-  Future<DownloadSyncResult> _syncShaderPictures(FileSystem fs, Directory dir,
+  Future<DownloadSyncResult> _syncShaderPictures(
       ShaderSyncResult shaderSync, HybridSyncMode mode) async {
-    final storeShaderIds = <String>{};
-    final shaderMediaPath = ShadertoyContext.shaderMediaPath;
-    await for (final path
-        in listFiles(dir, _shaderMediaFiles, recursive: true)) {
-      storeShaderIds.add(fileNameToShaderId(p.basenameWithoutExtension(path)));
-    }
+    final storeSyncsResponse = await store.findSyncs(
+        type: SyncType.shaderAsset,
+        status: {SyncStatus.pending, SyncStatus.error});
 
-    final storeShaderInputSources = <String>{};
-    await for (final path
-        in listFiles(dir, _shaderInputSourceFiles, recursive: true)) {
-      storeShaderInputSources.add(p.relative(path, from: dir.path));
-    }
+    if (storeSyncsResponse.ok) {
+      final storeSyncs = storeSyncsResponse.syncs ?? [];
+      final storeShaderPicturesError =
+          storeSyncs.map((fsr) => fsr.sync?.target).whereType<String>();
+      final storeShaderIds = <String>{};
+      final shaderMediaPath = ShadertoyContext.shaderMediaPath;
+      for (final path in await listPaths(_shaderMediaFiles)) {
+        storeShaderIds
+            .add(fileNameToShaderId(p.basenameWithoutExtension(path)));
+      }
 
-    shaderPictureRemotePath(shaderId) =>
-        ShadertoyContext.shaderPicturePath(shaderId);
-    shaderPictureLocalPath(shaderId) => p.join(
-        dir.path, shaderMediaPath, '${shaderIdToFileName(shaderId)}.jpg');
-    shaderInputSourceLocalPath(inputSource) => p.join(dir.path, inputSource);
+      final storeShaderInputSources = <String>{};
+      for (final path in await listPaths(_shaderInputSourceFiles)) {
+        storeShaderInputSources.add(path);
+      }
 
-    hasPicture(Shader shader) {
-      for (RenderPass rp in shader.renderPasses) {
-        for (Input i in rp.inputs) {
-          if (i.type == InputType.webcam) {
-            return false;
+      shaderPictureRemotePath(shaderId) =>
+          ShadertoyContext.shaderPicturePath(shaderId);
+      shaderPictureLocalPath(shaderId) =>
+          p.join(shaderMediaPath, '${shaderIdToFileName(shaderId)}.jpg');
+
+      hasPicture(Shader shader) {
+        for (RenderPass rp in shader.renderPasses) {
+          for (Input i in rp.inputs) {
+            if (i.type == InputType.webcam) {
+              return false;
+            }
           }
         }
+        return true;
       }
-      return true;
+
+      final currentShaderIds =
+          shaderSync.currentShaderIdsWhere(test: hasPicture);
+      final currentShaderInputSources =
+          shaderSync.currentShaderInputSourcePaths;
+
+      final addedShaderIds = shaderSync.addedShaderIdsWhere(test: hasPicture);
+      final removedShaderIds =
+          shaderSync.removedShaderIdsWhere(test: hasPicture);
+      final addShaderPaths = {
+        for (var shaderId in {
+          ...addedShaderIds,
+          ...currentShaderIds.difference(storeShaderIds)
+        })
+          shaderPictureRemotePath(shaderId): shaderPictureLocalPath(shaderId)
+      };
+      for (var path in {
+        ...shaderSync.addedShaderInputSourcePaths,
+        ...currentShaderInputSources.difference(storeShaderInputSources),
+        ...storeShaderPicturesError
+      }) {
+        addShaderPaths.putIfAbsent(path, () => path);
+      }
+
+      final removeShaderPaths = {
+        for (var shaderId in {
+          ...removedShaderIds,
+          ...storeShaderIds.difference(currentShaderIds)
+        })
+          shaderPictureRemotePath(shaderId): shaderPictureLocalPath(shaderId)
+      };
+      for (var path in {
+        ...shaderSync.removedShaderInputSourcePaths,
+        ...storeShaderInputSources.difference(currentShaderInputSources)
+      }) {
+        removeShaderPaths.putIfAbsent(path, () => path);
+      }
+
+      final added = await _addShaderPictures(addShaderPaths)
+          .then((value) => value.where((task) => task.response.ok).toList());
+      final removed = await _deleteShaderPictures(removeShaderPaths)
+          .then((value) => value.where((task) => task.response.ok).toList());
+
+      return DownloadSyncResult(added: added, removed: removed);
+    } else {
+      runner.log(
+          'Error obtaining syncs from the local store: ${storeSyncsResponse.error?.message}');
     }
 
-    final currentShaderIds = shaderSync.currentShaderIdsWhere(test: hasPicture);
-    final currentShaderInputSources = shaderSync.currentShaderInputSourcePaths;
-
-    final addedShaderIds = shaderSync.addedShaderIdsWhere(test: hasPicture);
-    final removedShaderIds = shaderSync.removedShaderIdsWhere(test: hasPicture);
-    final addShaderPaths = {
-      for (var shaderId in {
-        ...addedShaderIds,
-        ...currentShaderIds.difference(storeShaderIds)
-      })
-        shaderPictureRemotePath(shaderId): shaderPictureLocalPath(shaderId)
-    };
-    for (var path in {
-      ...shaderSync.addedShaderInputSourcePaths,
-      ...currentShaderInputSources.difference(storeShaderInputSources)
-    }) {
-      addShaderPaths.putIfAbsent(path, () => shaderInputSourceLocalPath(path));
-    }
-
-    final removeShaderPaths = {
-      for (var shaderId in {
-        ...removedShaderIds,
-        ...storeShaderIds.difference(currentShaderIds)
-      })
-        shaderPictureRemotePath(shaderId): shaderPictureLocalPath(shaderId)
-    };
-    for (var path in {
-      ...shaderSync.removedShaderInputSourcePaths,
-      ...storeShaderInputSources.difference(currentShaderInputSources)
-    }) {
-      removeShaderPaths.putIfAbsent(
-          path, () => shaderInputSourceLocalPath(path));
-    }
-
-    final added = await _addShaderPictures(fs, addShaderPaths)
-        .then((value) => value.where((task) => task.response.ok).toList());
-    final removed = await _deleteShaderPictures(fs, removeShaderPaths)
-        .then((value) => value.where((task) => task.response.ok).toList());
-
-    return DownloadSyncResult(added: added, removed: removed);
+    return DownloadSyncResult();
   }
 
   /// Synchronizes the pictures from a shader
   ///
-  /// * [fs]: The [FileSystem]
-  /// * [dir]: The target directory on the [FileSystem]
   /// * [mode]: The synchronization mode
-  Future<ShaderSyncResult> syncShaders(HybridSyncMode mode,
-      {FileSystem? fs, Directory? dir}) async {
+  Future<ShaderSyncResult> syncShaders(HybridSyncMode mode) async {
     final shaderSyncResult = await _syncShaders(mode);
-    await _syncShaderComments(shaderSyncResult, mode);
-    if (fs != null) {
-      await _syncShaderPictures(
-          fs, dir ?? fs.currentDirectory, shaderSyncResult, mode);
-    }
+    //await _syncShaderComments(shaderSyncResult, mode);
+    await _syncShaderPictures(shaderSyncResult, mode);
 
     return shaderSyncResult;
   }

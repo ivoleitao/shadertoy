@@ -1507,7 +1507,7 @@ void main() {
       final response = await store.findSyncs(
           type: SyncType.shader,
           target: '3sBGRt',
-          status: SyncStatus.error,
+          status: {SyncStatus.error},
           createdBefore: DateTime(2002, 1, 1, 0, 0, 0),
           updatedBefore: DateTime(2012, 1, 1, 0, 0, 0));
       // assert

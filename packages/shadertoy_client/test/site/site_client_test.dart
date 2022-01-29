@@ -789,7 +789,7 @@ void main() {
       final userId = 'iq';
       final response = await textFixture('user/$userId.html');
       final adapter = newAdapter(options)
-        ..addUserRoute(response, userId, options);
+        ..addUserRoute(userId, response, options);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findUserById(userId);
@@ -816,7 +816,7 @@ void main() {
       final userId = 'shaderflix';
       final response = await textFixture('user/$userId.html');
       final adapter = newAdapter(options)
-        ..addUserRoute(response, userId, options);
+        ..addUserRoute(userId, response, options);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findUserById(userId);
@@ -864,7 +864,7 @@ void main() {
       final userId = 'XXXX';
       final response = await textFixture('error/no_body.html');
       final adapter = newAdapter(options)
-        ..addUserRoute(response, userId, options);
+        ..addUserRoute(userId, response, options);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findUserById(userId);
@@ -886,7 +886,7 @@ void main() {
       final userId = 'XXXX';
       final response = await textFixture('user/invalid_no_sections.html');
       final adapter = newAdapter(options)
-        ..addUserRoute(response, userId, options);
+        ..addUserRoute(userId, response, options);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findUserById(userId);
@@ -1900,7 +1900,7 @@ void main() {
       final fixturePath = 'media/shaders/$shaderId.jpg';
       final response = await binaryFixture(fixturePath);
       final adapter = newAdapter(options)
-        ..addDownloadShaderMedia(response, shaderId, options);
+        ..addDownloadShaderPicture(shaderId, response, options);
       final api = newClient(options, adapter);
       // act
       final sr = await api.downloadShaderPicture(shaderId);

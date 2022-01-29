@@ -2,3 +2,4 @@
 library shadertoy_util;
 
 export 'src/util/id_util.dart';
+export 'src/util/path_util.dart';

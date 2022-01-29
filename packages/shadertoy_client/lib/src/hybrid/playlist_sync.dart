@@ -1,8 +1,10 @@
 import 'dart:collection';
+import 'dart:typed_data';
 
 import 'package:pool/pool.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/src/hybrid/user_sync.dart';
+import 'package:stash/stash_api.dart' show Vault;
 
 import 'hybrid_client.dart';
 import 'shader_sync.dart';
@@ -61,12 +63,14 @@ class PlaylistSyncProcessor extends SyncProcessor {
   ///
   /// * [client]: The [ShadertoyHybridClient] instance
   /// * [store]: The [ShadertoyStore] instance
+  /// * [vault]: The [Vault] instance
   /// * [runner]: The [SyncTaskRunner] that will be used in this processor
   /// * [concurrency]: The number of concurrent tasks
   /// * [timeout]: The maximum timeout waiting for a task completion
   PlaylistSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
+      Vault<Uint8List> vault,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
-      : super(client, store,
+      : super(client, store, vault,
             runner: runner, concurrency: concurrency, timeout: timeout);
 
   /// Creates a [FindPlaylistResponse] with a error
@@ -228,17 +232,26 @@ class PlaylistSyncProcessor extends SyncProcessor {
   /// * [playlistIds]: The list playlist ids
   Future<PlaylistSyncResult> _syncPlaylists(ShaderSyncResult shaderSync,
       UserSyncResult userSync, List<String> playlistIds) async {
-    final storeResponse = await store.findAllPlaylists();
+    final storeSyncsResponse = await store.findSyncs(
+        type: SyncType.playlist,
+        status: {SyncStatus.pending, SyncStatus.error});
+    final storePlaylistResponse = await store.findAllPlaylists();
 
-    if (storeResponse.ok) {
-      final storePlaylists = storeResponse.playlists ?? [];
-      final storePlaylistIds = storePlaylists
+    if (storeSyncsResponse.ok && storePlaylistResponse.ok) {
+      final storeSyncs = storeSyncsResponse.syncs ?? [];
+      final storePlaylistIdsError =
+          storeSyncs.map((fsr) => fsr.sync?.target).whereType<String>();
+      final storePlaylists = storePlaylistResponse.playlists ?? [];
+      final storePlaylistIdsOk = storePlaylists
           .map((fpr) => fpr.playlist?.id)
           .whereType<String>()
           .toSet();
 
-      final requestesPlaylistIds = playlistIds.toSet();
-      final addPlaylistIds = requestesPlaylistIds.difference(storePlaylistIds);
+      final requestedPlaylistIds = playlistIds.toSet();
+      final addPlaylistIds = {
+        ...requestedPlaylistIds.difference(storePlaylistIdsOk),
+        ...storePlaylistIdsError
+      };
       final clientPlaylistShaderIds =
           LinkedHashMap.of(<Playlist, Set<String>>{});
       for (var playlistTask in await _clientPlaylists(addPlaylistIds)) {
@@ -264,10 +277,10 @@ class PlaylistSyncProcessor extends SyncProcessor {
 
       final addPlaylists =
           LinkedHashMap<Playlist, Set<String>>.from(clientPlaylistShaderIds)
-            ..removeWhere((key, value) => storePlaylistIds.contains(key.id));
+            ..removeWhere((key, value) => storePlaylistIdsOk.contains(key.id));
       final removePlaylists =
           LinkedHashMap<Playlist, Set<String>>.from(clientPlaylistShaderIds)
-            ..removeWhere((key, value) => !storePlaylistIds.contains(key.id));
+            ..removeWhere((key, value) => !storePlaylistIdsOk.contains(key.id));
       final local = storePlaylists.map((fpr) => PlaylistSyncTask(fpr));
       final added = await _addPlaylists(addPlaylists)
           .then((value) => value.where((task) => task.response.ok).toList());
@@ -282,8 +295,13 @@ class PlaylistSyncProcessor extends SyncProcessor {
       return PlaylistSyncResult(
           current: currentPlaylists, added: added, removed: removed);
     } else {
-      runner.log(
-          'Error obtaining shader ids from the local store: ${storeResponse.error?.message}');
+      if (!storeSyncsResponse.ok) {
+        runner.log(
+            'Error obtaining syncs from the local store: ${storeSyncsResponse.error?.message}');
+      } else {
+        runner.log(
+            'Error obtaining playlist ids from the local store: ${storePlaylistResponse.error?.message}');
+      }
     }
 
     return PlaylistSyncResult();

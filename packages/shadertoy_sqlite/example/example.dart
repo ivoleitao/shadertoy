@@ -1,5 +1,5 @@
-import 'package:drift/native.dart';
 import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
 
@@ -9,7 +9,7 @@ QueryExecutor memoryExecutor({bool logStatements = false}) {
 
 void main(List<String> arguments) async {
   // Creates a new store with an in-memory executor
-  final store = newShadertoySqliteStore(memoryExecutor());
+  final store = newShadertoySqliteStore();
 
   // Creates user 1
   final userId1 = 'UzZ0Z1';

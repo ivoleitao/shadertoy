@@ -1,8 +1,10 @@
-import 'package:file/file.dart';
+import 'dart:typed_data';
+
 import 'package:glob/glob.dart';
-import 'package:path/path.dart' as p;
 import 'package:pool/pool.dart';
 import 'package:shadertoy/shadertoy_api.dart';
+import 'package:shadertoy/shadertoy_util.dart';
+import 'package:stash/stash_api.dart' show Vault;
 
 import 'hybrid_client.dart';
 import 'shader_sync.dart';
@@ -87,12 +89,14 @@ class UserSyncProcessor extends SyncProcessor {
   ///
   /// * [client]: The [ShadertoyHybridClient] instance
   /// * [store]: The [ShadertoyStore] instance
+  /// * [vault]: The [Vault] instance
   /// * [runner]: The [SyncTaskRunner] that will be used in this processor
   /// * [concurrency]: The number of concurrent tasks
   /// * [timeout]: The maximum timeout waiting for a task completion
   UserSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
+      Vault<Uint8List> vault,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
-      : super(client, store,
+      : super(client, store, vault,
             runner: runner, concurrency: concurrency, timeout: timeout);
 
   /// Creates a [FindUserResponse] with a error
@@ -218,22 +222,31 @@ class UserSyncProcessor extends SyncProcessor {
   /// * [mode]: The synchronization mode
   Future<UserSyncResult> _syncUsers(
       ShaderSyncResult shaderSync, HybridSyncMode mode) async {
-    final localResponse = await store.findAllUsers();
-    if (localResponse.ok) {
-      final localUsers = localResponse.users ?? [];
-      final localUserIds =
-          localUsers.map((fur) => fur.user?.id).whereType<String>().toSet();
-      final remoteUserIds = shaderSync.currentUserIds;
-      final addUserIds = remoteUserIds.difference(localUserIds);
-      final removeUserIds = localUserIds.difference(remoteUserIds);
+    final storeSyncsResponse = await store.findSyncs(
+        type: SyncType.user, status: {SyncStatus.pending, SyncStatus.error});
+    final storeUserResponse = await store.findAllUsers();
 
-      final local = localUsers.map((fur) => UserSyncTask(fur));
+    if (storeSyncsResponse.ok && storeUserResponse.ok) {
+      final storeSyncs = storeSyncsResponse.syncs ?? [];
+      final storeUserIdsError =
+          storeSyncs.map((fsr) => fsr.sync?.target).whereType<String>();
+      final storeUsers = storeUserResponse.users ?? [];
+      final storeUserIdsOk =
+          storeUsers.map((fur) => fur.user?.id).whereType<String>().toSet();
+      final clientUserIds = shaderSync.currentUserIds;
+      final addUserIds = {
+        ...clientUserIds.difference(storeUserIdsOk),
+        ...storeUserIdsError
+      };
+
+      final local = storeUsers.map((fur) => UserSyncTask(fur));
       final added = await _addUsers(addUserIds)
           .then((value) => value.where((task) => task.response.ok).toList());
 
       var removed = <UserSyncTask>[];
       var removedUserIds = Iterable.empty();
       if (mode == HybridSyncMode.full) {
+        final removeUserIds = storeUserIdsOk.difference(clientUserIds);
         removed = await _deleteUsers(removeUserIds)
             .then((value) => value.where((task) => task.response.ok).toList());
         removedUserIds = removed
@@ -246,8 +259,13 @@ class UserSyncProcessor extends SyncProcessor {
       return UserSyncResult(
           current: currentUsers, added: added, removed: removed);
     } else {
-      runner.log(
-          'Error obtaining user ids from the local store: ${localResponse.error?.message}');
+      if (!storeSyncsResponse.ok) {
+        runner.log(
+            'Error obtaining syncs from the local store: ${storeSyncsResponse.error?.message}');
+      } else {
+        runner.log(
+            'Error obtaining user ids from the local store: ${storeUserResponse.error?.message}');
+      }
     }
 
     return UserSyncResult();
@@ -255,16 +273,15 @@ class UserSyncProcessor extends SyncProcessor {
 
   /// Stores a list of user pictures
   ///
-  /// * [fs]: The [FileSystem]
   /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _addUserPicture(
-      FileSystem fs, Map<String, String> pathMap) async {
+      Map<String, String> pathMap) async {
     final tasks = <Future<DownloadSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     pathMap.forEach((userPicturePath, userPictureFilePath) {
-      tasks.add(taskPool.withResource(() =>
-          syncMedia(fs, contextUser, userPicturePath, userPictureFilePath)));
+      tasks.add(taskPool.withResource(() => syncMedia(SyncType.userAsset,
+          contextUser, userPicturePath, userPictureFilePath)));
     });
 
     return runner.process<DownloadSyncTask>(tasks,
@@ -273,15 +290,14 @@ class UserSyncProcessor extends SyncProcessor {
 
   /// Deletes a list of user pictures
   ///
-  /// * [fs]: The [FileSystem]
   /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _deleteUserPicture(
-      FileSystem fs, Map<String, String> pathMap) async {
+      Map<String, String> pathMap) async {
     final tasks = <Future<DownloadSyncTask>>[];
 
     pathMap.forEach((userPicturePath, userPictureFilePath) {
-      tasks.add(
-          deleteMedia(fs, contextUser, userPicturePath, userPictureFilePath));
+      tasks.add(deleteMedia(SyncType.userAsset, contextUser, userPicturePath,
+          userPictureFilePath));
     });
 
     return runner.process<DownloadSyncTask>(tasks,
@@ -290,58 +306,62 @@ class UserSyncProcessor extends SyncProcessor {
 
   /// Synchronizes the pictures from a user
   ///
-  /// * [fs]: The [FileSystem]
-  /// * [dir]: The target directory on the [FileSystem]
   /// * [userSync]: The user synchronization result
   /// * [mode]: The synchronization mode
-  Future<DownloadSyncResult> _syncUserPictures(FileSystem fs, Directory dir,
+  Future<DownloadSyncResult> _syncUserPictures(
       UserSyncResult userSync, HybridSyncMode mode) async {
-    final localUserPictures = <String>{};
+    final storeSyncsResponse = await store.findSyncs(
+        type: SyncType.userAsset,
+        status: {SyncStatus.pending, SyncStatus.error});
 
-    await for (final path in listFiles(dir, _userMediaFiles, recursive: true)) {
-      localUserPictures.add(p.relative(path, from: dir.path));
+    if (storeSyncsResponse.ok) {
+      final storeSyncs = storeSyncsResponse.syncs ?? [];
+      final storeUserPicturesError =
+          storeSyncs.map((fsr) => fsr.sync?.target).whereType<String>();
+      final storeUserPictures = Set<String>.from(storeUserPicturesError);
+
+      for (final path in await listPaths(_userMediaFiles)) {
+        storeUserPictures.add(path);
+      }
+
+      final currentUserPicturePaths = userSync.currentUserPicturePaths;
+      final addUserPicturePaths = {
+        for (var path in {
+          ...userSync.addedUserPicturePaths,
+          ...currentUserPicturePaths.difference(storeUserPictures)
+        })
+          path: path
+      };
+
+      final removeUserPicturePaths = {
+        for (var path in {
+          ...userSync.removedUserPicturePaths,
+          ...storeUserPictures.difference(currentUserPicturePaths)
+        })
+          path: path
+      };
+      final added = await _addUserPicture(addUserPicturePaths)
+          .then((value) => value.where((task) => task.response.ok).toList());
+      final removed = await _deleteUserPicture(removeUserPicturePaths)
+          .then((value) => value.where((task) => task.response.ok).toList());
+
+      return DownloadSyncResult(added: added, removed: removed);
+    } else {
+      runner.log(
+          'Error obtaining syncs from the local store: ${storeSyncsResponse.error?.message}');
     }
 
-    userPictureLocalPath(path) => p.join(dir.path, path);
-
-    final currentUserPicturePaths = userSync.currentUserPicturePaths;
-    final addUserPicturePaths = {
-      for (var path in {
-        ...userSync.addedUserPicturePaths,
-        ...currentUserPicturePaths.difference(localUserPictures)
-      })
-        path: userPictureLocalPath(path)
-    };
-
-    final removeUserPicturePaths = {
-      for (var path in {
-        ...userSync.removedUserPicturePaths,
-        ...localUserPictures.difference(currentUserPicturePaths)
-      })
-        path: userPictureLocalPath(path)
-    };
-    final added = await _addUserPicture(fs, addUserPicturePaths)
-        .then((value) => value.where((task) => task.response.ok).toList());
-    final removed = await _deleteUserPicture(fs, removeUserPicturePaths)
-        .then((value) => value.where((task) => task.response.ok).toList());
-
-    return DownloadSyncResult(added: added, removed: removed);
+    return DownloadSyncResult();
   }
 
   /// Synchronizes the pictures from a user
   ///
-  /// * [fs]: The [FileSystem]
-  /// * [dir]: The target directory on the [FileSystem]
-  /// * [userSync]: The user synchronization result
+  /// * [shaderSync]: The shader synchronization result
   /// * [mode]: The synchronization mode
   Future<UserSyncResult> syncUsers(
-      ShaderSyncResult shaderSync, HybridSyncMode mode,
-      {FileSystem? fs, Directory? dir}) async {
+      ShaderSyncResult shaderSync, HybridSyncMode mode) async {
     final userSyncResult = await _syncUsers(shaderSync, mode);
-    if (fs != null) {
-      await _syncUserPictures(
-          fs, dir ?? fs.currentDirectory, userSyncResult, mode);
-    }
+    await _syncUserPictures(userSyncResult, mode);
 
     return userSyncResult;
   }

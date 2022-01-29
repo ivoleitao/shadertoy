@@ -1,0 +1,69 @@
+
+{
+    "text": [
+      "@demofox: yes, any sort of filtering would help this out a lot, I did not try temporal.",
+      "Just insanely real.  ",
+      "love diffraction",
+      "Very pretty! It seriously looks great, but it would be nice if the flickeryness could be smoothed out somehow.  Have you thought about maybe temporal filtering?",
+      "Awesome!",
+      "Hehe, right, it's a bit excessive. \n\nA higher specular exponent results in a smaller specular highlight. It is also amplified by 56. This is done so that the out of focus regions would result in a bokeh shape. \n\nThe other method which generates extreme shininess are the reflections. For each pixel as long as the surface is hit the ray is bounced and it continues up to 3 bounces.\n\nBecause of the reflection the color of the scene comes from the reflected background. All the day\/night cycle does is to darken the background.",
+      "Don't know how I missed this one. It's definitely one of the nicer renderings I've scene on here. The chromatic aberration is a nice touch. So pretty.\n\nI was curious as to how you made the scene so shiny. A specular exponent of 1000. That'll do it. That'd have to be a Shadertoy record. :)",
+      "thanks, unfortunately this is not as easy to plug in as my lens flare was",
+      "Shinny!"
+    ],
+    "date": [
+      "1593022683",
+      "1480220348",
+      "1479798359",
+      "1479770921",
+      "1479612325",
+      "1459755233",
+      "1459741189",
+      "1455577235",
+      "1454483940"
+    ],
+    "username": [
+      "mu6k",
+      "CaliCoastReplay",
+      "iapafoto",
+      "demofox",
+      "patu",
+      "mu6k",
+      "Shane",
+      "mu6k",
+      "iq"
+    ],
+    "userpicture": [
+      "\/media\/users\/mu6k\/profile.png",
+      "\/img\/profile.jpg",
+      "\/media\/users\/iapafoto\/profile.png",
+      "\/media\/users\/demofox\/profile.jpeg",
+      "\/media\/users\/patu\/profile.jpeg",
+      "\/media\/users\/mu6k\/profile.png",
+      "\/img\/profile.jpg",
+      "\/media\/users\/mu6k\/profile.png",
+      "\/media\/users\/iq\/profile.png"
+    ],
+    "id": [
+      "XtdyD8",
+      "lsGGWG",
+      "ldGGzt",
+      "ldyGRt",
+      "ldKGzc",
+      "MlfSWj",
+      "XtfXD2",
+      "ltfSRN",
+      "4tSGWc"
+    ],
+    "hidden": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  }

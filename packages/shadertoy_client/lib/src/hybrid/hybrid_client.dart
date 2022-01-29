@@ -1,16 +1,16 @@
 import 'dart:collection';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:file/file.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/src/http_options.dart';
-import 'package:shadertoy_client/src/hybrid/playlist_sync.dart';
 import 'package:shadertoy_client/src/hybrid/shader_sync.dart';
 import 'package:shadertoy_client/src/hybrid/user_sync.dart';
 import 'package:shadertoy_client/src/site/site_client.dart';
 import 'package:shadertoy_client/src/site/site_options.dart';
 import 'package:shadertoy_client/src/ws/ws_client.dart';
 import 'package:shadertoy_client/src/ws/ws_options.dart';
+import 'package:stash/stash_api.dart';
 
 /// The sync mode of the hybrid client
 enum HybridSyncMode {
@@ -52,20 +52,17 @@ abstract class ShadertoyHybrid implements ShadertoySite, ShadertoyWS {
   /// provided
   Future<FindShaderIdsResponse> findNewShaderIds(Set<String> storeShaderIds);
 
-  /// Synchronizes the [store] with the remote shadertoy data. It can optionally
-  /// download shader and user assets if [fs] is specified
+  /// Synchronizes the [store] with the remote shadertoy data.
   ///
   /// * [store]: A [ShadertoyStore] implementation
+  /// * [vault]: A [Vault] implementation to store shader and user assets
   /// * [mode]: Specifies the mode used on the synchronization, either full or newest
-  /// * [fs]: A [FileSystem] implementation to store shader and user assets
-  /// * [dir]: A path on the [FileSystem]
   /// * [concurrency]: Maximum number of simultaneous requests
   /// * [timeout]: Request timeout in seconds
   /// * [playlistIds]: The playlists to synchronize
-  void rsync(ShadertoyStore store, HybridSyncMode mode,
-      {FileSystem? fs,
-      Directory? dir,
-      SyncTaskRunner? runner,
+  Future<void> rsync(
+      ShadertoyStore store, Vault<Uint8List> vault, HybridSyncMode mode,
+      {SyncTaskRunner? runner,
       int? concurrency,
       int? timeout,
       List<String> playlistIds});
@@ -240,26 +237,26 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
   }
 
   @override
-  void rsync(ShadertoyStore store, HybridSyncMode mode,
-      {FileSystem? fs,
-      Directory? dir,
-      SyncTaskRunner? runner,
+  Future<void> rsync(
+      ShadertoyStore store, Vault<Uint8List> vault, HybridSyncMode mode,
+      {SyncTaskRunner? runner,
       int? concurrency,
       int? timeout,
       List<String> playlistIds = const <String>[]}) async {
-    final shaderProcessor = ShaderSyncProcessor(this, store,
+    final shaderProcessor = ShaderSyncProcessor(this, store, vault,
         runner: runner, concurrency: concurrency, timeout: timeout);
-    final shaderSyncResult =
-        await shaderProcessor.syncShaders(mode, fs: fs, dir: dir);
+    final shaderSyncResult = await shaderProcessor.syncShaders(mode);
 
-    final userProcessor = UserSyncProcessor(this, store,
+    final userProcessor = UserSyncProcessor(this, store, vault,
         runner: runner, concurrency: concurrency, timeout: timeout);
     final userSyncResult =
-        await userProcessor.syncUsers(shaderSyncResult, mode, fs: fs, dir: dir);
+        await userProcessor.syncUsers(shaderSyncResult, mode);
 
-    final playlistProcessor = PlaylistSyncProcessor(this, store,
+    /*
+    final playlistProcessor = PlaylistSyncProcessor(this, store, vault,
         runner: runner, concurrency: concurrency, timeout: timeout);
     await playlistProcessor.syncPlaylists(
         shaderSyncResult, userSyncResult, playlistIds);
+    */
   }
 }

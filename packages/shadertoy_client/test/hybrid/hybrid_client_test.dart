@@ -1,9 +1,13 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
+import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
+import 'package:stash/stash_api.dart';
+import 'package:stash_memory/stash_memory.dart';
 import 'package:test/test.dart';
 
 import '../fixtures/fixtures.dart';
@@ -489,7 +493,7 @@ void main() {
       final siteOptions = newSiteOptions();
       final userId = 'iq';
       final response = await textFixture('user/$userId.html');
-      final adapter = newAdapter()..addUserRoute(response, userId, siteOptions);
+      final adapter = newAdapter()..addUserRoute(userId, response, siteOptions);
       final api = newClient(adapter, siteOptions: siteOptions);
       // act
       final sr = await api.findUserById(userId);
@@ -719,7 +723,7 @@ void main() {
       final fixturePath = 'media/shaders/$shaderId.jpg';
       final response = await binaryFixture(fixturePath);
       final adapter = newAdapter()
-        ..addDownloadShaderMedia(response, shaderId, siteOptions);
+        ..addDownloadShaderPicture(shaderId, response, siteOptions);
       final api = newClient(adapter, siteOptions: siteOptions);
       // act
       final sr = await api.downloadShaderPicture(shaderId);
@@ -745,6 +749,98 @@ void main() {
       expect(sr.error, isNull);
       expect(sr.bytes, isNotNull);
       expect(sr, await downloadFileResponseFixture(fixturePath));
+    });
+  });
+
+  group('Sync', () {
+    test('Sync 24 shaders', () async {
+      // prepare
+      final siteOptions = ShadertoySiteOptions();
+
+      final shaderPaths = [
+        'shaders/fractal_explorer_multi_res.json',
+        'shaders/rave_fractal.json',
+        'shaders/rhodium_fractalscape.json',
+        'shaders/fractal_explorer_dof.json',
+        'shaders/kleinian_variations.json',
+        'shaders/simplex_noise_fire_milkdrop_beat.json',
+        'shaders/fight_them_all_fractal.json',
+        'shaders/trilobyte_julia_fractal_smasher.json',
+        'shaders/rapping_fractal.json',
+        'shaders/trilobyte_bipolar_daisy_complex.json',
+        'shaders/smashing_fractals.json',
+        'shaders/trilobyte_multi_turing_pattern.json',
+        'shaders/surfer_boy.json',
+        'shaders/alien_corridor.json',
+        'shaders/turn_burn.json',
+        'shaders/ice_primitives.json',
+        'shaders/basic_montecarlo.json',
+        'shaders/crossy_penguin.json',
+        'shaders/full_scene_radial_blur.json',
+        'shaders/gargantua_with_hdr_bloom.json',
+        'shaders/blueprint_of_architekt.json',
+        'shaders/three_pass_dof.json',
+        'shaders/elephant.json',
+        'shaders/multiple_transparency.json'
+      ];
+
+      final shaders = [
+        for (var shader in shaderPaths) await shaderFixture(shader)
+      ];
+      final shaderMedia = {
+        for (var shader in shaders)
+          for (var path in shader.picturePaths())
+            path: await binaryFixture(path)
+      };
+
+      final userIds = {...shaders.map((s) => s.info.userId)};
+      final userResponseMap = {
+        for (var userId in userIds)
+          userId: await textFixture('user/$userId.html')
+      };
+      final userMedia = {
+        for (var userId in userIds)
+          'media/users/$userId/profile.png':
+              await binaryFixture('media/users/$userId/profile.png')
+      };
+
+      final response1 = await textFixture('results/sync_step_1.html');
+      final response2 = await textFixture('results/sync_step_2.html');
+      final adapter = newAdapter()
+        ..addResultsRoute(response1, siteOptions)
+        ..addResultsRoute(response2, siteOptions, from: 12, num: 12)
+        ..addShaderRouteList(shaders, siteOptions)
+        ..addDownloadMediaMap(shaderMedia, siteOptions)
+        ..addUserRouteMap(userResponseMap, siteOptions)
+        ..addDownloadMediaMap(userMedia, siteOptions);
+      final api = newClient(adapter, siteOptions: siteOptions);
+      final store = newShadertoySqliteStore();
+      final vault = newMemoryVaultStore().vault<Uint8List>();
+      // act
+      await api.rsync(store, vault, HybridSyncMode.full);
+      // assert
+      final allSyncs = await store.findAllSyncs();
+      expect(allSyncs, isNotNull);
+      expect(allSyncs.error, isNull);
+
+      final syncs = allSyncs.syncs ?? [];
+
+      final shaderSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.shader);
+      expect(shaderSyncs.length, 24);
+      final shaderPictureSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.shaderAsset);
+      expect(shaderPictureSyncs.length, shaderMedia.length);
+
+      final userSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok && fsr.sync?.type == SyncType.user);
+      expect(userSyncs.length, 15);
+      final userPictureSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.userAsset);
+      expect(userPictureSyncs.length, userMedia.length);
     });
   });
 }

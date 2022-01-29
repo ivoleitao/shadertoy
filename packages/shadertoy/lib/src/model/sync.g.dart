@@ -31,7 +31,8 @@ const _$SyncTypeEnumMap = {
   SyncType.shader: 'shader',
   SyncType.comment: 'comment',
   SyncType.playlist: 'playlist',
-  SyncType.asset: 'asset',
+  SyncType.shaderAsset: 'shaderAsset',
+  SyncType.userAsset: 'userAsset',
 };
 
 const _$SyncStatusEnumMap = {

@@ -58,20 +58,20 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
   ///
   /// * [type]: The target type
   /// * [target]: The target
-  /// * [status]: The status of the sync
+  /// * [status]: A list of status to query
   /// * [createdBefore]: Syncs created before this date
   /// * [updatedBefore]: Syncs updated before this date
   Future<List<SyncEntry>> _getSyncQuery(
       {SyncType? type,
       String? target,
-      SyncStatus? status,
+      Set<SyncStatus>? status,
       DateTime? createdBefore,
       DateTime? updatedBefore}) {
     final query = select(syncTable);
 
     final hasType = type != null;
     final hasTarget = target != null && target.isNotEmpty;
-    final hasStatus = status != null;
+    final hasStatus = status != null && status.isNotEmpty;
     final hasCreatedBefore = createdBefore != null;
     final hasUpdatedBefore = updatedBefore != null;
     if (hasType ||
@@ -92,7 +92,8 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
         }
 
         if (hasStatus) {
-          final statusTypeExp = entry.status.equals(status.name);
+          final statusList = status.map((s) => s.name);
+          final statusTypeExp = entry.status.isIn(statusList);
           exp = (exp == null ? statusTypeExp : exp & statusTypeExp);
         }
 
@@ -119,13 +120,13 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
   ///
   /// * [type]: The target type
   /// * [target]: The target
-  /// * [status]: The status of the sync
+  /// * [status]: A list of status
   /// * [createdBefore]: Syncs created before this date
   /// * [updatedBefore]: Syncs updated before this date
   Future<List<Sync>> find(
       {SyncType? type,
       String? target,
-      SyncStatus? status,
+      Set<SyncStatus>? status,
       DateTime? createdBefore,
       DateTime? updatedBefore}) {
     return _getSyncQuery(

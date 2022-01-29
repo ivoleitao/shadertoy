@@ -17,8 +17,11 @@ enum SyncType {
   /// Playlist
   playlist,
 
-  /// Asset
-  asset
+  /// Shader Asset
+  shaderAsset,
+
+  /// User Asset
+  userAsset
 }
 
 /// The sync status
@@ -97,6 +100,7 @@ class Sync extends Equatable {
   /// Builds a copy of a [Sync]
   ///
   /// * [type]: The target type
+  /// * [parent]: The parent
   /// * [target]: The target
   /// * [status]: The status of the sync
   /// * [message]: An optional sync message
@@ -104,6 +108,7 @@ class Sync extends Equatable {
   /// * [updateTime]: The last time the target was synced
   Sync copyWith(
       {SyncType? type,
+      String? parent,
       String? target,
       SyncStatus? status,
       String? message,

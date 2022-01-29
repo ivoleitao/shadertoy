@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:drift/native.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
@@ -27,8 +26,8 @@ abstract class ExtendedCommand extends MultiCommand
 
     ShadertoyExtendedClient client;
     if (dbPath != null) {
-      client = newShadertoySqliteStore(
-          NativeDatabase(File(dbPath), logStatements: verbose));
+      client =
+          newShadertoySqliteStore(file: File(dbPath), logStatements: verbose);
     } else {
       client = newShadertoyHybridClient(
           apiKey: apiKey, user: user, password: password);
