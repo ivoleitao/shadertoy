@@ -8,20 +8,20 @@ enum SyncType {
   /// User
   user,
 
+  /// User Asset
+  userAsset,
+
   /// Shader
   shader,
 
-  /// Comment
-  comment,
-
-  /// Playlist
-  playlist,
+  /// Shader comments
+  shaderComments,
 
   /// Shader Asset
   shaderAsset,
 
-  /// User Asset
-  userAsset
+  /// Playlist
+  playlist
 }
 
 /// The sync status

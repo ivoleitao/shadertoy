@@ -620,7 +620,7 @@ void main() {
       final shaderId = shader.info.id;
       await store.saveShader(shader);
       final comments = await commentsFixture('comment/$shaderId.json');
-      await store.saveShaderComments(comments);
+      await store.saveShaderComments(shaderId, comments);
       final fcr1 = await store.findCommentsByShaderId(shaderId);
       // act
       final dsr = await store.deleteShaderById(shader.info.id);
@@ -900,7 +900,7 @@ void main() {
       await store.saveShader(shader);
       final comments = await commentsFixture('comment/$shaderId.json');
       // act
-      final response = await store.saveShaderComments(comments);
+      final response = await store.saveShaderComments(shaderId, comments);
       // assert
       expect(response, isNotNull);
       expect(response.error, isNull);
@@ -918,9 +918,9 @@ void main() {
           .map((comment) => comment.copyWith(text: 'test'))
           .toList();
       // act
-      await store.saveShaderComments(originalComments);
+      await store.saveShaderComments(shaderId, originalComments);
       final savedComments1 = await store.findCommentsByShaderId(shaderId);
-      await store.saveShaderComments(updatedComments);
+      await store.saveShaderComments(shaderId, updatedComments);
       final savedComments2 = await store.findCommentsByShaderId(shaderId);
       // assert
       expect(savedComments1.comments, originalComments);
@@ -935,7 +935,7 @@ void main() {
       final shaderId = shader.info.id;
       await store.saveShader(shader);
       final comments = await commentsFixture('comment/$shaderId.json');
-      await store.saveShaderComments(comments);
+      await store.saveShaderComments(shaderId, comments);
       // act
       final response = await store.findCommentById(comments[0].id);
       // assert
@@ -953,7 +953,7 @@ void main() {
       await store.saveShader(shader);
       final commentPath = 'comment/$shaderId.json';
       final comments = await commentsFixture(commentPath);
-      await store.saveShaderComments(comments);
+      await store.saveShaderComments(shaderId, comments);
       // act
       final response = await store.findAllCommentIds();
       // assert
@@ -974,7 +974,7 @@ void main() {
       await store.saveShader(shader);
       final commentPath = 'comment/$shaderId.json';
       final comments = await commentsFixture(commentPath);
-      await store.saveShaderComments(comments);
+      await store.saveShaderComments(shaderId, comments);
       // act
       final response = await store.findAllComments();
       // assert
@@ -994,10 +994,10 @@ void main() {
       final shaderId = shader.info.id;
       await store.saveShader(shader);
       final comments = await commentsFixture('comment/$shaderId.json');
-      await store.saveShaderComments(comments);
+      await store.saveShaderComments(shaderId, comments);
       final fcr1 = await store.findCommentsByShaderId(shaderId);
       // act
-      final dcr = await store.deleteCommentById(comments[0].id);
+      final dcr = await store.deleteShaderComments(shaderId);
       final fcr2 = await store.findCommentsByShaderId(shaderId);
       // assert
       expect(fcr1.comments, isNotNull);

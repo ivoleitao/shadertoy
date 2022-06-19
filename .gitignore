@@ -1,17 +1,18 @@
-### Dart ###
+# See https://www.dartlang.org/guides/libraries/private-files
+
 # Files and directories created by pub
 packages/*/.dart_tool/
 packages/*/.packages
 packages/*/.pub/
 packages/*/build/
-# If you're building an application, you may want to check-in your pubspec.lock
 packages/*/pubspec.lock
+packages/*/pubspec_overrides.yaml
 
 # Directory created by dartdoc
 # If you don't generate documentation locally you can remove this line.
 packages/*/doc/api/
 
-# Directory generated with the dart coverage tool
+# Directory generated with the coverage tool
 packages/*/coverage/
 packages/*/coverage_badge.svg
 packages/*/test/.test_coverage.dart
@@ -67,6 +68,12 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# node
+node_modules
+
+#yarn
+yarn.lock
 
 ### VisualStudioCode ###
 .vscode/*

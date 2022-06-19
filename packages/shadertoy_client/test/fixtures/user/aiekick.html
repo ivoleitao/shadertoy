@@ -1,25 +1,26 @@
 HTTP/1.1 200 OK
-Date: Thu, 10 Jun 2021 23:11:50 GMT
-Server: Apache
-X-Powered-By: PHP/5.6.40
+Date: Sun, 30 Jan 2022 18:04:03 GMT
+Content-Type: text/html; charset=UTF-8
+Content-Length: 51405
+Connection: close
+Set-Cookie: AWSALB=TW+5LxeC+e01U4rHTiAgjy4qvlyPISnol6sOAjEYE3SxaAp/BAGcThH3I2C/9WyxIYQWQwTAKH6oI+tCByT0AXc6GnzyuQuhUFuc62ESa1ocJuG6sHzBYZpSeA1K; Expires=Sun, 06 Feb 2022 18:04:02 GMT; Path=/,AWSALBCORS=TW+5LxeC+e01U4rHTiAgjy4qvlyPISnol6sOAjEYE3SxaAp/BAGcThH3I2C/9WyxIYQWQwTAKH6oI+tCByT0AXc6GnzyuQuhUFuc62ESa1ocJuG6sHzBYZpSeA1K; Expires=Sun, 06 Feb 2022 18:04:02 GMT; Path=/; SameSite=None; Secure,sdtd=vsdv50j74n5dbednj4hjre7ico; expires=Sun, 13-Feb-2022 18:04:02 GMT; Max-Age=1209600; path=/; secure; HttpOnly
+Server: Apache/2.4.48 (Unix) OpenSSL/1.1.1d
+X-Powered-By: PHP/7.4.21
 Expires: Thu, 19 Nov 1981 08:52:00 GMT
-Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Cache-Control: no-store, no-cache, must-revalidate
 Pragma: no-cache
-Set-Cookie: sdtd=dceb0e88352603cc44ee20083d8dec27; expires=Thu, 24-Jun-2021 23:11:50 GMT; Max-Age=1209600; path=/; secure; HttpOnly
-Vary: Accept-Encoding,User-Agent
+Vary: Accept-Encoding
 Content-Encoding: gzip
 X-Frame-Options: SAMEORIGIN
 X-XSS-Protection: 1; mode=block
 X-Content-Type-Options: nosniff
-Connection: close
-Transfer-Encoding: chunked
-Content-Type: text/html; charset=UTF-8
+
 
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
     
-<title>Playlist - Shadertoy BETA</title>
+<title>aiekick - Shadertoy BETA</title>
 <meta charset="utf-8" />
 <meta name="Keywords" content="shadertoy, shader toy, quilez, inigo, jeremias, pol, fractals, demoscene, computer graphics, mathematics, rendering, demo, 3D, realtime, shader, raytracing, raymarching, webgl, glsl" />
 <meta name="Description" content="Build shaders, share them, and learn from the best community." />
@@ -5035,8 +5036,8 @@ EffectPass.prototype.SetSamplerFilter = function (id, str, buffers, cubeBuffers)
         {
             if( assetID_to_cubemapBuferID(inp.mInfo.mID)===0)
             {
-                renderer.SetSamplerFilter(cubeBuffers[id].mTexture[0], filter, true);
-                renderer.SetSamplerFilter(cubeBuffers[id].mTexture[1], filter, true);
+                renderer.SetSamplerFilter(cubeBuffers[0].mTexture[0], filter, true);
+                renderer.SetSamplerFilter(cubeBuffers[0].mTexture[1], filter, true);
                 inp.mInfo.mSampler.filter = str;
             }
             else
@@ -5697,27 +5698,27 @@ EffectPass.prototype.NewTexture = function( wa, slot, url, buffers, cubeBuffers,
         {
             if(url.mType==="musicstream")
             {
-                SC.resolve(url.mSrc).then( function(song) 
-                                           {
-                                                if( song.streamable===true )
-                                                {
-                                                    texture.audio.crossOrigin = '';
-                                                    texture.audio.src = song.stream_url + "?client_id=" + SC.client_id;
-                                                    texture.audio.soundcloudInfo = song;
-                                                }
-                                                else
-                                                {
-                                                    alert('Shadertoy: Soundcloud - This track cannot be streamed' );
-                                                }
-                                            } 
-                                            ).catch( 
-                                            function(error)
-                                            {
-                                                if (me.mTextureCallbackFun!==null)
-                                                {
-                                                    me.mTextureCallbackFun(me.mTextureCallbackObj, slot, {wave:null}, false, 4, 0, -1.0, me.mID);
-                                                }
-                                            } );
+                SC.resolve(url.mSrc, 
+                    function(song) 
+                    {
+                        if( song.streamable===true )
+                        {
+                            texture.audio.crossOrigin = 'anonymous';
+                            texture.audio.src = song.stream_url;
+                            texture.audio.soundcloudInfo = song;
+                        }
+                        else
+                        {
+                            alert('Shadertoy: Soundcloud 3 - This track cannot be streamed' );
+                        }
+                    },
+                    function(error)
+                    {
+                        if (me.mTextureCallbackFun!==null)
+                        {
+                            me.mTextureCallbackFun(me.mTextureCallbackObj, slot, {wave:null}, false, 4, 0, -1.0, me.mID);
+                        }
+                    } );
             } 
             else
             {
@@ -6874,7 +6875,7 @@ function Screenshots()
     let mTarget = null;
     let mXres = 0;
     let mYres = 0;
-    let mCubemapToEquirectProgram = null;
+    let mCubemapToEquirectProgram;
     let mRenderer = null;
 
     // public
@@ -6899,7 +6900,7 @@ function Screenshots()
             fsSourceC = "uniform samplerCube t; void main() { vec2 px = gl_FragCoord.xy/vec2(4096.0,2048.0); vec2 an = 3.1415926535898 * (px*vec2(2.0, 1.0) - vec2(0.0,0.5)); vec3 rd = vec3(-cos(an.y) * sin(an.x), sin(an.y), cos(an.y) * cos(an.x)); gl_FragColor = texture(t, rd); }";
         }
 
-        let compileShader = function (worked, errorType, log, shader)
+        let compileShader = function (worked, info)
         {
             if (worked === false)
             {
@@ -6907,7 +6908,7 @@ function Screenshots()
             }
             else
             {
-                mCubemapToEquirectProgram = shader;
+                mCubemapToEquirectProgram = info;
             }
         }
         mRenderer.CreateShader(vsSourceC, fsSourceC, false, true, compileShader);
@@ -7284,6 +7285,7 @@ Effect.prototype.saveScreenshot = function(passid)
         this.mRenderer.SetRenderTarget( target );
 
         let program = this.mScreenshotSytem.GetProgram();
+
         this.mRenderer.AttachShader(program);
         let l1 = this.mRenderer.GetAttribLocation(program, "pos");
         this.mRenderer.SetViewport( [0, 0, xres, yres] );
@@ -8581,9 +8583,42 @@ me.mThumbnailImg.style.opacity = 1.0;
 </script>
 
     <style>
-    div#privacy
+
+    #content
     {
-        margin-left:4px;
+        user-select: text;
+        -moz-user-select: -moz-text;
+        -webkit-user-select: text;
+        padding:0px;
+        margin:0px;
+        position:relative;
+    }
+
+    #divUser
+    {
+        padding:0px;
+        padding-top:24px;
+        padding-bottom:16px;
+        width:100%;
+    }
+
+    div#controls
+    {
+        width:100%;
+        padding-top:16px;
+        padding-bottom:16px;
+        display:flex;
+        justify-content:space-between; 
+        flex-wrap:wrap;
+    }
+
+    div#controls > div
+    {
+        display:inline-flex;
+    }
+
+    .controlOptions
+    {
         display:inline-block;
     }
 
@@ -8594,9 +8629,9 @@ me.mThumbnailImg.style.opacity = 1.0;
         margin:0px;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
         grid-column-gap: 64px;
-        grid-row-gap: 24px;
+        grid-row-gap: 16px;
     }
 
     .searchResult
@@ -8613,8 +8648,28 @@ me.mThumbnailImg.style.opacity = 1.0;
         position: relative;
     }
 
+    div#navigation
+    {
+        text-align: center;
+        width: 100%;
+    }
+
+
+    #userPicture
+    {
+        background-color:#808080;
+        border: 1px solid #000000;
+        padding:0px;
+        left:0px;
+        top:0px;
+        width:128px;
+        height:128px;
+    }
+
     a.pageButtons, .pageButtonsCurrent
     {
+        
+        //background-color: #303030;
         border-style: solid;
         border-width: 1px;
         border-color: #808080;
@@ -8652,30 +8707,11 @@ me.mThumbnailImg.style.opacity = 1.0;
         color:#000000;
     }
 
-    div#controls
-    {
-        width:100%;
-        padding-top:16px;
-        padding-bottom:16px;
-        display:flex;
-        justify-content:space-between; 
-        flex-wrap:wrap;
-    }
-
-    div#controls > div
-    {
-        display:inline-flex;
-    }
-
-    .controlOptions
-    {
-        display:inline-block;
-    }
     /* ----------------------- media resolutions ------------------------ */
 
     @media screen and (max-width:799px) 
     {
-        div#shaderGrid  { grid-template-columns: 1fr; grid-template-rows: repeat(12, 1fr); grid-column-gap: 0px; grid-row-gap: 16px; }
+        div#shaderGrid  { grid-template-columns: 1fr; grid-template-rows: repeat(8, 1fr); grid-column-gap: 0px; grid-row-gap: 16px; padding-bottom:16px; }
 
         div#controls
         {
@@ -8695,39 +8731,16 @@ me.mThumbnailImg.style.opacity = 1.0;
         }
     }
     </style>
+
     <script>
-    var gShaderIDs=["wlKXWc","lstXRl","lttBzN","ld3Szs","wllczX","Wt33zH","wsGczG","3tjyRt","WdlcRj","tdtyDs","XsjXR1","ts2cWm","wl2SRK","WscGRM","3lGGWK"];var gPlaylistID="week";    var gUseScreenshots = piIsMobile();
+    var gShaderIDs=["4t2Xzt","llB3zG","4djBDR","MljSRD","4t2SWW","XtX3R2","Xdt3DB","4lj3Ww","Mt3GW2","XljGR3","XtjSRm","4ll3Wn","Xts3RB","XlX3RS","ltX3DM","XtBXRm","MlX3Wj","XlfXDM","MsySWz","4ljGRh"];var gFollow = -1;
+    var gUseScreenshots = piIsMobile();
     var gThemeName = "classic";
-
-    function onDeleteShader(shaderID)
-    {
-        var playlistID = gPlaylistID;
-
-        var req = new XMLHttpRequest();
-        req.onload = function()
-        {
-            var jsn = req.response;
-            if( jsn==null ) return;
-            if( jsn.result!=0 )
-            {
-                alert( "The shader couldn't be removed from the playlist. Please try again." );
-                console.log( "Error: The shader couldn't be removed from the playlist. Please try again." );
-            }
-            else
-            {
-                window.location.reload();
-            }
-        }
-        req.open( "POST", "/shadertoy", true );
-        req.responseType = "json";
-        req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        var str = "prs=1&pid=" + playlistID + "&sid=" + shaderID;
-        req.send( str );
-    }
     </script>
+
 </head>
 
-<body onload="resultsInit(12,onDeleteShader,'test');">
+<body onload="resultsInit(8,null,null)">
 
 <!-- header =================================================================================== -->
 
@@ -8753,40 +8766,83 @@ me.mThumbnailImg.style.opacity = 1.0;
 
 <div id="content">
 
-  <div>
-        <span style="font-size:1.5em">
-        <br>
-        <span style="font-weight:bold;font-size:2.0em;margin-right:8px;">test</span> by <a class='user' href='/user/ivoleitao'> ivoleitao </a>
+    
+    <script>
+    function follow()
+    {
+        if (gFollow < 0) return;
+        try
+        {
+            var req = new XMLHttpRequest();
+            req.onload = function()
+            {
+                var jsn = req.response;
+                if( jsn==null ) return;
+                let btnFollow = document.getElementById( "btnFollow");
+                if (gFollow == 1) {
+                    gFollow = 0;
+                    btnFollow.value="Follow";
+                } else if (gFollow == 0) {
+                    gFollow = 1;
+                    btnFollow.value="Unfollow";
+                }
+            }
+            req.open( "POST", "/shadertoy", true );
+            req.responseType = "json";
+            req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            if (gFollow == 1) {
+                var str = "fu=1&uid=aiekick";
+            } else if (gFollow == 0) {
+                var str = "fs=1&uid=aiekick";
+            }
+            req.send( str );
+        }
+        catch(e)
+        {
+            alert( "exception: " + e );
+        }
+    }
+    </script>
 
-                <br>
-        <br>
-        Testing playlists        </span>
-  </div>
+    <!-- ---------------------------------- --> 
+
+    <div id="divUser">
+        <table style="border:0px;border-spacing:0px;border-collapse:collapse;"><tr>
+        <td style="vertical-align:top;">
+        <img id="userPicture" src="/media/users/aiekick/profile.jpeg"></img>        </td>
+        <td style="vertical-align:top;padding-left:16px;">
+        <b>Name</b>: aiekick <br/><b>Joined</b>: June 17, 2013 <br/> <br/><b>Shaders</b>: 545<br/><b>Playlists</b>: 4<br/><b>Comments</b>: 4224<br/> <br/><b>Following</b>: 32<br/><b>Followers</b>: 72<br/>        </td>
+        <td style="vertical-align:top;padding-left:32px;">
+        <b>About</b><br><br>Lovers of Code and Art in all their forms<br/><br/>My profiles : <a href="https://github.com/aiekick"  class="regular" target="_blank">https://github.com/aiekick</a><br/>My Shader Editor (used for all my shaders) : <a href="https://github.com/aiekick/NoodlesPlate"  class="regular" target="_blank">https://github.com/aiekick/NoodlesPlate</a><br/>My twitter : <a href="https://twitter.com/aiekick"  class="regular" target="_blank">https://twitter.com/aiekick</a>        </td>
+        <td style="vertical-align:top;padding-left:32px;">
+                    </td>
+        </tr></table>
+    </div>
+
+<!-- --------------------------- -->
 
   <div id="controls">
 
-  <!--
-      <div id="goSlideshow"><a class="pageButtons" href="/slideshow?playlist=week&sort=popular">Slideshow</a></div>
-  -->
-      <div>
+    <div>
+      <div style="text-align: center; vertical-align: middle; display: inline-block; padding-bottom:5px; padding-top:4px; margin-right:8px; margin-bottom:8px; margin-top:8px;">
+      Sort:      </div>
+      <div class="controlOptions"><div class="pageButtonsCurrent" href="/user/aiekick/sort=popular">Popular</div><a class="pageButtons" href="/user/aiekick/sort=newest">Newest</a><a class="pageButtons" href="/user/aiekick/sort=love">Love</a></div>
+    </div>
+
+    <div id="controlFilter">
+      <div style="display:flex;margin-right:8px;align-items:center;">Filter:</div>
+      <div class="controlOptions"> <a class="pageButtons" href="/user/aiekick&sort=popular&filter=multipass">Multipass</a><a class="pageButtons" href="/user/aiekick&sort=popular&filter=soundoutput">GPU Sound</a><a class="pageButtons" href="/user/aiekick&sort=popular&filter=vr">VR</a><a class="pageButtons" href="/user/aiekick&sort=popular&filter=soundinput">Microphone</a><a class="pageButtons" href="/user/aiekick&sort=popular&filter=musicstream">Soundcloud</a><a class="pageButtons" href="/user/aiekick&sort=popular&filter=webcam">Webcam</a></div>
+    </div>
+
+    <div>
         <div style="text-align: center; vertical-align: middle; display: inline-block; padding-bottom:5px; padding-top:4px; margin-right:8px; margin-bottom:8px; margin-top:8px;">
-        View:</div>
-        <div><a class="pageButtons" href="/slideshow?playlist=week&sort=popular">Slideshow</a></div>
-      </div>
-
-
-
-      <div>
-
-        <div style="text-align: center; vertical-align: middle; display: inline-block; padding-bottom:5px; padding-top:4px; margin-right:8px; margin-bottom:8px; margin-top:8px;">
-        12 Shaders:        </div>
+        Results (545):        </div>
 
         <div class="controlOptions">
-    
-              <div id="pageButton"0 class="pageButtonsCurrent" href='week&from=0&num=12'>1</div>
-        </div>
-      </div>
+              <div id="pageButton"0 class="pageButtonsCurrent" href="/user/aiekick/sort=popular&from=0&num=8">1</div><a id="pageButton"1 class="pageButtons" href="/user/aiekick/sort=popular&from=8&num=8">2</a><a id="pageButton"2 class="pageButtons" href="/user/aiekick/sort=popular&from=16&num=8">3</a><span>...</span><a id="pageButtonLast" class="pageButtons" href="/user/aiekick/sort=popular&from=544&num=8">69</a>        </div>
+    </div>
   </div>
+
 
   <div id="shaderGrid">
     <div class='searchResult'><div class='searchResultContainer' id='Preview_0_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_0_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_0_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_0_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_0_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_0_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_0_Thumnail'>        <img class='previewThumbnailImage' id='Preview_0_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_0_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
@@ -8805,15 +8861,7 @@ Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas 
 Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_6_ThumnailWarning2' title='You are using static shader previews.
 Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_6_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_6_Info'>  <span class='previewText'  id='Preview_6_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_6_TextUser'></span>  <span class='previewStats' id='Preview_6_Stats'></span></div></div><div class='searchResult'><div class='searchResultContainer' id='Preview_7_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_7_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_7_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_7_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_7_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_7_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_7_Thumnail'>        <img class='previewThumbnailImage' id='Preview_7_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_7_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
 Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_7_ThumnailWarning2' title='You are using static shader previews.
-Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_7_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_7_Info'>  <span class='previewText'  id='Preview_7_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_7_TextUser'></span>  <span class='previewStats' id='Preview_7_Stats'></span></div></div><div class='searchResult'><div class='searchResultContainer' id='Preview_8_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_8_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_8_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_8_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_8_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_8_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_8_Thumnail'>        <img class='previewThumbnailImage' id='Preview_8_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_8_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
-Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_8_ThumnailWarning2' title='You are using static shader previews.
-Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_8_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_8_Info'>  <span class='previewText'  id='Preview_8_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_8_TextUser'></span>  <span class='previewStats' id='Preview_8_Stats'></span></div></div><div class='searchResult'><div class='searchResultContainer' id='Preview_9_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_9_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_9_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_9_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_9_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_9_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_9_Thumnail'>        <img class='previewThumbnailImage' id='Preview_9_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_9_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
-Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_9_ThumnailWarning2' title='You are using static shader previews.
-Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_9_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_9_Info'>  <span class='previewText'  id='Preview_9_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_9_TextUser'></span>  <span class='previewStats' id='Preview_9_Stats'></span></div></div><div class='searchResult'><div class='searchResultContainer' id='Preview_10_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_10_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_10_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_10_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_10_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_10_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_10_Thumnail'>        <img class='previewThumbnailImage' id='Preview_10_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_10_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
-Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_10_ThumnailWarning2' title='You are using static shader previews.
-Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_10_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_10_Info'>  <span class='previewText'  id='Preview_10_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_10_TextUser'></span>  <span class='previewStats' id='Preview_10_Stats'></span></div></div><div class='searchResult'><div class='searchResultContainer' id='Preview_11_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_11_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_11_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_11_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_11_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_11_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_11_Thumnail'>        <img class='previewThumbnailImage' id='Preview_11_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_11_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
-Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_11_ThumnailWarning2' title='You are using static shader previews.
-Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_11_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_11_Info'>  <span class='previewText'  id='Preview_11_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_11_TextUser'></span>  <span class='previewStats' id='Preview_11_Stats'></span></div></div>  </div>
+Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_7_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_7_Info'>  <span class='previewText'  id='Preview_7_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_7_TextUser'></span>  <span class='previewStats' id='Preview_7_Stats'></span></div></div>  </div>
 </div>
 
 <!-- footer ================================================================================== -->
@@ -8919,5 +8967,6 @@ function acceptCompliance()
 
     ga('create', 'UA-44068895-1', 'shadertoy.com');
     ga('send', 'pageview');
-</script></body>
+</script>
+</body>
 </html>

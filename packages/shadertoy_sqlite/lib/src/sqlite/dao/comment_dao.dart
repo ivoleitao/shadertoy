@@ -122,21 +122,21 @@ class CommentDao extends DatabaseAccessor<DriftStore> with _$CommentDaoMixin {
         mode: InsertMode.insertOrReplace));
   }
 
-  /// Deletes a [Comment] by [commentId]
-  ///
-  /// * [commentId]: The id of the [Comment]
-  Future<void> deleteById(String commentId) {
+  /// Deletes the comments of a shader
+  /// *
+  /// * [shaderId]: The id of the shader
+  Future<void> deleteByShaderId(String shaderId) {
     return transaction(() async {
       // Delete any sync reference
       await (delete(syncTable)
             ..where((sync) =>
-                sync.type.equals(SyncType.comment.name) &
-                sync.target.equals(commentId)))
+                sync.type.equals(SyncType.shaderComments.name) &
+                sync.target.equals(shaderId)))
           .go();
 
       // Delete the comment
       await (delete(commentTable)
-            ..where((comment) => comment.id.equals(commentId)))
+            ..where((comment) => comment.shaderId.equals(shaderId)))
           .go();
     });
   }

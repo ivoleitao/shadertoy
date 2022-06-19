@@ -7,6 +7,10 @@ ide:
   intellij:
     false
 
+command:
+  bootstrap:
+    usePubspecOverrides: true
+
 scripts:
   get:
     run: |
@@ -62,7 +66,7 @@ scripts:
       melos exec -- \
         rm -Rf "doc"
       melos exec -c 1 -- \
-        "dartdoc"
+        "dart pub global run dartdoc ."
     description: |
       Generate documentation for all packages.
 
@@ -88,7 +92,7 @@ scripts:
   coverage:
     run: |
       melos exec -c 1 -- \
-        "dart test --concurrency=1 --coverage=coverage && dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib"
+        "dart test --concurrency=1 --coverage=coverage && dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib"
     description: |
       Run `dart test` and collects coverage in all packages.
 

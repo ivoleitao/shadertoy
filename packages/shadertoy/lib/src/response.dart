@@ -213,7 +213,7 @@ class ResponseError with EquatableMixin {
   /// Creates a [ResponseError] from json map
   factory ResponseError.fromJson(Map<String, dynamic> json) => ResponseError(
       code: ErrorCode.values.firstWhere(
-          (e) => e.toString() == 'ErrorCode.' + (json['code'] as String)),
+          (e) => e.toString() == 'ErrorCode.${json['code'] as String}'),
       message: json['message'] as String,
       context: json['context'] as String,
       target: json['target'] as String);
@@ -829,16 +829,16 @@ class SaveShaderCommentsResponse extends APIResponse with EquatableMixin {
   SaveShaderCommentsResponse({ResponseError? error}) : super(error: error);
 }
 
-/// Delete comment API response
+/// Delete shader comments API response
 ///
-/// The response returned upon the execution of the delete comment API call
-/// When [DeleteCommentResponse.error] is *not null* there was an error in the delete comment call
-/// When [DeleteCommentResponse.error] is *null* the delete was sucessful
-class DeleteCommentResponse extends APIResponse with EquatableMixin {
-  /// Builds a [DeleteCommentResponse]
+/// The response returned upon the execution of the save shader comments API call
+/// When [DeleteShaderCommentsResponse.error] is *not null* there was an error in the save shader comments call
+/// When [DeleteShaderCommentsResponse.error] is *null* the save was sucessful
+class DeleteShaderCommentsResponse extends APIResponse with EquatableMixin {
+  /// Builds a [DeleteShaderCommentsResponse]
   ///
-  /// [error]: An error if there was error while deleting the comment
-  DeleteCommentResponse({ResponseError? error}) : super(error: error);
+  /// [error]: An error if there was error while saving the shader comments
+  DeleteShaderCommentsResponse({ResponseError? error}) : super(error: error);
 }
 
 @JsonSerializable()

@@ -71,10 +71,15 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   /// Parses the id's from the Shadertoy results, for example on
   /// a search for "elevated" this regular expression parses the
   /// id's from this [page](https://www.shadertoy.com/results?query=elevated)
-  static final RegExp idArrayRegExp = RegExp(r'\[(\s*\"(\w{6})\"\s*,?)+\]');
+  static final RegExp idArrayRegExp = RegExp(r"\[(\s*'(\w{6})'\s*,?)+\]");
 
   /// Parses a Shadertoy id after sucessfully aplying the regex [idArrayRegExp]
-  static final RegExp shaderIdRegExp = RegExp(r'\"(\w{6})\"');
+  static final RegExp shaderIdRegExp = RegExp(r"'(\w{6})'");
+
+  /// Parses the shaders from the Shadertoy results, for example on
+  /// a search for "elevated" this regular expression parses the
+  /// shaders from this [page](https://www.shadertoy.com/results?query=elevated)
+  static final RegExp shaderArrayRegExp = RegExp(r'var\sgShaders=(\[.*\])');
 
   /// Used to remove the '\' on the userpicture field of the comment
   /// Ex: '\/img\/profile.jpg' becomes '/img/profile.jpg'
@@ -287,7 +292,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   ///
   /// Returns null in case of a unsucessful match
   int? _parseShadersPager(Document doc) {
-    var elements = doc.querySelectorAll('#content>#controls>*>div');
+    final elements = doc.querySelectorAll('#content>#controls>*>div');
     if (elements.isNotEmpty) {
       for (var element in elements) {
         final numShadersMatch = numShadersRegExp.firstMatch(element.text);
@@ -302,6 +307,65 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
     }
 
     return null;
+  }
+
+  /// Parses the shaders from the returned html
+  ///
+  /// * [doc]: The [Document] with the page DOM
+  /// * [maxShaders]: The maximum number of shaders
+  ///
+  /// It should be used to parse the html of
+  /// browse, results, user and playlist pages
+  FindShadersResponse _parseShaders(Document doc, int maxShaders) {
+    final error = _validate(doc);
+    if (error != null) {
+      return FindShadersResponse(error: error);
+    }
+
+    final count = _parseShadersPager(doc) ?? _parseResultsPager(doc);
+    final results = <FindShaderResponse>[];
+
+    if (count == null) {
+      return FindShadersResponse(
+          error: ResponseError.backendResponse(
+              message: 'Unable to parse the number of results'));
+    } else if (count < 0) {
+      return FindShadersResponse(
+          error: ResponseError.backendResponse(
+              message: 'Obtained an invalid number of results: $count'));
+    } else if (count == 0) {
+      return FindShadersResponse(total: 0, shaders: const []);
+    }
+
+    var elements = doc.querySelectorAll('script');
+    if (elements.isNotEmpty) {
+      for (var element in elements) {
+        final shaderArrayMatch = shaderArrayRegExp.firstMatch(element.text);
+
+        if (shaderArrayMatch != null) {
+          final shaderMatchGroup = shaderArrayMatch.group(1);
+
+          if (shaderMatchGroup != null) {
+            Iterable jsonList = json.decode(shaderMatchGroup);
+            results.addAll(List<FindShaderResponse>.from(jsonList.map(
+                (json) => FindShaderResponse(shader: Shader.fromJson(json)))));
+          }
+        }
+      }
+
+      if (results.isEmpty) {
+        return FindShadersResponse(
+            error: ResponseError.backendResponse(
+                message:
+                    'No script block matches with "${shaderArrayRegExp.pattern}" pattern'));
+      }
+    } else {
+      return FindShadersResponse(
+          error: ResponseError.backendResponse(
+              message: 'Unable to get the script blocks from the document'));
+    }
+
+    return FindShadersResponse(total: count, shaders: results);
   }
 
   /// Parses the list of shader id's returned
@@ -369,19 +433,18 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
     return FindShaderIdsResponse(count: count, ids: results);
   }
 
-  /// Finds shader ids
+  /// Gets the results query
   ///
+  /// * [num]: The number of results
   /// * [term]: Shaders that have [term] in the name or in description
   /// * [filters]: A set of tag filters
   /// * [sort]: The sort order of the shaders
   /// * [from]: A 0 based index for results returned
   ///
-  /// Returns a [FindShaderIdsResponse] with a list of ids or a [ResponseError]
-  Future<FindShaderIdsResponse> _getShaderIdsPage(
+  /// Returns the results query
+  String _getResultsQuery(int num,
       {String? term, Set<String>? filters, Sort? sort, int? from}) {
-    var num = options.pageResultsShaderCount;
-
-    var queryParameters = [];
+    final queryParameters = [];
     if (term != null && term.isNotEmpty) {
       queryParameters.add('query=$term');
     }
@@ -408,8 +471,93 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
       sb.write(queryParameters[i]);
     }
 
-    return client.get(sb.toString()).then((Response<dynamic> response) =>
-        _parseShaderIds(parse(response.data), num));
+    return sb.toString();
+  }
+
+  /// Obtains the shaders
+  ///
+  /// * [term]: Shaders that have [term] in the name or in description
+  /// * [filters]: A set of tag filters
+  /// * [sort]: The sort order of the shaders
+  /// * [from]: A 0 based index for results returned
+  ///
+  /// Returns a [FindShadersResponse] with a list of shaders or a [ResponseError]
+  Future<FindShadersResponse> _getShadersPage(
+      {String? term, Set<String>? filters, Sort? sort, int? from}) {
+    final num = options.pageResultsShaderCount;
+
+    return client
+        .get(_getResultsQuery(num,
+            term: term, filters: filters, sort: sort, from: from))
+        .then((Response<dynamic> response) =>
+            _parseShaders(parse(response.data), num));
+  }
+
+  /// Finds shaders
+  ///
+  /// * [term]: Shaders that have [term] in the name or in description
+  /// * [filters]: A set of tag filters
+  /// * [sort]: The sort order of the shaders
+  /// * [from]: A 0 based index for results returned
+  /// * [num]: The total number of results
+  ///
+  /// Returns a [FindShadersResponse] with a list of ids or a [ResponseError]
+  /// According with [from] and [num] parameters the number of calls to the Shadertoy
+  /// site API s calculated. Note that the site returns a fixed number of shaders
+  /// (configured in [ShadertoySiteOptions.pageResultsShaderCount])
+  Future<FindShadersResponse> _getShaders(
+      {String? term, Set<String>? filters, Sort? sort, int? from, int? num}) {
+    final startFrom = from ?? 0;
+    return _getShadersPage(
+            term: term, filters: filters, sort: sort, from: startFrom)
+        .then((FindShadersResponse shaderPage) {
+      if (shaderPage.error != null) {
+        return shaderPage;
+      }
+
+      var pages = (min(num ?? shaderPage.total, shaderPage.total) /
+              options.pageResultsShaderCount)
+          .ceil();
+      if (pages > 1) {
+        var shaderTaskPool = Pool(options.poolMaxAllocatedResources,
+            timeout: Duration(seconds: options.poolTimeout));
+
+        var tasks = [Future.value(shaderPage)];
+        for (var page = 1; page < pages; page++) {
+          tasks.add(pooledRetry(
+              shaderTaskPool,
+              () => _getShadersPage(
+                  term: term,
+                  filters: filters,
+                  sort: sort,
+                  from: startFrom + page * options.pageResultsShaderCount)));
+        }
+
+        return Future.wait(tasks).then((List<FindShadersResponse> responses) {
+          final results = <FindShaderResponse>[];
+
+          for (var i = 0; i < responses.length; i++) {
+            final response = responses[i];
+
+            if (response.error != null) {
+              return FindShadersResponse(
+                  error: ResponseError.backendResponse(
+                      message:
+                          'Page ${i + 1} of $pages page(s) was not successfully fetched: ${response.error?.message}'));
+            }
+
+            final shaders = response.shaders;
+            if (shaders != null) {
+              results.addAll(shaders);
+            }
+          }
+
+          return FindShadersResponse(total: results.length, shaders: results);
+        });
+      }
+
+      return shaderPage;
+    });
   }
 
   /// Finds shader ids
@@ -426,78 +574,27 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   /// (configured in [ShadertoySiteOptions.pageResultsShaderCount])
   Future<FindShaderIdsResponse> _getShaderIds(
       {String? term, Set<String>? filters, Sort? sort, int? from, int? num}) {
-    final startFrom = from ?? 0;
-    return _getShaderIdsPage(
-            term: term, filters: filters, sort: sort, from: startFrom)
-        .then((FindShaderIdsResponse shaderPage) {
-      if (shaderPage.error != null) {
-        return shaderPage;
-      }
-
-      var pages = (min(num ?? shaderPage.total, shaderPage.total) /
-              options.pageResultsShaderCount)
-          .ceil();
-      if (pages > 1) {
-        var shaderTaskPool = Pool(options.poolMaxAllocatedResources,
-            timeout: Duration(seconds: options.poolTimeout));
-
-        var tasks = [Future.value(shaderPage)];
-        for (var page = 1; page < pages; page++) {
-          tasks.add(pooledRetry(
-              shaderTaskPool,
-              () => _getShaderIdsPage(
-                  term: term,
-                  filters: filters,
-                  sort: sort,
-                  from: startFrom + page * options.pageResultsShaderCount)));
-        }
-
-        return Future.wait(tasks).then((List<FindShaderIdsResponse> responses) {
-          final results = <String>[];
-
-          for (var i = 0; i < responses.length; i++) {
-            final response = responses[i];
-
-            if (response.error != null) {
-              return FindShaderIdsResponse(
-                  error: ResponseError.backendResponse(
-                      message:
-                          'Page ${i + 1} of $pages page(s) was not successfully fetched: ${response.error?.message}'));
-            }
-
-            final ids = response.ids;
-            if (ids != null) {
-              results.addAll(ids);
-            }
-          }
-
-          return FindShaderIdsResponse(count: results.length, ids: results);
-        });
-      }
-
-      return shaderPage;
-    });
+    return _getShaders(
+            term: term, filters: filters, sort: sort, from: from, num: num)
+        .then((fsr) => FindShaderIdsResponse(
+            count: fsr.total,
+            error: fsr.error,
+            ids: fsr.shaders
+                ?.map((item) => item.shader?.info.id)
+                .whereType<String>()
+                .toList()));
   }
 
   @override
   Future<FindShadersResponse> findShaders(
       {String? term, Set<String>? filters, Sort? sort, int? from, int? num}) {
     return catchDioError<FindShadersResponse>(
-        _getShaderIds(
-                term: term,
-                filters: filters,
-                sort: sort,
-                from: from,
-                num: num ?? options.shaderCount)
-            .then((FindShaderIdsResponse response) {
-          if (response.error != null) {
-            return FindShadersResponse(error: response.error);
-          }
-
-          final ids = response.ids ?? [];
-
-          return _getShadersByIdSet(ids.toSet());
-        }),
+        _getShaders(
+            term: term,
+            filters: filters,
+            sort: sort,
+            from: from,
+            num: num ?? options.shaderCount),
         (de) => FindShadersResponse(
             error: toResponseError(de, context: contextShader)));
   }
@@ -576,7 +673,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
     return sb.toString();
   }
 
-  /// Get the shader id's of a user
+  /// Get the shaders of a user
   ///
   /// * [userId]: The user Id
   /// * [filters]: A set of tag filters
@@ -584,15 +681,90 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   /// * [from]: A 0 based index for results returned
   ///
   /// Returns a [FindShaderIdsResponse] with a list of ids or a [ResponseError]
-  Future<FindShaderIdsResponse> _getShaderIdsPageByUserId(String userId,
+  Future<FindShadersResponse> _getShadersPageByUserId(String userId,
       {Set<String>? filters, Sort? sort, int? from}) {
     return client
         .get(_getUserQueryUrl(userId, filters: filters, sort: sort, from: from))
         .then((Response<dynamic> response) =>
-            _parseShaderIds(parse(response.data), options.pageUserShaderCount));
+            _parseShaders(parse(response.data), options.pageUserShaderCount));
   }
 
-  /// Gets the shader ids of a user
+  /// Gets the shaders of a user
+  ///
+  /// * [userId]: The user Id
+  /// * [filters]: A set of tag filters
+  /// * [sort]: The sort order of the shaders
+  /// * [from]: A 0 based index for results returned
+  /// * [num]: The total number of results
+  ///
+  /// Returns a [FindShadersResponse] with a list of ids or a [ResponseError]
+  /// According with [from] and [num] parameters the number of calls to the Shadertoy
+  /// site API s calculated. Note that the site returns a fixed number of shaders
+  /// (configured in [ShadertoySiteOptions.pageUserShaderCount])
+  Future<FindShadersResponse> _getShadersByUserId(String userId,
+      {Set<String>? filters, Sort? sort, int? from, int? num}) {
+    final startFrom = from ?? 0;
+    return _getShadersPageByUserId(userId,
+            filters: filters, sort: sort, from: startFrom)
+        .then((FindShadersResponse userShaderPage) {
+      final error = userShaderPage.error;
+      if (error != null) {
+        error.target = userId;
+        return userShaderPage;
+      }
+
+      var firstPageShaders = userShaderPage.shaders;
+      var firstPageResponse = FindShadersResponse(
+          total: firstPageShaders?.length, shaders: firstPageShaders);
+
+      var pages = (min(num ?? userShaderPage.total, userShaderPage.total) /
+              options.pageUserShaderCount)
+          .ceil();
+      if (pages > 1) {
+        var shaderTaskPool = Pool(options.poolMaxAllocatedResources,
+            timeout: Duration(seconds: options.poolTimeout));
+
+        var tasks = [Future.value(firstPageResponse)];
+        for (var page = 1; page < pages; page++) {
+          tasks.add(pooledRetry(
+              shaderTaskPool,
+              () => _getShadersPageByUserId(userId,
+                  filters: filters,
+                  sort: sort,
+                  from: startFrom + page * options.pageUserShaderCount)));
+        }
+
+        return Future.wait(tasks)
+            .then((List<FindShadersResponse> findShadersResponse) {
+          final result = <FindShaderResponse>[];
+
+          for (var i = 0; i < findShadersResponse.length; i++) {
+            final findShaderResponse = findShadersResponse[i];
+
+            if (findShaderResponse.error != null) {
+              return FindShadersResponse(
+                  error: ResponseError.backendResponse(
+                      message:
+                          'Page ${i + 1} of $pages page(s) was not successfully fetched: ${findShaderResponse.error?.message}',
+                      target: userId));
+            }
+
+            final shaders = findShaderResponse.shaders;
+            if (shaders != null) {
+              result.addAll(shaders);
+            }
+          }
+
+          return FindShadersResponse(
+              total: userShaderPage.total, shaders: result);
+        });
+      }
+
+      return userShaderPage;
+    });
+  }
+
+  /// Gets the shaders ids of a user
   ///
   /// * [userId]: The user Id
   /// * [filters]: A set of tag filters
@@ -606,65 +778,15 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   /// (configured in [ShadertoySiteOptions.pageUserShaderCount])
   Future<FindShaderIdsResponse> _getShaderIdsByUserId(String userId,
       {Set<String>? filters, Sort? sort, int? from, int? num}) {
-    final startFrom = from ?? 0;
-    return _getShaderIdsPageByUserId(userId,
-            filters: filters, sort: sort, from: startFrom)
-        .then((FindShaderIdsResponse userShaderPage) {
-      final error = userShaderPage.error;
-      if (error != null) {
-        error.target = userId;
-        return userShaderPage;
-      }
-
-      var firstPageIds = userShaderPage.ids;
-      var firstPageResponse =
-          FindShaderIdsResponse(count: firstPageIds?.length, ids: firstPageIds);
-
-      var pages = (min(num ?? userShaderPage.total, userShaderPage.total) /
-              options.pageUserShaderCount)
-          .ceil();
-      if (pages > 1) {
-        var shaderTaskPool = Pool(options.poolMaxAllocatedResources,
-            timeout: Duration(seconds: options.poolTimeout));
-
-        var tasks = [Future.value(firstPageResponse)];
-        for (var page = 1; page < pages; page++) {
-          tasks.add(pooledRetry(
-              shaderTaskPool,
-              () => _getShaderIdsPageByUserId(userId,
-                  filters: filters,
-                  sort: sort,
-                  from: startFrom + page * options.pageUserShaderCount)));
-        }
-
-        return Future.wait(tasks)
-            .then((List<FindShaderIdsResponse> findShaderIdsResponses) {
-          final shaders = <String>[];
-
-          for (var i = 0; i < findShaderIdsResponses.length; i++) {
-            final findShaderIdsResponse = findShaderIdsResponses[i];
-
-            if (findShaderIdsResponse.error != null) {
-              return FindShaderIdsResponse(
-                  error: ResponseError.backendResponse(
-                      message:
-                          'Page ${i + 1} of $pages page(s) was not successfully fetched: ${findShaderIdsResponse.error?.message}',
-                      target: userId));
-            }
-
-            final ids = findShaderIdsResponse.ids;
-            if (ids != null) {
-              shaders.addAll(ids);
-            }
-          }
-
-          return FindShaderIdsResponse(
-              count: userShaderPage.total, ids: shaders);
-        });
-      }
-
-      return userShaderPage;
-    });
+    return _getShadersByUserId(userId,
+            filters: filters, sort: sort, from: from, num: num)
+        .then((fsr) => FindShaderIdsResponse(
+            count: fsr.total,
+            error: fsr.error,
+            ids: fsr.shaders
+                ?.map((item) => item.shader?.info.id)
+                .whereType<String>()
+                .toList()));
   }
 
   /// Helper methods which parses a [String] out of a [Node]
@@ -834,21 +956,11 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   Future<FindShadersResponse> findShadersByUserId(String userId,
       {Set<String>? filters, Sort? sort, int? from, int? num}) {
     return catchDioError<FindShadersResponse>(
-        _getShaderIdsByUserId(userId,
-                filters: filters,
-                sort: sort,
-                from: from,
-                num: num ?? options.userShaderCount)
-            .then((FindShaderIdsResponse response) {
-          if (response.error != null) {
-            return FindShadersResponse(
-                error: response.error
-                    ?.copyWith(context: contextUser, target: userId));
-          }
-
-          final ids = response.ids ?? [];
-          return _getShadersByIdSet(ids.toSet());
-        }),
+        _getShadersByUserId(userId,
+            filters: filters,
+            sort: sort,
+            from: from,
+            num: num ?? options.userShaderCount),
         (de) => FindShadersResponse(
             error: toResponseError(de, context: contextUser, target: userId)));
   }
@@ -1065,6 +1177,88 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
     return client.get(_getPlaylistUrl(playlistId)).then(
         (Response<dynamic> response) =>
             _parsePlaylist(playlistId, parse(response.data)));
+  }
+
+  /// Get's the shaders of a playlist
+  ///
+  /// * [playlistId]: The playlist Id
+  /// * [from]: A 0 based index for results returned
+  ///
+  /// Returns a [FindShaderIdsResponse] with a list of shader id's or a [ResponseError]
+  Future<FindShadersResponse> _getShadersPageByPlayListId(String playlistId,
+      {int? from}) {
+    return client.get(_getPlaylistQueryUrl(playlistId, from: from)).then(
+        (Response<dynamic> response) => _parseShaders(
+            parse(response.data), options.pagePlaylistShaderCount));
+  }
+
+  /// Gets the shaders of a playlist
+  ///
+  /// * [playlistId]: The playlist Id
+  /// * [from]: A 0 based index for results returned
+  /// * [num]: The total number of results
+  ///
+  /// Returns a [FindShadersResponse] with a list of shader id's or a [ResponseError]
+  /// According with [from] and [num] parameters the number of calls to the Shadertoy
+  /// site API s calculated. Note that the site returns a fixed number of shaders
+  /// (configured in [ShadertoySiteOptions.pagePlaylistShaderCount])
+  Future<FindShadersResponse> _getShadersByPlaylistId(String playlistId,
+      {int? from, int? num}) {
+    final startFrom = from ?? 0;
+    return _getShadersPageByPlayListId(playlistId, from: startFrom)
+        .then((FindShadersResponse playlistShaderPage) {
+      final error = playlistShaderPage.error;
+      if (error != null) {
+        error.target = playlistId;
+        return playlistShaderPage;
+      }
+
+      var firstPageShaders = playlistShaderPage.shaders;
+      var firstPageResponse = FindShadersResponse(
+          total: firstPageShaders?.length, shaders: firstPageShaders);
+
+      var pages =
+          (min(num ?? playlistShaderPage.total, playlistShaderPage.total) /
+                  options.pagePlaylistShaderCount)
+              .ceil();
+      if (pages > 1) {
+        var shaderTaskPool = Pool(options.poolMaxAllocatedResources,
+            timeout: Duration(seconds: options.poolTimeout));
+
+        var tasks = [Future.value(firstPageResponse)];
+        for (var page = 1; page < pages; page++) {
+          tasks.add(pooledRetry(
+              shaderTaskPool,
+              () => _getShadersPageByPlayListId(playlistId,
+                  from: startFrom + page * options.pagePlaylistShaderCount)));
+        }
+
+        return Future.wait(tasks)
+            .then((List<FindShadersResponse> findShadersResponse) {
+          final result = <FindShaderResponse>[];
+
+          for (var i = 0; i < findShadersResponse.length; i++) {
+            final findShaderResponse = findShadersResponse[i];
+
+            if (findShaderResponse.error != null) {
+              return FindShadersResponse(
+                  error: ResponseError.backendResponse(
+                      message:
+                          'Page ${i + 1} of $pages page(s) was not successfully fetched: ${findShaderResponse.error?.message}',
+                      context: contextPlaylist,
+                      target: playlistId));
+            }
+
+            result.addAll(findShaderResponse.shaders ?? []);
+          }
+
+          return FindShadersResponse(
+              total: playlistShaderPage.total, shaders: result);
+        });
+      }
+
+      return playlistShaderPage;
+    });
   }
 
   /// Get's the shader id's of a playlist

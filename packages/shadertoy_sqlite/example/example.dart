@@ -125,7 +125,7 @@ void main(List<String> arguments) async {
       text: 'Thanks');
 
   // Save shader comments
-  await store.saveShaderComments([comment1, comment2]);
+  await store.saveShaderComments(shaderId1, [comment1, comment2]);
 
   // Retrieves the shader comments
   await store.findCommentsByShaderId(shaderId1);

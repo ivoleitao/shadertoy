@@ -39,17 +39,17 @@ abstract class SyncCommand extends HybridCommand implements SyncTaskRunner {
 
     //preparing colLength.
     for (var i = 0; i < cols; i++) {
-      final _chunk = <String>[];
-      _chunk.add(header[i]);
+      final chunk = <String>[];
+      chunk.add(header[i]);
       for (var model in body) {
-        _chunk.add(model[i]);
+        chunk.add(model[i]);
       }
-      colLength[i] = ([for (var c in _chunk) c.length]..sort()).last;
+      colLength[i] = ([for (var c in chunk) c.length]..sort()).last;
     }
     // here we got prepared colLength.
 
     String fillSpace(int maxSpace, String text) {
-      return text.padLeft(maxSpace) + ' | ';
+      return '${text.padLeft(maxSpace)} | ';
     }
 
     void addRow(List<String> model, List<List<String>> row) {
@@ -71,7 +71,7 @@ abstract class SyncCommand extends HybridCommand implements SyncTaskRunner {
     for (final row in rowList) {
       var rowText = row.join();
       rowText = rowText.substring(0, rowText.length - 2);
-      retString += rowText + '\n';
+      retString += '$rowText\n';
     }
 
     return retString;

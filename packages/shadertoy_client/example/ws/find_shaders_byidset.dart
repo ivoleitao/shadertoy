@@ -1,4 +1,4 @@
-import 'package:dotenv/dotenv.dart' show load, env;
+import 'package:dotenv/dotenv.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 
 final Set<String> shaders = {
@@ -57,7 +57,7 @@ final Set<String> shaders = {
 
 void main(List<String> arguments) async {
   // Load the .env file
-  load();
+  final env = DotEnv()..load();
 
   // Fetch the API key from the .env file
   final apiKey = env['API_KEY'];

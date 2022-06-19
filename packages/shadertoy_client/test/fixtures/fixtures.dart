@@ -37,7 +37,7 @@ Future<String> textHttpFixture(String path) => Dio()
 Future<String> textFixture(String path) =>
     _isWeb() ? textHttpFixture(path) : textFileFixture(path);
 
-Future<Map<String, dynamic>> jsonFixture(String path) =>
+Future<dynamic> jsonFixture(String path) =>
     textFixture(path).then((text) => json.decode(text));
 
 Future<Shader> shaderFixture(String path) =>
@@ -73,7 +73,7 @@ Future<FindShadersRequest> findShadersRequestFixture(List<String> paths) =>
         .then((ids) => FindShadersRequest(ids.toSet()));
 
 Future<CommentsResponse> commentsResponseFixture(String path) =>
-    jsonFixture(path).then((json) => CommentsResponse.fromMap(json));
+    jsonFixture(path).then((json) => CommentsResponse.from(json));
 
 Future<DownloadFileResponse> downloadFileResponseFixture(String path,
         {ResponseError? error}) =>

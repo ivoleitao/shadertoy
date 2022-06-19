@@ -31,7 +31,7 @@ jobs:
     runs-on: ${{ matrix.host }}
 
     steps:
-      - name: Setup os
+      - name: Install libraries
         if: matrix.host == 'ubuntu-latest'
         run: |
           sudo apt-get update
@@ -52,21 +52,22 @@ jobs:
 
       - name: Bootstrap
         run: |
-          melos bootstrap
+          melos build
+          melos get
           
       - name: Linter
         run: |
-          melos run format
-          melos run analyze
+          melos format
+          melos analyze
 
       - name: Test
         run: |
-          melos run test
+          melos test
 
       - name: Documentation
         run: |
-          melos run doc
+          melos doc
 
       - name: Verify
         run: |
-          melos run verify
+          melos verify

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/src/http_options.dart';
+import 'package:shadertoy_client/src/hybrid/playlist_sync.dart';
 import 'package:shadertoy_client/src/hybrid/shader_sync.dart';
 import 'package:shadertoy_client/src/hybrid/user_sync.dart';
 import 'package:shadertoy_client/src/site/site_client.dart';
@@ -252,11 +253,9 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
     final userSyncResult =
         await userProcessor.syncUsers(shaderSyncResult, mode);
 
-    /*
     final playlistProcessor = PlaylistSyncProcessor(this, store, vault,
         runner: runner, concurrency: concurrency, timeout: timeout);
     await playlistProcessor.syncPlaylists(
         shaderSyncResult, userSyncResult, playlistIds);
-    */
   }
 }

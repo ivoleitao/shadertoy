@@ -361,19 +361,20 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   /// In case of error a [ResponseError] is set on [SaveShaderCommentResponse]
   Future<SaveShaderCommentResponse> saveShaderComment(Comment comment);
 
-  /// Saves a list of shaders comment
+  /// Saves a list of [shaderId] comments
   ///
-  /// On success the list of comment was saved
+  /// On success the list of comments was saved
   ///
   /// In case of error a [ResponseError] is set on [SaveShaderCommentsResponse]
-  Future<SaveShaderCommentsResponse> saveShaderComments(List<Comment> comments);
+  Future<SaveShaderCommentsResponse> saveShaderComments(
+      String shaderId, List<Comment> comments);
 
-  /// Deletes a comment by [commentId]
+  /// Deletes a list of [shaderId]s comments
   ///
-  /// On success the comment identified by [commentId] is deleted
+  /// On success the list of comments was deleted
   ///
-  /// In case of error a [ResponseError] is set on [DeleteCommentResponse]
-  Future<DeleteCommentResponse> deleteCommentById(String commentId);
+  /// In case of error a [ResponseError] is set on [DeleteShaderCommentsResponse]
+  Future<DeleteShaderCommentsResponse> deleteShaderComments(String shaderId);
 
   /// Saves a [Playlist] and optionally the playlist shaders
   ///

@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'dart:typed_data';
 
-import 'package:file/file.dart';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:shadertoy/shadertoy_api.dart';
@@ -167,7 +166,7 @@ abstract class SyncProcessor {
       String context, String mediaPath, String mediaFilePath) {
     return vault.containsKey(mediaFilePath).then((exists) => exists
         ? _getDownloadFileResponse(mediaFilePath)
-        : client.downloadMedia('/' + mediaPath).then((apiFile) {
+        : client.downloadMedia('/$mediaPath').then((apiFile) {
             final bytes = apiFile.bytes;
             final error = apiFile.error;
             if (bytes != null) {

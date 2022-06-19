@@ -6,7 +6,7 @@ part of 'store.dart';
 // MoorGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
+// ignore_for_file: type=lint
 class UserEntry extends DataClass implements Insertable<UserEntry> {
   /// The user id
   final String id;
@@ -246,9 +246,10 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
 
 class $UserTableTable extends UserTable
     with TableInfo<$UserTableTable, UserEntry> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $UserTableTable(this._db, [this._alias]);
+  $UserTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -338,7 +339,7 @@ class $UserTableTable extends UserTable
 
   @override
   $UserTableTable createAlias(String alias) {
-    return $UserTableTable(_db, alias);
+    return $UserTableTable(attachedDatabase, alias);
   }
 }
 
@@ -733,9 +734,10 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
 
 class $ShaderTableTable extends ShaderTable
     with TableInfo<$ShaderTableTable, ShaderEntry> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ShaderTableTable(this._db, [this._alias]);
+  $ShaderTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -908,7 +910,7 @@ class $ShaderTableTable extends ShaderTable
 
   @override
   $ShaderTableTable createAlias(String alias) {
-    return $ShaderTableTable(_db, alias);
+    return $ShaderTableTable(attachedDatabase, alias);
   }
 }
 
@@ -1176,9 +1178,10 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
 
 class $CommentTableTable extends CommentTable
     with TableInfo<$CommentTableTable, CommentEntry> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $CommentTableTable(this._db, [this._alias]);
+  $CommentTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -1281,7 +1284,7 @@ class $CommentTableTable extends CommentTable
 
   @override
   $CommentTableTable createAlias(String alias) {
-    return $CommentTableTable(_db, alias);
+    return $CommentTableTable(attachedDatabase, alias);
   }
 }
 
@@ -1465,9 +1468,10 @@ class PlaylistTableCompanion extends UpdateCompanion<PlaylistEntry> {
 
 class $PlaylistTableTable extends PlaylistTable
     with TableInfo<$PlaylistTableTable, PlaylistEntry> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $PlaylistTableTable(this._db, [this._alias]);
+  $PlaylistTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
@@ -1538,7 +1542,7 @@ class $PlaylistTableTable extends PlaylistTable
 
   @override
   $PlaylistTableTable createAlias(String alias) {
-    return $PlaylistTableTable(_db, alias);
+    return $PlaylistTableTable(attachedDatabase, alias);
   }
 }
 
@@ -1696,9 +1700,10 @@ class PlaylistShaderTableCompanion
 
 class $PlaylistShaderTableTable extends PlaylistShaderTable
     with TableInfo<$PlaylistShaderTableTable, PlaylistShaderEntry> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $PlaylistShaderTableTable(this._db, [this._alias]);
+  $PlaylistShaderTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _playlistIdMeta = const VerificationMeta('playlistId');
   @override
   late final GeneratedColumn<String?> playlistId = GeneratedColumn<String?>(
@@ -1763,7 +1768,7 @@ class $PlaylistShaderTableTable extends PlaylistShaderTable
 
   @override
   $PlaylistShaderTableTable createAlias(String alias) {
-    return $PlaylistShaderTableTable(_db, alias);
+    return $PlaylistShaderTableTable(attachedDatabase, alias);
   }
 }
 
@@ -2006,9 +2011,10 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
 
 class $SyncTableTable extends SyncTable
     with TableInfo<$SyncTableTable, SyncEntry> {
-  final GeneratedDatabase _db;
+  @override
+  final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $SyncTableTable(this._db, [this._alias]);
+  $SyncTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
@@ -2103,7 +2109,7 @@ class $SyncTableTable extends SyncTable
 
   @override
   $SyncTableTable createAlias(String alias) {
-    return $SyncTableTable(_db, alias);
+    return $SyncTableTable(attachedDatabase, alias);
   }
 }
 

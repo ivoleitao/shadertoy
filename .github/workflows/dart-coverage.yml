@@ -5,19 +5,20 @@ on:
     branches:
       - master
     paths:
+      - 'melos.yaml'
       - 'packages/**'
       - '.github/workflows/dart-coverage.yml'
 
 jobs:
   coverage:
-    name: Dart coverage
+    name: Dart Coverage
 
     strategy:
       matrix:
-        host: ['ubuntu-latest']
+        os: ['ubuntu-latest']
         sdk: ['stable']
 
-    runs-on: ${{ matrix.host }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Install libraries
@@ -34,15 +35,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install tools
+      - name: Install packages
         run: |
           dart pub global activate melos
-          
+
       - name: Bootstrap
         run: |
-          melos bootstrap
+          melos build
+          melos get
 
       - name: Coverage
         run: |
-          melos run coverage
-          melos run codecov
+          melos coverage
+          melos codecov

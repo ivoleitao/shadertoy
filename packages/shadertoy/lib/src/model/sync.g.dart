@@ -28,11 +28,11 @@ Map<String, dynamic> _$SyncToJson(Sync instance) => <String, dynamic>{
 
 const _$SyncTypeEnumMap = {
   SyncType.user: 'user',
-  SyncType.shader: 'shader',
-  SyncType.comment: 'comment',
-  SyncType.playlist: 'playlist',
-  SyncType.shaderAsset: 'shaderAsset',
   SyncType.userAsset: 'userAsset',
+  SyncType.shader: 'shader',
+  SyncType.shaderComments: 'shaderComments',
+  SyncType.shaderAsset: 'shaderAsset',
+  SyncType.playlist: 'playlist',
 };
 
 const _$SyncStatusEnumMap = {

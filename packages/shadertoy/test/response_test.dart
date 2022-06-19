@@ -389,12 +389,6 @@ void main() {
     expect(saveShaderCommentsResponse1.error, isNull);
   });
 
-  final deleteCommentResponse1 = DeleteCommentResponse(error: null);
-
-  test('Test delete comment response', () {
-    expect(deleteCommentResponse1.error, isNull);
-  });
-
   final playlist1 = Playlist(
       id: 'week',
       userId: 'shadertoy',

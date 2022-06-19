@@ -127,13 +127,13 @@ class CommentsSyncTask extends SyncTask<FindCommentsResponse> {
 }
 
 /// The result of a comment synchronization task
-class CommentTaskResult extends SyncResult<CommentSyncTask> {
+class CommentTaskResult extends SyncResult<CommentsSyncTask> {
   /// The [CommentTaskResult] constructor
   ///
-  /// * [added]: The list of added [CommentSyncTask]s
+  /// * [added]: The list of added [CommentSyncTasks]s
   /// * [removed]: The list of removed [CommentSyncTask]s
   CommentTaskResult(
-      {List<CommentSyncTask>? added, List<CommentSyncTask>? removed})
+      {List<CommentsSyncTask>? added, List<CommentsSyncTask>? removed})
       : super(added: added, removed: removed);
 }
 
@@ -372,118 +372,131 @@ class ShaderSyncProcessor extends SyncProcessor {
             ]);
   }
 
-  /// Creates a [FindCommentResponse] with a error
+  /// Creates a [FindCommentsResponse] with a error
   ///
-  /// * [comment]: The comment
+  /// * [comments]: The comments
   /// * [fcomment]: The comment response
   /// * [response]: The response
   /// * [e]: The error cause
-  FindCommentResponse _getCommentResponse(Comment comment,
-      {FindCommentResponse? fcomment, APIResponse? response, dynamic e}) {
+  FindCommentsResponse _getCommentsResponse(
+      String shaderId, List<Comment> comments,
+      {FindCommentsResponse? fcomments, APIResponse? response, dynamic e}) {
     if (response != null && response.ok) {
-      return fcomment ?? FindCommentResponse(comment: comment);
+      return fcomments ?? FindCommentsResponse(comments: comments);
     }
 
-    return FindCommentResponse(
+    return FindCommentsResponse(
         error: response?.error ??
             ResponseError.unknown(
                 message: e.toString(),
                 context: contextComment,
-                target: comment.id));
+                target: shaderId));
   }
 
-  /// Saves a comment
+  /// Saves a list of comments
   ///
-  /// * [comment]: The comment to save
-  Future<FindCommentResponse> _addComment(Comment comment) {
-    return store
-        .saveShaderComment(comment)
-        .then((scomment) => _getCommentResponse(comment, response: scomment));
+  /// * [shaderId]: The shader id
+  /// * [comments]: The comments to save
+  Future<FindCommentsResponse> _addComments(
+      String shaderId, List<Comment> comments) {
+    return store.saveShaderComments(shaderId, comments).then((scomment) =>
+        _getCommentsResponse(shaderId, comments, response: scomment));
   }
 
-  /// Syncs a comment
+  /// Deletes a list of [shaderId] comments
   ///
-  /// * [comment]: The comment
-  Future<CommentSyncTask> _syncComment(Comment comment) {
-    final commentId = comment.id;
-    return store.findSyncById(SyncType.comment, commentId).then((fsync) {
+  /// * [shaderId]: The shader id
+  /// * [comments]: The comments to save
+  Future<CommentsSyncTask> _deleteComments(
+      String shaderId, List<Comment> comments) {
+    return store.deleteShaderComments(shaderId).then(
+        (DeleteShaderCommentsResponse dComments) => CommentsSyncTask(
+            _getCommentsResponse(shaderId, comments, response: dComments)));
+  }
+
+  /// Syncs shader comments
+  ///
+  /// * [shaderId]: The shaderId
+  /// * [comments]: The comment
+  Future<CommentsSyncTask> _syncComments(
+      String shaderId, List<Comment> comments) {
+    return store.findSyncById(SyncType.shaderComments, shaderId).then((fsync) {
       final sync = fsync.sync;
       if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
         final preSync = sync != null
             ? sync.copyWith(
                 status: SyncStatus.pending, updateTime: DateTime.now())
             : Sync(
-                type: SyncType.comment,
-                target: commentId,
+                type: SyncType.shaderComments,
+                target: shaderId,
                 status: SyncStatus.pending,
                 creationTime: DateTime.now());
 
         return store.saveSync(preSync).then((ssync1) {
           if (ssync1.ok) {
-            return _addComment(comment).then((FindCommentResponse fcomment) {
-              final posSync = fcomment.ok
+            return _addComments(shaderId, comments)
+                .then((FindCommentsResponse fcomments) {
+              final posSync = fcomments.ok
                   ? preSync.copyWith(
                       status: SyncStatus.ok, updateTime: DateTime.now())
                   : preSync.copyWith(
                       status: SyncStatus.error,
-                      message: fcomment.error?.message,
+                      message: fcomments.error?.message,
                       updateTime: DateTime.now());
 
               return store.saveSync(posSync).then((ssync2) {
-                return Future.value(CommentSyncTask(_getCommentResponse(comment,
-                    fcomment: fcomment, response: ssync2)));
+                return Future.value(CommentsSyncTask(_getCommentsResponse(
+                    shaderId, comments,
+                    fcomments: fcomments, response: ssync2)));
               });
             });
           }
 
-          return Future.value(
-              CommentSyncTask(_getCommentResponse(comment, response: ssync1)));
+          return Future.value(CommentsSyncTask(
+              _getCommentsResponse(shaderId, comments, response: ssync1)));
         });
       }
 
-      return Future.value(
-          CommentSyncTask(_getCommentResponse(comment, response: fsync)));
-    }).catchError((e) => CommentSyncTask(_getCommentResponse(comment, e: e)));
+      return Future.value(CommentsSyncTask(
+          _getCommentsResponse(shaderId, comments, response: fsync)));
+    }).catchError((e) =>
+        CommentsSyncTask(_getCommentsResponse(shaderId, comments, e: e)));
   }
 
-  /// Saves a list of comments
+  /// Saves a map of shader comments
   ///
-  /// * [comments]: The list comments
-  Future<List<CommentSyncTask>> _addComments(List<Comment> comments) async {
-    final tasks = <Future<CommentSyncTask>>[];
+  /// * [shaderComments]: A map of shader comments
+  Future<List<CommentsSyncTask>> _addShaderComments(
+      Map<String, List<Comment>> shaderCommentsMap) async {
+    final tasks = <Future<CommentsSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
-    for (final comment in comments) {
-      tasks.add(taskPool.withResource(() => _syncComment(comment)));
+    for (final shaderId in shaderCommentsMap.keys) {
+      final shaderComments = shaderCommentsMap[shaderId] ?? [];
+      tasks.add(
+          taskPool.withResource(() => _syncComments(shaderId, shaderComments)));
     }
 
-    return runner.process<CommentSyncTask>(tasks,
-        message: 'Saving ${comments.length} comment(s)');
+    return runner.process<CommentsSyncTask>(tasks,
+        message: 'Saving comments of ${tasks.length} shaders');
   }
 
-  /// Deletes a comment
+  /// Deletes a map of shader comments
   ///
-  /// * [comment]: The comment
-  Future<CommentSyncTask> _deleteComment(Comment comment) {
-    return store
-        .deleteCommentById(comment.id)
-        .then((value) => CommentSyncTask(FindCommentResponse(comment: comment)))
-        .catchError((e) => CommentSyncTask(_getCommentResponse(comment, e: e)));
-  }
-
-  /// Deletes a list of comments
-  ///
-  /// * [comments]: The list comments
-  Future<List<CommentSyncTask>> _deleteComments(List<Comment> comments) async {
-    final tasks = <Future<CommentSyncTask>>[];
+  /// * [shaderComments]: A map of shader comments
+  Future<List<CommentsSyncTask>> _deleteShaderComments(
+      Map<String, List<Comment>> shaderCommentsMap) async {
+    final tasks = <Future<CommentsSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
-    for (final comment in comments) {
-      tasks.add(taskPool.withResource(() => _deleteComment(comment)));
+    for (final shaderId in shaderCommentsMap.keys) {
+      final shaderComments = shaderCommentsMap[shaderId] ?? [];
+      tasks.add(taskPool
+          .withResource(() => _deleteComments(shaderId, shaderComments)));
     }
 
-    return runner.process<CommentSyncTask>(tasks,
-        message: 'Deleting ${comments.length} comment(s)');
+    return runner.process<CommentsSyncTask>(tasks,
+        message: 'Deleting comments of ${tasks.length} shaders');
   }
 
   /// Synchronizes a list of comments from a previously synchronized list of shaders
@@ -500,34 +513,59 @@ class ShaderSyncProcessor extends SyncProcessor {
       };
       final storeCommentIds = storeCommentMap.keys.toSet();
 
-      final clientCommentMap = <String, Comment>{};
+      final commentMap = <String, Comment>{};
+      final shaderCommentMap = <String, List<Comment>>{};
       for (var commentTask in await _clientComments(mode == HybridSyncMode.full
           ? shaderSync.currentShaderIds
           : shaderSync.addedShaderIds)) {
-        final id = commentTask.response.comment?.id;
-        final value = commentTask.response.comment;
-        if (id != null && value != null) {
-          clientCommentMap[id] = value;
+        final shaderId = commentTask.response.comment?.shaderId;
+        final commentId = commentTask.response.comment?.id;
+        final comment = commentTask.response.comment;
+        if (shaderId != null && commentId != null && comment != null) {
+          commentMap[commentId] = comment;
+          final shaderComments = (shaderCommentMap[shaderId] ??= <Comment>[]);
+          shaderComments.add(comment);
         }
       }
-      final clientCommentIds = {...clientCommentMap.keys};
+      final clientCommentIds = {...commentMap.keys};
 
       final addCommentIds = clientCommentIds.difference(storeCommentIds);
       final addComments = [
-        for (var entry in clientCommentMap.entries)
+        for (var entry in commentMap.entries)
           if (addCommentIds.contains(entry.key)) entry.value
       ];
-      final added = await _addComments(addComments)
+      final addShaderComments = <String, List<Comment>>{};
+      for (var comment in addComments) {
+        final shaderId = comment.shaderId;
+        final comments = addShaderComments[shaderId];
+        if (comments == null) {
+          addShaderComments[shaderId] = <Comment>[comment];
+        } else {
+          comments.add(comment);
+        }
+      }
+      final added = await _addShaderComments(addShaderComments)
           .then((value) => value.where((task) => task.response.ok).toList());
 
-      var removed = <CommentSyncTask>[];
+      var removed = <CommentsSyncTask>[];
       if (mode == HybridSyncMode.full) {
         final removeCommentIds = storeCommentIds.difference(clientCommentIds);
         final removeComments = [
           for (var entry in storeCommentMap.entries)
             if (removeCommentIds.contains(entry.key)) entry.value
         ];
-        removed = await _deleteComments(removeComments)
+        final removeShaderComments = <String, List<Comment>>{};
+        for (var comment in removeComments) {
+          final shaderId = comment.shaderId;
+          final comments = removeShaderComments[shaderId];
+          if (comments == null) {
+            removeShaderComments[shaderId] = <Comment>[comment];
+          } else {
+            comments.add(comment);
+          }
+        }
+
+        removed = await _deleteShaderComments(removeShaderComments)
             .then((value) => value.where((task) => task.response.ok).toList());
       }
 
@@ -671,7 +709,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// * [mode]: The synchronization mode
   Future<ShaderSyncResult> syncShaders(HybridSyncMode mode) async {
     final shaderSyncResult = await _syncShaders(mode);
-    //await _syncShaderComments(shaderSyncResult, mode);
+    await _syncShaderComments(shaderSyncResult, mode);
     await _syncShaderPictures(shaderSyncResult, mode);
 
     return shaderSyncResult;

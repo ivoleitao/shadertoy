@@ -162,15 +162,16 @@ extension SiteMockAdaptater on MockAdapter {
   }
 
   MockAdapter addUserRoute(
-      String userId, String response, ShadertoySiteOptions options) {
+      String response, String userId, ShadertoySiteOptions options) {
     return htmlRoute('/user/$userId', response);
   }
 
   MockAdapter addUserRouteMap(
       Map<String, String> userResponseMap, ShadertoySiteOptions options) {
     for (var entry in userResponseMap.entries) {
-      addUserRoute(entry.key, entry.value, options);
+      addUserRoute(entry.value, entry.key, options);
     }
+
     return this;
   }
 
@@ -304,6 +305,15 @@ extension SiteMockAdaptater on MockAdapter {
           HttpHeaders.refererHeader: '${options.baseUrl}/view/$shaderId'
         },
         formData: formData);
+  }
+
+  MockAdapter addCommentsRouteMap(
+      Map<String, CommentsResponse> commentResponseMap,
+      ShadertoySiteOptions options) {
+    for (var entry in commentResponseMap.entries) {
+      addCommentRoute(entry.value, entry.key, options);
+    }
+    return this;
   }
 
   MockAdapter addCommentSocketErrorRoute(

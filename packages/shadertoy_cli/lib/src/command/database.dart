@@ -46,7 +46,7 @@ abstract class DatabaseCommand extends SyncCommand {
   /// Abstracts the creation of new [Vault]
   ///
   /// [path]: The path to the database file
-  Vault<Uint8List> newVault(String path);
+  Future<Vault<Uint8List>> newVault(String path);
 
   @override
   void call(ShadertoyHybrid client) async {
@@ -72,7 +72,7 @@ abstract class DatabaseCommand extends SyncCommand {
     }
 
     final store = newStore(p.join(fsPath, '$name.mdb'));
-    final vault = newVault(p.join(fsPath, '$name.adb'));
+    final vault = await newVault(p.join(fsPath, '$name.adb'));
     await client.rsync(store, vault, mode,
         runner: this,
         concurrency: concurrency,

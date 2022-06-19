@@ -493,7 +493,7 @@ void main() {
       final siteOptions = newSiteOptions();
       final userId = 'iq';
       final response = await textFixture('user/$userId.html');
-      final adapter = newAdapter()..addUserRoute(userId, response, siteOptions);
+      final adapter = newAdapter()..addUserRoute(response, userId, siteOptions);
       final api = newClient(adapter, siteOptions: siteOptions);
       // act
       final sr = await api.findUserById(userId);
@@ -753,11 +753,13 @@ void main() {
   });
 
   group('Sync', () {
-    test('Sync 24 shaders', () async {
+    test('Full Mode', () async {
       // prepare
       final siteOptions = ShadertoySiteOptions();
+      final playlistNum = siteOptions.pagePlaylistShaderCount;
 
-      final shaderPaths = [
+      final playlistId = 'week';
+      final shaderPaths = {
         'shaders/fractal_explorer_multi_res.json',
         'shaders/rave_fractal.json',
         'shaders/rhodium_fractalscape.json',
@@ -782,11 +784,16 @@ void main() {
         'shaders/three_pass_dof.json',
         'shaders/elephant.json',
         'shaders/multiple_transparency.json'
-      ];
+      };
 
       final shaders = [
         for (var shader in shaderPaths) await shaderFixture(shader)
       ];
+      final commentsReponseMap = {
+        for (var shader in shaders)
+          shader.info.id:
+              await commentsResponseFixture('comment/${shader.info.id}.json')
+      };
       final shaderMedia = {
         for (var shader in shaders)
           for (var path in shader.picturePaths())
@@ -804,20 +811,31 @@ void main() {
               await binaryFixture('media/users/$userId/profile.png')
       };
 
-      final response1 = await textFixture('results/sync_step_1.html');
-      final response2 = await textFixture('results/sync_step_2.html');
+      final results1 = await textFixture('results/sync_step_1.html');
+      final results2 = await textFixture('results/sync_step_2.html');
+      final playlist = await textFixture('playlist/week_by_mu6k.html');
+      final playlist1 = await textFixture('playlist/week_24_page_1.html');
+      final playlist2 = await textFixture('playlist/week_24_page_2.html');
       final adapter = newAdapter()
-        ..addResultsRoute(response1, siteOptions)
-        ..addResultsRoute(response2, siteOptions, from: 12, num: 12)
+        ..addResultsRoute(results1, siteOptions)
+        ..addResultsRoute(results2, siteOptions, from: 12, num: 12)
+        ..addPlaylistRoute(playlist, playlistId, siteOptions)
+        ..addPlaylistShadersRoute(playlist1, playlistId, siteOptions,
+            from: 0, num: playlistNum)
+        ..addPlaylistShadersRoute(playlist2, playlistId, siteOptions,
+            from: siteOptions.pagePlaylistShaderCount, num: playlistNum)
         ..addShaderRouteList(shaders, siteOptions)
+        ..addCommentsRouteMap(commentsReponseMap, siteOptions)
         ..addDownloadMediaMap(shaderMedia, siteOptions)
         ..addUserRouteMap(userResponseMap, siteOptions)
         ..addDownloadMediaMap(userMedia, siteOptions);
       final api = newClient(adapter, siteOptions: siteOptions);
       final store = newShadertoySqliteStore();
-      final vault = newMemoryVaultStore().vault<Uint8List>();
+      final vault =
+          await newMemoryVaultStore().then((store) => store.vault<Uint8List>());
       // act
-      await api.rsync(store, vault, HybridSyncMode.full);
+      await api
+          .rsync(store, vault, HybridSyncMode.full, playlistIds: [playlistId]);
       // assert
       final allSyncs = await store.findAllSyncs();
       expect(allSyncs, isNotNull);

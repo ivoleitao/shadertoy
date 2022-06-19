@@ -25,10 +25,11 @@ class SqliteCommand extends DatabaseCommand {
   }
 
   @override
-  Vault<Uint8List> newVault(String path) {
+  Future<Vault<Uint8List>> newVault(String path) {
     final file = File(path);
     final name = p.basenameWithoutExtension(path);
 
-    return newSqliteLocalVaultStore(file: file).vault<Uint8List>(name: name);
+    return newSqliteLocalVaultStore(file: file)
+        .then((store) => store.vault<Uint8List>(name: name));
   }
 }
