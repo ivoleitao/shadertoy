@@ -313,11 +313,14 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   ///
   /// * [doc]: The [Document] with the page DOM
   /// * [maxShaders]: The maximum number of shaders
+  /// * [context]: The context of execution when the error ocurred
+  /// * [target]: The target entity of the API that triggered this error
   ///
   /// It should be used to parse the html of
   /// browse, results, user and playlist pages
-  FindShadersResponse _parseShaders(Document doc, int maxShaders) {
-    final error = _validate(doc);
+  FindShadersResponse _parseShaders(Document doc, int maxShaders,
+      {String? context, String? target}) {
+    final error = _validate(doc, context: context, target: target);
     if (error != null) {
       return FindShadersResponse(error: error);
     }
@@ -328,11 +331,15 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
     if (count == null) {
       return FindShadersResponse(
           error: ResponseError.backendResponse(
-              message: 'Unable to parse the number of results'));
+              message: 'Unable to parse the number of results',
+              context: context,
+              target: target));
     } else if (count < 0) {
       return FindShadersResponse(
           error: ResponseError.backendResponse(
-              message: 'Obtained an invalid number of results: $count'));
+              message: 'Obtained an invalid number of results: $count',
+              context: context,
+              target: target));
     } else if (count == 0) {
       return FindShadersResponse(total: 0, shaders: const []);
     }
@@ -357,12 +364,16 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
         return FindShadersResponse(
             error: ResponseError.backendResponse(
                 message:
-                    'No script block matches with "${shaderArrayRegExp.pattern}" pattern'));
+                    'No script block matches with "${shaderArrayRegExp.pattern}" pattern',
+                context: context,
+                target: target));
       }
     } else {
       return FindShadersResponse(
           error: ResponseError.backendResponse(
-              message: 'Unable to get the script blocks from the document'));
+              message: 'Unable to get the script blocks from the document',
+              context: context,
+              target: target));
     }
 
     return FindShadersResponse(total: count, shaders: results);
@@ -372,11 +383,14 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   ///
   /// * [doc]: The [Document] with the page DOM
   /// * [maxShaders]: The maximum number of shaders
+  /// * [context]: The context of execution when the error ocurred
+  /// * [target]: The target entity of the API that triggered this error
   ///
   /// It should be used to parse the html of
   /// browse, results, user and playlist pages
-  FindShaderIdsResponse _parseShaderIds(Document doc, int maxShaders) {
-    final error = _validate(doc);
+  FindShaderIdsResponse _parseShaderIds(Document doc, int maxShaders,
+      {String? context, String? target}) {
+    final error = _validate(doc, context: context, target: target);
     if (error != null) {
       return FindShaderIdsResponse(error: error);
     }
@@ -552,7 +566,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
             }
           }
 
-          return FindShadersResponse(total: results.length, shaders: results);
+          return FindShadersResponse(total: shaderPage.total, shaders: results);
         });
       }
 
@@ -685,8 +699,9 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
       {Set<String>? filters, Sort? sort, int? from}) {
     return client
         .get(_getUserQueryUrl(userId, filters: filters, sort: sort, from: from))
-        .then((Response<dynamic> response) =>
-            _parseShaders(parse(response.data), options.pageUserShaderCount));
+        .then((Response<dynamic> response) => _parseShaders(
+            parse(response.data), options.pageUserShaderCount,
+            context: contextUser, target: userId));
   }
 
   /// Gets the shaders of a user
@@ -746,6 +761,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
                   error: ResponseError.backendResponse(
                       message:
                           'Page ${i + 1} of $pages page(s) was not successfully fetched: ${findShaderResponse.error?.message}',
+                      context: contextUser,
                       target: userId));
             }
 
@@ -970,12 +986,10 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
       {Set<String>? filters, Sort? sort, int? from, int? num}) {
     return catchDioError<FindShaderIdsResponse>(
         _getShaderIdsByUserId(userId,
-                filters: filters,
-                sort: sort,
-                from: from,
-                num: num ?? options.userShaderCount)
-            .then((userResponse) => FindShaderIdsResponse(
-                count: userResponse.ids?.length, ids: userResponse.ids)),
+            filters: filters,
+            sort: sort,
+            from: from,
+            num: num ?? options.userShaderCount),
         (de) => FindShaderIdsResponse(
             error: toResponseError(de, context: contextUser, target: userId)));
   }
@@ -1189,7 +1203,8 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
       {int? from}) {
     return client.get(_getPlaylistQueryUrl(playlistId, from: from)).then(
         (Response<dynamic> response) => _parseShaderIds(
-            parse(response.data), options.pagePlaylistShaderCount));
+            parse(response.data), options.pagePlaylistShaderCount,
+            context: contextPlaylist, target: playlistId));
   }
 
   /// Gets the shader ids of a playlist

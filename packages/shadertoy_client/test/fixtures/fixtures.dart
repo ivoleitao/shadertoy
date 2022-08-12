@@ -43,7 +43,14 @@ Future<dynamic> jsonFixture(String path) =>
 Future<Shader> shaderFixture(String path) =>
     jsonFixture(path).then((json) => Shader.fromJson(json));
 
-Future<List<Shader>> shadersFixture(List<String> paths) =>
+Future<List<Shader>> shaderListFixture(String path) => jsonFixture(path)
+    .then((json) => (json as List).map((obj) => Shader.fromJson(obj)).toList());
+
+Future<List<Shader>> shaderListFixtures(List<String> paths) =>
+    Future.wait(paths.map((path) => shaderListFixture(path)))
+        .then((shaders) => shaders.expand((shader) => shader).toList());
+
+Future<List<Shader>> shaderFixtures(List<String> paths) =>
     Future.wait(paths.map((p) => shaderFixture(p)));
 
 Future<FindShaderResponse> findShaderResponseFixture(String path,
@@ -63,6 +70,13 @@ Future<FindShadersResponse> findShadersResponseFixture(List<String> paths,
 Future<String> shaderIdFixture(String path) =>
     shaderFixture(path).then((shader) => shader.info.id);
 
+Future<List<String>> shaderIdListFixture(String path) => shaderListFixture(path)
+    .then((shaders) => shaders.map((shader) => shader.info.id).toList());
+
+Future<List<String>> shaderIdListFixtures(List<String> paths) =>
+    shaderListFixtures(paths)
+        .then((shaders) => shaders.map((shader) => shader.info.id).toList());
+
 Future<FindShaderIdsResponse> findShaderIdsResponseFixture(List<String> paths,
         {int? count, ResponseError? error}) =>
     Future.wait(paths.map((p) => shaderIdFixture(p))).then(
@@ -79,3 +93,19 @@ Future<DownloadFileResponse> downloadFileResponseFixture(String path,
         {ResponseError? error}) =>
     binaryFixture(path)
         .then((bytes) => DownloadFileResponse(bytes: bytes, error: error));
+
+extension ShaderExtension on Shader {
+  FindShaderResponse toFindShaderResponse({ResponseError? error}) {
+    return FindShaderResponse(shader: this, error: error);
+  }
+}
+
+extension ShaderListExtension on List<Shader> {
+  FindShadersResponse toFindShadersResponse(
+      {int? total, ResponseError? error}) {
+    return FindShadersResponse(
+        total: total,
+        shaders: map((shader) => shader.toFindShaderResponse()).toList(),
+        error: error);
+  }
+}

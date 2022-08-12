@@ -228,7 +228,7 @@ void main() {
       // prepare
       final options = ShadertoySiteOptions();
       final shaders = ['shaders/seascape.json'];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final adapter = newAdapter(options)..addShadersRoute(sl, options);
       final api = newClient(options, adapter);
       // act
@@ -244,7 +244,7 @@ void main() {
       // prepare
       final options = newOptions();
       final shaders = ['shaders/seascape.json'];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final adapter = newAdapter(options)
         ..addShadersRoute(sl, options, responseShaders: <Shader>[]);
       final api = newClient(options, adapter);
@@ -289,7 +289,7 @@ void main() {
       // prepare
       final options = newOptions();
       final shaders = ['shaders/seascape.json'];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final adapter = newAdapter(options)..addShadersRoute(sl, options);
       final api = newClient(options, adapter);
       // act
@@ -304,7 +304,7 @@ void main() {
       // prepare
       final options = newOptions();
       final shaders = ['shaders/seascape.json', 'shaders/happy_jumping.json'];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final adapter = newAdapter(options)..addShadersRoute(sl, options);
       final api = newClient(options, adapter);
       // act
@@ -339,32 +339,16 @@ void main() {
     test('Find shaders', () async {
       // prepare
       final options = newOptions();
-      final shaders = [
-        'shaders/seascape.json',
-        'shaders/raymarching_primitives.json',
-        'shaders/creation.json',
-        'shaders/clouds.json',
-        'shaders/raymarching_part_6.json',
-        'shaders/elevated.json',
-        'shaders/volcanic.json',
-        'shaders/raymarching_part_1.json',
-        'shaders/rainforest.json',
-        'shaders/raymarching_part_2.json',
-        'shaders/raymarching_part_3.json',
-        'shaders/very_fast_procedural_ocean.json',
-      ];
-      final response = await textFixture('results/normal.html');
-      final sl = await shadersFixture(shaders);
-      final adapter = newAdapter(options)
-        ..addResultsRoute(response, options)
-        ..addShadersRoute(sl, options);
+      final response = await textFixture('results/results.html');
+      final sl = await shaderListFixture('results/results.json');
+      final adapter = newAdapter(options)..addResultsRoute(response, options);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findShaders();
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse(total: 63918));
     });
 
     test('Find shaders with no html body', () async {
@@ -452,7 +436,7 @@ void main() {
           sr.error,
           ResponseError.backendResponse(
               message:
-                  'No script block matches with "${ShadertoySiteClient.idArrayRegExp.pattern}" pattern'));
+                  'No script block matches with "${ShadertoySiteClient.shaderArrayRegExp.pattern}" pattern'));
     });
 
     test('Find shaders with Dio error', () async {
@@ -480,9 +464,9 @@ void main() {
       final query = 'raymarch';
       final sort = Sort.love;
       final filters = {'vr', 'soundoutput', 'multipass'};
-      final shaders = ['shaders/kurogane.json'];
-      final response = await textFixture('results/filtered_1_result.html');
-      final sl = await shadersFixture(shaders);
+
+      final response = await textFixture('results/results_1.html');
+      final sl = await shaderListFixture('results/results_1.json');
       final adapter = newAdapter(options)
         ..addResultsRoute(response, options,
             query: query, sort: sort, filters: filters)
@@ -494,7 +478,7 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse(total: 1));
     });
 
     test('Find shaders with query, first page', () async {
@@ -504,22 +488,8 @@ void main() {
       final sort = Sort.love;
       final filters = {'multipass'};
       final from = 0;
-      final shaders = [
-        'shaders/elevated.json',
-        'shaders/rainforest.json',
-        'shaders/volcanic.json',
-        'shaders/sirenian_dawn.json',
-        'shaders/goo.json',
-        'shaders/cloudy_terrain.json',
-        'shaders/raymarching_tutorial.json',
-        'shaders/greek_temple.json',
-        'shaders/gargantua_with_hdr_bloom.json',
-        'shaders/selfie_girl.json',
-        'shaders/ladybug.json',
-        'shaders/precalculated_voronoi_heightmap.json',
-      ];
-      final response = await textFixture('results/filtered_page_1.html');
-      final sl = await shadersFixture(shaders);
+      final response = await textFixture('results/results_0_12.html');
+      final sl = await shaderListFixture('results/results_0_12.json');
       final adapter = newAdapter(options)
         ..addResultsRoute(response, options,
             query: query, sort: sort, filters: filters, from: from)
@@ -531,7 +501,7 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse(total: 36));
     });
 
     test('Find shaders with query, second page', () async {
@@ -542,22 +512,8 @@ void main() {
       final filters = {'multipass'};
       final from = options.pageResultsShaderCount;
       final num = options.pageResultsShaderCount;
-      final shaders = [
-        'shaders/homeward.json',
-        'shaders/surfer_boy.json',
-        'shaders/alien_corridor.json',
-        'shaders/turn_burn.json',
-        'shaders/ice_primitives.json',
-        'shaders/basic_montecarlo.json',
-        'shaders/crossy_penguin.json',
-        'shaders/full_scene_radial_blur.json',
-        'shaders/fractal_explorer_multi_res.json',
-        'shaders/blueprint_of_architekt.json',
-        'shaders/three_pass_dof.json',
-        'shaders/multiple_transparency.json',
-      ];
-      final response = await textFixture('results/filtered_page_2.html');
-      final sl = await shadersFixture(shaders);
+      final response = await textFixture('results/results_12_12.html');
+      final sl = await shaderListFixture('results/results_12_12.json');
       final adapter = newAdapter(options)
         ..addResultsRoute(response, options,
             query: query, sort: sort, filters: filters, from: from, num: num)
@@ -569,7 +525,7 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse(total: 36));
     });
 
     test('Find shaders with query, second and third page', () async {
@@ -580,38 +536,14 @@ void main() {
       final filters = {'multipass'};
       final from = options.pageResultsShaderCount;
       final num = options.pageResultsShaderCount;
-      final shaders = [
-        'shaders/homeward.json',
-        'shaders/surfer_boy.json',
-        'shaders/alien_corridor.json',
-        'shaders/turn_burn.json',
-        'shaders/ice_primitives.json',
-        'shaders/basic_montecarlo.json',
-        'shaders/crossy_penguin.json',
-        'shaders/full_scene_radial_blur.json',
-        'shaders/fractal_explorer_multi_res.json',
-        'shaders/blueprint_of_architekt.json',
-        'shaders/three_pass_dof.json',
-        'shaders/multiple_transparency.json',
-        'shaders/sunset_drive_unlimited.json',
-        'shaders/80s_raymarching.json',
-        'shaders/veach_1997_fig_9_4.json',
-        'shaders/raymarching_reaction_diffusion.json',
-        'shaders/castaway.json',
-        'shaders/julia_quaternion_3.json',
-        'shaders/lets_make_a_raymarcher.json',
-        'shaders/aurora_explorer.json',
-        'shaders/frozen_barrens.json',
-        'shaders/go_go_legoman.json',
-        'shaders/post_processing_toon_shading.json'
-      ];
-      final response2 = await textFixture('results/filtered_page_2.html');
-      final response3 = await textFixture('results/filtered_page_3.html');
-      final sl = await shadersFixture(shaders);
+      final response1 = await textFixture('results/results_12_12.html');
+      final response2 = await textFixture('results/results_24_12.html');
+      final sl = await shaderListFixtures(
+          ['results/results_12_12.json', 'results/results_24_12.json']);
       final adapter = newAdapter(options)
-        ..addResultsRoute(response2, options,
+        ..addResultsRoute(response1, options,
             query: query, sort: sort, filters: filters, from: from, num: num)
-        ..addResultsRoute(response3, options,
+        ..addResultsRoute(response2, options,
             query: query,
             sort: sort,
             filters: filters,
@@ -625,57 +557,42 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse(total: 36));
     });
 
     test('Find all shader ids', () async {
       // prepare
       final options = newOptions();
-      final shaders = [
-        'shaders/fractal_explorer_multi_res.json',
-        'shaders/rave_fractal.json',
-        'shaders/rhodium_fractalscape.json',
-        'shaders/fractal_explorer_dof.json',
-        'shaders/kleinian_variations.json',
-        'shaders/simplex_noise_fire_milkdrop_beat.json',
-        'shaders/fight_them_all_fractal.json',
-        'shaders/trilobyte_julia_fractal_smasher.json',
-        'shaders/rapping_fractal.json',
-        'shaders/trilobyte_bipolar_daisy_complex.json',
-        'shaders/smashing_fractals.json',
-        'shaders/trilobyte_multi_turing_pattern.json',
-        'shaders/surfer_boy.json',
-        'shaders/alien_corridor.json',
-        'shaders/turn_burn.json',
-        'shaders/ice_primitives.json',
-        'shaders/basic_montecarlo.json',
-        'shaders/crossy_penguin.json',
-        'shaders/full_scene_radial_blur.json',
-        'shaders/gargantua_with_hdr_bloom.json',
-        'shaders/blueprint_of_architekt.json',
-        'shaders/three_pass_dof.json',
-        'shaders/elephant.json',
-        'shaders/multiple_transparency.json'
-      ];
-      final response1 = await textFixture('results/24_page_1.html');
-      final response2 = await textFixture('results/24_page_2.html');
+      final response1 = await textFixture('results/results_0_12.html');
+      final response2 = await textFixture('results/results_12_12.html');
+      final response3 = await textFixture('results/results_24_12.html');
+      final sl = await shaderIdListFixtures([
+        'results/results_0_12.json',
+        'results/results_12_12.json',
+        'results/results_24_12.json'
+      ]);
       final adapter = newAdapter(options)
         ..addResultsRoute(response1, options)
-        ..addResultsRoute(response2, options, from: 12, num: 12);
+        ..addResultsRoute(response2, options,
+            from: options.pageResultsShaderCount,
+            num: options.pageResultsShaderCount)
+        ..addResultsRoute(response3, options,
+            from: options.pageResultsShaderCount * 2,
+            num: options.pageResultsShaderCount);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findAllShaderIds();
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShaderIdsResponseFixture(shaders, count: 24));
+      expect(sr, FindShaderIdsResponse(count: 36, ids: sl));
     });
 
     test('Find all shader ids with Dio error on the first page', () async {
       // prepare
       final options = newOptions();
       final message = 'Failed host lookup: \'www.shadertoy.com\'';
-      final response = await textFixture('results/24_page_2.html');
+      final response = await textFixture('results/results.html');
       final adapter = newAdapter(options)
         ..addResultsSocketErrorRoute(options, message)
         ..addResultsRoute(response, options, from: 12, num: 12);
@@ -695,10 +612,14 @@ void main() {
       // prepare
       final options = newOptions();
       final message = 'Failed host lookup: \'www.shadertoy.com\'';
-      final response = await textFixture('results/24_page_1.html');
+      final response1 = await textFixture('results/results_0_12.html');
+      final response3 = await textFixture('results/results_24_12.html');
       final adapter = newAdapter(options)
-        ..addResultsRoute(response, options)
-        ..addResultsSocketErrorRoute(options, message, from: 12, num: 12);
+        ..addResultsRoute(response1, options)
+        ..addResultsSocketErrorRoute(options, message, from: 12, num: 12)
+        ..addResultsRoute(response3, options,
+            from: options.pageResultsShaderCount * 2,
+            num: options.pageResultsShaderCount);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findAllShaderIds();
@@ -716,12 +637,19 @@ void main() {
         () async {
       // prepare
       final options = newOptions();
-      final response1 = await textFixture('results/24_page_1.html');
-      final response2 =
-          await textFixture('results/24_page_2_invalid_number_of_results.html');
+      final response1 = await textFixture('results/results_0_12.html');
+      final response2 = await textFixture(
+          'results/results_12_12_invalid_number_of_results.html');
+      final response3 = await textFixture('results/results_24_12.html');
+
       final adapter = newAdapter(options)
         ..addResultsRoute(response1, options)
-        ..addResultsRoute(response2, options, from: 12, num: 12);
+        ..addResultsRoute(response2, options,
+            from: options.pageResultsShaderCount,
+            num: options.pageResultsShaderCount)
+        ..addResultsRoute(response3, options,
+            from: options.pageResultsShaderCount * 2,
+            num: options.pageResultsShaderCount);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findAllShaderIds();
@@ -732,27 +660,14 @@ void main() {
           sr.error,
           ResponseError.backendResponse(
               message:
-                  'Page 2 of 2 page(s) was not successfully fetched: Obtained an invalid number of results: -1'));
+                  'Page 2 of 3 page(s) was not successfully fetched: Obtained an invalid number of results: -1'));
     });
 
     test('Find shader ids', () async {
       // prepare
       final options = newOptions();
-      final shaders = [
-        'shaders/seascape.json',
-        'shaders/raymarching_primitives.json',
-        'shaders/creation.json',
-        'shaders/clouds.json',
-        'shaders/raymarching_part_6.json',
-        'shaders/elevated.json',
-        'shaders/volcanic.json',
-        'shaders/raymarching_part_1.json',
-        'shaders/rainforest.json',
-        'shaders/raymarching_part_2.json',
-        'shaders/raymarching_part_3.json',
-        'shaders/very_fast_procedural_ocean.json',
-      ];
-      final response = await textFixture('results/normal.html');
+      final response = await textFixture('results/results.html');
+      final sl = await shaderIdListFixture('results/results.json');
       final adapter = newAdapter(options)..addResultsRoute(response, options);
       final api = newClient(options, adapter);
       // act
@@ -760,7 +675,7 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShaderIdsResponseFixture(shaders, count: 43698));
+      expect(sr, FindShaderIdsResponse(count: 63918, ids: sl));
     });
 
     test('Find shader ids with Dio error', () async {
@@ -986,9 +901,9 @@ void main() {
       // prepare
       final options = newOptions();
       final userId = 'bonzaj';
-      final shaders = ['shaders/julia_bonzaj_mod1.json'];
-      final response = await textFixture('user/one_shader_1.html');
-      final sl = await shadersFixture(shaders);
+
+      final response = await textFixture('user/bonzaj_1.html');
+      final sl = await shaderListFixture('user/bonzaj_1.json');
       final adapter = newAdapter(options)
         ..addUserShadersRoute(response, userId, options)
         ..addShadersRoute(sl, options);
@@ -998,7 +913,7 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse());
     });
 
     test('Find shaders by user id with query, one result', () async {
@@ -1007,9 +922,9 @@ void main() {
       final userId = 'iq';
       final sort = Sort.popular;
       final filters = {'multipass', 'musicstream'};
-      final shaders = ['shaders/bricks_game.json'];
-      final response = await textFixture('user/one_shader_2.html');
-      final sl = await shadersFixture(shaders);
+
+      final response = await textFixture('user/iq_1.html');
+      final sl = await shaderListFixture('user/iq_1.json');
       final adapter = newAdapter(options)
         ..addUserShadersRoute(response, userId, options,
             sort: sort, filters: filters)
@@ -1021,25 +936,15 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse());
     });
 
     test('Find shaders by user id, first page', () async {
       // prepare
       final options = newOptions();
       final userId = 'iq';
-      final shaders = [
-        'shaders/raymarching_primitives.json',
-        'shaders/clouds.json',
-        'shaders/elevated.json',
-        'shaders/volcanic.json',
-        'shaders/rainforest.json',
-        'shaders/snail.json',
-        'shaders/voxel_edges.json',
-        'shaders/mike.json'
-      ];
-      final response = await textFixture('user/iq_page_1.html');
-      final sl = await shadersFixture(shaders);
+      final response = await textFixture('user/iq_0_8.html');
+      final sl = await shaderListFixture('user/iq_0_8.json');
       final adapter = newAdapter(options)
         ..addUserShadersRoute(response, userId, options)
         ..addShadersRoute(sl, options);
@@ -1049,7 +954,7 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse(total: 24));
     });
 
     test('Find shaders by user id, second page', () async {
@@ -1058,18 +963,8 @@ void main() {
       final userId = 'iq';
       final from = 8;
       final num = options.pageUserShaderCount;
-      final shaders = [
-        'shaders/warping_procedural_2.json',
-        'shaders/happy_jumping.json',
-        'shaders/cubescape.json',
-        'shaders/cloudy_terrain.json',
-        'shaders/voronoi_distances.json',
-        'shaders/music_pirates.json',
-        'shaders/voronoise.json',
-        'shaders/palletes.json'
-      ];
-      final response = await textFixture('user/iq_page_2.html');
-      final sl = await shadersFixture(shaders);
+      final response = await textFixture('user/iq_8_8.html');
+      final sl = await shaderListFixture('user/iq_8_8.json');
       final adapter = newAdapter(options)
         ..addUserShadersRoute(response, userId, options, from: from, num: num)
         ..addShadersRoute(sl, options);
@@ -1079,7 +974,7 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse(total: 24));
     });
 
     test('Find shaders by user id, first and second page', () async {
@@ -1088,27 +983,11 @@ void main() {
       final userId = 'iq';
       final from = 0;
       final num = options.pageUserShaderCount;
-      final shaders = [
-        'shaders/raymarching_primitives.json',
-        'shaders/clouds.json',
-        'shaders/elevated.json',
-        'shaders/volcanic.json',
-        'shaders/rainforest.json',
-        'shaders/snail.json',
-        'shaders/voxel_edges.json',
-        'shaders/mike.json',
-        'shaders/warping_procedural_2.json',
-        'shaders/happy_jumping.json',
-        'shaders/cubescape.json',
-        'shaders/cloudy_terrain.json',
-        'shaders/voronoi_distances.json',
-        'shaders/music_pirates.json',
-        'shaders/voronoise.json',
-        'shaders/palletes.json'
-      ];
-      final response1 = await textFixture('user/iq_page_1.html');
-      final response2 = await textFixture('user/iq_page_2.html');
-      final sl = await shadersFixture(shaders);
+      final response1 = await textFixture('user/iq_0_8.html');
+      final response2 = await textFixture('user/iq_8_8.html');
+      final sl =
+          await shaderListFixtures(['user/iq_0_8.json', 'user/iq_8_8.json']);
+
       final adapter = newAdapter(options)
         ..addUserShadersRoute(response1, userId, options, from: from, num: num)
         ..addUserShadersRoute(response2, userId, options,
@@ -1121,7 +1000,7 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse(total: 24));
     });
 
     test(
@@ -1132,9 +1011,10 @@ void main() {
       final userId = 'iq';
       final from = 0;
       final num = options.pageUserShaderCount;
-      final response1 = await textFixture('user/iq_page_1.html');
+      final response1 = await textFixture('user/iq_0_8.html');
       final response2 =
-          await textFixture('user/iq_page_2_invalid_number_of_results.html');
+          await textFixture('user/iq_8_8_invalid_number_of_results.html');
+
       final adapter = newAdapter(options)
         ..addUserShadersRoute(response1, userId, options, from: from, num: num)
         ..addUserShadersRoute(response2, userId, options,
@@ -1161,27 +1041,11 @@ void main() {
       final userId = 'iq';
       final from = 8;
       final num = options.pageUserShaderCount;
-      final shaders = [
-        'shaders/warping_procedural_2.json',
-        'shaders/happy_jumping.json',
-        'shaders/cubescape.json',
-        'shaders/cloudy_terrain.json',
-        'shaders/voronoi_distances.json',
-        'shaders/music_pirates.json',
-        'shaders/voronoise.json',
-        'shaders/palletes.json',
-        'shaders/sphere_projection.json',
-        'shaders/bricks_game.json',
-        'shaders/dolphin.json',
-        'shaders/nv15_space_curvature.json',
-        'shaders/menger_sponge.json',
-        'shaders/monster.json',
-        'shaders/canyon.json',
-        'shaders/ladybug.json'
-      ];
-      final sl = await shadersFixture(shaders);
-      final response2 = await textFixture('user/iq_page_2.html');
-      final response3 = await textFixture('user/iq_page_3.html');
+      final response2 = await textFixture('user/iq_8_8.html');
+      final response3 = await textFixture('user/iq_16_8.html');
+      final sl =
+          await shaderListFixtures(['user/iq_8_8.json', 'user/iq_16_8.json']);
+
       final adapter = newAdapter(options)
         ..addUserShadersRoute(response2, userId, options, from: from, num: num)
         ..addUserShadersRoute(response3, userId, options,
@@ -1194,38 +1058,25 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(sr, await findShadersResponseFixture(shaders));
+      expect(sr, sl.toFindShadersResponse(total: 24));
     });
 
     test('Find shader ids by user id, first page', () async {
       // prepare
       final options = newOptions();
       final userId = 'iq';
-      final shaders = [
-        'shaders/raymarching_primitives.json',
-        'shaders/clouds.json',
-        'shaders/elevated.json',
-        'shaders/volcanic.json',
-        'shaders/rainforest.json',
-        'shaders/snail.json',
-        'shaders/voxel_edges.json',
-        'shaders/mike.json'
-      ];
-      final response = await textFixture('user/iq_page_1.html');
-      final sl = await shadersFixture(shaders);
+      final response = await textFixture('user/iq_0_8.html');
+      final sl = await shaderIdListFixture('user/iq_0_8.json');
       final adapter = newAdapter(options)
-        ..addUserShadersRoute(response, userId, options)
-        ..addShadersRoute(sl, options);
+        ..addUserShadersRoute(response, userId, options);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findShaderIdsByUserId(userId);
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(
-          sr,
-          await findShaderIdsResponseFixture(shaders,
-              count: options.pageUserShaderCount));
+
+      expect(sr, FindShaderIdsResponse(count: 24, ids: sl));
     });
 
     test('Find shader ids by user id with Dio error', () async {
@@ -1253,31 +1104,26 @@ void main() {
       // prepare
       final options = newOptions();
       final userId = 'iq';
-      final shaders = [
-        'shaders/raymarching_primitives.json',
-        'shaders/clouds.json',
-        'shaders/elevated.json',
-        'shaders/volcanic.json',
-        'shaders/rainforest.json',
-        'shaders/snail.json',
-        'shaders/voxel_edges.json',
-        'shaders/mike.json'
-      ];
-      final response = await textFixture('user/iq_all.html');
-      final sl = await shadersFixture(shaders);
+      final from = 8;
+      final num = options.pageUserShaderCount;
+      final response1 = await textFixture('user/iq_0_8.html');
+      final response2 = await textFixture('user/iq_8_8.html');
+      final response3 = await textFixture('user/iq_16_8.html');
+      final sl = await shaderIdListFixtures(
+          ['user/iq_0_8.json', 'user/iq_8_8.json', 'user/iq_16_8.json']);
+
       final adapter = newAdapter(options)
-        ..addUserShadersRoute(response, userId, options)
-        ..addShadersRoute(sl, options);
+        ..addUserShadersRoute(response1, userId, options)
+        ..addUserShadersRoute(response2, userId, options, from: from, num: num)
+        ..addUserShadersRoute(response3, userId, options,
+            from: from * 2, num: num);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findAllShaderIdsByUserId(userId);
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(
-          sr,
-          await findShaderIdsResponseFixture(shaders,
-              count: options.pageUserShaderCount));
+      expect(sr, FindShaderIdsResponse(count: 24, ids: sl));
     });
 
     test('Find all shader ids by user id with Dio error', () async {
@@ -1546,7 +1392,7 @@ void main() {
         'shaders/worms.json',
         'shaders/primitive_portrait.json'
       ];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final response = await textFixture('playlist/week_page_1.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response, playlistId, options)
@@ -1580,7 +1426,7 @@ void main() {
         'shaders/piranha_plant.json',
         'shaders/echeveria.json'
       ];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final response = await textFixture('playlist/week_page_2.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response, playlistId, options,
@@ -1628,7 +1474,7 @@ void main() {
         'shaders/piranha_plant.json',
         'shaders/echeveria.json'
       ];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final response1 = await textFixture('playlist/week_page_1.html');
       final response2 = await textFixture('playlist/week_page_2.html');
       final adapter = newAdapter(options)
@@ -1739,7 +1585,7 @@ void main() {
         'shaders/blurry_spheres.json',
         'shaders/echeveria_2.json'
       ];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final response2 = await textFixture('playlist/week_page_2.html');
       final response3 = await textFixture('playlist/week_page_3.html');
       final adapter = newAdapter(options)
@@ -1797,7 +1643,7 @@ void main() {
         'shaders/worms.json',
         'shaders/primitive_portrait.json'
       ];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final response = await textFixture('playlist/week_page_1.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response, playlistId, options)
@@ -1853,7 +1699,7 @@ void main() {
         'shaders/worms.json',
         'shaders/primitive_portrait.json'
       ];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final response = await textFixture('playlist/week_all.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response, playlistId, options)

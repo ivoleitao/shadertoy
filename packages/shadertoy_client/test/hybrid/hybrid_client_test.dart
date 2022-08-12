@@ -142,7 +142,7 @@ void main() {
       // prepare
       final siteOptions = ShadertoySiteOptions();
       final shaders = ['shaders/seascape.json'];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final adapter = newAdapter()..addShadersRoute(sl, siteOptions);
       final api = newClient(adapter, siteOptions: siteOptions);
       // act
@@ -174,7 +174,7 @@ void main() {
       // prepare
       final siteOptions = newSiteOptions();
       final shaders = ['shaders/seascape.json', 'shaders/happy_jumping.json'];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final adapter = newAdapter()..addShadersRoute(sl, siteOptions);
       final api = newClient(adapter, siteOptions: siteOptions);
       // act
@@ -229,7 +229,7 @@ void main() {
         'shaders/ladybug.json',
         'shaders/precalculated_voronoi_heightmap.json',
       ];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final response = await textFixture('results/filtered_page_1.html');
       final adapter = newAdapter()
         ..addResultsRoute(response, siteOptions,
@@ -529,7 +529,7 @@ void main() {
         'shaders/mike.json'
       ];
       final response = await textFixture('user/iq_page_1.html');
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final adapter = newAdapter()
         ..addUserShadersRoute(response, userId, siteOptions)
         ..addShadersRoute(sl, siteOptions);
@@ -557,7 +557,7 @@ void main() {
         'shaders/mike.json'
       ];
       final response = await textFixture('user/iq_page_1.html');
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final adapter = newAdapter()
         ..addUserShadersRoute(response, userId, siteOptions)
         ..addShadersRoute(sl, siteOptions);
@@ -665,7 +665,7 @@ void main() {
         'shaders/worms.json',
         'shaders/primitive_portrait.json'
       ];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final response = await textFixture('playlist/week_page_1.html');
       final adapter = newAdapter()
         ..addPlaylistShadersRoute(response, playlistId, siteOptions)
@@ -697,7 +697,7 @@ void main() {
         'shaders/worms.json',
         'shaders/primitive_portrait.json'
       ];
-      final sl = await shadersFixture(shaders);
+      final sl = await shaderFixtures(shaders);
       final response = await textFixture('playlist/week_page_1.html');
       final adapter = newAdapter()
         ..addPlaylistShadersRoute(response, playlistId, siteOptions)
