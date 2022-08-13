@@ -1378,22 +1378,23 @@ void main() {
       // prepare
       final options = newOptions();
       final playlistId = 'week';
+
       final shaders = [
-        'shaders/cables2.json',
-        'shaders/ray_marching_experiment_43.json',
-        'shaders/impulse_glass.json',
-        'shaders/3d_cellular_tiling.json',
-        'shaders/phyllotaxes.json',
-        'shaders/geometric_cellular_surfaces.json',
-        'shaders/ed_209.json',
-        'shaders/hexpacked_sphere_bass_shader.json',
-        'shaders/puma_clyde_concept.json',
-        'shaders/asymmetric_hexagon_landscape.json',
-        'shaders/worms.json',
-        'shaders/primitive_portrait.json'
+        'shaders/kitties.json',
+        'shaders/fire_fire.json',
+        'shaders/giant_ventifacts_of_calientis_v.json',
+        'shaders/controllable_machinery.json',
+        'shaders/battleships.json',
+        'shaders/soul_creature.json',
+        'shaders/hex_marching.json',
+        'shaders/saturday_torus.json',
+        'shaders/jeweled_vortex.json',
+        'shaders/fluffballs.json',
+        'shaders/coastal_landscape.json',
+        'shaders/night_circuit.json'
       ];
       final sl = await shaderFixtures(shaders);
-      final response = await textFixture('playlist/week_page_1.html');
+      final response = await textFixture('playlist/week_0_12.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response, playlistId, options)
         ..addShadersRoute(sl, options);
@@ -1413,21 +1414,21 @@ void main() {
       final from = options.pagePlaylistShaderCount;
       final num = options.pagePlaylistShaderCount;
       final shaders = [
-        'shaders/not_day_79.json',
-        'shaders/molten_bismuth.json',
-        'shaders/snaliens.json',
-        'shaders/warped_extruded_skewed_grid.json',
-        'shaders/atari_pong.json',
-        'shaders/surfer_boy.json',
-        'shaders/enterprise.json',
-        'shaders/underground_passageway.json',
-        'shaders/octahydra.json',
-        'shaders/tree_in_the_wind.json',
-        'shaders/piranha_plant.json',
-        'shaders/echeveria.json'
+        'shaders/pig_squad_9_year_anniversary.json',
+        'shaders/cubic_dispersal.json',
+        'shaders/color_processing.json',
+        'shaders/space_ship.json',
+        'shaders/space_ship.json',
+        'shaders/danger_noodle.json',
+        'shaders/stars_and_galaxy.json',
+        'shaders/desperate_distraction.json',
+        'shaders/party_concert_visuals.json',
+        'shaders/omzg_shader_royale.json',
+        'shaders/morning_commute.json',
+        'shaders/quartz_wip.json'
       ];
       final sl = await shaderFixtures(shaders);
-      final response = await textFixture('playlist/week_page_2.html');
+      final response = await textFixture('playlist/week_12_12.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response, playlistId, options,
             from: from, num: num)
@@ -1449,34 +1450,36 @@ void main() {
       final from = 0;
       final num = options.pagePlaylistShaderCount;
       final shaders = [
-        'shaders/cables2.json',
-        'shaders/ray_marching_experiment_43.json',
-        'shaders/impulse_glass.json',
-        'shaders/3d_cellular_tiling.json',
-        'shaders/phyllotaxes.json',
-        'shaders/geometric_cellular_surfaces.json',
-        'shaders/ed_209.json',
-        'shaders/hexpacked_sphere_bass_shader.json',
-        'shaders/puma_clyde_concept.json',
-        'shaders/asymmetric_hexagon_landscape.json',
-        'shaders/worms.json',
-        'shaders/primitive_portrait.json',
-        'shaders/not_day_79.json',
-        'shaders/molten_bismuth.json',
-        'shaders/snaliens.json',
-        'shaders/warped_extruded_skewed_grid.json',
-        'shaders/atari_pong.json',
-        'shaders/surfer_boy.json',
-        'shaders/enterprise.json',
-        'shaders/underground_passageway.json',
-        'shaders/octahydra.json',
-        'shaders/tree_in_the_wind.json',
-        'shaders/piranha_plant.json',
-        'shaders/echeveria.json'
+        // 1
+        'shaders/kitties.json',
+        'shaders/fire_fire.json',
+        'shaders/giant_ventifacts_of_calientis_v.json',
+        'shaders/controllable_machinery.json',
+        'shaders/battleships.json',
+        'shaders/soul_creature.json',
+        'shaders/hex_marching.json',
+        'shaders/saturday_torus.json',
+        'shaders/jeweled_vortex.json',
+        'shaders/fluffballs.json',
+        'shaders/coastal_landscape.json',
+        'shaders/night_circuit.json',
+        // 2
+        'shaders/pig_squad_9_year_anniversary.json',
+        'shaders/cubic_dispersal.json',
+        'shaders/color_processing.json',
+        'shaders/space_ship.json',
+        'shaders/space_ship.json',
+        'shaders/danger_noodle.json',
+        'shaders/stars_and_galaxy.json',
+        'shaders/desperate_distraction.json',
+        'shaders/party_concert_visuals.json',
+        'shaders/omzg_shader_royale.json',
+        'shaders/morning_commute.json',
+        'shaders/quartz_wip.json'
       ];
       final sl = await shaderFixtures(shaders);
-      final response1 = await textFixture('playlist/week_page_1.html');
-      final response2 = await textFixture('playlist/week_page_2.html');
+      final response1 = await textFixture('playlist/week_0_12.html');
+      final response2 = await textFixture('playlist/week_12_12.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response1, playlistId, options,
             from: from, num: num)
@@ -1502,7 +1505,7 @@ void main() {
       final from = 0;
       final num = options.pagePlaylistShaderCount;
       final response = await textFixture(
-          'playlist/week_page_1_invalid_number_of_results.html');
+          'playlist/week_0_12_invalid_number_of_results.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response, playlistId, options,
             from: from, num: num);
@@ -1529,9 +1532,9 @@ void main() {
       final playlistId = 'week';
       final from = 0;
       final num = options.pagePlaylistShaderCount;
-      final response1 = await textFixture('playlist/week_page_1.html');
+      final response1 = await textFixture('playlist/week_0_12.html');
       final response2 = await textFixture(
-          'playlist/week_page_2_invalid_number_of_results.html');
+          'playlist/week_12_12_invalid_number_of_results.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response1, playlistId, options,
             from: from, num: num)
@@ -1560,34 +1563,36 @@ void main() {
       final from = options.pagePlaylistShaderCount;
       final num = options.pagePlaylistShaderCount;
       final shaders = [
-        'shaders/not_day_79.json',
-        'shaders/molten_bismuth.json',
-        'shaders/snaliens.json',
-        'shaders/warped_extruded_skewed_grid.json',
-        'shaders/atari_pong.json',
-        'shaders/surfer_boy.json',
-        'shaders/enterprise.json',
-        'shaders/underground_passageway.json',
-        'shaders/octahydra.json',
-        'shaders/tree_in_the_wind.json',
-        'shaders/piranha_plant.json',
-        'shaders/echeveria.json',
-        'shaders/shine_on_you_crazy_ball.json',
-        'shaders/descent_3d.json',
-        'shaders/waterfall_procedural_gfx.json',
-        'shaders/abandoned_construction.json',
-        'shaders/voxel_game_evolution.json',
-        'shaders/sync_cord_revision_2020.json',
-        'shaders/psx_rendering.json',
-        'shaders/corridor_travel.json',
-        'shaders/tempting_the_mariner.json',
-        'shaders/day_74.json',
-        'shaders/blurry_spheres.json',
-        'shaders/echeveria_2.json'
+        // 2
+        'shaders/pig_squad_9_year_anniversary.json',
+        'shaders/cubic_dispersal.json',
+        'shaders/color_processing.json',
+        'shaders/space_ship.json',
+        'shaders/space_ship.json',
+        'shaders/danger_noodle.json',
+        'shaders/stars_and_galaxy.json',
+        'shaders/desperate_distraction.json',
+        'shaders/party_concert_visuals.json',
+        'shaders/omzg_shader_royale.json',
+        'shaders/morning_commute.json',
+        'shaders/quartz_wip.json',
+        // 3
+        'shaders/synthwave_song.json',
+        'shaders/a_paper_heart_for_my_valentine.json',
+        'shaders/terraform.json',
+        'shaders/star_gazing_hippo.json',
+        'shaders/undulating_columns.json',
+        'shaders/trippy_triangle.json',
+        'shaders/exit_the_matrix.json',
+        'shaders/on_the_salt_lake.json',
+        'shaders/recursive_donut.json',
+        'shaders/truchet_kaleidoscope_ftw.json',
+        'shaders/paper_plane.json',
+        'shaders/hyper_dough.json',
       ];
       final sl = await shaderFixtures(shaders);
-      final response2 = await textFixture('playlist/week_page_2.html');
-      final response3 = await textFixture('playlist/week_page_3.html');
+      final response2 = await textFixture('playlist/week_12_12.html');
+      final response3 = await textFixture('playlist/week_24_12.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response2, playlistId, options,
             from: from, num: num)
@@ -1630,21 +1635,21 @@ void main() {
       final options = newOptions();
       final playlistId = 'week';
       final shaders = [
-        'shaders/cables2.json',
-        'shaders/ray_marching_experiment_43.json',
-        'shaders/impulse_glass.json',
-        'shaders/3d_cellular_tiling.json',
-        'shaders/phyllotaxes.json',
-        'shaders/geometric_cellular_surfaces.json',
-        'shaders/ed_209.json',
-        'shaders/hexpacked_sphere_bass_shader.json',
-        'shaders/puma_clyde_concept.json',
-        'shaders/asymmetric_hexagon_landscape.json',
-        'shaders/worms.json',
-        'shaders/primitive_portrait.json'
+        'shaders/kitties.json',
+        'shaders/fire_fire.json',
+        'shaders/giant_ventifacts_of_calientis_v.json',
+        'shaders/controllable_machinery.json',
+        'shaders/battleships.json',
+        'shaders/soul_creature.json',
+        'shaders/hex_marching.json',
+        'shaders/saturday_torus.json',
+        'shaders/jeweled_vortex.json',
+        'shaders/fluffballs.json',
+        'shaders/coastal_landscape.json',
+        'shaders/night_circuit.json'
       ];
       final sl = await shaderFixtures(shaders);
-      final response = await textFixture('playlist/week_page_1.html');
+      final response = await textFixture('playlist/week_0_12.html');
       final adapter = newAdapter(options)
         ..addPlaylistShadersRoute(response, playlistId, options)
         ..addShadersRoute(sl, options);
@@ -1685,24 +1690,60 @@ void main() {
       // prepare
       final options = newOptions();
       final playlistId = 'week';
+      final from = options.pagePlaylistShaderCount;
+      final num = options.pagePlaylistShaderCount;
       final shaders = [
-        'shaders/cables2.json',
-        'shaders/ray_marching_experiment_43.json',
-        'shaders/impulse_glass.json',
-        'shaders/3d_cellular_tiling.json',
-        'shaders/phyllotaxes.json',
-        'shaders/geometric_cellular_surfaces.json',
-        'shaders/ed_209.json',
-        'shaders/hexpacked_sphere_bass_shader.json',
-        'shaders/puma_clyde_concept.json',
-        'shaders/asymmetric_hexagon_landscape.json',
-        'shaders/worms.json',
-        'shaders/primitive_portrait.json'
+        // 1
+        'shaders/kitties.json',
+        'shaders/fire_fire.json',
+        'shaders/giant_ventifacts_of_calientis_v.json',
+        'shaders/controllable_machinery.json',
+        'shaders/battleships.json',
+        'shaders/soul_creature.json',
+        'shaders/hex_marching.json',
+        'shaders/saturday_torus.json',
+        'shaders/jeweled_vortex.json',
+        'shaders/fluffballs.json',
+        'shaders/coastal_landscape.json',
+        'shaders/night_circuit.json',
+        // 2
+        'shaders/pig_squad_9_year_anniversary.json',
+        'shaders/cubic_dispersal.json',
+        'shaders/color_processing.json',
+        'shaders/space_ship.json',
+        'shaders/space_ship.json',
+        'shaders/danger_noodle.json',
+        'shaders/stars_and_galaxy.json',
+        'shaders/desperate_distraction.json',
+        'shaders/party_concert_visuals.json',
+        'shaders/omzg_shader_royale.json',
+        'shaders/morning_commute.json',
+        'shaders/quartz_wip.json',
+        // 3
+        'shaders/synthwave_song.json',
+        'shaders/a_paper_heart_for_my_valentine.json',
+        'shaders/terraform.json',
+        'shaders/star_gazing_hippo.json',
+        'shaders/undulating_columns.json',
+        'shaders/trippy_triangle.json',
+        'shaders/exit_the_matrix.json',
+        'shaders/on_the_salt_lake.json',
+        'shaders/recursive_donut.json',
+        'shaders/truchet_kaleidoscope_ftw.json',
+        'shaders/paper_plane.json',
+        'shaders/hyper_dough.json'
       ];
       final sl = await shaderFixtures(shaders);
-      final response = await textFixture('playlist/week_all.html');
+
+      final response1 = await textFixture('playlist/week_0_12.html');
+      final response2 = await textFixture('playlist/week_12_12.html');
+      final response3 = await textFixture('playlist/week_24_12.html');
       final adapter = newAdapter(options)
-        ..addPlaylistShadersRoute(response, playlistId, options)
+        ..addPlaylistShadersRoute(response1, playlistId, options)
+        ..addPlaylistShadersRoute(response2, playlistId, options,
+            from: from, num: num)
+        ..addPlaylistShadersRoute(response3, playlistId, options,
+            from: from * 2, num: num)
         ..addShadersRoute(sl, options);
       final api = newClient(options, adapter);
       // act
@@ -1710,10 +1751,7 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-      expect(
-          sr,
-          await findShaderIdsResponseFixture(shaders,
-              count: options.pagePlaylistShaderCount));
+      expect(sr, await findShaderIdsResponseFixture(shaders, count: 36));
     });
 
     test('Find all shader ids by playlist id with Dio error', () async {

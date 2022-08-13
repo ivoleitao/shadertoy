@@ -1,0 +1,99 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "wlVSDK",
+        "date": "1584688580",
+        "viewed": 12584,
+        "name": "Danger Noodle",
+        "username": "BigWIngs",
+        "description": "Watch fullscreen with sound. Use mouse to look around.",
+        "likes": 195,
+        "published": 3,
+        "flags": 64,
+        "usePreview": 1,
+        "tags": [
+            "raymarching",
+            "snake",
+            "animal",
+            "jungle",
+            "viper"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XsX3zn",
+                    "filepath": "\/media\/a\/94284d43be78f00eb6b298e6d78656a1b34e2b91b34940d02f1ca8b22310e8a0.png",
+                    "previewfilepath": "\/media\/ap\/94284d43be78f00eb6b298e6d78656a1b34e2b91b34940d02f1ca8b22310e8a0.png",
+                    "type": "cubemap",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4sX3zn",
+                    "filepath": "\/media\/a\/0681c014f6c88c356cf9c0394ffe015acc94ec1474924855f45d22c3e70b5785.png",
+                    "previewfilepath": "\/media\/ap\/0681c014f6c88c356cf9c0394ffe015acc94ec1474924855f45d22c3e70b5785.png",
+                    "type": "cubemap",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "clamp",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XtS3DR",
+                    "filepath": "https:\/\/soundcloud.com\/extasis_demencial\/jungle-sounds",
+                    "previewfilepath": "https:\/\/soundcloud.com\/extasis_demencial\/jungle-sounds",
+                    "type": "musicstream",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 0
+                },
+                {
+                    "id": "4tS3DR",
+                    "filepath": "https:\/\/soundcloud.com\/liam-seagrave\/pandemic-prologue-slow-strings-suspense-music-original-horror-piano-composition",
+                    "previewfilepath": "https:\/\/soundcloud.com\/liam-seagrave\/pandemic-prologue-slow-strings-suspense-music-original-horror-piano-composition",
+                    "type": "musicstream",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 0
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ \"Danger Noodle\" by Martijn Steinrucken aka BigWings\/CountFrolic - 2020\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\/\/ \n\/\/ Email: countfrolic@gmail.com\n\/\/ Twitter: @The_ArtOfCode\n\/\/ YouTube: youtube.com\/TheArtOfCodeIsCool\n\/\/\n\/\/ Ever since I did a snake scale effect as one of my first ShaderToys\n\/\/ I have been wanting to do a snake, so here it is.\n\/\/\n\/\/ Watch full screen with sound!\n\n#define MAX_STEPS 200\n#define MAX_DIST 60.\n#define SURF_DIST .01\n\n#define CAM_MOVE 1.\n\n#define S smoothstep\n\n#define MAT_TONGUE 1.\n#define MAT_HEAD 2.\n#define MAT_BODY 3.\n#define MAT_EYE 4.\n\n\/\/ From Dave Hoskins\nvec2 Hash22(vec2 p) {\n\tvec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));\n    p3 += dot(p3, p3.yzx+33.33);\n    return fract((p3.xx+p3.yz)*p3.zy);\n}\n\nfloat Hash21(vec2 p) {\n\tp = fract(p*vec2(123.1031, 324.1030));\n    p += dot(p, p+33.33);\n    return fract(p.x*p.y);\n}\n\nfloat sabs(float x,float k) {\n    float a = (.5\/k)*x*x+k*.5;\n    float b = abs(x);\n    return b<k ? a : b;\n}\n\nvec2 RaySphere(vec3 ro, vec3 rd, vec4 s) {\n\tfloat t = dot(s.xyz-ro, rd);\n    vec3 p = ro + rd * t;\n    \n    float y = length(s.xyz-p);\n    \n    vec2 o = vec2(MAX_DIST,MAX_DIST);\n    \n    if(y<s.w) {\n    \tfloat x = sqrt(s.w*s.w-y*y);\n        o.x = t-x;\n        o.y = t+x;\n    }\n    \n    return o;\n}\n\n\/\/ From IQ\nfloat smin( float a, float b, float k ) {\n    float h = clamp( 0.5+0.5*(b-a)\/k, 0., 1. );\n    return mix( b, a, h ) - k*h*(1.0-h);\n}\n\nfloat smax(float a, float b, float k) {\n\treturn smin(a, b, -k);\n}\n\nmat2 Rot(float a) {\n    float s = sin(a);\n    float c = cos(a);\n    return mat2(c, -s, s, c);\n}\n\nfloat sdGyroid(vec3 p, float scale, float thickness, float bias) {\n\tp *= scale;\n    return abs(dot(sin(p), cos(p.zxy))+bias)\/scale - thickness;\n}\n\nfloat sdSph(vec3 p, vec3 pos, vec3 squash, float r) {\n    squash = 1.\/squash;\n\tp = (p-pos)*squash;\n    return (length(p)-r)\/max(squash.x, max(squash.y, squash.z));\n}\n\n\nvec4 Scales(vec2 uv, float overlap, float skew, float point, float blur) {\n    \n    vec2 gv = fract(uv*5.)-.5;\n    vec2 id = floor(uv*5.);\n    \n    float m = 0.;\n    \n    gv.y = sabs(gv.y,point);\n    \n    float w = .5+overlap;\n    vec2 p1 = (gv+vec2(overlap,-gv.x*skew))*vec2(1,1.8);\n    float a1 = atan(p1.x-w, p1.y);\n    \n    float waveAmp = .02;\n    float waves = 10.;\n    float w1 = sin(a1*waves);\n    float s1 = S(w, w*blur, length(p1)+w1*waveAmp);\n    s1 +=  w1*.1*s1;\n    s1 *= mix(1., .5-gv.x, overlap*2.);\n    \n    gv.x -= 1.;\n    vec2 p2 = (gv+vec2(overlap,-gv.x*skew))*vec2(1,1.8);\n    float a2 = atan(p2.x-w, p2.y);\n    float w2 = sin(a2*waves);\n    float s2 = S(w, w*blur, length(p2)+w2*waveAmp);\n    s2 += w2*.1*s2;\n    \n    s2 *= mix(1., .5-gv.x, overlap*2.);\n    \n    if(s1>s2) {\n    \tm += s1;\n        m -= dot(p1,p1);\n    } else {\n        m += s2;\n        m -= dot(p2,p2);\n        id.x += 1.;\n    }\n\n    return vec4(1.-m, 0., id);\n}\n\nvec4 ScaleTex(vec2 uv, float overlap, float skew, float point, float blur) {\n\n    uv *= 2.;\n    vec4 s1 = Scales(uv, overlap, skew, point, blur);\n    vec4 s2 = Scales(uv+.1, overlap, skew, point, blur);\n    s2.zw -= .5;\n    \n    return s1.x<s2.x ? s1 : s2;\n}\n\n\nvec3 sdBody(vec3 p) {\n    float t = iTime*.3;\n    float neckFade = S(3., 10., p.z);\n   \n    p.x += sin(p.z*.15-t)*neckFade*4.;\n    p.y += sin(p.z*.1-t)*neckFade;\n    \n    vec2 st = vec2(atan(p.x, p.y), p.z);\n    \n    float body = length(p.xy)-(.86+S(2., 15., p.z)*.6-p.z*.01);\n    body = max(.8-p.z, body);   \n    \n    vec4 scales = vec4(0);\n    if(body<.1) {\n        vec2 uv = vec2(-st.y*.25, st.x\/6.2832+.5);\n        float a = sin(st.x+1.57)*.5+.5;\n        float fade = a;\n        a = S(.1, .4, a);\n\n        uv.y = 1.-abs(uv.y*2.-1.);\n        uv.y *= (uv.y-.2)*.4;\n        scales = ScaleTex(uv*1.3, .3*a, .3*a, .01, .8);\n        body += scales.x*.02*(fade+.2);\n    }\n    \n    body += S(-.4, -.9, p.y)*.2;\t\/\/ flatten bottom\n    return vec3(body, scales.zw);\n}\n\nfloat GetHeadScales(vec3 p, vec3 eye, vec3 mouth, float md) {    \n    float t = iTime;\n  \n    float jitter = .5;\n    jitter *= S(.1, .3, abs(md));\n    jitter *= S(1.2, .5, p.z);\n    \n    p.z += .5;\n    p.z *= .5;\n    \n    p.yz *= Rot(.6);\n    float y = atan(p.y, p.x);\n    vec2 gv = vec2(p.z*5., y*3.);\n\n    vec2 id = floor(gv);\n    \n    gv = fract(gv)-.5;\n    \n    float d=MAX_DIST;\n    for(float y=-1.; y<=1.; y++) {\n        for(float x=-1.; x<=1.; x++) {\n            vec2 offs = vec2(x, y);\n\n            vec2 n = Hash22(id+offs);\n            vec2 p = offs+sin(n*6.2831)*jitter;\n            p -= gv;\n            \n            float cd = dot(p,p);\n            if(cd<d) d = cd;\n        }\n    }\n    \n    d += sin(d*20.)*.02;    \n    d *= S(.0, .5, length(p.xy)-.1);\n    return d*.06;\n}\n\nfloat sdHead(vec3 p) {    \n    p.x = abs(p.x*.9);\n    float d = sdSph(p, vec3(0,-.05,.154), vec3(1,1,1.986),1.14); \n    d = smax(d, length(p-vec3(0,7.89,.38))-8.7, .2);\n    d = smax(d, length(p-vec3(0,-7.71,1.37))-8.7, .15); \/\/ top\n    \n    d = smax(d, 8.85-length(p-vec3(9.16,-1.0,-3.51)), .2);\t\/\/ cheeks\n    \n    vec3 ep = p-vec3(.54,.265,-.82);\n    float eye = length(ep)-.35;\n    float brows = S(.1, .8, p.y-(p.z+.9)*.5);\n    brows *= brows*brows;\n    brows *= S(.3, -.2, eye);\n   \td -= brows*.5;\n    d += S(.1, -.2, eye)*.1;\n    \n    vec2 mp = p.yz-vec2(3.76+S(-.71, -.14, p.z)*(p.z+.5)*.2, -.71); \n    float mouth = length(mp)-4.24;\n    d += S(.03,.0,abs(mouth))*S(.59,.0, p.z)*.03;\n    \n   \td += GetHeadScales(p, ep, mp.xyy, mouth);\n    \n    d = min(d, eye);\n    \n    float nostril = length(p.zy-vec2(-1.9-p.x*p.x, .15))-.05;\n    d = smax(d, -nostril,.05);\n    return d;\n}\n\nfloat sdTongue(vec3 p) {\n\tfloat t = iTime*3.;\n   \n    float inOut = S(.7, .8, sin(t*.5));\n    \n    if(p.z>-2.||inOut==0.) return MAX_DIST;\t\t\/\/ early out\n    \n    float zigzag = (abs(fract(t*2.)-.5)-.25)*4.; \/\/ flicker\n    float tl = 2.5;\t\/\/ length\n    \n    p+=vec3(0,0.27,2);\n    p.z *= -1.;\n    float z = p.z;\n    p.yz *= Rot(z*.4*zigzag);\n    p.z -= inOut*tl;\n    \n    float width = S(0., -1., p.z);\n    float fork = 1.-width;\n    \n    float r = mix(.05, .02, fork);\n\t\n    p.x = sabs(p.x, .05*width*width);\n    p.x -= r+.01;\n    p.x -= fork*.2*inOut;\n\n    return length(p-vec3(0,0,clamp(p.z, -tl, 0.)))-r;\n}\n\nfloat GetDist(vec3 P) {\n    \n    vec3 p = P;\n    p.xz *= Rot(sin(iTime*.3)*.1*S(1., 0., p.z));\n    float d = sdTongue(p)*.7;\n    d = min(d, sdHead(p));\n    d = smin(d, sdBody(P).x, .13);\n    \n    return d;\n}\n\nvec3 GetMat(vec3 p) {    \n    float d = MAX_DIST;\n    \n    float tongue = sdTongue(p)*.7;\n    float head = sdHead(p);\n    vec3 body = sdBody(p);\n    \n    float closest = min(tongue, min(head, body.x));\n    if(closest == tongue) {\n        return vec3(MAT_TONGUE, 0, 0);\n    } else if(closest==head) {\n        p.x = abs(p.x*.9);\n        vec3 ep = p-vec3(.54,.265,-.82);\n        float eye = length(ep)-.35;\n        if(eye<SURF_DIST)\n        \treturn vec3(MAT_EYE, ep.yz);\n        else\n            return vec3(MAT_BODY, 0, 0);\n            \n    }else if(closest==body.x) {\n        return vec3(MAT_BODY, body.yz);\n    }\n}\n\n\nfloat RayMarch(vec3 ro, vec3 rd) {\n\tfloat dO=0.;\n    \n    for(int i=0; i<MAX_STEPS; i++) {\n    \tvec3 p = ro + rd*dO;\n        float dS = GetDist(p);\n        dO += dS;\n        if(dO>MAX_DIST || abs(dS)<SURF_DIST) break;\n    }\n    \n    return dO;\n}\n\n\/\/ From Nimitz\nvec4 GetNormalAndCurvature(in vec3 p, float eps) {\n    vec2 e = vec2(-1., 1.)*eps;   \n    float t1 = GetDist(p + e.yxx), t2 = GetDist(p + e.xxy);\n    float t3 = GetDist(p + e.xyx), t4 = GetDist(p + e.yyy);\n\n    float c = .25\/e.y*(t1 + t2 + t3 + t4 - 4.0*GetDist(p));\n    vec3 n = normalize(e.yxx*t1 + e.xxy*t2 + e.xyx*t3 + e.yyy*t4);\n    \n    return vec4(n, c);\n}\n\nvec3 GetRayDir(vec2 uv, vec3 p, vec3 l, float z) {\n    vec3 f = normalize(l-p),\n        r = normalize(cross(vec3(0,1,0), f)),\n        u = cross(f,r),\n        c = f*z,\n        i = c + uv.x*r + uv.y*u,\n        d = normalize(i);\n    return d;\n}\n\n\nvec4 Material(vec3 ro, vec3 rd, float d) {\n    vec3 p = ro + rd * d;\n    vec4 n = GetNormalAndCurvature(p, mix(.01, .03, S(8., 20., d)));\n\n    p.xz *= Rot(sin(iTime*.3)*.1*S(1., 0., p.z));\n    vec3 mat = GetMat(p);\n    \n    vec3 col = vec3(n.y*.5+.5);  \t\/\/ diffuse\n\tcol *= 1.-max(0., .3-n.w);\t\t\/\/ curvature shadow\n    \n    vec3 h = normalize(-rd + vec3(1,1,1));\n    float spe = pow(clamp(dot(h, n.xyz), 0.0, 1.0), 32.0);\n\t\n    vec3 ref = reflect(rd, n.xyz);\n    vec3 r = texture(iChannel0, ref).rgb;\n    \n    if(mat.x==MAT_EYE) {\n        vec2 sph = RaySphere(\n            vec3(abs(p.x*.9),p.yz), \n            vec3(-abs(rd.x), rd.yz), \n            vec4(.3,.265,-.82, .52)\n        );\n\n        vec3 sp = p+rd*sph.x;\n        mat.yz = sp.yz-vec2(.265,-.82)+.05;\n\n        float t = iTime*.2;\n        vec2 p1 = sin(floor(t)*vec2(20., 31.));\n        vec2 p2 = sin(floor(t+1.)*vec2(20., 31.));\n        p1 = mix(p1, p2, S(.45, .5, fract(t)));\n        mat.yz += p1*vec2(.01, .03)*1.;\n        float a = atan(mat.y, mat.z);\n\n        float d = abs(mat.z)+mat.y*mat.y;\n        col *= vec3(1,1,.1);\n        col += S(.1, .0, length(mat.yz*vec2(1,2))-.1)*.1;\n        \n        float z = S(.7, 1., rd.z*rd.z)*.05;\n        col *= S(.02-z, .03+z, d);\n        \n        vec3 gp = vec3(a, mat.yz)*20.;\n        float gyroid = (abs(dot(sin(gp), cos(gp.zxy))));\n        col *= 1.+gyroid*.1;\n        \n        col += r*r*r*.3;\n        col += pow(spe, 6.);\n    } else if(mat.x==MAT_BODY) {\n        float x = mat.y;\n        float y = mat.z;\n        float wave = S(2., 0., abs(y-2.+sin(x*.5)*1.));\n        wave *= S(2., 3., p.z);\n        \n        float t = iTime*.3;\n        float neckFade = S(3., 10., p.z);\n        p.y += sin(p.z*.1-t)*neckFade;\n        \n        vec3 baseCol = mix(vec3(1., 1., .2), vec3(.3, .8, .1), S(-.55, -.1, p.y));\n        col *= mix(baseCol, vec3(.2,.4,.2)*.5, wave);\n        col += spe*pow(1.-abs(n.w), 5.)*.3;\n        \n        r = texture(iChannel1, ref).rgb;\n        col += r*r*.05;\n    } else if(mat.x==MAT_TONGUE) {\n    \tcol *= vec3(.4, .1, .2);\n        col += pow(min(1., spe*5.), 5.);\n    }\n    \n    return vec4(col, 1);\n}\n\nvec3 Render(vec2 uv, vec2 m, float t) {\n    vec3 ro = vec3(0, 0, -3)*(8.+sin(t*.2)*2.*CAM_MOVE);\n    ro.yz *= Rot(-m.y*3.14+sin(t*.03)*CAM_MOVE*.2);\n    ro.xz *= Rot(-m.x*6.2831*2.+sin(t*.05)*CAM_MOVE);\n    \n    vec3 rd = GetRayDir(uv, ro, vec3(0,0,sin(t*.11)), 6.);\n    \n    float d = RayMarch(ro, rd);\n    \n    vec3 col = vec3(0);\n    \n    vec2 env = RaySphere(ro, rd, vec4(0,0,0,20));\n    \n    if(d<MAX_DIST) {\n        vec4 snake = Material(ro, rd, d);\n    \tsnake.rgb *= S(60., 10., d);\n        col = mix(col, snake.rgb, snake.a);\n    } else {\n    \tcol = (rd.y*.5+.5)*vec3(.4, 1.,.2);\n        col *= texture(iChannel0, rd).rgb;\n        col *= 1.-S(.8, 1., rd.z);\n        \n        if(env.y>0.)\t\/\/ vines behind\n            col *= S(0., 1.1, sdGyroid(ro + env.y*rd, .4, .1, .0))*.5+.5;\n    }\n    \n    if(env.x>0.)\t\/\/ vines in front\n        col *= S(0., .25, sdGyroid(ro + env.x*rd, .25, .1, .0));\n    \n    return col;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = (fragCoord-.5*iResolution.xy)\/iResolution.y;\n\tvec2 m = (iMouse.xy-.5*iResolution.xy)\/iResolution.xy;    \n    if(m.x<-.49 && m.y<-.49) m*=0.;\n    \n    vec3 col = Render(uv, m, iTime);\n    \n    col *= 1.5;\t\t\t\t\t\t\/\/ exposure adjustment\n    col = pow(col, vec3(.4545));\t\/\/ gamma correction\n    col *= 1.-dot(uv,uv)*.3;\t\t\/\/ vignette\n\n    fragColor = vec4(col,1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

@@ -1,0 +1,53 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "7tcGWB",
+        "date": "1637429335",
+        "viewed": 4378,
+        "name": "Hyper Dough",
+        "username": "Tater",
+        "description": "experimenting with some complicated diffuse lighting. ",
+        "likes": 72,
+        "published": 3,
+        "flags": 0,
+        "usePreview": 1,
+        "tags": [
+            "3d",
+            "raymarch",
+            "glow",
+            "halfprism"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XsBSR3",
+                    "filepath": "\/media\/a\/cb49c003b454385aa9975733aff4571c62182ccdda480aaba9a8d250014f00ec.png",
+                    "previewfilepath": "\/media\/ap\/cb49c003b454385aa9975733aff4571c62182ccdda480aaba9a8d250014f00ec.png",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "nearest",
+                        "wrap": "repeat",
+                        "vflip": "false",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/very inspired by this work from halfprism\n\/\/https:\/\/twitter.com\/halfprism_\/status\/1434909264951263243\n#define GLOW\n#define STEPS 200.0\n#define MDIST 50.0\n#define pi 3.1415926535\n#define rot(a) mat2(cos(a),sin(a),-sin(a),cos(a))\n#define sat(a) clamp(a,0.0,1.0)\n#define range(a,b,r,x) (smoothstep(a-r,a+r,x)*smoothstep(b+r,b-r,x))\n#define s(a) smoothstep(0.0,1.0,a)\n#define pmod(p,x) (mod(p,x)-0.5*(x))\n\n\/\/smin & smax, probably based on IQ's version idk \nfloat smin(float a,float b, float k){ \n    float h=max(0.,k-abs(a-b));\n    return min(a,b)-h*h*.25\/k;\n}\n\nfloat smax(float d1,float d2,float k){\n    float h=clamp(0.5-0.5*(d2+d1)\/k,0.,1.);\n    return mix(d2,-d1,h)+k*h*(1.0-h);\n}\n\n\/\/https:\/\/www.shadertoy.com\/view\/3tjGWm\nvec3 hs(vec3 c, float s){\n    vec3 m=vec3(cos(s),s=sin(s)*.5774,-s);\n    return c*mat3(m+=(1.-m.x)\/3.,m.zxy,m.yzx);\n}\n\n\/\/iq box sdf\nfloat ebox(vec3 p, vec3 b){\n  vec3 q = abs(p) - b;\n  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);\n}\n\nvec2 moda (vec2 p, float per){\n    float a = atan(p.y,p.x);\n    a = mod(a-per\/2.,per)-per\/2.;\n    return vec2 (cos(a),sin(a))*length(p);\n}\n\nfloat box(vec2 p, float r){\n  vec2 d = abs(p);\n  return max(d.x,d.y)-r;\n}\n\nfloat superGon(vec2 p, float r){\n  float a = box(p,r);\n  p*=rot(pi\/4.);\n  float b = box(p,r);\n  a = max(a,b);\n  p*=rot(pi\/8.);\n  b = box(p,r);\n  a = max(a,b);\n  p*=rot(pi\/4.);\n  b = box(p,r);\n  a = max(a,b);\n  return a;\n}\n\nfloat octGon(vec2 p, float r){\n  float a = box(p,r);\n  p*=rot(pi\/4.);\n  float b = box(p,r);\n  a = max(a,b);\n  return a;\n}\n\nfloat glow = 0.;\nfloat glow2 = 0.;\nvec2 map(vec3 p){\n    float t = iTime*0.85;\n    vec3 po2 = p;\n    p.xz*=rot(pi\/4.0);\n    vec3 po = p;\n    \n    vec2 a = vec2(1);\n    vec2 b = vec2(1);\n    a.x = 999.;\n    float ballscl = 3.4;\n    \n    for(float i = 0.; i<13.0; i++){\n        p.x+=tanh(cos(t*2.0+i*1.4)*8.0)*ballscl;\n        p.x+=tanh(cos(t*1.0+i*2.0)*20.0)*ballscl;\n        p.z+=tanh(sin(t*2.0+i*0.5)*8.0)*ballscl;\n        p.z+=tanh(sin(t*1.0+i*3.5)*8.0)*ballscl;\n        p.y+=sin(t*0.33+i*2.3+tanh(sin(t*1.1)*8.)*1.5)*7.5;\n\n        b.x = length(p)-1.7;\n        a.x = smin(a.x,b.x,1.3);\n        p = po;\n    }\n    \n    p.xy*=rot(pi\/4.);\n    float wv = 0.6;\n    float disp = sin(p.x*wv+t*2.0)*sin(p.z*wv);\n    p+=disp;\n    p.xz = abs(p.xz)-2.6;\n    \n    float size = 2.75;\n    b.x = ebox(p, vec3(size,0.,size))-1.7;\n    b.x = smax(a.x-0.2,b.x,2.);\n    a.x = min(a.x,b.x);\n    \n    glow+=0.6\/(2.9+a.x*a.x);\n    #ifdef GLOW\n    \/\/outer lines\n    p = po2;\n    \n    p.xy*=rot(0.8);\n    float space = .3;\n    float width = .2;\n    p.y+=t*0.75;\n    vec2 c = vec2(a.x,3.0);\n    \n    p.y = pmod(p.y,space+width);\n    float cut = abs(p.y)-space*0.5;\n    \n    c.x-=.3;\n    c.x = abs(c.x)-0.15;\n    c.x = max(c.x,-cut);\n    if(c.x<0.01){\n    glow2+=1.3\/(2.9+c.x*c.x);\n    glow-=0.5\/(2.9+c.x*c.x);\n    }\n    glow-=0.05\/(0.4+c.x*c.x);\n    c.x = max(0.03,abs(c.x));\n\n    a=(a.x<c.x)?a:c;\n    #endif\n    return a;\n}\n\nvec3 norm(vec3 p){\n    vec2 e = vec2(0.01,0);\n    return normalize(map(p).x-vec3(\n    map(p-e.xyy).x,\n    map(p-e.yxy).x,\n    map(p-e.yyx).x));\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord){\n    vec2 uv = (fragCoord-0.5*iResolution.xy)\/iResolution.y;\n    \n    vec3 col = vec3(0);\n\n    vec3 ro = vec3(0,0,-28.0);\n    if(iMouse.z>0.){\n    ro.yz*=rot(2.0*(iMouse.y\/iResolution.y-0.5));\n    ro.zx*=rot(-7.0*(iMouse.x\/iResolution.x-0.5));\n    }\n    vec3 lk = vec3(0,0.1,0);\n    vec3 f = normalize(lk-ro);\n    vec3 r = normalize(cross(vec3(0,1,0),f));\n    vec3 rd = normalize(f*(1.0)+uv.x*r+uv.y*cross(f,r));  \n    vec3 p = ro;\n    vec2 d = vec2(0);\n    bool hit = false;\n    float dO = 0.;\n    float blueNoise = texelFetch(iChannel0, ivec2(fragCoord)% textureSize(iChannel0, 0) , 0).r;\n    ro+=rd*(blueNoise*min(10.0,map(ro).x*0.8)-0.5);\n\n    for(float i = 0.; i<STEPS; i++){\n        p = ro+rd*dO;\n        d = map(p);\n        dO+=d.x;\n        if(abs(d.x)<0.005){\n            hit = true;\n            break;\n        }\n        if(dO>MDIST){\n            break;\n        }\n    }\n    vec3 red = vec3(0.957,0.176,0.310);\n    vec3 redish = vec3(0.706,0.094,0.278);\n    if(hit){\n        vec3 n = norm(p);\n        vec3 rr = reflect(rd,n);\n        vec3 ld = normalize(vec3(-1,1.6,-0.1));\n        ld.xz*=rot(0.3);\n        vec3 h = normalize(ld - rd);\n        float diff = max(0.0,dot(n,ld));\n        float amb = dot(n,ld)*0.5+0.5;\n        float fres = pow(dot(rd,rr)*0.4+0.6,1.0);\n        float spec = pow(max(dot(n, h),0.), 20.);\n        float diff2 = dot(n,ld)*0.7+0.3;\n\n        vec3 diffcol = vec3(0);\n        \n        \/\/Base top red color\n        diffcol+=mix(red,redish,0.5);\n        \/\/Sorta shift yellow towards top of diff but keep bottom end\n        float bias = 0.3;\n        \/\/Base Top Yellow \n        vec3 top1=vec3(diff2*0.5,pow(diff2,0.9),diff2*0.1)*smoothstep(0.0,0.4+bias,dot(n,ld)+0.15);\n        \/\/Second version of Top Yellow \n        vec3 top2 =vec3(diff2*0.6,diff2*0.9,diff2*-0.3)*smoothstep(0.0,0.5+bias,dot(n,ld));\n        \/\/Idk I liked both of them\n        diffcol+=mix(top1,top2,0.6);\n        \/\/White top hightlight\n        diffcol+=vec3(0,0,1)*smoothstep(0.75,1.15,diff)*0.3;\n        \/\/Saturate \n        diffcol=pow(diffcol,vec3(1.05));\n        \/\/Add diffcol\n        col+=diffcol;\n        \/\/Transition between dark and light\n        float cutdiff = smoothstep(0.3,0.55,amb)+0.1;\n        \/\/Remove previous lighting in dark\n        col*=cutdiff;\n        \/\/add purple fresnal in dark area\n        col+=mix(fres,1.0,0.3)*pow(redish,vec3(1.3))*sat(1.0-cutdiff)*0.8;\n        \/\/I think the hueshift breaks without this idk\n        col = sat(col);\n        \/\/col = vec3(amb);\n    }\n    else {\n        float px = 2.5\/min(iResolution.x,iResolution.y);\n        \n        col+=sat(min(glow*0.05,0.3)*2.5)*redish;\n        uv-=vec2(-0.9,0.6);\n        col+=redish*length(uv)*smoothstep(0.5,5.8,length(uv));\n\n        \n        uv+=vec2(0.08,-0.06);\n        vec2 uv2 = uv;\n        uv2*=rot(-iTime*0.02);\n        col+=0.55*mix(vec3(0.973,0.004,0.369),vec3(0.537,0.200,0.910),uv.y+0.5)\n        *smoothstep(0.5+px,0.5-px,superGon(uv2,-0.01));\n\n\n        vec2 uvo = uv;\n        uv.xy*=rot(iTime*0.0075);\n        uv=moda(uv,0.18);\n        uv.x-=0.55;\n\n        col+=0.3*vec3(0.973,0.004,0.369)*smoothstep(0.025+px,0.025-px,octGon(uv,0.0));\n\n        uv = uvo;\n        uv.xy*=rot(iTime*0.0125);\n        uv=moda(uv,0.17);\n        uv.x-=0.62;\n\n        uv=moda(uv,2.);\n        uv.x-=0.03;\n\n        col+=0.3*vec3(0.973,0.004,0.369)*smoothstep(0.0125+px,0.0125-px,octGon(uv,0.0));\n    \n    }  \n    col +=min(glow2*0.06,0.7)*pow(redish,vec3(0.5));\n\n    \/\/Hue Shift\n    col = hs(col,0.3);\n    \n    fragColor = vec4(col,1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

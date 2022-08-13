@@ -1,0 +1,34 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "NsdXDs",
+        "date": "1634186925",
+        "viewed": 3641,
+        "name": "Terraform",
+        "username": "Xor",
+        "description": "Just a fun little animation",
+        "likes": 80,
+        "published": 1,
+        "flags": 0,
+        "usePreview": 0,
+        "tags": [
+            "animation"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "#define AA 1\n#define EPS .001\n#define MAX 50.\n\nvec2 hash2(vec2 p)\n{\n    return fract(sin(p*mat2(98,-64,-73,69))*397.)*.8;\n}\nfloat height(vec2 p)\n{\n    return p.x+sin(p.y*.3)*3.-iTime;\n}\nfloat cell(vec3 p)\n{\n    vec2 f = floor(p.xz);\n    float d = 4.;\n    \n    for(int X = -1; X<=1; X++)\n    for(int Y = -1; Y<=1; Y++)\n    {\n        vec2 h = f+vec2(X,Y);\n        h += hash2(h)-p.xz;\n        \n        vec3 c = vec3(h,p.y+1.);\n        vec2 R = normalize(sin(c.xy+p.xz));\n        mat2 r = mat2(R,-R.y,R);\n\n        float off = height(p.xz+c.xy);\n        c.z -= sqrt(abs(off))-1.;\n        c.z = max(c.z,0.);\n\n        float s = .13*smoothstep(-.2,.2,off);\n        c.xy *= r;\n        float w = .15;\n        d = min(d, length(max(abs(c)-s,0.))+s-w);\n    }\n    \n    return d;\n}\nfloat dist(vec3 p)\n{\n    return min(p.y+1.,cell(p));\n}\nvec3 normal(vec3 p)\n{\n    vec2 e = vec2(-2,2)*EPS;\n    return normalize(dist(p+e.xxy)*e.xxy+dist(p+e.xyx)*e.xyx+\n    dist(p+e.yxx)*e.yxx+dist(p+e.y)*e.y);\n}\nvec3 color(vec3 p,vec3 r)\n{\n    float off = height(p.xz);\n    float s = smoothstep(-.2,.2,off);\n    \n    float l = cell(vec3(p.x,-2,p.z));\n    float e = smoothstep(.02,0.,l);\n\n\n    vec3 n = normal(p);\n    float ao = clamp(dist(p+n*.2)\/.2,.1,1.);\n    vec3 sd = normalize(vec3(3,2,-1));\n    float dl = max(.3+.7*dot(n,sd),0.);\n    float sl = max(dot(reflect(r,n),sd)*1.2-1.,0.);\n    \n    for(float i = .02;i<.5; i*=1.3)\n    {\n        dl *= clamp(1.5-i\/(i+dist(p+sd*i*2.)),.0,1.);\n    }\n    vec3 sh = mix(vec3(.1,.15,.2),vec3(1),dl);\n    \n    vec3 col = mix(vec3(0.7,1,.2),vec3(1,0.4,0.1),s);\n    return mix(vec3(.5,.7,.8),col*min((p.y+1.1)\/.4,1.),e)*sh*sqrt(ao)+sl;\n}\nvec4 march(vec3 p,vec3 r)\n{\n    vec4 m = vec4(p+r,1);\n    for(int i = 0;i<200;i++)\n    {\n        float s = dist(m.xyz);\n        m += vec4(r,1)*s;\n        \n        if (s<EPS || m.w>MAX) return m;\n    }\n    return m;\n}\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec3 p = vec3(iTime-2.,.5+.5*cos(iTime*.2),1);\n    vec3 col = vec3(0);\n    for(int X = 0;X<AA;X++)\n    for(int Y = 0;Y<AA;Y++)\n    {\n        vec2 c = fragCoord+vec2(X,Y)\/float(AA)-.5;\n        vec3 r = normalize(vec3(c-vec2(.5,.6)*iResolution.xy,iResolution.y));\n    \n        vec4 m = march(p,r);\n        float fog = smoothstep(MAX*.4,MAX,m.w);\n        col += mix(color(m.xyz,r),exp(-vec3(13,7,4)*r.y*r.y-.2),fog);\n    }\n    col \/= float(AA*AA);\n    fragColor = vec4(pow(col,vec3(.45)),1);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

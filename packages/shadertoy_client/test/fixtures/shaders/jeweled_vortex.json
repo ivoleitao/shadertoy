@@ -1,0 +1,46 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "fdjfDc",
+        "date": "1647519670",
+        "viewed": 4507,
+        "name": "Jeweled Vortex",
+        "username": "ChunderFPV",
+        "description": "A logarithmic version of this: https:\/\/www.shadertoy.com\/view\/sllyRn with added fanciness.\nMagical segmentation code derived from this: https:\/\/www.shadertoy.com\/view\/lsdBzX\nDebugging Font by valalalalala: https:\/\/www.shadertoy.com\/view\/WtGyWD",
+        "likes": 112,
+        "published": 3,
+        "flags": 0,
+        "usePreview": 0,
+        "tags": [
+            "2d",
+            "math",
+            "spiral",
+            "vogel",
+            "fractions"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "#define SCALE 2.0\n#define R iResolution.xy\n#define PI radians(180.0)\n#define TAU (PI*2.0)\n#define CL(x,a,b) smoothstep(0.0,1.0,(2.0\/3.0)*(x-a)\/(b-a)+(1.0\/6.0))*(b-a)+a \/\/ https:\/\/www.shadertoy.com\/view\/Ws3Xzr\nvoid mainImage( out vec4 O, in vec2 U )\n{\n    vec4 m = iMouse; m.xy = (m.xy-0.5*R.xy)\/R.y*2.0; \/\/ mouse to cartesian\n    float st = radians(-31.0); \/\/ start position (180 = inf)\n    float t = (m.z > 0.0) ? atan(m.x, -m.y): st+(iTime*TAU)\/3600.0; \/\/ #sec for num line\n    float n = (cos(t) > 0.0) ? sin(t): 1.0\/sin(t); \/\/ time to sin\/csc\n    float az = pow(500.0, n); \/\/ autozoom\n    az = clamp(az, CL(az, 1e-16, 1e-15), CL(az, 1e+17, 1e+18)); \/\/ clamp at precision lost\n    vec2 uv = (U-0.5*R)\/R.y*SCALE*az; \/\/ apply cartesian, scale, zoom\n    vec3 c = vec3(0); \/\/ black background\n    float a = atan(uv.x, -uv.y); \/\/ arc radian\n    float i = a\/TAU; \/\/ spiral increment 0.5 per 180\u00b0\n    float l = pow(length(uv), 0.5\/n); \/\/ logarithmic (archimedean at 0.5)\n    float r = l-i; \/\/ spiral radius\n    float ls = (iTime*TAU)\/5.0; \/\/ light animation speed\n    c += sin(ls+pow(TAU*ceil((TAU*l-a)\/TAU)+a, 2.0)\/(2.0*TAU*n)); \/\/ segmented spiral magic\n    c *= pow(sin(fract(r)*PI), abs(n*2.0)+5.0); \/\/ smooth edges & thin near inf\n    float vd = (ceil(r)*TAU+a)\/n; \/\/ visual denominator\n    c *= sin(vd*(ceil(r)+i)+PI\/2.0+ls*2.0); \/\/ this looks nice\n    c *= 0.2+abs(cos(vd)); \/\/ dark spirals\n    c = min(c, pow(length(uv)\/az, -1.0\/n)); \/\/ dark gradient\n    vec3 rgb = vec3(cos(vd)+1.0, abs(sin(t)), cos(PI+vd)+1.0); \/\/ color\n    c += (c*2.0)-(rgb*0.5); \/\/ add color\n    if (m.z > 0.0) c = digitIn(c, vec3(1), (U-0.5*R)\/R.y*2.0-m.xy, 44.0, n); \/\/ digits\n    O = vec4(c, 1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "\/\/ https:\/\/www.shadertoy.com\/view\/WtGyWD\nconst int CHARACTERS[14] = int[14](31599,9362,31183,31207,23524,29671,29679,30994,31727,31719,1488,448,2,3640);\nfloat digitIsOn( int digit, vec2 id ) {   \n    if ( id.x < .0 || id.y < .0 || id.x > 2. || id.y > 4. ) return .0;\n    return floor( mod( float( CHARACTERS[ int( digit ) ] ) \/ pow( 2., id.x + id.y * 3. ), 2. ) );\n}\nfloat digitSign( float v, vec2 id ) {\n    return digitIsOn( 10 - int( ( sign( v ) - 1. ) * .5 ), id );\n}\nint digitCount( float v ) {\n    return int( floor( log( max( v, 1. ) ) \/ log( 10. ) ) );\n}\nfloat digitFirst( vec2 uv, float scale, float v, int decimalPlaces ) {\n    vec2 id = floor( uv * scale );\n\n    if ( .0 < digitSign( v, id ) ) return 1.;\n    v = abs( v );\n    \n    int digits = digitCount( v );\n    float power = pow( 10., float( digits ) );\n    \n    float offset = floor( .1 * scale );\n    id.x -= offset;\n    \n    float n;\n    for ( int i = 0 ; i < 33 ; i++, id.x -= offset, v -= power * n, power \/= 10. ) {\n        n = floor( v \/ power );\n        if ( .0 < digitIsOn( int( n ), id ) ) return 1.;   \n        if ( i == digits ) {\n            id.x -= offset;\n            if ( .0 < digitIsOn( int( 12 ), id ) ) return 1.;\n        }  \n        if ( i >= digits + decimalPlaces ) return .0;    \n    }  \n    return .0;\n}\nfloat digitFirst( vec2 uv, float scale, float v ) {\n    return digitFirst( uv, scale, v, 3 );\n}\nvec3 digitIn( vec3 color, vec3 fontColor, vec2 uv, float scale, float v ) {\n    float f = digitFirst( uv, scale, v );\n    return mix( color, fontColor, f );\n}",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        }
+    ]
+}

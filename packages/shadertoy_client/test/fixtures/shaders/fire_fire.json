@@ -1,0 +1,221 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "sdGBzt",
+        "date": "1659024446",
+        "viewed": 4794,
+        "name": "Fire!Fire!",
+        "username": "zguerrero",
+        "description": "Fire experiment, fake fluid simulation.\nclick and drag to move the fireball",
+        "likes": 114,
+        "published": 1,
+        "flags": 32,
+        "usePreview": 0,
+        "tags": [
+            "fire",
+            "fluid"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4sXGR8",
+                    "filepath": "\/media\/previz\/buffer02.png",
+                    "previewfilepath": "\/media\/previz\/buffer02.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "const vec3 color1 = vec3(0.0, 0.05, 0.2);\nconst vec3 color2 = vec3(0.1, 0.0, 0.1);\nconst vec3 color3 = vec3(0.5, 0.15, 0.25);\nconst vec3 color4 = vec3(2.0, 1.25, 0.7);\nconst vec3 color5 = vec3(2.0, 2.0, 2.0);\n\nconst vec3 glowColor1 = vec3(1.5, 0.5, 0.0);\nconst vec3 glowColor2 = vec3(1.5, 1.5, 0.5);\n\nconst vec3 lightColor = vec3(1.0, 1.5, 0.75);\nconst vec3 lightDirection = normalize(vec3(0.0, -1.0, 0.0));\n\nconst float a = 0.125;\nconst float b = 0.35;\nconst float c = 0.5;\n\nvec3 gradient(float value)\n{\n    vec4 start = vec4(0.0, a, b, c);\n    vec4 end = vec4(a, b, c, 1.0);\n    vec4 mixValue = smoothstep(start, end, vec4(value));\n    \n    vec3 color = mix(color1, color2, mixValue.x);\n    color = mix(color, color3, mixValue.y);\n    color = mix(color, color4, mixValue.z);\n    color = mix(color, color5, mixValue.w);\n    \n    return color;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord \/ iResolution.xy;\n    \n    vec4 source = texture(iChannel0, uv);\n    \n    vec2 force = texture(iChannel1, uv).xy;\n    force = DecodeForce(force);\n    \n    float value = length(force);\n    \n    float glow = source.w + source.z * 0.75;\n    glow \/= 2.0;\n    \n    vec3 color = gradient(value);\n    color += mix(glowColor1, glowColor2, glow) * glow;\n    \n    vec3 normal = vec3(force.x, force.y, 1.0) * 0.5;\n    normal = normalize(normal);\n    \n    float NdotL = smoothstep(-0.5, 0.5, dot(normal, lightDirection));\n    color += color * NdotL * lightColor;\n    \n    fragColor = vec4(color, 1.0);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [],
+            "outputs": [],
+            "code": "vec2 EncodeForce(vec2 force)\n{\n    force = clamp(force, -1.0, 1.0);\n    return force * 0.5 + 0.5;\n}\n\nvec2 DecodeForce(vec2 force)\n{\n    force = force * 2.0 - 1.0;\n    return force;\n}\n\nconst float pi = 3.14159265359;\nconst float tau = 6.28318530718;\n\nmat2 rot(float a) \n{\n    vec2 s = sin(vec2(a, a + pi\/2.0));\n    return mat2(s.y,s.x,-s.x,s.y);\n}\n\nfloat linearStep(float a, float b, float x)\n{\n    return clamp((x - a)\/(b - a), 0.0, 1.0);\n}",
+            "name": "Common",
+            "description": "",
+            "type": "common"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XdX3Rr",
+                    "filepath": "\/media\/a\/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+                    "previewfilepath": "\/media\/ap\/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+                    "type": "volume",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/Init Fluid\n\nconst vec3 noiseSpeed1 = vec3(-0.05, 0.0, 0.2);\nconst float noiseSize1 = 3.3;\nconst vec3 noiseSpeed2 = vec3(0.05, 0.0, -0.2);\nconst float noiseSize2 = 0.8;\nconst float circleForceAmount = 15.0;\nconst vec2 randomForceAmount = vec2(0.5, 0.75);\nconst vec2 upForce = vec2(0.0, 0.8);\nconst vec2 moveSpeed = vec2(1.0, 2.0);\n\nvec4 GetNoise(vec2 uv, float ratio)\n{\n    vec3 noiseCoord1;\n    noiseCoord1.xy = uv;\n    noiseCoord1.x *= ratio;\n    noiseCoord1 += iTime * noiseSpeed1;\n    noiseCoord1 *= noiseSize1;\n    \n    vec3 noiseCoord2;\n    noiseCoord2.xy = uv;\n    noiseCoord2.x *= ratio;\n    noiseCoord2 += iTime * noiseSpeed2;\n    noiseCoord2 *= noiseSize2;\n    \n    vec4 noise1 = texture(iChannel2, noiseCoord1);\n    vec4 noise2 = texture(iChannel2, noiseCoord2);\n    \n    vec4 noise = (noise1 + noise2) \/ 2.0;\n    \n    return noise;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float ratio = iResolution.x \/ iResolution.y;\n    vec2 uv = fragCoord \/ iResolution.xy;\n    \n    vec2 circleCoord = uv;   \n    vec2 mousePos = vec2(0.0);\n    vec2 circleVelocity = vec2(0.0);\n    \n    if(iMouse.z > 0.5)\n    {     \n        circleCoord -= iMouse.xy\/iResolution.xy;\n    }\n    else\n    {\n        circleCoord -= 0.5;\n        circleCoord.xy += sin(iTime * moveSpeed) * vec2(0.35, 0.25);\n    }\n    \n    circleCoord.x *= ratio;\n    \n    float circle = length(circleCoord);\n    float bottom = uv.y;\n    \n    vec4 masksIN = vec4(0.08, 0.35, 0.05, 0.2);\n    vec4 masksOUT = vec4(0.06, 0.0, 0.0, 0.0);\n    vec4 masksValue = vec4(circle, circle, bottom, bottom);\n    vec4 masks = smoothstep(masksIN, masksOUT, masksValue);\n\n    vec2 mask = masks.xy + masks.zw;\n    \n    vec4 noise = GetNoise(uv, ratio);\n        \n    vec2 force = circleCoord * noise.xy * circleForceAmount * masks.x;\n    force += (noise.xy - 0.5) * (masks.x * randomForceAmount.x + masks.z * randomForceAmount.y);\n    force.y += (0.25 + 0.75 * noise.z) * (masks.x * upForce.x + masks.z * upForce.y);\n    force = EncodeForce(force);\n    \n    fragColor = vec4(force.x, force.y, mask.x, mask.y);\n}",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XdX3Rr",
+                    "filepath": "\/media\/a\/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+                    "previewfilepath": "\/media\/ap\/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+                    "type": "volume",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4sXGR8",
+                    "filepath": "\/media\/previz\/buffer02.png",
+                    "previewfilepath": "\/media\/previz\/buffer02.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "XsXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/Move Fluid\n\nconst float flow1 = 0.5;\nconst float flow2 = 0.75;\nconst float speed = 0.02;\nconst float gravity = -0.15;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float ratio = iResolution.x \/ iResolution.y;\n    vec2 uv = fragCoord \/ iResolution.xy;\n\n    vec4 source = texture(iChannel0, uv);\n \n    vec2 force = texture(iChannel1, uv).xy;\n    force = DecodeForce(force);\n    force.y -= gravity;\n    \n    vec2 s = vec2(speed);\n    s.x \/= ratio;\n    force *= s;\n    \n    source.z = smoothstep(flow1, flow2, source.z);\n    \n    vec2 movedForce = texture(iChannel1, uv - force).xy;\n    movedForce = mix(movedForce, source.xy, source.z);\n    \n    fragColor = vec4(movedForce.x, movedForce.y, 0.0, 1.0);\n}",
+            "name": "Buffer B",
+            "description": "",
+            "type": "buffer"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "XdX3Rr",
+                    "filepath": "\/media\/a\/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+                    "previewfilepath": "\/media\/ap\/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+                    "type": "volume",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "XsXGR8",
+                    "filepath": "\/media\/previz\/buffer01.png",
+                    "previewfilepath": "\/media\/previz\/buffer01.png",
+                    "type": "buffer",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4sXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/Update Fluid\n\nconst int Xiterations = 2;\nconst int Yiterations = 2;\n\nconst float sampleDistance1 = 0.006;\nconst float sampleDistance2 = 0.0001;\n\nconst float forceDamping = 0.01;\n\nconst vec3 noiseSpeed1 = vec3(0.0, 0.1, 0.2);\nconst float noiseSize1 = 2.7;\nconst vec3 noiseSpeed2 = vec3(0.0, -0.1, -0.2);\nconst float noiseSize2 = 0.8;\n\nconst float turbulenceAmount = 2.0;\n\nvec4 GetNoise(vec2 uv, float ratio)\n{\n    vec3 noiseCoord1;\n    noiseCoord1.xy = uv;\n    noiseCoord1.x *= ratio;\n    noiseCoord1 += iTime * noiseSpeed1;\n    noiseCoord1 *= noiseSize1;\n    \n    vec3 noiseCoord2;\n    noiseCoord2.xy = uv;\n    noiseCoord2.x *= ratio;\n    noiseCoord2 += iTime * noiseSpeed2;\n    noiseCoord2 *= noiseSize2;\n    \n    vec4 noise1 = texture(iChannel2, noiseCoord1);\n    vec4 noise2 = texture(iChannel2, noiseCoord2);\n    \n    vec4 noise = (noise1 + noise2) \/ 2.0;\n    \n    return noise;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float ratio = iResolution.x \/ iResolution.y;\n    vec2 uv = fragCoord \/ iResolution.xy;\n    \n    vec4 source = texture(iChannel0, uv);    \n    \n    vec2 currentForce = DecodeForce(texture(iChannel1, uv).xy);\n    float currentForceMagnitude = length(currentForce);\n       \n    vec3 sampleDistance; \n    sampleDistance.xy = vec2(mix(sampleDistance1, sampleDistance2, smoothstep(-0.25, 0.65, currentForceMagnitude)));\n    sampleDistance.z = 0.0;\n    \n    vec2 totalForce = vec2(0.0);\n    float iterations = 0.0;\n    \n    for(int x = -Xiterations; x <= Xiterations; x++)\n    {\n        for(int y = -Yiterations; y <= Yiterations; y++)\n        {\n            vec3 dir = vec3(float(x), float(y), 0.0);\n            vec4 sampledValue = texture(iChannel1, uv + dir.xy * sampleDistance.xy);\n            \n            vec2 force = DecodeForce(sampledValue.xy); \n            float forceValue = length(force);\n            totalForce += force * forceValue;\n            iterations += forceValue;\n        }\n    }\n    \n    totalForce \/= iterations;  \n    totalForce -= totalForce * forceDamping;\n    \n    float turbulence = GetNoise(uv, ratio).z - 0.5;\n    turbulence *= mix(0.0, turbulenceAmount, smoothstep(0.0, 1.0, currentForceMagnitude));\n    \n    totalForce *= rot(turbulence);\n    totalForce = EncodeForce(totalForce);\n    \n    fragColor = vec4(totalForce.x, totalForce.y, 0.0, 1.0);\n}",
+            "name": "Buffer C",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

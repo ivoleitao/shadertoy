@@ -1,0 +1,97 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "4tGfz3",
+        "date": "1545233050",
+        "viewed": 3317,
+        "name": "StarGazingHippo",
+        "username": "kuvkar",
+        "description": "Star gazing hippo. It's winter and all! Hadn't done a shader in while.",
+        "likes": 40,
+        "published": 3,
+        "flags": 0,
+        "usePreview": 0,
+        "tags": [
+            "snow",
+            "winter",
+            "hippo"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XsX3Rn",
+                    "filepath": "\/media\/a\/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+                    "previewfilepath": "\/media\/ap\/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+                    "type": "texture",
+                    "channel": 1,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4sf3Rn",
+                    "filepath": "\/media\/a\/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+                    "previewfilepath": "\/media\/ap\/0a40562379b63dfb89227e6d172f39fdce9022cba76623f1054a2c83d6c0ba5d.png",
+                    "type": "texture",
+                    "channel": 2,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "4dXGzn",
+                    "filepath": "\/media\/a\/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+                    "previewfilepath": "\/media\/ap\/0c7bf5fe9462d5bffbd11126e82908e39be3ce56220d900f633d58fb432e56f5.png",
+                    "type": "texture",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                },
+                {
+                    "id": "Xsf3zn",
+                    "filepath": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "previewfilepath": "\/media\/ap\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+                    "type": "texture",
+                    "channel": 3,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "mat3 rotx(float a) { mat3 rot; rot[0] = vec3(1.0, 0.0, 0.0); rot[1] = vec3(0.0, cos(a), -sin(a)); rot[2] = vec3(0.0, sin(a), cos(a)); return rot; }\nmat3 roty(float a) { mat3 rot; rot[0] = vec3(cos(a), 0.0, sin(a)); rot[1] = vec3(0.0, 1.0, 0.0); rot[2] = vec3(-sin(a), 0.0, cos(a)); return rot; }\nmat3 rotz(float a) { mat3 rot; rot[0] = vec3(cos(a), -sin(a), 0.0); rot[1] = vec3(sin(a), cos(a), 0.0); rot[2] = vec3(0.0, 0.0, 1.0); return rot; }\n\nvec3 lightDir = normalize(vec3(1.5, 1.2, -1.0));\nconst float groundH = .05;\n\n\/\/https:\/\/www.shadertoy.com\/view\/4djSRW\nfloat hash(vec2 p)\n{\n\t#define HASHSCALE1 .1031\n\tvec3 p3  = fract(vec3(p.xyx) * HASHSCALE1);\n    p3 += dot(p3, p3.yzx + 19.19);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\n\n\/\/ https:\/\/www.shadertoy.com\/view\/lsf3WH\nfloat noise( in vec2 p )\n{\n    vec2 i = floor( p );\n    vec2 f = fract( p );\n\t\n\tvec2 u = f*f*(3.0-2.0*f);\n\n    return mix( mix( hash( i + vec2(0.0,0.0) ), \n                     hash( i + vec2(1.0,0.0) ), u.x),\n                mix( hash( i + vec2(0.0,1.0) ), \n                     hash( i + vec2(1.0,1.0) ), u.x), u.y);\n}\n\n\n\/\/ https:\/\/www.shadertoy.com\/view\/Ml2XDw\nfloat smax(float a, float b, float k)\n{\n    return log(exp(k*a)+exp(k*b))\/k;\n}\n\n\/\/ https:\/\/iquilezles.org\/articles\/distfunctions\nfloat smin( float a, float b, float k )\n{\n    float h = clamp( 0.5+0.5*(b-a)\/k, 0.0, 1.0 );\n    return mix( b, a, h ) - k*h*(1.0-h);\n}\n\n\nfloat sdBox( vec3 p, vec3 b )\n{\n  vec3 d = abs(p) - b;\n  return length(max(d,0.0))\n         + min(max(d.x,max(d.y,d.z)),0.0); \/\/ remove this line for an only partially signed sdf \n}\n\n\nfloat opBentBox(in vec3 p, in vec3 v , float bend)\n{\n    float c = cos(bend*p.y);\n    float s = sin(bend*p.y);\n    mat2  m = mat2(c,-s,s,c);\n    vec3  q = vec3(m*p.xy,p.z);\n    return sdBox(q, v);\n}\n\nfloat sdRoundBox( vec3 p, vec3 b, float r )\n{\n  vec3 d = abs(p) - b;\n  return length(max(d,0.0)) - r\n         + min(max(d.x,max(d.y,d.z)),0.0); \/\/ remove this line for an only partially signed sdf \n}\n\nvec3 traceSphere(in vec3 ro, in vec3 rd, float r, out float t1, out float t2)\n{\n    t1=t2=-1.0;\n    vec3 X = ro + rd * (dot(normalize(-ro), rd)) * length(ro);\n    float disc = r*r-pow(length(X), 2.0);\n    if (disc < 0.0) return vec3(1000000.0);\n    disc=sqrt(disc);\n    vec3 p=X-disc*rd;\n    t1=length(p-ro);t2=t1+disc*2.;\n    return p;\n}\n\nconst int NOTHING = 0;\nconst int EYES = 1;\n\nstruct HitInfo\n{\n    int id;\n    vec3 pos;\n    float d;\n};\n\n\n\nHitInfo map(in vec3 rp)\n{\n\tHitInfo hi;\n    rp.x = abs(rp.x);\n    hi.id = NOTHING;\n    \n    \/\/ head\n    float head = sdRoundBox(rp*1.7, vec3(.04, .05, .2)*1., 0.1);\n    head += length(rp + vec3(0.0, 0.0, 0.1)) - 0.15;\n    head = smin(head, length(rp * vec3(1.1, 1.3, 1.0)+ vec3(0.0, -0.1, -.07)) -0.08, 0.05);\n    \n    \/\/ nostrils\n    float nostril = length(rp * vec3(6.0, 10.0, 1.0) + vec3(-0.27, -.5, 0.25)) - 0.1;\n    head = max(head, -nostril );\n    \n    \/\/ ears\n    float ear = length(rp * vec3(1.0, 1.0, 5.0) + vec3(-0.05, -.14, -0.5)) - 0.02;\n    head = smin(head, ear, 0.02);\n    \/\/ eyes\n    vec3 eyePos = vec3(-0.02, -0.11, -0.02);\n    float eye = length(rp + eyePos) - 0.03;\n    \n    if(eye < 0.0) \n    {\n    \thi.id = EYES;\n        hi.pos = rp-eyePos;\n        hi.d = eye;\n        return hi;\n    }\n\n    head = min(head, eye);\n    \n    \n    \/\/ mouth\n    float mouth = sdBox(rotx(-0.2) * rp + vec3(0.0, 0.02, 0.215), vec3(0.15, 0.001 * max( -((rp.z))*25., 0.), 0.15));\n    head = max(head, -mouth);\n    \n\t\/\/ torso    \n    float torso = length(rp * vec3(1.0, 1., 1.) + vec3(0.0, 0.12, -0.04)) - 0.13;\n    torso = smin(torso, head, max(0.0, rp.z*1.));\n    \n    \/\/ legs\n    float leg = sdRoundBox(rp + vec3(-.075, 0.2, -0.1), vec3(0.04, 0.3, 0.04)*.25, 0.04);\n    float feet = sdBox(rp + vec3(-.075, 0.35, -0.07), vec3(0.07, 0.01, 0.06)*.25)-.025;\n    leg = smin(leg, feet, 0.14);\n    torso = smin(torso,leg, 0.04);\n    \n    \/\/ arms\n   \tfloat arm = opBentBox(rotz(0.8)*(rp + vec3(-0.15, 0.09, -0.08)), vec3(0.01, 0.3, 0.07*max(1.0, -rp.y*0.))*.25, 5.) - .02;\n    const float fingerWidth = .03;\n    const float fingerBend = 40.;\n    const float fingerX = -0.185;\n    const float roundness = .004;\n    const float spacing = 0.025;\n    const float smoothen = .02;\n    const float fingerY = .184;\n    \n    float finger1 = opBentBox(rp + vec3(fingerX, fingerY, -0.08-spacing), vec3(fingerWidth, .02, .01)*.2, fingerBend)-roundness;\n    arm = smin(finger1, arm, smoothen);\n\n    float finger2 = opBentBox(rp + vec3(fingerX, fingerY, -0.08), vec3(fingerWidth, .02, .01)*.2, fingerBend)-roundness;\n    arm = smin(finger2, arm, smoothen);\n\n    float finger3 = opBentBox(rp + vec3(fingerX, fingerY, -0.08+spacing), vec3(fingerWidth, .02, .01)*.2, fingerBend)-roundness;\n    arm = smin(finger3, arm, smoothen);\n    \n    head = smin(arm, torso, 0.05);\n    \n    \n    float body = min(head, torso);\n    hi.d = body;\n    return hi;\n}\n\n\nvec3 grad(in vec3 rp)\n{\n    vec2 off = vec2(0.002, 0.0);\n    vec3 g = vec3(map(rp + off.xyy).d - map(rp - off.xyy).d,\n                  map(rp + off.yxy).d - map(rp - off.yxy).d,\n                  map(rp + off.yyx).d - map(rp - off.yyx).d);\n    return normalize(g);\n}\n\n\nfloat ao(in vec3 n, in vec3 rp)\n{\n    float dist = 0.1;\n    rp += n*dist;\n    float occ = 0.;\n    const int steps = 4;\n    \n    for (int i = 0; i < steps; ++i)\n    {\n        float d = map(rp).d;\n        float o= clamp(d\/(dist*float(i + 1)), 0.0, 1.0);\n        \n        occ += o;\n        rp += n * dist;\n    }\n    \n    occ \/= float(steps);\n    return occ;\n          \n}\n\n\nfloat fbm(in vec3 rp)\n{\n    rp += vec3(5.0, 0.0, 0.0);\n    vec2 p = rp.xz*.2;\n    float f = noise(p) * 0.5;\n    f += noise(p * 2.) * 0.5 * 0.5;\n    f += noise(p * 4.) * 0.5 * 0.5 * 0.5;\n    return f;\n}\n\n\nfloat sampleGround(in vec3 rp)\n{\n    rp *= 3.;\n    float texCol = 0.;\n\tfloat f = fbm(rp);\n    texCol=1.-f;\n    return texCol;\n}\n\nvec3 g_hitp = vec3(0.0);\n\nvec3 groundNormal(in vec3 rp)\n{\n    float h0 = sampleGround(rp);\n    vec2 off = vec2(0.1, 0.0);\n    float h1 = h0 - sampleGround(rp + off.xyy);\n    float h2 = h0 - sampleGround(rp + off.yyx);\n    float h =.5;\n    vec3 f=(vec3(off.x, h1*h, 0.0));\n    vec3 u=(vec3(0.0, h2*h, off.x));\n    vec3 n = normalize(cross(u, f));\n    n += (1.0 - 2.0 * texture(iChannel3, rp.xz*2.).rgb)*.15;\n    n = normalize(n);\n    return n*vec3(-1.0, 1.0, -1.0);\n}\n\n\nbool trace(in vec3 rp, in vec3 rd, inout vec4 color)\n{\n \n    bool hit = false;\n    vec3 ro = rp;\n    float dist = 0.0;\n    HitInfo hi;\n    \n    \/\/ trace to character bounding sphere\n    float t1, t2 = 0.0;\n    traceSphere(ro, rd, .38, t1, t2);\n    \n    \/\/ character\n    if(t1 > 0.0)\n    {\n        rp = ro + t1 * rd;\n        for (int i = 0; i < 140 + min(0, iFrame); ++i)\n        {\n            hi = map(rp);\n            dist = hi.d;\n            if(dist < 0.0)\n            {\n                hit = true;\n                break;\n            }\n            rp += rd * max(dist*.2, 0.001);\n\n            if(length(ro - rp) > t2) break;\n\n        }\n        rp += rd * dist*.5;\n        hi = map(rp);\n    }\n\t\n    \/\/ character color\n    vec3 albedo = vec3(180., 190., 200.)\/255.;\n    if(hi.id == EYES)\n    {\n        float off = .155;\n        albedo = vec3(1.-smoothstep(off, off+.001, dot(hi.pos, normalize(vec3(0.0, 1., -1.0)))));\n    }\n           \n    \n    if(hit)\n    {\n        \n        color = vec4(.0);\n        vec3 g = grad(rp);\n        g_hitp = rp;\n        \n        \/\/diff\n        float d = dot(g, lightDir);\n        float wrap = 0.8;\n        d = d+wrap\/(1.0+wrap);\n        d = clamp(d, 0.1, 1.0);\n        color.rgb += d*albedo*.5;\n        \n        \/\/ao\n        color.rgb += ao(g, rp)*vec3(239., 219., 159.)\/255.*.15;\n        \n        \/\/ rim\/fresn\n        vec3 source = normalize(vec3(1.0, 2.0, 5.0));\n        float rim = max(0.0, (dot(reflect(source, g), rd)));\n        rim = pow(rim, 4.0)*.5;\n        color.rgb += rim*vec3(.2, 0.2, 0.3);\n        \n        \/\/ some grounding for character + shadow\n        color.rgb *= mix(vec3(1.0), vec3(0.4, 0.6, 0.8), 1.-smoothstep(-.7, 0.3, g.y));\n        color.rgb *= 0.4 + 0.6 * smoothstep(-0.5, 0., rp.y);\n    }\n    \n    float travel = length(ro - rp);\n    vec3 hitp = ro;\n    vec3 n = vec3(0.0, 1.0, 0.0);\n    float t = (-dot(n, ro)+groundH)\/dot(rd, n);\n    \n    \/\/ ground\n    if(t > 0.)\n    {\n        hitp = ro + rd*t;\n\n\t\tfloat vdist = 0.0;\n        \n        \/\/ rougher tracing\n        for (int i = 0; i < 40 + min(0, iFrame); ++i)\n        {\n            float texCol = sampleGround(hitp);\n            vdist = hitp.y - (groundH - texCol);\n            if(vdist < 0.)\n            {\n                break;\n            }\n\n            hitp += rd*.05*log(2.+dot(ro-hitp, ro-hitp));\n        }\n        \n        \/\/ hone into the surface\n        for (int i = 0; i < 40 + min(0, iFrame); ++i)\n        {\n            hitp += rd * vdist;\n            float texCol = sampleGround(hitp);\n            vdist = hitp.y - (groundH - texCol);\n        }\n\t\t\n        if(!hit || (travel > length(ro - hitp)))\n        {\n            \/\/ dif\n            vec3 n = groundNormal(hitp);\n            float d = dot(n, normalize(vec3(0.0, 1., 0)));\n            d = clamp(d, 0.1, .99);\n            vec3 groundCol = vec3(0.7, 1., 1.) *pow(d, 4.)*.5;\n            \n            \/\/ rim            \n            float _rimd = 1.-(n.y * -rd.y);\n            float rimd = pow(_rimd, 8.0) * 4.;\n            rimd = clamp(rimd, 0.0, 1.0);\n            \n            groundCol += vec3(0.4, 0.6, 0.8) * rimd;\n            groundCol += texture(iChannel1, hitp.xz*.02).rrr * texture(iChannel3, hitp.xz).rrr;\n            \n            float specd = dot(reflect(normalize(vec3(0., -1., 0.)), n), -rd); \n            specd = pow((clamp(specd, .0, 1.0)), 4.0) * .3;\n            groundCol += vec3(0.8, 0.9, 1.0)*specd;\n            \n            color.rgb = groundCol;\n\n            g_hitp = hitp;\n\t\t    \n            color.rgb *= 0.5 + 0.5 * smoothstep(0.0, .5, length(hitp.xz));\n        }\n    }\n    \n    return hit;\n}\n\n    \nmat3 lookat(vec3 from, vec3 to)\n{\n    vec3 f = normalize(to - from);\n    vec3 _tmpr = normalize(cross(f, vec3(0.0, 1.0, 0.0)));\n    vec3 u = normalize(cross(_tmpr, f));\n    vec3 r = normalize(cross(u, f));\n    return mat3(r, u, f);\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 uv = fragCoord.xy \/ iResolution.xy;\n    uv -= vec2(0.5);\n    uv.y \/= iResolution.x \/ iResolution.y;\n\n    vec2 im = 2.0 * ((iMouse.xy \/ iResolution.xy) - vec2(0.5));\n    im.y *= .7;\n    vec3 rd = normalize(vec3(uv, .4));\n    vec3 rp = vec3(0.0, .7, -.7);\n    vec3 _rp = rp;\n    rp = roty(im.x) * rp;\n    rp.y = (rotx(im.y) *_rp).y;\n    \n    if(iMouse.z <= 0.0)\n    {\n        float T = iTime * .2;\n        rp.x = sin(T+.4);\n        rp.y = sin(T) * 0.25 + .3;\n        rp.z = -0.6;\n    }\n    \n    rd = lookat(rp, vec3(0.0)) * rd;\n    vec4 bgCol = vec4(.0, .1+rd.y*.2, 0.2, 0.15)*.15;\n    bool hit = trace(rp, rd, fragColor);\n    \n    float light = smoothstep(5.0, 1.0, length(g_hitp));\n    fragColor.rgb = mix(fragColor.rgb, vec3(0.0, 0.0, 0.02), .99-light);\n    if(!hit)\n    {\n\t    fragColor.rgb = mix(fragColor.rgb, bgCol.rgb, smoothstep(-0.15, 0., rd.y));\n        \n        vec2 starCoord = vec2( atan(rd.x, rd.z), rd.y);\n        vec3 stars = texture(iChannel0,starCoord).rrr*smoothstep(-1., .1, rd.y);\n        stars = smoothstep(0.5, 1.0, stars-.3);\n        stars *= texture(iChannel0, starCoord+vec2(iTime*.02)).rrr;\n        fragColor.rgb += stars;\n        \n    }\n    fragColor = smoothstep(0.0, 1.0, fragColor);\n    fragColor.rgb = pow(fragColor.rgb, vec3(1.0 \/ 2.2));\n    \n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

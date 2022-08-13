@@ -1,0 +1,36 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "WtscW4",
+        "date": "1592097490",
+        "viewed": 5303,
+        "name": "@Party Concert Visuals 2020",
+        "username": "blackle",
+        "description": "visuals for the concert at @party online 2020, programmed in about 1 hour",
+        "likes": 104,
+        "published": 3,
+        "flags": 0,
+        "usePreview": 1,
+        "tags": [
+            "raymarching",
+            "4d",
+            "lasers"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/CC0 1.0 Universal https:\/\/creativecommons.org\/publicdomain\/zero\/1.0\/\n\/\/To the extent possible under law, Blackle Mori has waived all copyright and related or neighboring rights to this work.\n\nfloat comp (vec3 p) {\n    p = asin(sin(p)*.9);\n    return length(p)-1.;\n}\n\nvec3 erot(vec3 p, vec3 ax, float ro) {\n    return mix(dot(p,ax)*ax,p,cos(ro))+sin(ro)*cross(ax,p);\n}\n\nfloat smin(float a, float b, float k) {\n    float h = max(0.,k-abs(b-a))\/k;\n    return min(a,b)-h*h*h*k\/6.;\n}\n\nvec4 wrot(vec4 p) {\n    return vec4(dot(p,vec4(1)), p.yzw + p.zwy - p.wyz - p.xxx)\/2.;\n}\n\nfloat d1, d2, d3;\nfloat t;\nfloat lazors, doodad;\nvec3 p2;\nfloat bpm = 125.;\nfloat scene(vec3 p) {\n    p2 = erot(p, vec3(0,1,0), t);\n    p2 = erot(p2, vec3(0,0,1), t\/3.);\n    p2 = erot(p2, vec3(1,0,0), t\/5.);\n    \n    float bpt = iTime\/60.*bpm;\n        vec4 p4 = vec4(p2,0);\n        p4=mix(p4,wrot(p4),smoothstep(-.5,.5,sin(bpt\/4.)));\n        p4 =abs(p4);\n        p4=mix(p4,wrot(p4),smoothstep(-.5,.5,sin(bpt)));\n    float fctr = smoothstep(-.5,.5,sin(bpt\/2.));\n    float fctr2 = smoothstep(.9,1.,sin(bpt\/16.));\n        doodad = length(max(abs(p4)-mix(0.05,0.07,fctr),0.)+mix(-0.1,.2,fctr))-mix(.15,.55,fctr*fctr)+fctr2;\n    \/*\n        vec4 p4 = vec4(p2,0);\n        p4=wrot(p4);\n        p4 = abs(p4);\n        p4=mix(p4,wrot(p4),smoothstep(-.5,.5,sin(t)));\n        doodad = length(max(abs(p4)-0.07,0)+0.2)-.55;\n    }*\/\n    \n    p.x += asin(sin(t\/80.)*.99)*80.;\n    \n    lazors = length(asin(sin(erot(p,vec3(1,0,0),t*.2).yz*.5+1.))\/.5)-.1;\n    d1 = comp(p);\n    d2 = comp(erot(p+5., normalize(vec3(1,3,4)),0.4));\n    d3 = comp(erot(p+10., normalize(vec3(3,2,1)),1.));\n    return min(doodad,min(lazors,.3-smin(smin(d1,d2,0.05),d3,0.05)));\n}\n\nvec3 norm(vec3 p) {\n    float precis = length(p) < 1. ? 0.005 : 0.01;\n    mat3 k = mat3(p,p,p)-mat3(precis);\n    return normalize(scene(p)-vec3(scene(k[0]),scene(k[1]),scene(k[2])));\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = (fragCoord-.5*iResolution.xy)\/iResolution.y;\n\n    float bpt = iTime\/60.*bpm;\n    float bp = mix(pow(sin(fract(bpt)*3.14\/2.),20.)+floor(bpt), bpt,0.4);\n    t = bp;\n\tvec3 cam = normalize(vec3(.8+sin(bp*3.14\/4.)*.3,uv));\n    vec3 init = vec3(-1.5+sin(bp*3.14)*.2,0,0)+cam*.2;\n    init = erot(init,vec3(0,1,0),sin(bp*.2)*.4);\n    init = erot(init,vec3(0,0,1),cos(bp*.2)*.4);\n    cam = erot(cam,vec3(0,1,0),sin(bp*.2)*.4);\n    cam = erot(cam,vec3(0,0,1),cos(bp*.2)*.4);\n    vec3 p = init;\n    bool hit = false;\n    float atten = 1.;\n    float tlen = 0.;\n    float glo = 0.;\n    float dist;\n    float fog = 0.;\n    float dlglo = 0.;\n    bool trg = false;\n    for (int i = 0; i <80 && !hit; i++) {\n        dist = scene(p);\n        hit = dist*dist < 1e-6;\n        glo += .2\/(1.+lazors*lazors*20.)*atten;\n        dlglo += .2\/(1.+doodad*doodad*20.)*atten;\n        if (hit && ((sin(d3*45.)<-0.4 && (dist!=doodad )) || (dist==doodad && sin(pow(length(p2*p2*p2),.3)*120.)>.4 )) && dist != lazors) {\n            trg = trg || dist==doodad;\n            hit = false;\n            vec3 n = norm(p);\n            atten *= 1.-abs(dot(cam,n))*.98;\n            cam = reflect(cam,n);\n            dist = .1;\n        }\n        p += cam*dist;\n        tlen += dist;\n        fog += dist*atten\/30.;\n    }\n    fog = smoothstep(0.,1.,fog);\n    bool lz = lazors == dist;\n    bool dl = doodad == dist;\n    vec3 fogcol = mix(vec3(0.5,0.8,1.2), vec3(0.4,0.6,0.9), length(uv));\n    vec3 n = norm(p);\n    vec3 r = reflect(cam,n);\n    float ss = smoothstep(-.3,0.3,scene(p+vec3(.3)))+.5;\n    float fact = length(sin(r*(dl?4.:3.))*.5+.5)\/sqrt(3.)*.7+.3;\n    vec3 matcol = mix(vec3(0.9,0.4,0.3), vec3(0.3,0.4,0.8), smoothstep(-1.,1.,sin(d1*5.+iTime*2.)));\n    matcol = mix(matcol, vec3(0.5,0.4,1.0), smoothstep(0.,1.,sin(d2*5.+iTime*2.)));\n    if (dl) matcol = mix(vec3(1),matcol,0.1)*.2+0.1;\n    vec3 col = matcol*fact*ss + pow(fact,10.);\n    if (lz) col = vec3(4);\n    fragColor.xyz = col*atten + glo*glo + fogcol*glo;\n    \n    fragColor.xyz = mix(fragColor.xyz, fogcol, fog);\n    if(!dl)fragColor.xyz = abs(erot(fragColor.xyz, normalize(sin(p*2.)),0.2*(1.-fog)));\n    if(!trg&&!dl)fragColor.xyz+=dlglo*dlglo*.1*vec3(0.4,0.6,0.9);\n    fragColor.xyz = sqrt(fragColor.xyz);\n    fragColor.xyz = smoothstep(vec3(0),vec3(1.2),fragColor.xyz);\n}\n",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}

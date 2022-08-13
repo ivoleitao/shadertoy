@@ -1,0 +1,80 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "3l3Bzl",
+        "date": "1613214774",
+        "viewed": 3658,
+        "name": "OMZG Shader Royale - NuSan",
+        "username": "NuSan",
+        "description": "Shader made Live during OMZG Shader Royale (12\/02\/2021) in about 80m\n1st place",
+        "likes": 50,
+        "published": 1,
+        "flags": 32,
+        "usePreview": 0,
+        "tags": [
+            "raymarching",
+            "live"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Shader made Live during OMZG Shader Royale (12\/02\/2021) in about 80m\n\/\/ 1st place\n\/\/ https:\/\/www.twitch.tv\/videos\/911443995?t=01h12m13s\n\/\/ Code is in \"Buffer A\" so I can use \"feedback\" effects\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n  vec2 uv=fragCoord.xy \/ iResolution.xy;\n  fragColor = texture(iChannel0, uv);\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        },
+        {
+            "inputs": [
+                {
+                    "id": "4dXGR8",
+                    "filepath": "\/media\/previz\/buffer00.png",
+                    "previewfilepath": "\/media\/previz\/buffer00.png",
+                    "type": "buffer",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "linear",
+                        "wrap": "clamp",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dXGR8",
+                    "channel": 0
+                }
+            ],
+            "code": "\/\/ Shader made Live during OMZG Shader Royale (12\/02\/2021) in about 80m\n\/\/ 1st place\n\/\/ https:\/\/www.twitch.tv\/videos\/911443995?t=01h12m13s\n\n#define FEEDBACK 1\n#define ALL_COLORS 1\n\nfloat time=0.0;\n\nmat2 rot(float a) {\n  \n  float ca=cos(a);\n  float sa=sin(a);\n  return mat2(ca,sa,-sa,ca);\n}\n\nvec3 rnd(vec3 p) {\n  return fract(sin(p*524.574+p.yzx*874.512)*352.341);\n}\n\nfloat rnd(float t) {\n  return fract(sin(t*472.547)*537.884);\n}\n\nfloat curve(float t, float d) {\n  t\/=d;\n  return mix(rnd(floor(t)), rnd(floor(t)+1.), pow(smoothstep(0.,1.,fract(t)), 10.));\n}\n\nvec3 curve(vec3 t, float d) {\n  t\/=d;\n  return mix(rnd(floor(t)), rnd(floor(t)+1.), pow(smoothstep(0.,1.,fract(t)), vec3(10.)));\n}\n\nfloat box(vec3 p, vec3 s) {\n  p=abs(p)-s;\n  return max(p.x, max(p.y,p.z));\n}\n\nvec3 repeat(vec3 p, vec3 s) {\n  return (fract(p\/s+.5)-.5)*s;  \n}\n\nvec3 atm=vec3(0);\nvec3 id=vec3(0);\nfloat map(vec3 p) {\n  \n  if(time>10.) p.y += curve(time*5.-length(p.xz), 1.3)*.6;\n  if(time>36.) p.xz *= rot(time*.4-length(p.xz)*.3);\n    \n  vec3 p2=p+sin(time*vec3(1,1.2,.8)*.2)*.03;\n  float mm=10000.;\n  id=vec3(0);\n  \/\/ This is the main kifs, making lots of plane cuts in everything\n  \/\/ we get back the distance to the nearest plane in \"mm\"\n  \/\/ also each \"block\" between plane gets a different \"id\"\n  for(float i=1.; i<4.; ++i) {\n    float t=time*0.1+curve(time+i*.2, 1.3)*4.;\n    p2.xz *= rot(t);\n    t+=sign(p2.x); \/\/ this makes the cuts not totaly symmetric\n    p2.yx *= rot(t*.7);\n    \n    id += sign(p2)*i*i; \/\/ change id depending on what plane's side we are\n    p2=abs(p2);\n    mm=min(mm, min(p2.x,min(p2.y,p2.z)));\n    \n    p2-=0.2+sin(time*.3)*.3;\n  }\n  \n  \/\/ now we translate each \"block\" randomly according to the id\n  p += (curve(rnd(id)+time*.3,.7)-.5)*.8;\n  \n  \/\/ to have the random breaks without killing the SDF completly, we will have to make the ray \"slow down\" near the planes\n  \/\/ we will also use that as translucent glowy shape\n  float d2=min(mm,1.5-length(p));\n  \n  \/\/ block shapes\n  float d=abs(length(p)-1.-mm*1.4)-.1;\n  \n  \/\/ add boxes or cylinder randomly on each block\n  vec3 r2=rnd(id+.1);\n  if(r2.x<.3) {\n    d=min(d, max(box(repeat(p2, vec3(.25)), vec3(.1)), d-.1)); \n  } else if(r2.x<.7) {\n    d=min(d, max(length(repeat(p2, vec3(.15)).xy-.05), d-.2)); \n  }\n  \n  \/\/ cut everything by the planes\n  d=max(d,0.06-mm);\n  \n  \/\/ translucent glowy shape, appearing sometimes\n  atm += vec3(1,0.5,0.3)*r2*0.0013\/(0.01+abs(d2))*max(0.,curve(time+r2.y, .3)-.4);\n  \/\/ put the plane cuts in the SDF, but with max(0.2) so the ray will just slow down but then go through it\n  d2=max(d2,0.2);  \n  d=min(d,d2);\n  \n  \/\/ floor plan\n  float d3 = p.y+2.;\n  \n  \/\/ tried adding things to the terrain, but failed ^^\n  vec3 p3 = repeat(p,vec3(10,10,10));\n  \/\/d3 = min(d3, length(p3.xz)-0.7);\n  \/\/d=min(d, max(d3, 0.5-abs(p3.y)));\n  \n  d=min(d, max(d3, .2-mm));\n  \n  return d;\n}\n\nvoid cam(inout vec3 p) {\n  \n  float t=time*.2;\/\/+curve(time, 1.3)*7.;\n  p.yz *= rot(sin(t*1.3)*.5-.7);\n  p.xz *= rot(t);\n}\n\nfloat gao(vec3 p, vec3 r, float d) {\n  return clamp(map(p+r*d)\/d,0.,1.)*.5+.5;  \n}\n\nfloat rnd(vec2 uv) {\n  return fract(dot(sin(uv*521.744+uv.yx*352.512),vec2(471.52)));\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    time=mod(iTime*.3, 300.0);\n\n\tvec2 uv = vec2(fragCoord.x \/ iResolution.x, fragCoord.y \/ iResolution.y);\n\tuv -= 0.5;\n\tuv \/= vec2(iResolution.y \/ iResolution.x, 1);\n  \n  \/\/uv *= 1.+curve(time*3.-length(uv),.7)*.2; \n\n  vec3 s=vec3(curve(time, .7)-.5,curve(time+7.2, .8)-.5,-8);\n  vec3 r=normalize(vec3(uv, .8 + curve(time, 1.7)*1.4));\n  \n  cam(s);\n  cam(r);\n  \n  bool hit=false;\n  \n  vec3 p=s;\n  \/\/ raymarching loop\n  for(int i=0; i<100; ++i) {\n    \n    float d=map(p);\n    if(d<0.001) {\n      hit=true;\n      break;\n    }\n    if(d>100.0) break;\n    \n    p+=r*d*.8;\n    \n  }\n  \n  vec3 col=vec3(0);\n  if(hit) {\n    vec3 id2=id;\n    vec2 off=vec2(0.01,0);\n    vec3 n=normalize(map(p)-vec3(map(p+off.xyy), map(p+off.yxy), map(p+off.yyx)));\n    vec3 l=normalize(vec3(1,-3,2));\n    if(dot(l,n)<0.) l=-l; \/\/ trick to have two opposite lights\n    vec3 h=normalize(l+r);\n    float spec=max(0.,dot(n,h));\n    \n    float fog=1.-clamp(length(p-s),0.,1.);\n        \n    \/\/ base shading\n    float ao=gao(p,n,.1)*gao(p,n,.2)*gao(p,n,.4)*gao(p,n,.8);\n    col += max(0.,dot(n,l)) * (0.3 + pow(spec,10.) + pow(spec,50.)) * ao * 3.;\n    \n    \/\/ subsurface effect, didn't managed to make it very good\n    for(float i=1.; i<15.; ++i) {\n      float dist=i*.07;\n      col += max(0.,map(p+r*dist)) * vec3(.5+dist,0.5,0.5) * .8 * ao;\n    }\n    \n    off.x=0.04;\n    vec3 n2=normalize(map(p)-vec3(map(p+off.xyy), map(p+off.yxy), map(p+off.yyx)));\n    \/\/ outline effect (thanks FMS_Cat for the very great trick of difference between two normals with different offset size)\n    col += vec3(id2.x,id2.y*.5+.4,.7)*pow(curve(time-id2.z, .7),4.)*.1*length(n-n2);\n    \n    \/\/col+=map(p-r*.2)*1.; \/\/ quickest shading there is\n  }\n  \n  \/\/ add glow\n  col += pow(atm*3.,vec3(2.));\n  \n  \/\/ saturated colors becomes white\n  col += max(col.yzx-1.,0.);\n  col += max(col.zxy-1.,0.);\n  \n  \/\/ vignet\n  col *= 1.2-length(uv);\n  \n  #if ALL_COLORS\n  if(time>18.) {\n      float t4 = time*.3+uv.y*.6;\n      if(time>30.) t4+=floor(abs(uv.x+col.x*.1)*3.)*17.;\n      col.xz*=rot(t4);\n      col.yz*=rot(t4*1.3);\n      col=abs(col);\n  }\n  #endif\n  \n  \/\/ \"tonemapping\"\n  col=smoothstep(0.0,1.,col);\n  col=pow(col, vec3(.4545));\n  \n  #if FEEDBACK\n  if(time>24.) {\n      vec2 uv2=fragCoord.xy \/ iResolution.xy;\n      uv2-=.5;\n      uv2*=.92+rnd(uv2)*.03;\n      uv2+=.5;\n      vec3 c2=texture(iChannel0, uv2).xyz;\n      float t3=0.0;\n      c2.xz *= rot(.05+t3);\n      c2.xy *= rot(.02+t3);\n      c2=abs(c2);\n      float fac=clamp(1.5-length(uv)*1.3,0.,1.);\n      fac=min(fac, max(0.,pow(fract(time*.5),2.)));\n      col *= 0.3+fac*.7;\n      col += c2*.9*(1.-fac);\n  }\n  #endif\n  \n    fragColor = vec4(col, 1);\n}",
+            "name": "Buffer A",
+            "description": "",
+            "type": "buffer"
+        }
+    ]
+}

@@ -1,0 +1,211 @@
+{
+  "ver": "0.1",
+  "info": {
+    "id": "Xllfzl",
+    "date": "1513378957",
+    "viewed": 7687,
+    "name": "Homeward",
+    "username": "Dave_Hoskins",
+    "description": "OK, it's feathers aren't quite the right shape for a crow, but hey...\nIt takes advantage of WebGL2 and buffers. All the stuff that is done multiple times for each pixel, like animation, is put into A as single pixel calculations\n",
+    "likes": 187,
+    "published": 3,
+    "flags": 104,
+    "tags": [
+      "3d",
+      "raymarching",
+      "bird",
+      "homeward",
+      "rook",
+      "raven",
+      "blackbird",
+      "crow"
+    ],
+    "hasliked": 0
+  },
+  "renderpass": [
+    {
+      "inputs": [
+        {
+          "id": 30,
+          "src": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+          "ctype": "texture",
+          "channel": 3,
+          "sampler": {
+            "filter": "linear",
+            "wrap": "repeat",
+            "vflip": "false",
+            "srgb": "false",
+            "internal": "byte"
+          },
+          "published": 1
+        },
+        {
+          "id": 257,
+          "src": "\/media\/previz\/buffer00.png",
+          "ctype": "buffer",
+          "channel": 0,
+          "sampler": {
+            "filter": "linear",
+            "wrap": "clamp",
+            "vflip": "true",
+            "srgb": "false",
+            "internal": "byte"
+          },
+          "published": 1
+        },
+        {
+          "id": 258,
+          "src": "\/media\/previz\/buffer01.png",
+          "ctype": "buffer",
+          "channel": 1,
+          "sampler": {
+            "filter": "nearest",
+            "wrap": "clamp",
+            "vflip": "true",
+            "srgb": "false",
+            "internal": "byte"
+          },
+          "published": 1
+        },
+        {
+          "id": 12825,
+          "src": "https:\/\/soundcloud.com\/sei_peridot\/world-op",
+          "ctype": "musicstream",
+          "channel": 2,
+          "sampler": {
+            "filter": "linear",
+            "wrap": "clamp",
+            "vflip": "true",
+            "srgb": "false",
+            "internal": "byte"
+          },
+          "published": 0
+        }
+      ],
+      "outputs": [
+        {
+          "id": 37,
+          "channel": 0
+        }
+      ],
+      "code": "\/\/ Homeward\n\/\/ by David Hoskins.\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/\/ Music:-\n\/\/ World OP by PeriTune | http:\/\/peritune.com\n\/\/ Music promoted by https:\/\/www.free-stock-music.com\n\/\/ Creative Commons Attribution 3.0 Unported License\n\/\/ https:\/\/creativecommons.org\/licenses\/...\n\n\/\/ Do the crow in this buffer...\n\n\n\n#define PI acos(-1.)\n\nmat3 crowDir;\nvec4 flapping, headTilt;\nfloat turn, specular;\n\n\/\/----------------------------------------------------------------------------------------\nvec4 getStore(int num)\n{\n    \/\/ivec2 loc = ivec2(num & 63, num\/64); \/\/ Didn't need that many, doh!\n    ivec2 loc = ivec2(num, 0);\n    return  texelFetch(iChannel0, loc, 0);\n}\n\n\n\/\/----------------------------------------------------------------------------------------\n\n\/\/----------------------------------------------------------------------------------------\nfloat noise( in float p  )\n{\n    \n    float f = fract(p);\n    p = floor(p);\n\tf = f*f*(3.0-2.0*f);\n\treturn mix(hash11(p),hash11(p+1.), f);\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat sMin( float a, float b, float k )\n{\n    \n\tfloat h = clamp(0.5 + 0.5*(b-a)\/k, 0.0, 1.0 );\n\treturn mix( b, a, h ) - k*h*(1.-h);\n}\n\/\/----------------------------------------------------------------------------------------\nmat2 rot2D(float a)\n{\n\tfloat si = sin(a);\n\tfloat co = cos(a);\n\treturn mat2(co, si, -si, co);\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat  sphere( vec3 p, float s )\n{\n    return length(p)-s;\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat featherBox( vec3 p, vec3 b, float r )\n{\n    b.y-= smoothstep(3.75, -4.0, p.z)*noise(p.x*6.)*.56;\n\n    p.y+=  smoothstep(1.5, .0, p.z)*noise(p.x*3.+crowPos.z*1.)*.35;\n    return length(max(abs(p)-b,0.0))-r;\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat featherTailBox( vec3 p, vec3 b, float r )\n{\n    \/\/b.x \/= smoothstep(-10.,4.,p.z);\n    p.x *= clamp((p.z+4.)\/6., 0.1,2.5);\n    b.y-= smoothstep(.75, .0, p.z)*noise(p.x*3.)*.3;\n    \n    p.y+=  smoothstep(1., -4.0, p.z)*noise(p.x*3.+crowPos.z*1.)*.5;\n    return length(max(abs(p)-b,0.0))-r;\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat segment(vec3 p,  vec3 a, vec3 b, float r1, float r2)\n{\n\tvec3 pa = p - a;\n\tvec3 ba = b - a;\n\tfloat h = clamp( dot(pa,ba)\/dot(ba,ba), 0.0, 1.0 );\n\treturn length( pa - ba*h ) - r1 + r2*h;\n}\n\n\n\/\/--------------------------------------------------------------------------\nfloat noise( in vec3 p )\n{\n    vec3 f = fract(p);\n    p = floor(p);\n\tf = f*f*(3.0-2.0*f);\n\t\n\tvec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;\n\tvec2 rg = textureLod( iChannel3, (uv+ 0.5)\/256.0, 0.0).yx;\n\treturn mix( rg.x, rg.y, f.z );\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec3 getSky(vec3 dir, vec3 pos)\n{\n    vec3 col;\n    vec3 clou = dir * 1. + pos*.025;\n\tfloat t = noise(clou);\n    t += noise(clou * 2.1) * .5;\n    t += noise(clou * 4.3) * .25;\n    t += noise(clou * 7.9) * .125;\n\tcol = mix(vec3(FOG_COLOUR), vec3(0.2, 0.2,.2),abs(dir.y))+ FOG_COLOUR *t*.4;\n \n    return col;\n}\n\n\/\/----------------------------------------------------------------------------------------\n\/\/ Map a crow like asbtract bird thing...\nfloat map(vec3 p, float t)\n{\n    float d, f;\n    specular = .1;\n    \/\/ Normalize rotation...\n    vec3 q = crowDir*(p-crowPos);\n    \/\/ Head...\n    vec3 b = q- vec3(.0, 0, 2.8);\n    b.yz = b.yz*rot2D(headTilt.x);\n    b.xz = b.xz*rot2D(headTilt.y);\n    d = segment(b,vec3(0,0,1), vec3(0,0,5.), 1.2, 3.); \n\n    \/\/ Body...\n    b = q+vec3(0,1.,3);\n  \td = sMin(d, segment(q, vec3(0), vec3(0,0,-14), 1.3, 11.5), 3.); \n    \/\/ Tail...\n    b.xy = b.xy* rot2D(headTilt.w);\n    d = sMin(d, featherTailBox(b, vec3(headTilt.z,.1,2.2), .3),4.3); \n    \/\/ Left wing...\n    b = q + vec3(2.8,0,0);\n    b.xy = rot2D(flapping.x)*b.xy;\n    d = sMin(d, featherBox(b+(vec3(4,0,1.)), vec3(4,.05,2.5),.4), 2.);\n    \n    b =  b + vec3(8,0,0);\n    b.xy = rot2D(flapping.y*1.5)*b.xy;\n\tf = featherBox(b+vec3(4,0,0), vec3(4,.05,3.5),.4);\n    f = max(f, sphere(b+vec3(2,0,3), 5.));\n    d = sMin(d, f, .1);\n    \n    \/\/ Right wing...\n    b = q - vec3(2.8,0,0);\n    b.xy = rot2D(-flapping.z)*b.xy;\n    d = sMin(d, featherBox(b-(vec3(4,0,-1.)), vec3(4,.05,2.5),.4), 2.);\n    \n    \n    b =  b - vec3(8,0,0);\n    b.xy = rot2D(-flapping.w*1.5)*b.xy;\n    f = featherBox(b-vec3(4,0,0), vec3(4,.05,3.5),.4);\n    f = max(f, sphere(b-vec3(2,0,-3), 5.));\n    d = sMin(d, f, .1);\n\n    \/\/ Do some glassy eyes...\n    b = q- vec3(.0, .0, 2.85);\n    \n    b.yz = b.yz*rot2D(headTilt.x);\n    b.xz = b.xz*rot2D(headTilt.y);\n\tb.x = abs(b.x);\n\n    f = sphere(b-vec3(.7,0.1,1.4), .25);\n    if (f < d){ d = f; specular = 4.0;}\n\n    \n    return d;\n}\n\/\/----------------------------------------------------------------------------------------\nvec3 getNormal(vec3 p, float e)\n{\n    return normalize( vec3( map(p+vec3(e,0.0,0.0), e) - map(p-vec3(e,0.0,0.0), e),\n                            map(p+vec3(0.0,e,0.0), e) - map(p-vec3(0.0,e,0.0), e),\n                            map(p+vec3(0.0,0.0,e), e) - map(p-vec3(0.0,0.0,e), e) ) );\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec3 lighting(in vec3 pos, in vec3 normal, in vec3 eyeDir, in float d)\n{\n\t;\n   \tnormal = reflect(eyeDir, normal); \/\/ Specular...\n    vec3 col = pow(max(dot(sunLight, normal), 0.0), 10.0)  * SUN_COLOUR * specular;\n\n\n\treturn min(col, 1.0);\n}\n\n\n\/\/--------------------------------------------------------------------------\nfloat marchScene(in vec3 rO, in vec3 rD, vec2 co, float t)\n{\n\tt += .5*hash12(co);\n\n    \n    for( int j=0; j < 30; j++ )\n\t{\n\t\tif (t >= FAR) break;\n\t\tfloat h = map( rO + t*rD, t*0.012);\n \t\tif(h < 0.03)\n\t\t{\n  \n            break;\n\t     }\n\n        t += h + t*.005;\n\t}\n\n\n    return t;\n}\n\n\nvec3 lenseFlare(vec2 uv,vec3 dir, mat3 camMat)\n{\n\n    vec3 col = vec3(0);\n    float bri = dot(dir, sunLight)*.7;\n\tif (bri > 0.0)\n\t{\n\t\tvec2 sunPos = vec2(dot( sunLight, camMat[0] ),dot( sunLight, camMat[1] ) );\n        \/\/sunPos = clamp(sunPos,-.5,.5);\n        \/\/sunPos *= vec2(iResolution.y\/iResolution.x, 1.);\n\t    float z = textureLod(iChannel1,(sunPos+1.)*.5, 0.).w;\n       \tvec2 uvT = uv-sunPos;\n        if (z >= FAR)\n        {\n            uvT = uvT*(length(uvT));\n            bri = pow(bri, 6.0)*.7;\n\n            \/\/ glare = the red shifted blob...\n            float glare1 = max(dot(dir,sunLight),0.0)*1.4;\n            \/\/ glare2 is the yellow ring...\n            float glare2 = max(1.-length(uvT+sunPos*.4)*4.0, 0.0);\n            uvT = mix (uvT, uv, -2.3);\n            \/\/ glare3 is a splodge...\n            float glare3 = max(1.-pow(length(uvT+sunPos*2.5)*3., 2.), 0.0);\n\n            col += bri * vec3(1.0, .0, .0)  * pow(glare1, 12.5)*.05;\n            col += bri * vec3(1.0, 1.0, .1) * pow(glare2, 2.0)*2.5;\n            col += bri * SUN_COLOUR * pow(glare3, 3.)*3.0;\n        }\n\t}\n    return col;\n}\n\n\n\/\/----------------------------------------------------------------------------------------\nvoid mainImage( out vec4 colOut, in vec2 fragCoord )\n{\n    \n    vec2 uv = (-iResolution.xy + 2.0 * fragCoord ) \/ iResolution.y;\n\n  \tvec3 col;\n\n    sunLight \t= getStore(SUN_DIRECTION).xyz;\n    vec3 camPos = getStore(CAMERA_POS).xyz;\n    vec3 camTar = getStore(CAMERA_TAR).xyz;\n    crowPos  \t= getStore(CROW_POS).xyz;\n    vec3 crowTar= getStore(CROW_HEADING).xyz;\n    flapping\t= getStore(CROW_FLAPPING);\n    headTilt\t= getStore(CROW_HEADTILT);\n    turn  \t\t= getStore(CROW_TURN).x;\n    crowDir\t\t= setCamMat(crowPos, crowTar, turn);\n    crowDir \t= inverse(crowDir);\n\tmat3 camMat = setCamMat(camPos, camTar, (camTar.x-camPos.x)*.02);\n    vec3 dir \t= camMat * normalize( vec3(uv, cos((length(uv*.5)))));\n\n\n\t\n    colOut = texelFetch(iChannel1, ivec2(fragCoord), 0);\n    float t = max(length(camPos-crowTar)-25., .0);\n    float far = t+30.0;\n    float dhit = marchScene(camPos, dir, fragCoord, t);\n  \n    if (dhit < far && dhit < colOut.w)\n    {\n      \t\n       \tvec3  p = camPos+dhit*dir; \n        vec3 sky = getSky(dir, p);\n       \tvec3 nor =  getNormal(p, dhit*.003);\n   \t\tcol = lighting(p,nor, dir, dhit);\n        col = mix(sky, col.xyz , exp(-dhit*.0015)-.1);\n    }else\n    \tcol = texelFetch(iChannel1, ivec2(fragCoord), 0).xyz;\n    \n    \n    col += lenseFlare(uv, dir, camMat);\n    col = clamp(col, 0.0, 1.0);\n\n\t\/\/ Contrast & stretch...\n\n    col = pow( col, vec3(1.7,1.95,2.) )*1.8;\n    col = clamp(col, 0., 1.0);\n\tcol = col*.2 + (col*col*(3.0-2.0*col))*.8;\n \n    \/\/ Gamma...\n    col = min(sqrt(col), 1.0);\n\n\n    \/\/ Vignette...\n    vec2 xy = abs((fragCoord.xy \/ iResolution.xy)-.5);\n    col *= pow(abs(250.0* (.5-xy.y))*(.5-xy.x), .2 )*.7;\n\tcolOut = vec4(col*smoothstep(.0, 2.,iTime), 1.0);\n}",
+      "name": "Image",
+      "description": "",
+      "type": "image"
+    },
+    {
+      "inputs": [
+        {
+          "id": 257,
+          "src": "\/media\/previz\/buffer00.png",
+          "ctype": "buffer",
+          "channel": 0,
+          "sampler": {
+            "filter": "linear",
+            "wrap": "clamp",
+            "vflip": "true",
+            "srgb": "false",
+            "internal": "byte"
+          },
+          "published": 1
+        }
+      ],
+      "outputs": [
+        {
+          "id": 257,
+          "channel": 0
+        }
+      ],
+      "code": "\/\/ by David Hoskins.\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\/\/ These are indices into the variable data in this buffer...\n\n\n\/\/----------------------------------------------------------------------------------------\nfloat noise( in float p  )\n{\n    float f = fract(p);\n    p = floor(p);\n\tf = f*f*(3.0-2.0*f);\n\treturn mix(hash11(p),hash11(p+1.), f);\n}\n\/\/----------------------------------------------------------------------------------------\nfloat noiseTilt( in float p  )\n{\n    float f = fract(p);\n    p = floor(p);\n\tf = f*f*(3.0-2.0*f);\n    \n    f = f*f*f*f;\n\treturn mix(hash11(p),hash11(p+1.), f);\n}\n\/\/----------------------------------------------------------------------------------------\nfloat grabTime()\n{\n  \tfloat m = (iMouse.x\/iResolution.x)*80.0;\n\treturn (iTime+m+110.)*32.;\n}\n\n\/\/----------------------------------------------------------------------------------------\nint StoreIndex(ivec2 p)\n{\n\treturn p.x + 64 * p.y;\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec4 getStore(int num)\n{\n   \t\/\/ivec2 loc = ivec2(num & 63, num\/64); \/\/ Didn't need that many, doh!\n    ivec2 loc = ivec2(num, 0);\n    return  texelFetch(iChannel0, loc, 0);\n}\n\n\/\/----------------------------------------------------------------------------------------\nvoid mainImage( out vec4 fragColour, in vec2 fragCoord )\n{\n    ivec2 pos = ivec2(fragCoord);\n    vec4 col = vec4(0.);\n\tfloat gTime = grabTime();\n    \n    int num = StoreIndex(pos);\n    if (num > CROW_CLIMBING) discard;\n    \n    vec4 diff = (getStore(CROW_HEADING) - getStore(CROW_POS)) * vec4(-.07,.3, 1,1);\n    float climb  = diff.y;\n    float oldClimb  = getStore(CROW_CLIMBING).x;\n\n    switch (num)\n    {\n        case CAMERA_POS:\n        {\n            float r = gTime \/ 63.;\n        \tcol.xyz = cameraPath(gTime)+vec3(sin(r*.64 )*12., cos(r*.3)*12., 0.);\n           \n        }\n    \t\tbreak;\n        case CAMERA_TAR:\n            col.xyz = cameraPath(gTime + 20.);\n        \tbreak;\n        case SUN_DIRECTION:\n        \tcol.xyz  = normalize( vec3(  0.7, .8,  0.3 ) );\n    \t\tbreak;\n       \tcase CROW_POS:\n        {\n        \tfloat r = gTime \/ 200.-10.;\n        \tcol.xyz = cameraPath(gTime + 45.+ sin(r*.5)* 30.)+vec3(sin(r)*15.0, cos(r*.2)*12.0, 0.0);\n            float sp = pow((clamp(oldClimb+.1,0.0, .5)), 2.2)*3.;\n            \n            \/\/col.y-= sin(gTime*.25)*sp;\n            vec2 ax = vec2(sin(diff.x), cos(diff.x));\n            col.xy+= -ax*sin(gTime*.25)*sp;\n        }\n        \tbreak;\n        case CROW_HEADING:\n        {\n        \tfloat r = gTime \/ 200.-10.;\n        \tcol.xyz = cameraPath(gTime + 50.+ sin(r*.5)* 30.)+vec3(sin(r)*15.0, cos(r*.2)*12.0, 0.0);\n        }\n         \tbreak;\n        case CROW_FLAPPING:\n        {\n            float sp = pow((clamp(oldClimb+.1,0.0, .5)), 2.2)*3.5;\n   \n        \tcol.x  = sin(gTime*.25)*sp+ noise(gTime*.1)*.35;\n            col.y  = sin(gTime*.25-1.)*sp*.5+smoothstep(0.5,.0,sp)*.1;\n            \n            col.z  = sin(gTime*.25)*sp+ noise(gTime*.1+8.)*.35;\n            col.w  = sin(gTime*.25-1.)*sp*.5+smoothstep(0.5,.0,sp)*.1;\n        }\n        \tbreak;\n        case CROW_HEADTILT:\n        \tcol.x = noiseTilt(gTime*.01+8.)*.5;\n        \tcol.y = noiseTilt(gTime*.05+111.)-.5;\n        \tcol.z = noiseTilt(gTime*.03)*.8+.2;\n        \tcol.w = (noiseTilt(gTime*.04)-.5);\n        \tbreak;\n        case CROW_TURN:\n        \tcol = diff;\n        \tbreak;\n        case CROW_CLIMBING:\n        \t\/\/ IIR leaky integrator for smoothing wing power...\n        \tcol.x = oldClimb *.99+climb *.01;\n        \tbreak;\n        \n\n    }\n    fragColour = col;\n \n    \n}",
+      "name": "Buffer A",
+      "description": "",
+      "type": "buffer"
+    },
+    {
+      "inputs": [
+        {
+          "id": 7,
+          "src": "\/media\/a\/fb918796edc3d2221218db0811e240e72e340350008338b0c07a52bd353666a6.jpg",
+          "ctype": "texture",
+          "channel": 2,
+          "sampler": {
+            "filter": "mipmap",
+            "wrap": "repeat",
+            "vflip": "true",
+            "srgb": "false",
+            "internal": "byte"
+          },
+          "published": 1
+        },
+        {
+          "id": 8,
+          "src": "\/media\/a\/52d2a8f514c4fd2d9866587f4d7b2a5bfa1a11a0e772077d7682deb8b3b517e5.jpg",
+          "ctype": "texture",
+          "channel": 1,
+          "sampler": {
+            "filter": "mipmap",
+            "wrap": "repeat",
+            "vflip": "true",
+            "srgb": "false",
+            "internal": "byte"
+          },
+          "published": 1
+        },
+        {
+          "id": 30,
+          "src": "\/media\/a\/f735bee5b64ef98879dc618b016ecf7939a5756040c2cde21ccb15e69a6e1cfb.png",
+          "ctype": "texture",
+          "channel": 3,
+          "sampler": {
+            "filter": "linear",
+            "wrap": "repeat",
+            "vflip": "false",
+            "srgb": "false",
+            "internal": "byte"
+          },
+          "published": 1
+        },
+        {
+          "id": 257,
+          "src": "\/media\/previz\/buffer00.png",
+          "ctype": "buffer",
+          "channel": 0,
+          "sampler": {
+            "filter": "linear",
+            "wrap": "clamp",
+            "vflip": "true",
+            "srgb": "false",
+            "internal": "byte"
+          },
+          "published": 1
+        }
+      ],
+      "outputs": [
+        {
+          "id": 258,
+          "channel": 0
+        }
+      ],
+      "code": "\/\/ Render the landscape and sky...\n\/\/ by David Hoskins.\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\/\/ These are indices into the variable data in Buf A...\n\nfloat gTime, specular;\n\n\n\n\/\/========================================================================\n\/\/ Utilities...\n\n\/\/----------------------------------------------------------------------------------------\n\/\/ Grab value of variable, indexed 'num' from buffer A...\n\/\/ Useful because each pixel doesn't need to do a whole bunch of math\/code over and over again.\n\/\/ Like camera positions and animations...\nvec4 getStore(int num)\n{\n    \/\/ivec2 loc = ivec2(num & 63, num\/64); \/\/ Didn't need that many, doh!\n    ivec2 loc = ivec2(num, 0);\n\treturn  texelFetch(iChannel0, loc, 0);\n}\n\n\/\/----------------------------------------------------------------------------------------\nfloat  sphere( vec3 p, float s )\n{\n    return length(p)-s;\n}\n\n\/\/--------------------------------------------------------------------------\n\n\/\/--------------------------------------------------------------------------\nfloat noise( in vec3 p )\n{\n    vec3 f = fract(p);\n    p = floor(p);\n\tf = f*f*(3.0-2.0*f);\n\t\n\tvec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;\n\tvec2 rg = textureLod( iChannel3, (uv+ 0.5)\/256.0, 0.0).yx;\n\treturn mix( rg.x, rg.y, f.z );\n}\n\n\/\/--------------------------------------------------------------------------\n\nfloat sMax(float a, float b, float s){\n    \n    float h = clamp( 0.5 + 0.5*(a-b)\/s, 0., 1.);\n    return mix(b, a, h) + h*(1.0-h)*s;\n}\n\n\n\/\/--------------------------------------------------------------------------\n\/\/ This uses mipmapping with the incoming ray distance.\n\/\/ I think it also helps with the texture cache, but I don't know that for sure...\nfloat map( in vec3 p, float di)\n{\n  \n    di = min(di, 6.0);\n\n    \/\/ Grab texture based on 3D coordinate mixing...\n \tfloat te = textureLod(iChannel1, p.xz*.0022 + p.xy * 0.0023-p.zy*.0011, di).x*40.0;\n    \/\/ Make a wibbly wobbly sin\/cos dot product..\n    float h = dot(sin(p*.0173),cos(p.zxy*.0191))*30.;\n    \/\/ Add them all together...\n    float d =  h+p.y*.2 + te;\n    \/\/...Then subtract the camera tunnel...\n    p.xy -= cameraPath(p.z).xy;\n    float tunnel = 15. - length(p.xy)-h; \n\n    d = sMax(d, tunnel, 80.);\n    \n    \/\/d = max(tunnel, d); \n\n    return d;\n}\n\n\/\/--------------------------------------------------------------------------\n\nvec3 getSky(vec3 dir, vec2 uv, vec3 pos)\n{\n    vec3 col;\n    vec3 clou = dir * 1. + pos*.025;\n\tfloat t = noise(clou);\n    t += noise(clou * 2.1) * .5;\n    t += noise(clou * 4.3) * .25;\n    t += noise(clou * 7.9) * .125;\n\tcol = mix(vec3(FOG_COLOUR), vec3(0.2, 0.2,.2),abs(dir.y))+ FOG_COLOUR *t*.4;\n \n    return col;\n}\n\n\n\/\/--------------------------------------------------------------------------\n\nvec3 getNormal(vec3 p, float e)\n{\n    return normalize( vec3( map(p+vec3(e,0.0,0.0), e) - map(p-vec3(e,0.0,0.0), e),\n                            map(p+vec3(0.0,e,0.0), e) - map(p-vec3(0.0,e,0.0), e),\n                            map(p+vec3(0.0,0.0,e), e) - map(p-vec3(0.0,0.0,e), e) ) );\n}\n\n\/\/--------------------------------------------------------------------------\n\nfloat BinarySubdivision(in vec3 rO, in vec3 rD, vec2 t)\n{\n    float halfwayT;\n  \n    for (int i = 0; i < 5; i++)\n    {\n\n        halfwayT = dot(t, vec2(.5));\n        float d = map(rO + halfwayT*rD, halfwayT*.008); \n        t = mix(vec2(t.x, halfwayT), vec2(halfwayT, t.y), step(0.02, d));\n    }\n\n\treturn halfwayT;\n}\n\n\/\/--------------------------------------------------------------------------\nfloat marchScene(in vec3 rO, in vec3 rD, vec2 co)\n{\n\tfloat t = 10.+10.*hash12(co), oldT = 0.;\n\tvec2 dist = vec2(1000);\n\tvec3 p;\n    bool hit = false;\n    \n    for( int j=0; j < 150; j++ )\n\t{\n\t\tif (t >= FAR) break;\n\t\tp = rO + t*rD;\n\n\t\tfloat h = map(p, t*0.008);\n \t\tif(h < 0.02)\n\t\t{\n            dist = vec2(oldT, t);\n            break;\n\t     }\n        oldT = t;\n        t += h * .4 + t*.004;\n\t}\n    if (t < FAR) \n    {\n       t = BinarySubdivision(rO, rD, dist);\n    }\n    return t;\n}\n\n\/\/--------------------------------------------------------------------------\nfloat noise2d(vec2 p)\n{\n    vec2 f = fract(p);\n    p = floor(p);\n    f = f*f*(3.0-2.0*f);\n    \n    float res = mix(mix( hash12(p),  \t\t    hash12(p + vec2(1,0)),f.x),\n                    mix( hash12(p + vec2(0,1)), hash12(p + vec2(1,1)),f.x),f.y);\n    return res;\n}\n\n\/\/--------------------------------------------------------------------------\nfloat findClouds2D(in vec2 p)\n{\n\tfloat a = 1.0, r = 0.0;\n    p*= .001;\n    for (int i = 0; i < 5; i++)\n    {\n        r+= noise2d(p*=2.563)*a;\n        a*=.5;\n    }\n\treturn max(r-1.1, 0.0);\n}\n\n\/\/--------------------------------------------------------------------------\n\/\/ Use the difference between two cloud densities to light clouds in the direction of the sun.\nvec4 getClouds(vec3 pos, vec3 dir)\n{\n    if (dir.y < 0.0) return vec4(0.0);\n    float d = (600. \/ dir.y);\n    vec2 p = pos.xz+dir.xz*d;\n    float r = findClouds2D(p);\n    float t = findClouds2D(p+normalize(sunLight.xz)*15.);    \n    t = sqrt(max((r-t)*30., .8));\n    vec3 col = vec3(t) * SUN_COLOUR;\n    \/\/ returns colour and alpha...\n    return vec4(col, r);\n}\n\n\/\/--------------------------------------------------------------------------\n\/\/ Turn a 2D texture into a six sided one...\nvec3 texCube(in sampler2D tex, in vec3 p, in vec3 n )\n{\n\tvec3 x = textureLod(tex, p.yz, 0.0).xyz;\n\tvec3 y = textureLod(tex, p.zx, 0.0).xyz;\n\tvec3 z = textureLod(tex, p.xy, 0.0).xyz;\n\treturn (x*abs(n.x) + y*abs(n.y) + z*abs(n.z))\/(1e-20+abs(n.x)+abs(n.y)+abs(n.z));\n}\n\n\/\/--------------------------------------------------------------------------\n\/\/ Grab the colour...\nvec3 albedo(vec3 pos, vec3 nor)\n{\n    specular  = .8;\n    vec3 alb  = texCube(iChannel2, pos*.03, nor);\n\n    \/\/ Brown the texture in places for warmth...\n    float v = noise(pos*.04+20.);\n    alb *= vec3(.85+v, .9+v*.5, .9);\n    \n    \/\/ Mossy rocky bits...\n    v = pow(max(noise(pos*.03)-.4, 0.0), .7);\n    alb = mix(alb, vec3(.45,.55,.45), v*v*4.);\n    \n\t\/\/ Do ice on flat areas..\n    float ice = smoothstep(0.4, .7,nor.y);\n\talb = mix(alb, vec3(.5, .8,1.), ice);\n    specular+=ice*.5;\n    \n    return alb*1.8;\n}\n\n\/\/--------------------------------------------------------------------------\nfloat mapCrowShad(vec3 p)\n{\n    float d = 0.;\n    p= p-crowPos;\n    d = sphere(p, 3.);\n    return smoothstep(.0, 8.0, d)+.8;\n}\n\n\/\/--------------------------------------------------------------------------\nfloat shadow(in vec3 ro, in vec3 rd)\n{\n\tfloat res = 1.0;\n    \n    float t = .1;\n    for( int i = 0; i < 14; i++ )\n    {\n\t\tfloat h = map(ro + rd*t, 4.);\n        float g = mapCrowShad(ro + rd*t);\n        h = min(g, h); \n        res = min( res, 4.*h\/t );\n        t += h+.35;\n    }\n    return clamp( res, 0., 1.0 );\n}\n\n\n\/\/--------------------------------------------------------------------------\nvec3 lighting(in vec3 mat, in vec3 pos, in vec3 normal, in vec3 eyeDir, in float d)\n{\n  \n\tfloat sh = shadow(pos+normal*.5,  sunLight);\n    \/\/sh*=curve(pos)+1.;\n    \/\/ Light surface with 'sun'...\n\tvec3 col = mat * SUN_COLOUR*(max(dot(sunLight,normal), 0.0))*sh;\n\n    \n    \/\/ Ambient...\n\tcol += mat  * abs(normal.y*.14);\n    \n    normal = reflect(eyeDir, normal); \/\/ Specular...\n    col += pow(max(dot(sunLight, normal), 0.0), 10.0)  * SUN_COLOUR * sh * specular;\n\n\treturn min(col, 1.0);\n}\n\n\n\/\/--------------------------------------------------------------------------\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = (-iResolution.xy + 2.0 * fragCoord ) \/ iResolution.y;\n    specular = 0.0;\n  \tvec3 col;\n\n    sunLight \t= getStore(SUN_DIRECTION).xyz;\n    vec3 camPos = getStore(CAMERA_POS).xyz;\n    vec3 camTar = getStore(CAMERA_TAR).xyz;\n    crowPos  \t= getStore(CROW_POS).xyz;\n  \n    \/\/ Setup an epic fisheye lens for the ray 'dir'....\n    mat3 camMat = setCamMat(camPos, camTar, (camTar.x-camPos.x)*.02);\n    vec3 dir = camMat * normalize( vec3(uv, cos((length(uv*.5)))));\n\n    \/\/ The sky is a general mix of blue to fog colour with 3D 'cold' clouds, for mixing with the distance fogging effect...\n    vec3 sky = getSky(dir, uv, camPos);\n    \/\/March it...\n    float dhit = marchScene(camPos, dir, fragCoord);\n    \/\/ Render at distance value...\n    if (dhit < FAR)\n    {\n\t   \tvec3  p = camPos+dhit*dir;\n        float pixel = iResolution.y;\n       \tvec3 nor =  getNormal(p, dhit\/pixel);\n       \tvec3 mat = albedo(p, nor);\n\t\tvec3  temp = lighting(mat, p, nor, dir, dhit);\n\t\t\/\/ Distance fog...\n       \ttemp = mix(sky, temp , exp(-dhit*.0015)-.1);\n       \tcol = temp;\n    }else\n\t{\n \n        \/\/ Clouds and Sun...\n        col = sky;\n        vec4 cc = getClouds(camPos, dir);\n       \n        col = mix(col, cc.xyz, cc.w);\n\n        col+= pow(max(dot(sunLight, dir), 0.0), 200.0)*SUN_COLOUR;\n    }\n   \t\/\/col *= vec3(1.1,1.0,1.0);\n    \n\t\/\/col = mix( col, vec3(dot(col,vec3(0.333))), 0.4 );\n    \/\/col = col*0.5+0.5*col*col*(3.0-2.0*col);\n    \n\tfragColor = vec4(col, dhit);\n    \n}\n\n",
+      "name": "Buffer B",
+      "description": "",
+      "type": "buffer"
+    },
+    {
+      "inputs": [],
+      "outputs": [],
+      "code": "\/\/ Wind and Crow sound effects.\n\/\/ Usees a formant graph to approximate the CAW sound.\n\/\/ by David Hoskins.\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\n\nvec2 add = vec2(1.0, 0.0);\n#define MOD1 .16632\n#define MOD2 vec2(.16632,.17369)\n#define MOD3 vec3(.16532,.17369,.15787)\n\n\/\/----------------------------------------------------------------------------------------\n\/\/  1 out, 1 in ...\nfloat shash11(float p)\n{\n\tvec2 p2 = fract(vec2(p) * MOD2);\n    p2 += dot(p2.yx, p2.xy+19.19);\n\treturn fract(p2.x * p2.y)-.5;\n}\n\/\/----------------------------------------------------------------------------------------\n\/\/  2 out, 1 in...\nvec2 shash21(float p)\n{\n\t\/\/p  = fract(p * MOD3);\n    vec3 p3 = fract(vec3(p) * MOD3);\n    p3 += dot(p3.xyz, p3.yzx + 19.19);\n   return fract(vec2(p3.x * p3.y, p3.z*p3.x))-.5;\n}\n\n\/\/----------------------------------------------------------------------------------------\n\/\/\/  2 out, 2 in...\nvec2 shash22(vec2 p)\n{\n\tvec3 p3 = fract(vec3(p.xyx) * MOD3);\n    p3 += dot(p3.zxy, p3.yxz+19.19);\n    return fract(vec2(p3.x * p3.y, p3.z*p3.x))-.5;\n}\n\n\/\/----------------------------------------------------------------------------------------\n\/\/  2 out, 1 in...\nvec2 Noise21(float x)\n{\n    float p = floor(x);\n    float f = fract(x);\n    f = f*f*(3.0-2.0*f);\n    return  mix( shash21(p), shash21(p + 1.0), f)-.5;\n    \n}\n\n\/\/----------------------------------------------------------------------------------------\n\/\/  2 out, 1 in...\nfloat Noise11(float x)\n{\n    float p = floor(x);\n    float f = fract(x);\n    f = f*f*(3.0-2.0*f);\n    return mix( shash11(p), shash11(p + 1.0), f);\n\n}\n\n\n\/\/----------------------------------------------------------------------------------------\n\/\/  2 out, 2 in...\nvec2 Noise22(vec2 x)\n{\n    vec2 p = floor(x);\n    vec2 f = fract(x);\n    f = f*f*(3.0-2.0*f);\n    \n    vec2 res = mix(mix( shash22(p),          shash22(p + add.xy),f.x),\n                   mix( shash22(p + add.yx), shash22(p + add.xx),f.x),f.y);\n    return res;\n}\n#define F(p1, p2, p3, p4, p5) {d+=0.00625; f123 = ivec4(p2, p3, p4, p5);}\n#define TAU  6.28318530718\n#define PI TAU*.5;\n\/\/----------------------------------------------------------------------------------\nfloat Tract(float x, float f, float bandwidth)\n{\n    float ret = sin(TAU * f * x) * exp(-bandwidth * 3.14159265359 * x)*(Noise11(f));\n    return ret;\n}\nfloat crow(float time)\n{\n   \tfloat\tx = 0.0;\n    time -= 1.0;\n \n    float t = mod(time, 12.);\n    float p = Noise11(floor(time\/12.0)*33.0)*.002+.008;\n    float v = smoothstep(0.,.01, t)*smoothstep(0.5,.49, t);\n    x = mod(t, p + t * t * smoothstep(0.2, .5, t)*.002+t*smoothstep(0.2, .0, t)*.004);\n    vec4 formants = vec4(1500.0, 1900., 2408., 3268.);\n    \n\tfloat glot = \tTract(x, formants.x, 200.0)  +\n       \t\tTract(x, formants.y, 100.0)  * .8 +\n       \t\tTract(x, formants.z, 90.0) * .6 +\n   \t\t\tTract(x, formants.w, 90.0) * .5;\n\t\n\treturn glot*v*3.;\n}\n\/\/----------------------------------------------------------------------------------------\n\/\/ Fractal Brownian Motion...\nvec2 FBM22(vec2 x)\n{\n    vec2 r = vec2(0.0);\n    \n    float a = .7;\n    \n    for (int i = 0; i < 8; i++)\n    {\n        r += Noise22(x) * a;\n        a *= .5;\n        x *= 2.0;\n        x += 10.;\n    }\n     \n    return r;\n}\n\n\/\/----------------------------------------------------------------------------------------\nvec2 mainSound(float time)\n{\n\tvec2 audio = vec2(.0);\n    vec2 n1 = FBM22( vec2(time*520., time*530.) * (Noise21(time*.2+9.)*.2+1.)) * (Noise21(time*.5)+1.);\n\tvec2 n2 = FBM22( vec2(time*1800., time*900.) * (Noise21(time*.1)*.2+1.))  * (Noise21(time*.2)+1.);\n\n    audio += (n1+n2)\/2.0;\n    \n    audio+= (crow(time)+crow(time+.02)+crow(time+.04))*.2;  \/\/ ...Not very good, but it has a little style of its own...\n    audio.x+= crow(time-.25)*.15;\n    audio.y+= crow(time-.5)*.1;\n\n \/\/   float foot = tri(time*3.);\n\/\/    audio += Noise11(time*10.0)*Noise11(time*500.0)*Noise11(time*3000.0)* smoothstep(0.6,1.,abs(foot)) * 6.;\n    \n    return clamp(audio, -1.0, 1.0) * smoothstep(0.0, .6, time) * smoothstep(180.0, 170.0, time);\n    \n    \n}",
+      "name": "Sound",
+      "description": "",
+      "type": "sound"
+    },
+    {
+      "inputs": [],
+      "outputs": [],
+      "code": "#define CAMERA_POS\t\t0\n#define CAMERA_TAR\t\t1\n#define SUN_DIRECTION \t2\n#define CROW_POS\t\t3\n#define CROW_HEADING\t4\n#define CROW_FLAPPING\t5\n#define CROW_HEADTILT\t6\n#define CROW_TURN\t\t7\n#define CROW_CLIMBING\t8\n\n#define FAR 850.\n\n#define TAU 6.28318530718\n#define SUN_COLOUR vec3(1.1, .95, .85)\n#define FOG_COLOUR vec3(.48, .49, .53)\n\nvec3 sunLight, crowPos;\n\n\/\/----------------------------------------------------------------------------------------\n\nvec3 cameraPath( float z )\n{\n\treturn vec3(100.2*sin(z * .0045)+90.*cos(z *.012), 43.*(cos(z * .0047)+sin(z*.0013)) + 53.*(sin(z*0.0112)), z);\n}\n\/\/ Set up a camera matrix\n\n\/\/--------------------------------------------------------------------------\nmat3 setCamMat( in vec3 ro, in vec3 ta, float cr )\n{\n\tvec3 cw = normalize(ta-ro);\n\tvec3 cp = vec3(sin(cr), cos(cr),0.0);\n\tvec3 cu = normalize( cross(cw,cp) );\n\tvec3 cv = normalize( cross(cu,cw) );\n    return mat3( cu, cv, cw );\n}\n#define HASHSCALE1 .1031\n\nfloat hash11(float p)\n{\n\tvec3 p3  = fract(vec3(p) * HASHSCALE1);\n    p3 += dot(p3, p3.yzx + 19.19);\n    return fract((p3.x + p3.y) * p3.z);\n}\nfloat hash12(vec2 p)\n{\n\tvec3 p3  = fract(vec3(p.xyx) * HASHSCALE1);\n    p3 += dot(p3, p3.yzx + 19.19);\n    return fract((p3.x + p3.y) * p3.z);\n}\n",
+      "name": "Common",
+      "description": "",
+      "type": "common"
+    }
+  ]
+}

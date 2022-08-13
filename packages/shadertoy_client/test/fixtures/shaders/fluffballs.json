@@ -1,0 +1,50 @@
+{
+    "ver": "0.1",
+    "info": {
+        "id": "fscczX",
+        "date": "1653804604",
+        "viewed": 3076,
+        "name": "fluffballs",
+        "username": "celyk",
+        "description": "a",
+        "likes": 86,
+        "published": 3,
+        "flags": 0,
+        "usePreview": 1,
+        "tags": [
+            "fluffy"
+        ],
+        "hasliked": 0
+    },
+    "renderpass": [
+        {
+            "inputs": [
+                {
+                    "id": "XdX3Rr",
+                    "filepath": "\/media\/a\/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+                    "previewfilepath": "\/media\/ap\/aea6b99da1d53055107966b59ac5444fc8bc7b3ce2d0bbb6a4a3cbae1d97f3aa.bin",
+                    "type": "volume",
+                    "channel": 0,
+                    "sampler": {
+                        "filter": "mipmap",
+                        "wrap": "repeat",
+                        "vflip": "true",
+                        "srgb": "false",
+                        "internal": "byte"
+                    },
+                    "published": 1
+                }
+            ],
+            "outputs": [
+                {
+                    "id": "4dfGRr",
+                    "channel": 0
+                }
+            ],
+            "code": "#define R iResolution.xy\n\nconst float PI = 3.1415926;\nmat2 rot(float c){float s=sin(c);return mat2(c=cos(c),s,-s,c);}\n\n#define normal(FUNC,P,E)\\\n(\\\n    vec3(\\\n        FUNC(P+vec3(E,0,0))-FUNC(P-vec3(E,0,0)),\\\n        FUNC(P+vec3(0,E,0))-FUNC(P-vec3(0,E,0)),\\\n        FUNC(P+vec3(0,0,E))-FUNC(P-vec3(0,0,E))\\\n     )\/(E*2.)\\\n)\n\nfloat map(vec3 p){\n    float d = 1e9;\n    \n    p -= (texture(iChannel0,p).xyz-.5)*.1;\n    \n    d = min(d,length(fract(p)-.5)+1.);\n    \n    p.xy = (p.xy+p.yx*vec2(-1,1))\/sqrt(2.);\n    \n    p.xz = (p.xz+p.zx*vec2(-1,1))\/sqrt(2.);\n    p*=.4;\n    p-=iTime*.3;\n    d = min(d,(length(fract(p)-.5))\/.4);\n        \n    \/\/d = min(d,(sdBox(fract(p-.5)-.5,vec3(.4,.5,.6))+.7)\/.4);\n    \n    return d;\n}\n\nfloat trace(vec3 ro,vec3 rd){\n    vec3 p = ro;\n    float t = 0.;\n    float h = -.4;\n    for(int i=0;i<40;i++){\n        t += (map(p)+t*h)\/(1.-h);\n        p = ro+rd*t;\n    }\n    return t;\n}\n\nvoid mainImage(out vec4 O,vec2 U){\n    vec2 uv = (2.*U-R)\/R.y*.8;\n    vec2 m = (2.*iMouse.xy-R)\/R.y*2.;\n\n    vec3 ro = vec3(sin(iTime*.2)*4.,sin(.1*iTime*1.23)*4.,-0)+iTime;\n    vec3 rd = normalize(vec3(uv,1));\n    \n    if(iMouse.z>0.){\n        rd.yz*=rot(-m.y);\n        rd.xz*=rot(-m.x);\n    }\n    \n    rd.yz*=rot(iTime*.37);\n    rd.xy*=rot(iTime*.4);\n     \n    \n    O.xyz = (rd*.5+.5)*2.;\n    \n    float t = trace(ro,rd);\n    \n    vec3 p = ro+rd*t;\n    vec3 n = normal(map,p,.15);\n    \n    O.xyz += vec3(1,2,3)*max(dot(n,normalize(vec3(0,1,0)))*.5+.5,0.)*.2;\/\/n*.5+.5;\n    O.xyz += vec3(4,2,1)*max(dot(n,normalize(vec3(3,1,0))),0.);\/\/n*.5+.5;\n\n\n    O.xyz += vec3(.1,.2,.3)*exp(t*.4);\n    O.xyz *= .6;O.xyz-=.4;\n    \n    O.xyz = 1. - exp(-O.xyz);\n    O.xyz = pow(O.xyz,vec3(1.\/2.2));\n}",
+            "name": "Image",
+            "description": "",
+            "type": "image"
+        }
+    ]
+}
