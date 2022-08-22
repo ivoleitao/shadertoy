@@ -110,5 +110,5 @@ scripts:
     description: |
       Uploads the code coverage to codecov.
 
-   postbootstrap: |
+  postbootstrap: |
       melos run build 
