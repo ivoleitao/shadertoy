@@ -1,0 +1,680 @@
+[
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "NlGcWR",
+            "date": "1661202075",
+            "viewed": 31,
+            "name": "Fork Electromag 063",
+            "username": "Tomortiz25Shadertoy",
+            "description": "rainbow pattern\n",
+            "likes": 0,
+            "published": 1,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Electromagnetic Field\n\/\/ I want to display the electromagnetic fields together, \n\/\/ with the colors representing the field directions.\n\/\/ ------------------------------------------\n\/\/ A coordinate system in three-dimensional space \n\/\/ consists of an origin plus three orientation axes \n\/\/ and three scaling components. \n\/\/ Corresponding to the three transformations of displacement, \n\/\/ rotation, and scaling, respectively.\n\/\/ ------------------------------------------\nstruct coord3\n{\n   vec3 ux,uy,uz; \/\/ three axial unit vectors\n};\nvec3 ccross(coord3 a,coord3 b)\n{\n    return vec3(\n        dot(a.uy,b.uz) - dot(a.uz,b.uy),\n        dot(a.uz,b.ux) - dot(a.ux,b.uz),\n        dot(a.ux,b.uy) - dot(a.uy,b.ux)\n    );\n}\n\n\/\/ ------------------------------------------\n\/\/ Dimension or Const\n\/\/ ------------------------------------------\n#define PI 3.1415926535\n#define met 1.0\n#define sec 50.0\n\n\/\/ ------------------------------------------\n\/\/ Electromagnetic Feild\n\/\/ Q = Fai + |A>\n\/\/ ------------------------------------------\nfloat Fai(vec3 p)\n{\n    float r = length(p);\n\treturn (1.0 \/ (r*r)); \n}\nvec3 DXYZ_Fai(vec3 p)\n{\n    float d = 0.001; \n    return vec3(\n        (Fai(p + vec3(d,0.0,0.0)) - Fai(p)) \/ d,\n        (Fai(p + vec3(0.0,d,0.0)) - Fai(p)) \/ d,\n        (Fai(p + vec3(0.0,0.0,d)) - Fai(p)) \/ d);\n}\nvec3 A(vec3 p, float t) {\n    float r = 0.001 + length(p.xz);\n    return vec3(0.0,1.0,0.0) * (1.0 \/ (r * r))*sin(t*0.5); \n}\ncoord3 DXYZ_A(vec3 p, float t){\n    coord3 c;\n    float d = 0.001;\n    c.ux = ((A(p + vec3(1.0,0.0,0.0) * d, t) - A(p, t)) \/ d);\n    c.uy = ((A(p + vec3(0.0,1.0,0.0) * d, t) - A(p, t)) \/ d);\n    c.uz = ((A(p + vec3(0.0,0.0,1.0) * d, t) - A(p, t)) \/ d);\n    return c;\n}\nvec3 DT_A(vec3 p, float t)\n{\n    float dt = 0.001;\n    return (A(p,t + dt) - A(p, t)) \/ dt; \n}\n\n\/\/ ------------------------------------------\n\/\/ Phase View\n\/\/ ------------------------------------------\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 pp = (-iResolution.xy + 2.0*fragCoord.xy) \/ iResolution.y;\n    float eyer = 1.0;\n    float eyea = -((iMouse.x) \/ iResolution.x) * PI * 2.0;\n    float eyef = ((iMouse.y \/ iResolution.y)-0.24) * PI * 2.0;\n    \n\tvec3 cam = vec3(\n        eyer * cos(eyea) * sin(eyef),\n        eyer * cos(eyef),\n        eyer * sin(eyea) * sin(eyef));\n    \n\tvec3 front = normalize(- cam);\n\tvec3 left = normalize(cross(normalize(vec3(0.0,1,-0.01)), front));\n\tvec3 up = normalize(cross(front, left));\n\tvec3 v = normalize(front*1.5 + left*pp.x + up*pp.y);\n    \n    vec3 p = cam;\n    \n    coord3 c;\n    c.ux = vec3(1.0,0.0,0.0);\n    c.uy = vec3(0.0,1.0,0.0);\n    c.uz = vec3(0.0,0.0,1.0);\n    \n    float dt = 0.01;\n    vec3 cor1 = vec3(0.0);\n    vec3 cor2 = vec3(0.0);\n    float t = iTime;\n    for(int i = 0; i < 200; i ++)\n    {\n        float r = length(p);\n        {  \n            vec3 o = p;\n            vec3 B = ccross(c,DXYZ_A(o, t));\n            vec3 E = -(DXYZ_Fai(o)) - DT_A(o, t); \n            cor1 += (B)*0.0001;\n            cor2 += (E)*0.0001;\n        }\n        p += v * dt;\n    }\n    \n    fragColor = vec4((cos(cor1*5.0) * sin(cor2*5.0)),1.0);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "slVyRm",
+            "date": "1661195876",
+            "viewed": 15,
+            "name": "Simple moving circle",
+            "username": "randomOrder",
+            "description": "I did not just want to draw a circle. I wanted it to move and I accidentally discovered that most smooth movements of accelerating and decelerating elements in games are just made with a simple sinus function over the time since start.",
+            "likes": 1,
+            "published": 1,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord\/iResolution.xy;\n    float aspect = iResolution.x\/iResolution.y;\n    uv.x *= aspect;\n\n    \/\/ Time varying pixel color\n    \/\/vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));\n\n    \/\/ Output to screen\n    float radius = 0.3+0.2*sin(iTime);\n    float center_x = 0.5*aspect + radius*sin(2.0*iTime);\n    float center_y = 0.5 + radius*sin(iTime);\n    float delta_x = center_x-uv.x;\n    float delta_y = center_y-uv.y;\n    if(delta_x*delta_x + delta_y*delta_y < radius) {    \n        fragColor = vec4(uv.x, uv.y, 0.0,1.0);\n    } else {\n        fragColor = vec4(0.0, 0.0, 1.0-uv.y,1.0);\n    }\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "NtVcRw",
+            "date": "1661195190",
+            "viewed": 28,
+            "name": "Raytracing Textures and Cubemaps",
+            "username": "Poisson",
+            "description": "A simple raytracer with soft shadow, (fake) reflections, cubemaps, and biplanar mapping;",
+            "likes": 1,
+            "published": 1,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "XsXGRn",
+                        "filepath": "\/media\/a\/cd4c518bc6ef165c39d4405b347b51ba40f8d7a065ab0e8d2e4f422cbc1e8a43.jpg",
+                        "previewfilepath": "\/media\/ap\/cd4c518bc6ef165c39d4405b347b51ba40f8d7a065ab0e8d2e4f422cbc1e8a43.jpg",
+                        "type": "texture",
+                        "channel": 2,
+                        "sampler": {
+                            "filter": "mipmap",
+                            "wrap": "repeat",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    },
+                    {
+                        "id": "XsX3Rn",
+                        "filepath": "\/media\/a\/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+                        "previewfilepath": "\/media\/ap\/92d7758c402f0927011ca8d0a7e40251439fba3a1dac26f5b8b62026323501aa.jpg",
+                        "type": "texture",
+                        "channel": 1,
+                        "sampler": {
+                            "filter": "mipmap",
+                            "wrap": "repeat",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    },
+                    {
+                        "id": "XsfGzn",
+                        "filepath": "\/media\/a\/585f9546c092f53ded45332b343144396c0b2d70d9965f585ebc172080d8aa58.jpg",
+                        "previewfilepath": "\/media\/ap\/585f9546c092f53ded45332b343144396c0b2d70d9965f585ebc172080d8aa58.jpg",
+                        "type": "cubemap",
+                        "channel": 3,
+                        "sampler": {
+                            "filter": "mipmap",
+                            "wrap": "clamp",
+                            "vflip": "false",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    },
+                    {
+                        "id": "Xsf3Rr",
+                        "filepath": "\/media\/a\/79520a3d3a0f4d3caa440802ef4362e99d54e12b1392973e4ea321840970a88a.jpg",
+                        "previewfilepath": "\/media\/ap\/79520a3d3a0f4d3caa440802ef4362e99d54e12b1392973e4ea321840970a88a.jpg",
+                        "type": "texture",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "mipmap",
+                            "wrap": "repeat",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "#define PI 3.141592\n#define TAU 6.283185\n#define SOFT_SHADOW_SAMPLES 16 \/\/ soft shadows quality\n#define AA 2 \/\/ antialiasing \/ set it to 1 if you have a slow computer\n\n\/\/ rotation function\nmat2 rot(float a) {\n    float c = cos(a), s = sin(a);\n    return mat2(c, -s, s, c);\n}\n\nstruct Ray {\n    vec3 o, d; \/\/ origin and direction\n};\n\nstruct Camera {\n    vec3 o, d; \/\/ origin and direction\n    float z; \/\/ zoom\n};\n\n\/\/ray setup function\nRay getRay(vec2 uv, Camera c) {\n    vec3 f = normalize(c.d - c.o);\n    vec3 s = normalize(cross(vec3(0,1,0), f));\n    vec3 u = cross(f, s);\n    vec3 i = normalize(f*c.z + uv.x*s + uv.y*u);\n    \n    return Ray(c.o, i);\n}\n\nstruct Record {\n    float t;\n    vec3 p, n; \/\/ position and normal\n    int tex; \/\/ texture\n};\n\n\/\/ sphere intersection function\nbool iSphere(vec3 c, float s, Ray r, inout Record rec) {\n    float t = dot(c - r.o, r.d);\n    vec3 p = r.o + r.d * t;\n    float a = length(p - c);\n    if (s*s - a*a > 0.0) {\n        float b = sqrt(s*s - a*a);\n        t -= b;\n        if (t > 1e-6 && t < rec.t) {\n            rec.t = t;\n            rec.p = r.o + r.d * t;\n            rec.n = normalize(rec.p - c);\n            rec.tex = 1;\n            return true;\n        }\n    }\n    return false;\n}\n\n\/\/ plane intersection function\nbool iPlane(vec3 n, float h, float s, Ray r, inout Record rec) {\n    float t = (-h - dot(n, r.o)) \/ dot(n, r.d);\n    vec3 p = r.o + r.d * t;\n    \n    if (t > 1e-6 && t < rec.t && length(p) < s+sin(p.x)*sin(p.z)) {\n        rec.t = t;\n        rec.p = p;\n        rec.n = n;\n        rec.tex = 2;\n        return true;\n    }\n    return false;\n}\n\n\/\/ box intersection function\nbool iBox(vec3 p, vec3 s, Ray r, inout Record rec) {\n    vec3 m = 1.\/r.d;\n    vec3 n = m*(r.o - p);\n    vec3 k = abs(m)*s;\n    vec3 t1 = -n - k;\n    vec3 t2 = -n + k;\n\n    float tN = max(max(t1.x, t1.y), t1.z);\n    float tF = min(min(t2.x, t2.y), t2.z);\n    \n    if( tN>tF || tF<1e-6) {\n        return false;\n    }\n    if (tN > 1e-6 && tN < rec.t) {\n        rec.t = tN;\n        rec.p = r.o + r.d * tN;\n        rec.n = -sign(r.d)*step(t1.yzx,t1.xyz)*step(t1.zxy,t1.xyz);\n        rec.tex = 0;\n        return true;\n    }\n}\n\n\/\/ intersect scene\nbool intersect(Ray r, out Record rec) {\n    rec.t = 1e10;\n    bool hit = false;\n\n    hit = iPlane(vec3(0,1,0), .5, 5., r, rec) || hit;\n    hit = iBox(vec3(0), vec3(.5,.25,.75), r, rec) || hit;\n    hit = iSphere(vec3(0,.9+.2*sin(2.5*iTime),0), .3, r, rec) || hit;\n    \n    return hit;\n}\n\n\/\/ biplanar mapping\nvec3 applyTexture(sampler2D tex, vec3 p, vec3 n, float k) {\n     p = .5+.5*p;   \n     \n     vec3 xy = texture(tex, p.xy).rgb;\n     vec3 xz = texture(tex, p.xz).rgb;\n     vec3 yz = texture(tex, p.yz).rgb;\n            \n     n = abs(n);\n     n = pow(n, vec3(k));\n     n \/= dot(n, vec3(1));\n            \n     return xy*n.z + xz * n.y + yz*n.x;\n}\n\n\/\/ soft shadow\nfloat calcSoftshadow(vec3 ro, vec3 rd, int q, float k) {\n    Ray r;\n    r.o = ro;\n    Record rec;\n    float res = 1.;\n    for (int i = 0; i < q; i++) {\n        float o = float(i)\/float(q) - .5;\n        r.d = normalize(rd + o*k); \n        if (intersect(r, rec)) res -= 1.\/float(q);\n    }\n    return res;\n}\n\nvec3 render(Ray r) {\n    Record rec;\n    bool hit = intersect(r, rec);\n        \n    vec3 col = texture(iChannel3, r.d).rgb;\n    if (hit) {\n        \/\/ color \/ lighting\n        vec3 lig = normalize(vec3(-3,4,-1) - rec.p);\n        float dif = clamp(dot(rec.n, lig), 0., 1.); \/\/ difuse lighting\n        float sha = calcSoftshadow(rec.p, lig, SOFT_SHADOW_SAMPLES, .1);\n        float occ = .5+.5*rec.n.y; \/\/ fake occlusion\n        float fre = pow(1.+dot(r.d, rec.n), 3.);\n\n        if (rec.tex == 0) {\n            col = applyTexture(iChannel0, rec.p, rec.n, 32.);\n        } else if (rec.tex == 1) {\n            col = applyTexture(iChannel1, rec.p, rec.n, 16.);\n        } else if (rec.tex == 2) {\n            col = applyTexture(iChannel2, rec.p*.5, rec.n, 16.);\n        }\n        \n        vec3 refTex = texture(iChannel3, reflect(r.d, rec.n)).rgb;\n        col += refTex * fre; \/\/ fake reflections\n        col *= dif * sha + occ * vec3(.05,.1,.15);\n    }\n        \n    return col;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 mouse = iMouse.xy \/ iResolution.xy;\n    \n    \/\/ antialiasing by iq\n    vec3 tot = vec3(0);\n    for (int i = 0; i < AA; i++) {\n    for (int j = 0; j < AA; j++) {\n        vec2 o = vec2(i, j) \/ float(AA*AA) - .5;\n        vec2 uv = (fragCoord + o - .5 * iResolution.xy) \/ iResolution.y;\n\n        vec3 camPos = vec3(0,mouse.y * 2.,-2);\n        camPos.xz *= rot(-mouse.x*TAU - .5*iTime);\n        \n        Ray r = getRay(uv, Camera(camPos, vec3(0,.25,0), .9));\n;\n        vec3 col = render(r);\n        \n        col = pow(col, vec3(.4545)); \/\/ gamma corection\n        col *= 1.-.15*dot(uv,uv); \/\/ vignetting\n        tot += col;\n    }\n    }\n    tot \/= float(AA*AA);\n        \n    fragColor = vec4(tot,1.0);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "7lKczw",
+            "date": "1661193108",
+            "viewed": 43,
+            "name": "+Something gaz 248",
+            "username": "nabr",
+            "description": "3d",
+            "likes": 2,
+            "published": 3,
+            "flags": 8,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Fork of \"Something gaz 248\" by gaz. https:\/\/shadertoy.com\/view\/7lcyWj\n\/\/ 2022-08-22 17:25:02\n\n#define N(x) fract(sin((x)*333.333))\n#define H(t) (cos((vec3(0,2,-2)\/3.+t)*6.24)*.5+.5)\n#define R(p,a,r)mix(a*dot(p,a),p,cos(r))+sin(r)*cross(p,a)\n#define minkowski(v,m) pow(dot(pow(v, v*0.+m), v*0.+1.), 1.\/m)\/\/glslsandbox by sphinx\nvoid mainImage(out vec4 O, vec2 C)\n{\n    O=vec4(0);\n    vec3 p,r=iResolution,d=normalize(vec3((C-.5*r.xy)\/r.y,1));\n    float i=0.,n,g=0.,t=mod(iTime, 16.);\n    for(int i=0;i<2;i++) t+=2.*N(floor(t\/.8));\n    for(;i++<25.;O+=1.\/exp(i*i*n)\/(12.+log2(N(i\/length(p.zx)))))\n    p=d*g-i\/1e5,\n        p -=mod(t,2.)<1.?R(vec3(2,3,6),normalize(H(t*.1)).xyx,t):vec3(0, .2*N(t), exp(3.*fract(t))),\n        g+=n=minkowski(abs(mod(p, vec3(3))-1.5),(1.+mod(t, 5.)))-max(.2, .5*sin(t));\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            },
+            {
+                "inputs": [],
+                "outputs": [],
+                "code": "#define f fract\n#define s sin\n#define it(x) int(x*t)\n#define p(x) s(x*f(x))\n#define pw(x,y) pow(1.-f(x*t), y)\n#define z 8.*t\nvec2 mainSound(int samp, float t )\n{\n    return .251*vec2(\n    \/\/synth\n    p( (2.5+f(19.*t)) * p(vec4(4,8,12,it(1.)%4>3?1:4)[it(8.)%4]\n        * t*100.*vec4(4,3,2.5,5)[it(2.)%4]+f(-650.*t)))\n        * exp(-float(it(1.)%6<5?3:1)*f(mod(t,8.)>6.?-.5*t:z)\n      )\n    \/\/kick\n    + p(10.*pw(8.,2.))*pw(2.,4.)\n    \/\/hihat\n    + p((40.+f(z))*t*400.)*exp(-15.*f(z)));\n}",
+                "name": "Sound",
+                "description": "",
+                "type": "sound"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "slKczw",
+            "date": "1661193004",
+            "viewed": 13,
+            "name": "French simple flag",
+            "username": "vinicim_no_poste",
+            "description": "french simple flag",
+            "likes": 0,
+            "published": 1,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord\/iResolution.xy - 0.5;\n\tfloat iswhite = step(abs(uv.x), 0.165);\n    fragColor = vec4(step(0.165, uv.x) + iswhite, \n                     iswhite, \n                     step(uv.x, -0.165) + iswhite,\n                     1.0);\n}\n",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "7lKcRw",
+            "date": "1661188127",
+            "viewed": 42,
+            "name": "Cubemap buffer precision issue",
+            "username": "stduhpf",
+            "description": "Using built-in cubemap buffer to accumulate results over time leads to precision issues, these isssues are non-existent when using a regular buffer as a cubemap. ",
+            "likes": 1,
+            "published": 1,
+            "flags": 32,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "4dX3Rr",
+                        "filepath": "\/media\/a\/\/media\/previz\/cubemap00.png",
+                        "previewfilepath": "\/media\/ap\/\/media\/previz\/cubemap00.png",
+                        "type": "cubemap",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    },
+                    {
+                        "id": "4dXGR8",
+                        "filepath": "\/media\/previz\/buffer00.png",
+                        "previewfilepath": "\/media\/previz\/buffer00.png",
+                        "type": "buffer",
+                        "channel": 2,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "vec2 sphereToPlane(vec3 p){\n    vec2 uv = vec2(atan(p.y,p.x),atan(length(p.xy),p.z));\n    uv\/=vec2(1.,.5)*TAU;\n    return fract(uv+1.);\n}\n\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord\/iResolution.xy; \n    vec2 mse =(iMouse.xy-.5*iResolution.xy)\/360.*vec2(2.,.5*3.1415);\n    if(iMouse.xy==vec2(0))\n        mse*=0.;\n    mat3 rdroty = mat3(1,0,0,0,cos(mse.y),sin(mse.y),0,-sin(mse.y),cos(mse.y));\n    mat3 rdrotx = mat3(cos(mse.x),0,sin(mse.x),0,1,0,-sin(mse.x),0,cos(mse.x));\n    mat3 rot = rdroty*rdrotx;\n    \n    float d = 1.;\n    \n    vec3 projPos = (vec3(2.*fragCoord-iResolution.xy,iResolution.y*d))*rot;\n    \n    vec3 rd = normalize(projPos);\n    vec3 col = uv.x<.5 ? texture(iChannel0,rd).rgb : \n            texture(iChannel2,sphereToPlane(rd)).rgb;\n\n    fragColor = vec4(linearToSRGB(col\/float(iFrame+1)),1.0);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            },
+            {
+                "inputs": [
+                    {
+                        "id": "4dX3Rr",
+                        "filepath": "\/media\/a\/\/media\/previz\/cubemap00.png",
+                        "previewfilepath": "\/media\/ap\/\/media\/previz\/cubemap00.png",
+                        "type": "cubemap",
+                        "channel": 1,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dX3Rr",
+                        "channel": 0
+                    }
+                ],
+                "code": "void mainCubemap( out vec4 fragColor, in vec2 fragCoord, in vec3 rayOri, in vec3 rayDir )\n{\n\n    vec3 col = texture(iChannel1,rayDir).rgb;\n    \n     col += .5+.25*sin(rayDir*10.);\n    fragColor = vec4(col,1.0);\n}",
+                "name": "Cube A",
+                "description": "",
+                "type": "cubemap"
+            },
+            {
+                "inputs": [],
+                "outputs": [],
+                "code": "\/\/Image-Based lighting requires linear values to look correct, so these transformations are important.\nconst float TAU = 2.*acos(-1.);\n\n\nvec3 linearToSRGB(vec3 linear){\n    return mix(\n        linear * 12.92,\n        pow(linear, vec3(1.\/2.4) ) * 1.055 - .055,\n        step( .0031308, linear )\n    );\n}\n\nvec3 srgbToLinear(vec3 srgb){\n    return mix(\n        srgb \/ 12.92,\n        pow(.947867 * srgb + .0521327, vec3(2.4) ),\n        step( .04045, srgb )\n    );\n}",
+                "name": "Common",
+                "description": "",
+                "type": "common"
+            },
+            {
+                "inputs": [
+                    {
+                        "id": "4dXGR8",
+                        "filepath": "\/media\/previz\/buffer00.png",
+                        "previewfilepath": "\/media\/previz\/buffer00.png",
+                        "type": "buffer",
+                        "channel": 1,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dXGR8",
+                        "channel": 0
+                    }
+                ],
+                "code": "vec3 planeToSphere(vec2 uv){\n    uv*=vec2(1.,.5)*TAU;\n    return vec3(cos(uv.x)*sin(uv.y),sin(uv.x)*sin(uv.y),cos(uv.y));\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec3 rayDir = planeToSphere(fragCoord\/iResolution.xy);\n    vec3 col = texture(iChannel1,fragCoord\/iResolution.xy).rgb;\n    \n    col += .5+.25*sin(rayDir*10.);\n    fragColor = vec4(col,1.0);\n}",
+                "name": "Buffer A",
+                "description": "",
+                "type": "buffer"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "7tKyRw",
+            "date": "1661184660",
+            "viewed": 17,
+            "name": "test_uvmap",
+            "username": "starea",
+            "description": "testuv",
+            "likes": 0,
+            "published": 3,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord\/iResolution.xy;\n\n    \/\/ Output to screen\n    fragColor = vec4(uv.xyy,1.0);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "NlVyRm",
+            "date": "1661179536",
+            "viewed": 57,
+            "name": "Electromagnetic Field",
+            "username": "romeosoft",
+            "description": "I want to display the electromagnetic fields together, with the colors representing the field directions.\nWith a computer, anything can be calculated!\nhttps:\/\/github.com\/panguojun\/Coordinate-system-transformation",
+            "likes": 0,
+            "published": 1,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Electromagnetic Field\n\/\/ I want to display the electromagnetic fields together, \n\/\/ with the colors representing the field directions.\n\/\/ ------------------------------------------\n\/\/ A coordinate system in three-dimensional space \n\/\/ consists of an origin plus three orientation axes \n\/\/ and three scaling components. \n\/\/ Corresponding to the three transformations of displacement, \n\/\/ rotation, and scaling, respectively.\n\/\/ ------------------------------------------\nstruct coord3\n{\n   vec3 ux,uy,uz; \/\/ three axial unit vectors\n};\nvec3 ccross(coord3 a,coord3 b)\n{\n    return vec3(\n        dot(a.uy,b.uz) - dot(a.uz,b.uy),\n        dot(a.uz,b.ux) - dot(a.ux,b.uz),\n        dot(a.ux,b.uy) - dot(a.uy,b.ux)\n    );\n}\n\n\/\/ ------------------------------------------\n\/\/ Dimension or Const\n\/\/ ------------------------------------------\n#define PI 3.1415926535\n#define met 1.0\n#define sec 50.0\n\n\/\/ ------------------------------------------\n\/\/ Electromagnetic Feild\n\/\/ Q = Fai + |A>\n\/\/ ------------------------------------------\nfloat Fai(vec3 p)\n{\n    float r = length(p);\n\treturn (1.0 \/ (r*r)); \n}\nvec3 DXYZ_Fai(vec3 p)\n{\n    float d = 0.001; \n    return vec3(\n        (Fai(p + vec3(d,0.0,0.0)) - Fai(p)) \/ d,\n        (Fai(p + vec3(0.0,d,0.0)) - Fai(p)) \/ d,\n        (Fai(p + vec3(0.0,0.0,d)) - Fai(p)) \/ d);\n}\nvec3 A(vec3 p, float t) {\n    float r = 0.001 + length(p.xz);\n    return vec3(0.0,1.0,0.0) * (1.0 \/ (r * r))*sin(t*0.5); \n}\ncoord3 DXYZ_A(vec3 p, float t){\n    coord3 c;\n    float d = 0.001;\n    c.ux = ((A(p + vec3(1.0,0.0,0.0) * d, t) - A(p, t)) \/ d);\n    c.uy = ((A(p + vec3(0.0,1.0,0.0) * d, t) - A(p, t)) \/ d);\n    c.uz = ((A(p + vec3(0.0,0.0,1.0) * d, t) - A(p, t)) \/ d);\n    return c;\n}\nvec3 DT_A(vec3 p, float t)\n{\n    float dt = 0.001;\n    return (A(p,t + dt) - A(p, t)) \/ dt; \n}\n\n\/\/ ------------------------------------------\n\/\/ Phase View\n\/\/ ------------------------------------------\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 pp = (-iResolution.xy + 2.0*fragCoord.xy) \/ iResolution.y;\n    float eyer = 1.0;\n    float eyea = -((iMouse.x) \/ iResolution.x) * PI * 2.0;\n    float eyef = ((iMouse.y \/ iResolution.y)-0.24) * PI * 2.0;\n    \n\tvec3 cam = vec3(\n        eyer * cos(eyea) * sin(eyef),\n        eyer * cos(eyef),\n        eyer * sin(eyea) * sin(eyef));\n    \n\tvec3 front = normalize(- cam);\n\tvec3 left = normalize(cross(normalize(vec3(0.0,1,-0.01)), front));\n\tvec3 up = normalize(cross(front, left));\n\tvec3 v = normalize(front*1.5 + left*pp.x + up*pp.y);\n    \n    vec3 p = cam;\n    \n    coord3 c;\n    c.ux = vec3(1.0,0.0,0.0);\n    c.uy = vec3(0.0,1.0,0.0);\n    c.uz = vec3(0.0,0.0,1.0);\n    \n    float dt = 0.01;\n    vec3 cor1 = vec3(0.0);\n    vec3 cor2 = vec3(0.0);\n    float t = iTime;\n    for(int i = 0; i < 200; i ++)\n    {\n        float r = length(p);\n        {  \n            vec3 o = p;\n            vec3 B = ccross(c,DXYZ_A(o, t));\n            vec3 E = -(DXYZ_Fai(o)) - DT_A(o, t); \n            cor1 += (B)*0.0001;\n            cor2 += (E)*0.0001;\n        }\n        p += v * dt;\n    }\n    \n    fragColor = vec4((cos(cor1*5.0) * sin(cor2*5.0)),1.0);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "ssGBRK",
+            "date": "1661176822",
+            "viewed": 158,
+            "name": "Extruded Triangle Grid Truchet",
+            "username": "Shane",
+            "description": "An extruded triangle grid Truchet variation.",
+            "likes": 24,
+            "published": 3,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "XsX3zn",
+                        "filepath": "\/media\/a\/94284d43be78f00eb6b298e6d78656a1b34e2b91b34940d02f1ca8b22310e8a0.png",
+                        "previewfilepath": "\/media\/ap\/94284d43be78f00eb6b298e6d78656a1b34e2b91b34940d02f1ca8b22310e8a0.png",
+                        "type": "cubemap",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "mipmap",
+                            "wrap": "clamp",
+                            "vflip": "false",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/*\n\n    Extruded Triangle Grid Truchet\n    ------------------------------\n    \n    I've been making a few technical shaders lately, so wanted to take a \n    break and code something simple.\n    \n    This is an extruded 2D simplex Truchet variation comprising three basic \n    tile configurations. It's not a common pattern, but some may have seen \n    it before. The 2D field is not difficult to construct: Simply render a \n    mixture of arcs or circles between triangle cell midpoints, then extrude \n    the result. Raymarching objects like this in a front-on fashion doesn't \n    present any challenges either.\n \n    I used an old extruded pattern template, then updated the colors and \n    lighting a bit. This was not a difficult shader to make. I was originally \n    going to give it a metallic look, but I might save that for one of the \n    more interesting variations I'm working on.\n\n\n    References:\n\n    \/\/ A two tiled variation using the same extrusion template.\n\tExtruded Octagon Diamond Truchet - Shane\n    https:\/\/www.shadertoy.com\/view\/3tGBWV\n\n    \/\/ BigWIngs's popular Youtube channel. It's always informative seeing how \n    \/\/ others approach various graphics topics.\n    Shader Coding: Truchet Tiling Explained! -  The Art of Code\n\thttps:\/\/www.youtube.com\/watch?v=2R7h76GoIJM\n\n\n*\/\n\n\n\/\/ Maximum ray distance.\n#define FAR 10.\n\n\/\/ Subtle textured lines.\n#define LINES\n\n\/\/ Double arcs.\n\/\/#define DOUBLE_ARC\n\n\/\/ Curve shape - Round: 0, Straight: 1.\n#define SHAPE 0\n\n\n\n\/\/ Object ID: Either the back plane, extruded object or beacons.\nint objID;\n\n\/\/ Standard 2D rotation formula.\nmat2 rot2(in float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }\n\n\/\/ IQ's vec2 to float hash.\nfloat hash21(vec2 p){  return fract(sin(dot(p, vec2(27.619, 57.583)))*43758.5453); }\n\n\n\n\/\/ Distance metrics.\nfloat dist(vec2 p){\n\n    \/\/ Circular or hexagonal bounds.\n    #if SHAPE == 0\n    return length(p);\n    #else \n    \/\/ Not a proper distance field, but it'll get the job done.\n    p = abs(p);\n    return max(p.y*.8660254 + p.x*.5, p.x);\n    #endif\n\n}\n\n\/*\n\/\/ IQ's extrusion formula.\nfloat opExtrusion(in float sdf, in float pz, in float h, in float sf){\n\n    \/\/ Slight rounding. A little nicer, but slower.\n    vec2 w = vec2( sdf, abs(pz) - h) + sf;\n  \treturn min(max(w.x, w.y), 0.) + length(max(w, 0.)) - sf;\n}\n*\/\n\n\n\/\/\/\/\/\/\/\/\n\/\/ A 2D triangle partitioning. I've dropped in an old routine here.\n\/\/ It works fine, but could do with some fine tuning. By the way, this\n\/\/ will partition all repeat grid triangles, not just equilateral ones.\n\n\/\/ Skewing coordinates. \"s\" contains the X and Y skew factors.\nvec2 skewXY(vec2 p, vec2 s){ return mat2(1, -s.yx, 1)*p; }\n\n\/\/ Unskewing coordinates. \"s\" contains the X and Y skew factors.\nvec2 unskewXY(vec2 p, vec2 s){ return inverse(mat2(1, -s.yx, 1))*p; }\n\n\/\/ Triangle scale: Smaller numbers mean smaller triangles, oddly enough. :)\nfloat scale = 1.\/1.5;\n\nfloat gTri;\n\nvec4 getTriVerts(in vec2 p, inout vec2[3] v){\n\n    \/\/ Rectangle scale.\n    vec2 rect = (vec2(1.\/.8660254, 1))*scale;\n    \/\/ Skewing half way along X, and not skewing in the Y direction.\n    vec2 sk = vec2(rect.x*.5, 0)\/scale; \/\/ 12 x .2\n\n    \/\/ Skew the XY plane coordinates.\n    p = skewXY(p, sk);\n    \n    \/\/ Unique position-based ID for each cell. Technically, to get the central position\n    \/\/ back, you'd need to multiply this by the \"rect\" variable, but it's kept this way\n    \/\/ to keep the calculations easier. It's worth putting some simple numbers into the\n    \/\/ \"rect\" variable to convince yourself that the following makes sense.\n\tvec2 id = floor(p\/rect) + .5; \n    \/\/ Local grid cell coordinates -- Range: [-rect\/2., rect\/2.].\n\tp -= id*rect; \n    \n    \n    \/\/ Equivalent to: \n    \/\/gTri = p.x\/rect.x < -p.y\/rect.y? 1. : -1.;\n    \/\/ Base on the bottom (-1.) or upside down (1.);\n    gTri = dot(p, 1.\/rect)<0.? 1. : -1.;\n   \n    \/\/ Puting the skewed coordinates back into unskewed form.\n    p = unskewXY(p, sk);\n    \n    \/\/ Vertex IDs for the quad.\n    vec2[3] vID; \n  \n    \/\/ Vertex IDs for each partitioned triangle.\n    if(gTri<0.){\n        vID = vec2[3](vec2(-.5, .5), vec2(.5, -.5), vec2(.5));\n    }\n    else {\n        vID = vec2[3](vec2(.5, -.5), vec2(-.5, .5), vec2(-.5));\n    }\n    \n    \/\/ Specific triangle ID.\n    id += vID[2]\/3.; \/\/id += (vID[0] + vID[1] + vID[2])\/3.;\n    \n    \/\/ Triangle vertex points.\n    for(int i = 0; i<3; i++) v[i] = unskewXY(vID[i]*rect, sk); \/\/ Unskew.\n    \n    \/\/ Centering at the zero point.\n    vec2 ctr = v[2]\/3.; \/\/Equivalent to: (v[0] + v[1] + v[2])\/3.;\n    p -= ctr;\n    v[0] -= ctr;\n    v[1] -= ctr;\n    v[2] -= ctr;\n\n    \/\/ Triangle local coordinates (centered at the zero point) and \n    \/\/ the central position point (which acts as a unique identifier).\n    return vec4(p, id);\n}\n\n\/\/ A standard square grid 2D blobby Truchet routine: Render circles\n\/\/ in opposite corners of a tile, reverse the pattern on alternate\n\/\/ checker tiles, and randomly rotate.\nvec3 tr(vec2 p){\n\n    \n        \/\/ Cell coordinate, ID and triangle orientation id.\n    \/\/ Cell vertices.\n    vec2[3] v;\n    \n    \/\/ Returns the local coordinates (centered on zero), cellID, the \n    \/\/ triangle vertex ID and relative coordinates.\n    vec4 p4 = getTriVerts(p, v);\n    p = p4.xy;\n    vec2 triID = p4.zw;\/\/ + (vID[0] + vID[1] + vID[2])\/3.;\n    \n    \n    \n    \/\/ Grid triangles. Some are upside down.\n    vec2 q = p*vec2(1, gTri); \/\/ Equivalent to the line above.\n    float tr = max(abs(q.x)*.8660254 + q.y*.5, -q.y) - scale\/3.;\n\n     \n    \/\/ Nearest vertex ID.\n    float vert = 1e5;\n    vec3 midD;\n    float sL = length(v[0] - v[1]);\n    \n    \/\/ Random value based on the overall triangle ID.\n    float rnd = hash21(triID + .11);\n    float rnd2 = hash21(triID + .22);    \n   \n    \/\/ Random rotation, in incrents of 120 degrees to maintain symmetry.\n    p = rot2(floor(rnd*36.)*6.2831\/3.)*p;\n\n    \/\/ Nearest vertex, vertex-arc and angle (subtended from each vertex) calculations.\n    vec2 vertID;\n    for(int i = 0; i<3; i++){\n        \n        \/\/vertD[i] = length(p - v[i]);\n        vert = min(vert, dist(p - v[i]));\n        \n        vec2 vM = mix(v[i], v[(i + 1)%3], .5);\n        midD[i] = dist(p - vM);\n \n    }\n    \n    float pTh = sL\/6.; \/\/ Arc thickness.\n    \/\/ Turning the circle distance into an arc.\n    float arc = abs(dist(p - v[0]) - sL\/2.) - pTh;\n\n    \/\/ Edge midpoint vertices.\n    float mid = min(min(midD.x, midD.y), midD.z);\n    \n    float tile;\n    \n    \/\/ Triangle Truchet tiles.\n    if(rnd2<.4){\n    \n        \/\/ Tri-pronged tile.\n        \/\/tile = min(min(arc.x, arc.y), arc.z);\n        tile = -(vert - (sL\/2. - pTh));\n    }\n    else if(rnd2<.7){\n    \n        \/\/ Arc and circle tile.\n        tile = min(arc, midD.y - pTh);\n    }\n    else {\n         \n         \/\/ Midpoint circle tiles.\n         tile = mid - pTh;\n    }\n    \n    #ifdef DOUBLE_ARC\n    tile = abs(tile + pTh\/2.25) - pTh\/1.2; \/\/ Doubling the arcs.\n    #endif\n    \n     \n    return vec3(tile, mid, tr);\n\n\n}\n \n\/\/ The scene's distance function: There'd be faster ways to do this, but it's\n\/\/ more readable this way. Plus, this  is a pretty simple scene, so it's \n\/\/ efficient enough.\nfloat m(vec3 p){\n    \n    \n    \n    \/\/ 2D Truchet distance -- for the extrusion cross section.\n    vec3 tr3 = tr(p.xy);\n    float obj = tr3.x;\n    \n    \/\/ Back plane with a slight triangle cell bevel.\n    float fl = -p.z - min(-tr3.z*4., .2)*.05;\n    \/\/fl -= min(-tr3.z*2., .25)*.15;\n    \/\/fl -= smoothstep(0., .07, -tr3.z)*.03;\/\/smoothstep(.08, .15, obj)*.1;\n    \/\/fl += tr3.z*.3;\n    \n    \/\/ Extrude the 2D Truchet object along the Z-plane. Note that this is a cheap\n    \/\/ hack. However, in this case, it doesn't make much of a visual difference.\n    obj = max(obj, abs(p.z) - .125) - smoothstep(.05, .11, -obj)*.04;\n    \/\/ Proper extrusion formula for comparisson.\n    \/\/obj = opExtrusion(obj, p.z, .125, .01) - smoothstep(.03, .25, -obj)*.1; \n    \n   \n    \/\/ Object ID.\n    objID = fl<obj? 0 : 1 ;\n    \n    \/\/ Minimum distance for the scene.\n    return min(fl, obj);\n    \n}\n\n\/\/ Basic raymarcher.\nfloat trace(in vec3 ro, in vec3 rd){\n\n    \/\/ Overall ray distance and scene distance.\n    float d, t = 0.; \/\/hash21(r.xy*57. + fract(iTime + r.z))*.5;\n    \n    for(int i = min(iFrame, 0); i<80; i++){\n    \n        d = m(ro + rd*t);\n        \/\/ Note the \"t*b + a\" addition. Basically, we're putting less emphasis on accuracy, as\n        \/\/ \"t\" increases. It's a cheap trick that works in most situations... Not all, though.\n        if(abs(d)<.001 || t>FAR) break; \/\/ Alternative: 0.001*max(t*.25, 1.), etc.\n\n        t += d*.7; \n    }\n\n    return min(t, FAR);\n}\n\n\/\/ Cheap shadows are hard. In fact, I'd almost say, shadowing particular scenes with limited \n\/\/ iterations is impossible... However, I'd be very grateful if someone could prove me wrong. :)\nfloat softShadow(vec3 ro, vec3 lp, vec3 n, float k){\n\n    \/\/ More would be nicer. More is always nicer, but not affordable for slower machines.\n    const int iter = 24; \n    \n    ro += n*.0015; \/\/ Bumping the shadow off the hit point.\n    \n    vec3 rd = lp - ro; \/\/ Unnormalized direction ray.\n\n    float shade = 1.;\n    float t = 0.; \n    float end = max(length(rd), 0.0001);\n    rd \/= end;\n    \n    \/\/rd = normalize(rd + (hash33R(ro + n) - .5)*.03);\n    \n\n    \/\/ Max shadow iterations - More iterations make nicer shadows, but slow things down. Obviously, the lowest \n    \/\/ number to give a decent shadow is the best one to choose. \n    for (int i = min(iFrame, 0); i<iter; i++){\n\n        float d = m(ro + rd*t);\n        shade = min(shade, k*d\/t);\n        \/\/shade = min(shade, smoothstep(0., 1., k*h\/dist)); \/\/ IQ's subtle refinement.\n        t += clamp(d, .01, .2); \n        \n        \n        \/\/ Early exits from accumulative distance function calls tend to be a good thing.\n        if (d<0. || t>end) break; \n    }\n\n    \/\/ Sometimes, I'll add a constant to the final shade value, which lightens the shadow a bit --\n    \/\/ It's a preference thing. Really dark shadows look too brutal to me. Sometimes, I'll add \n    \/\/ AO also just for kicks. :)\n    return max(shade, 0.); \n}\n\n\n\/\/ I keep a collection of occlusion routines... OK, that sounded really nerdy. :)\n\/\/ Anyway, I like this one. I'm assuming it's based on IQ's original.\nfloat calcAO(in vec3 p, in vec3 n){\n\n\tfloat sca = 2., occ = 0.;\n    for( int i = min(iFrame, 0); i<5; i++ ){\n    \n        float hr = float(i + 1)*.15\/5.;        \n        float d = m(p + n*hr);\n        occ += (hr - d)*sca;\n        sca *= .7;\n        \n        \/\/ Deliberately redundant line that may or may not stop the \n        \/\/ compiler from unrolling.\n        if(sca>1e5) break;\n    }\n    \n    return clamp(1. - occ, 0., 1.);\n}\n  \n\/\/ Normal function. It's not as fast as the tetrahedral calculation, but more symmetrical.\nvec3 nr(in vec3 p) {\n\t\n    const vec2 e = vec2(.001, 0);\n    \n    \/\/return normalize(vec3(m(p + e.xyy) - m(p - e.xyy), m(p + e.yxy) - m(p - e.yxy),\t\n    \/\/                      m(p + e.yyx) - m(p - e.yyx)));\n    \n    \/\/ This mess is an attempt to speed up compiler time by contriving a break... It's \n    \/\/ based on a suggestion by IQ. I think it works, but I really couldn't say for sure.\n    float sgn = 1.;\n    float mp[6];\n    vec3[3] e6 = vec3[3](e.xyy, e.yxy, e.yyx);\n    for(int i = min(iFrame, 0); i<6; i++){\n\t\tmp[i] = m(p + sgn*e6[i\/2]);\n        sgn = -sgn;\n        if(sgn>2.) break; \/\/ Fake conditional break;\n    }\n    \n    return normalize(vec3(mp[0] - mp[1], mp[2] - mp[3], mp[4] - mp[5]));\n}\n\n\nvoid mainImage(out vec4 c, vec2 u){\n\n    \n    \/\/ Aspect correct coordinates. Only one line necessary.\n    u = (u - iResolution.xy*.5)\/iResolution.y;    \n    \n    \/\/ Unit direction vector, camera origin and light position.\n    vec3 r = normalize(vec3(u, 1)), o = vec3(0, iTime\/2., -3), l = o + vec3(.25, .25, 2);\n    \n    \/\/ Rotating the camera about the XY plane.\n    r.yz = rot2(.15)*r.yz;\n    r.xz = rot2(-cos(iTime*3.14159\/32.)\/8.)*r.xz;\n    r.xy = rot2(sin(iTime*3.14159\/32.)\/8.)*r.xy; \n  \n    \n    \/\/ Raymarch to the scene.\n    float t = trace(o, r);\n \n    \n    \/\/ Object ID: Back plane (0), or the metaballs (1).\n    int gObjID = objID;\n    \n    \n    \/\/ Very basic lighting.\n    \/\/ Hit point and normal.\n    vec3 p = o + r*t, n = nr(p); \n    \n    \n    \/\/ UV texture coordinate holder.\n    vec2 uv = p.xy;\n    \n    \n    \n    \n    \/\/ Returns the local coordinates (centered on zero), cellID, the \n    \/\/ triangle vertex ID and relative coordinates.\n    vec2[3] v;\n    \/\/scale \/= 3.;\n    vec4 p4 = getTriVerts(p.xy, v);\n    vec2 triID = p4.zw;\/\/ + (vID[0] + vID[1] + vID[2])\/3.;\n    float svGTri = gTri;\n    \/\/ Grid triangles. Some are upside down.\n    vec2 q = p4.xy*vec2(1, gTri); \n    float tri = max(abs(q.x)*.8660254 + q.y*.5, -q.y) - scale\/3.;\n    q = (p4.xy - normalize(p.xy\/(p.z - 3.) - l.xy\/(l.z - 3.))*.005)*vec2(1, gTri); \n    float tri2 = max(abs(q.x)*.8660254 + q.y*.5, -q.y) - scale\/3.;\n    float b = max(tri2 - tri, 0.)\/.005;\n\n    \n    \/\/ 2D Truchet face distace -- Used to render borders, etc.\n    \/\/scale *= 3.;\n    vec3 tr3 = tr(p.xy);\n    float d = tr3.x;\n    p4 = getTriVerts(p.xy, v);\n    q = p4.xy*vec2(1, gTri); \n    float triB = tr3.z; \/\/max(abs(q.x)*.8660254 + q.y*.5, -q.y) - scale\/3.;\n    \n    \/\/ Smooth borders.\n    float bord = abs(triB) - .003; \n    \n    \n    \n    \/\/ Subtle pattern lines for a bit of texture.\n    #ifdef LINES\n    float lSc = 20.;\n    float pat = (abs(fract((uv.x - uv.y)*lSc - .5) - .5) - .125)\/lSc;\n    float pat2 = (abs(fract((uv.x + uv.y)*lSc + .5) - .5) - .125)\/lSc;\n    #else\n    float pat = 1e5, pat2 = 1e5;\n    #endif     \n     \n\n    vec4 col1 = vec4(1, .15, .4, 0);\n    vec4 col2 = vec4(.4, .7, 1, 0);\n \n    \/*\n    \/\/ Extra color. Interesting, but it makes things look creepily anatomical. :)\n    vec2 fID = floor(triID + .5);\n    if(mod(fID.x, 2.)<.5) col1 *= vec4(1, 2.35, 1.5, 0);\n    if(mod(fID.y, 2.)<.5) col1 *= vec4(2, 1.5, 1, 0);\n    if(mod(fID.x, 2.)<.5) col2 *= vec4(1, 1.15, .9, 0).zxyw;\n    if(mod(fID.y, 2.)<.5) col2 *= vec4(1.15, 1, .9, 0).zxyw; \n    *\/\n    \n    \/\/ Object color.\n    vec4 oCol;\n  \n    \n    \/\/ Use whatever logic to color the individual scene components. I made it\n    \/\/ all up as I went along, but things like edges, textured line patterns,\n    \/\/ etc, seem to look OK.\n    \/\/\n    if(gObjID == 0){\n    \n       \/\/ The blue floor:\n       col2 = mix(col2, vec4(0), (1. - smoothstep(0., .01, pat2))*.35);  \n       \/\/ Blue with some subtle lines.\n       oCol = col2;\/\/mix(col2, vec4(1), .25);\/\/mix(col2\/1.2, vec4(0), (1. - smoothstep(0., .01, pat2))*.35);\n       \/\/ Triangle borders: Omit the middle of edges where the Truchet passes through.\n       oCol = mix(oCol, vec4(0), (1. - smoothstep(0., .01, bord))*.8);\n       \/\/oCol = mix(oCol, vec4(0), (1. - smoothstep(0., .01, abs(bord - .06) - .005))*.8);\n       \/\/oCol = mix(oCol, col2\/1.15, (1. - smoothstep(0., .01, tri + .07)));\n\n       \/\/ Darken alternate triangles. \n       if(gTri<.0) oCol *= .8;\n        \n       \/\/ Using the Truchet pattern for some bottom edging.\n       oCol = mix(oCol, vec4(0), (1. - smoothstep(0., .01, d - .015))*.8);\n       \n      \n    }\n    else {\n    \n        \/\/ Extruded Truchet:\n \n        \/\/ White sides with a dark edge. \n        oCol = mix(vec4(.9), vec4(0), 1. - smoothstep(0., .01, d + .05));\n        \/\/df = mix(pow(df, 4.), df, 1. - smoothstep(0., .01, d + .05));\n     \n        \n        \/\/ Golden faces with some subtle lines.\n        vec4 fCol = mix(col1, vec4(0), (1. - smoothstep(0., .01, pat))*.35);\n        \n        \/\/ Darken alternate checkers on the face only.\n        if(svGTri>0.) fCol *= .8;\n        \n        \/\/ Triangle borders: Omit the middle of edges where the Truchet passes through.\n        bord = abs(tri) - .003;\n        fCol = mix(fCol, vec4(0), (1. - smoothstep(0., .01, bord))*.8);\n        \n        \n        \/\/ Apply the colored face to the Truchet, but leave enough room\n        \/\/ for an edge.\n        oCol = mix(oCol, fCol, 1. - smoothstep(0., .01, d + .08));\n\n        \n    }\n\n\n    \/\/ Basic point lighting.   \n    vec3 ld = l - p;\n    float lDist = length(ld);\n    ld \/= lDist; \/\/ Light direction vector.\n    float at = 1.\/(1. + lDist*lDist*.125); \/\/ Attenuation.\n    \n    \/\/ Very, very cheap shadows -- Not used here.\n    \/\/float sh = min(min(m(p + ld*.08), m(p + ld*.16)), min(m(p + ld*.24), m(p + ld*.32)))\/.08*1.5;\n    \/\/sh = clamp(sh, 0., 1.);\n    float sh = softShadow(p, l, n, 8.); \/\/ Shadows.\n    float ao = calcAO(p, n); \/\/ Ambient occlusion.\n    \n    \n    float df = max(dot(n, ld), 0.); \/\/ Diffuse.\n    float sp = pow(max(dot(reflect(r, n), ld), 0.), 32.); \/\/ Specular.\n   \n    \/\/ Specular reflection.\n    vec3 hv = normalize(-r + ld); \/\/ Half vector.\n    vec3 ref = reflect(r, n); \/\/ Surface reflection.\n    vec4 refTx = texture(iChannel0, ref); refTx *= refTx; \/\/ Cube map.\n    float spRef = pow(max(dot(hv, n), 0.), 8.); \/\/ Specular reflection.\n    float rf = (gObjID == 0)? .1 : 1.;\/\/mix(.5, 1., 1. - smoothstep(0., .01, d + .08));\n    oCol += spRef*refTx*rf; \/\/smoothstep(.03, 1., spRef) \n\n      \n    \/\/ Apply the lighting and shading. \n    c = oCol*(df*sh + sp*sh + .5)*at*ao;\n    \n     \n \n    \/\/ Rough gamma correction.\n    c = sqrt(max(c, 0.));  \n\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "7stGR2",
+            "date": "1661175542",
+            "viewed": 32,
+            "name": "Aurora Borealis Test",
+            "username": "Khael",
+            "description": "Aurora",
+            "likes": 0,
+            "published": 3,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Fonction de cercle qui n\u00e9cessite 3 inputs, l'uv, le radius et la valeur du blur.\nfloat Circle(vec2 uv, vec2 p, float r, float blur) {\n\n    \/\/ Distance de l'UV ( au dessus de 1 la distance est clamp\u00e9\n    float d = length(uv-p);\n    \n    \/\/smoothstep r est le min, r-0.01 est le max, et d est la valeur de la source donc le cercle\n    float c = smoothstep(r, r-blur, d);\n    \n    return c;\n\n}\n\nfloat Band(float t, float start, float end, float blur){\n    float step1 = smoothstep(start-blur, start+blur, t);\n    float step2 = smoothstep(end+blur, end-blur, t);\n    \n    return step1*step2;\n}\n\nfloat Rect(vec2 uv, float left, float right, float bottom, float top, float blur){\n    float band1 = Band(uv.x, left, right, blur);\n    float band2 = Band(uv.y, bottom, top, blur);\n    \n    return band1 * band2;\n}\n    \n\nfloat Smiley(vec2 uv, vec2 p, float size){\n    \n    uv -= p; \/\/ translating coordinate system\n    uv \/= size; \/\/scaling coordinate system\n    float mask = Circle(uv, vec2(0.), .4, .01);\n\n    mask -= Circle(uv, vec2(-.12, .15), .07, .01);\n    mask -= Circle(uv, vec2(.12, .15), .07, .01);\n    \n    float mouth = Circle(uv, vec2(0.), .3, .01);\n    mouth -= Circle(uv, vec2(0., 0.1), .3, .01);\n    \n    mask -= mouth;\n    \n    return mask;\n}\n    \/\/Lerp function\nfloat remap01(float a, float b, float t){\n    return (t-a) \/ (b-a); \/\/ Si t =a alors 0\/0 = 0\n    \/\/Si t = b alors 1\/1=1\n}\n\nfloat remap(float a, float b, float c, float d, float t){\n    return remap01(a,b,t) * (d-c) + c;\n}\n\nvec3 yToRgb(float y)\n{    \n    float r, g, b;\n    \n    \/\/ functions where created based on the default linear equation\n    \/\/ f(x) = mx + b, where m is the slope and b the intersection point\n    \/\/ with the x axis f(0) = b ;)\n    \/\/ you can view the graph of the functions here: \n    \/\/ https:\/\/iquilezles.org\/apps\/graphtoy\/?f3(x)=1-abs(x*2-1)&f4(x)=clamp(1-x*2,%200,%201)&f6(x)=clamp((x-0.5)*2,%200,%201)\n    \n    b = clamp(1.0-y*2.0, 0.0, 1.0);\n    g = 1.0-abs(y*2.0-1.0);\n    r = clamp((y-0.5)*2.0, 0.0, 1.0);\n    \n    return vec3(r, g, b);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ Normalized pixel coordinates (from 0 to 1)\n    \n    vec2 uv = fragCoord\/iResolution.xy;\n    float t = iTime;\n    \n    \/\/ Uv from -0.5 to 0.5\n    uv -= 0.5; \n    \n    \/\/ Calculate the x aspect ratio of the screen\n    uv.x *= iResolution.x\/iResolution.y;\n    \n    \/\/float mask = Smiley(uv, vec2(0.), 1.);\n    float mask =.0;\n\n    \/\/vec3 col = vec3(mouth);\n    float x = uv.x;\n    \n    float m = sin(t+x*8.)*.1;\n    float y = uv.y-m;\n    \n    \n    float blur = remap(-1., .5, .05, .25, x);\n    blur = pow(blur*4., 2.);\n    mask = Rect(vec2(x,y), -1., 1., -.1, .1, blur);\n    \n    vec3 rgb = vec3(yToRgb(-uv.x)); \n    vec3 col = pow( rgb, vec3(1.\/2.2)) * mask;\n    vec3 colormask = vec3(remap01(-0.3, 0.9, -uv.x));\n           \n    \/\/ Output to screen\n    fragColor = vec4(col ,1.0);\n    \/\/fragColor = vec4( pow( rgb, vec3(1.\/2.2)) * colormask , 1);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "7lyyRw",
+            "date": "1661174973",
+            "viewed": 33,
+            "name": "Curve Inflation Fork",
+            "username": "Tilmann",
+            "description": "A mix of https:\/\/www.shadertoy.com\/view\/7tyyzW and https:\/\/www.shadertoy.com\/view\/7tVyRW with a lot of averaging to reduce the noise.\n\nThere are three randomization modes:\n- random seed per location\n- fixed seeds\n- random seed per location and frame",
+            "likes": 2,
+            "published": 1,
+            "flags": 32,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "XdfGR8",
+                        "filepath": "\/media\/previz\/buffer03.png",
+                        "previewfilepath": "\/media\/previz\/buffer03.png",
+                        "type": "buffer",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Based on iq's https:\/\/www.shadertoy.com\/view\/7tVyRW\n\nfloat map( in vec3 pos )\n{\n    float d = -dist(pos.xy, iFrame);\n    if(d < 0.0)\n    {\n        vec2 tpos = pos.xy * vec2(iResolution.y\/iResolution.x,1.) + .5;\n        float h = sqrt(texture(iChannel0, tpos).x);\n        return abs(pos.z)-h; \/\/ WARNING, NOT AN EXACT DISTANCE!!\n    }\n    return sdBox( vec2(d,pos.z), vec2(0.001,0.0));\n}\n\n\/*\n\/\/ https:\/\/iquilezles.org\/articles\/rmshadows\nfloat calcSoftshadow( in vec3 ro, in vec3 rd, float tmin, float tmax, const float k )\n{\n\tfloat res = 1.0;\n    float t = tmin;\n    for( int i=0; i<64; i++ )\n    {\n\t\tfloat h = map( ro + rd*t );\n        res = min( res, k*h\/t );\n        t += clamp( h, 0.003, 0.10 );\n        if( res<0.002 || t>tmax ) break;\n    }\n    return clamp( res, 0.0, 1.0 );\n}\n*\/\n\n\/\/ https:\/\/iquilezles.org\/articles\/normalsSDF\nvec3 calcNormal( in vec3 pos )\n{\n    vec2 e = vec2(1.0,-1.0)*0.5773;\n    const float eps = 0.01;\n    return normalize( e.xyy*map( pos + e.xyy*eps ) + \n\t\t\t\t\t  e.yyx*map( pos + e.yyx*eps ) + \n\t\t\t\t\t  e.yxy*map( pos + e.yxy*eps ) + \n\t\t\t\t\t  e.xxx*map( pos + e.xxx*eps ) );\n}\n\n#define AA 0\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ initialize random seed\n    ivec2 q = ivec2(fragCoord);\n    srand(hash(q.x + hash(q.y + hash(iFrame))));\n  \n    \/\/ camera movement\t\n\tfloat an  = iMouse.z > .5 ? TAU * (.25 + iMouse.x \/ iResolution.x) : iTime + 1.0;\n\tfloat an2 = iMouse.z > .5 ? TAU * (.25 + iMouse.y \/ iResolution.y * .5) : 0.0;\n\tvec3 ro = vec3( 1.*cos(an)*cos(an2), sin(an2), 1.*sin(an)*cos(an2));\n    vec3 ta = vec3( 0.0, 0.0, 0.0 );\n    \/\/ camera matrix\n    vec3 ww = normalize( ta - ro );\n    vec3 uu = normalize( cross(ww,vec3(0.0,1.0,0.0) ) );\n    vec3 vv = normalize( cross(uu,ww));\n    \n    \/\/ render\n    vec3 tot = vec3(0.0);\n    \n    #if AA>1\n    for( int m=0; m<AA; m++ )\n    for( int n=0; n<AA; n++ )\n    {\n        \/\/ pixel coordinates\n        vec2 o = vec2(float(m),float(n)) \/ float(AA) - 0.5;\n        vec2 p = (2.0*(fragCoord+o)-iResolution.xy)\/iResolution.y;\n        #else    \n        vec2 p = (2.0*fragCoord-iResolution.xy)\/iResolution.y;\n        #endif\n\n\t    \/\/ create view ray\n        vec3 rd = normalize( p.x*uu + p.y*vv + 1.5*ww );\n\n        vec3 col = vec3(0.0);\n\n        \/\/ bounding sphere\n        vec2 tmima = iSphere( ro, rd, vec4(0.0,0.05,0.0,0.65) );\n        if( tmima.y>0.0 )\n        {\n            \/\/ raymarch inside bounding sphere\n            float t = max(tmima.x,0.0);\n            for( int i=0; i<256; i++ )\n            {\n                vec3 pos = ro + t*rd;\n                float h = map(pos);\n                if( abs(h)<0.001 || t>tmima.y ) break;\n                t += h;\n            }\n\n            \/\/ shading\/lighting\t\n            if( t<tmima.y )\n            {\n                vec3 pos = ro + t*rd;\n                vec3 nor = calcNormal(pos);\n                vec3 lig = vec3(0.57703);\n                float dif = clamp( dot(nor,lig), 0.0, 1.0 );\n                \/\/if( dif>0.001 ) dif *= calcSoftshadow( pos+nor*0.001, lig, 0.001, 1.0, 32.0 );\n                float amb = 0.5 + 0.5*dot(nor,vec3(0.0,1.0,0.0));\n                col = vec3(0.2,0.3,0.4)*amb + vec3(0.8,0.7,0.5)*dif;\n            }\n            \n            \/\/col+=0.25; \/\/ show bounding sphere\n        }\n        \n        \/\/ gamma        \n        col = sqrt( col );\n\t    tot += col;\n    #if AA>1\n    }\n    tot \/= float(AA*AA);\n    #endif\n\n\tfragColor = vec4( tot, 1.0 );\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            },
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dXGR8",
+                        "channel": 0
+                    }
+                ],
+                "code": "const int walk_iterations = 16;\nconst float epsilon = 0.001;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    maybe_srand(1, iFrame, ivec2(fragCoord));\n\n    float u = 0.0;\n    vec2 p = fragCoord\/iResolution.y - vec2(0.5*iResolution.x\/iResolution.y,0.5);\n    for(int i = 0;i<walk_iterations;i++)\n    {\n        float R = dist(p, iFrame);\n        if( R < epsilon) break;\n        u += R*R;\n        p += R*randomOnCircle();\n    }\n    fragColor = vec4(u, 0, 0, 1);\n}",
+                "name": "Buffer A",
+                "description": "",
+                "type": "buffer"
+            },
+            {
+                "inputs": [],
+                "outputs": [],
+                "code": "#define TAU 6.28318530\n\n\/\/ https:\/\/iquilezles.org\/articles\/intersectors\/\nvec2 iSphere( in vec3 ro, in vec3 rd, in vec4 sph )\n{\n\tvec3 oc = ro - sph.xyz;\n\tfloat b = dot( oc, rd );\n\tfloat c = dot( oc, oc ) - sph.w*sph.w;\n\tfloat h = b*b - c;\n\tif( h<0.0 ) return vec2(-1.0);\n    h = sqrt(h);\n\treturn vec2(-b-h,-b+h);\n}\n\n\/\/ https:\/\/www.shadertoy.com\/view\/4llXD7\nfloat sdCircle( vec2 p, float r )\n{\n    return length(p) - r;\n}\n\nfloat sdBox( in vec2 p, in vec2 b )\n{\n    vec2 d = abs(p)-b;\n    return length(max(d,0.0)) + min(max(d.x,d.y),0.0);\n}\n\nfloat sdCutDisk( in vec2 p, in float r, in float h )\n{\n    float w = sqrt(r*r-h*h); \/\/ constant for any given shape\n    p.x = abs(p.x);\n    float s = max( (h-r)*p.x*p.x+w*w*(h+r-2.0*p.y), h*p.x-w*p.y );\n    return (s<0.0) ? length(p)-r :\n           (p.x<w) ? h - p.y     :\n                     length(p-vec2(w,h));\n}\n\nfloat sdArc( in vec2 p, in vec2 sc, in float ra, float rb )\n{\n    \/\/ sc is the sin\/cos of the arc's aperture\n    p.x = abs(p.x);\n    return ((sc.y*p.x>sc.x*p.y) ? length(p-sc*ra) : \n                                  abs(length(p)-ra)) - rb;\n}\n\nvec3 colormap(in float d)\n{\n  vec3 col = (d>0.0) ? vec3(0.9,0.6,0.3) : vec3(0.65,0.85,1.0);\n\tcol *= 1.0 - exp(-6.0*abs(d));\n\tcol *= 0.8 + 0.2*cos(150.0*d);\n\tcol = mix( col, vec3(1.0), 1.0-smoothstep(0.0,0.01,abs(d)) );\n    return col;\n}\n\nfloat get_t(in int frame)\n{\n  return 20.*fract(float(frame)*0.005);\n}\n\n\/\/ https:\/\/www.shadertoy.com\/view\/7tyyzW\nfloat dist(in vec2 xy, in int frame)\n{\n \/\/ return -sdCircle( xy , 0.5);\n  \/\/return -min(\n  \/\/  sdCircle( xy , 0.25),\n  \/\/  sdBox(xy,vec2(0.5,0.125)));\n  float d = sdCircle( xy+vec2(0.,0.02) , 0.4);\n  \n  float t = get_t(frame);\n  \n  if(int(t)>3)\n  {\n    d = min(min(d,\n      max(sdCutDisk( xy , 0.48, 0.0),-sdCutDisk( xy , 0.42, 0.0))),\n      sdBox(xy+vec2(0.,-0.05),vec2(0.5,0.125)));\n  }\n  float x = xy.x;\n  switch(int(t))\n  {\n    default:\n    case 5:\n      float s = min(t-5.0,1.);\n      float th = mix(1.570796,0.2,3.*s*s-2.*s*s*s);\n      d = max(d, -sdArc( vec2(xy.x,-xy.y-0.07), vec2(cos(th),sin(th)), 0.2, 0.02));\n    case 4:\n    case 3:\n      x = abs(x);\n    case 2:\n      d = max(d, -sdCircle( vec2( x ,xy.y)-vec2(0.125,0.12) , 0.06));\n    case 1:\n    case 0: break;\n  }\n  return -d;\n  \/*return -max(max(d, \n      -sdCircle( vec2(abs(xy.x),xy.y)-vec2(0.18,0.17) , 0.07)\n      ),\n      -sdArc( vec2(xy.x,-xy.y-0.07), vec2(cos(0.2),sin(0.2)), 0.2, 0.02)\n      );*\/\n}\n\n\n\/\/ rand() stuff\nint   seed = 1;\nvoid  srand(int s) { seed = s; }\nint   randi(void)  { seed = seed*0x343fd+0x269ec3; return (seed>>16)&32767; }\nfloat randf(void)  { return float(randi())\/32767.0; }\nvec2  randOnCircle(void) { float an=6.2831853*randf(); return vec2(cos(an),sin(an)); }\n\/\/ hash to initialize the random sequence (copied from Hugo Elias)\nint hash(int n) { n = (n<<13)^n; return n*(n*n*15731+789221)+1376312589; }\n\n\/\/ --------------------------------------\n\nvec2 randomOnCircle( void ) {\n    float theta = TAU * randf();\n    return vec2(cos(theta), sin(theta));\n}\n\nvec2 onCircle(in float theta) {\n    theta *= TAU;\n    return vec2(cos(theta), sin(theta));\n}\n\nvoid maybe_srand(int seed_offset, int frame , ivec2 q) {\n    int seed = seed_offset;\n    switch(frame\/200 % 3){\n        case 2: seed += hash(frame);\n        case 0: seed += hash(q.x + hash(q.y));\n    }\n    srand(seed);\n}",
+                "name": "Common",
+                "description": "",
+                "type": "common"
+            },
+            {
+                "inputs": [
+                    {
+                        "id": "4dXGR8",
+                        "filepath": "\/media\/previz\/buffer00.png",
+                        "previewfilepath": "\/media\/previz\/buffer00.png",
+                        "type": "buffer",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "XsXGR8",
+                        "channel": 0
+                    }
+                ],
+                "code": "const int samples = 16;\nconst float epsilon = 0.001;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    maybe_srand(2, iFrame, ivec2(fragCoord));\n\n    vec2 p0 = fragCoord\/iResolution.y - vec2(0.5*iResolution.x\/iResolution.y,0.5);\n    float u = 0.0;\n    vec2 w = randomOnCircle();\n    float angle = TAU\/float(samples);\n    vec2 sc = vec2(sin(angle),cos(angle));\n    mat2 rot = mat2(sc.y, -sc.x, sc.x, sc.y);\n    \n    float R = dist(p0, iFrame);\n    if(R > epsilon)\n    for(int i = 0;i<samples;i++)\n    {\n        vec2 p = p0;\n        u += R*R;\n        p += R*w;\n        w *= rot;\n        ivec2 pi = ivec2(p*iResolution.y + .5*iResolution.xy);\n        u += texelFetch(iChannel0, pi, 0).x;\n    }\n    fragColor = vec4(u \/ float(samples), 0, 0, 1);\n}",
+                "name": "Buffer B",
+                "description": "",
+                "type": "buffer"
+            },
+            {
+                "inputs": [
+                    {
+                        "id": "XsXGR8",
+                        "filepath": "\/media\/previz\/buffer01.png",
+                        "previewfilepath": "\/media\/previz\/buffer01.png",
+                        "type": "buffer",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4sXGR8",
+                        "channel": 0
+                    }
+                ],
+                "code": "const int samples = 16;\nconst float epsilon = 0.001;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    maybe_srand(3, iFrame, ivec2(fragCoord));\n    \n    vec2 p0 = fragCoord\/iResolution.y - vec2(0.5*iResolution.x\/iResolution.y,0.5);\n    float u = 0.0;\n    vec2 w = randomOnCircle();\n    float angle = TAU\/float(samples);\n    vec2 sc = vec2(sin(angle),cos(angle));\n    mat2 rot = mat2(sc.y, -sc.x, sc.x, sc.y);\n    \n    float R = dist(p0, iFrame);\n    if(R > epsilon)\n    for(int i = 0;i<samples;i++)\n    {\n        vec2 p = p0;\n        u += R*R;\n        p += R*w;\n        w *= rot;\n        ivec2 pi = ivec2(p*iResolution.y + .5*iResolution.xy);\n        u += texelFetch(iChannel0, pi, 0).x;\n    }\n    fragColor = vec4(u \/ float(samples), 0, 0, 1);\n}",
+                "name": "Buffer C",
+                "description": "",
+                "type": "buffer"
+            },
+            {
+                "inputs": [
+                    {
+                        "id": "4sXGR8",
+                        "filepath": "\/media\/previz\/buffer02.png",
+                        "previewfilepath": "\/media\/previz\/buffer02.png",
+                        "type": "buffer",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "XdfGR8",
+                        "channel": 0
+                    }
+                ],
+                "code": "const int samples = 16;\nconst float epsilon = 0.001;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    maybe_srand(4, iFrame, ivec2(fragCoord));\n\n    vec2 p0 = fragCoord\/iResolution.y - vec2(0.5*iResolution.x\/iResolution.y,0.5);\n    float u = 0.0;\n    vec2 w = randomOnCircle();\n    float angle = TAU\/float(samples);\n    vec2 sc = vec2(sin(angle),cos(angle));\n    mat2 rot = mat2(sc.y, -sc.x, sc.x, sc.y);\n    \n    float R = dist(p0, iFrame);\n    if(R > epsilon)\n    for(int i = 0;i<samples;i++)\n    {\n        vec2 p = p0;\n        u += R*R;\n        p += R*w;\n        w *= rot;\n        ivec2 pi = ivec2(p*iResolution.y + .5*iResolution.xy);\n        u += texelFetch(iChannel0, pi, 0).x;\n    }\n    fragColor = vec4(u \/ float(samples), 0, 0, 1);\n}",
+                "name": "Buffer D",
+                "description": "",
+                "type": "buffer"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "ftVcRw",
+            "date": "1661162881",
+            "viewed": 94,
+            "name": "Bezier Runes",
+            "username": "cmzw",
+            "description": "Based on runes from [url]https:\/\/www.shadertoy.com\/view\/MsXSRn[\/url] but replacing line segments with beziers",
+            "likes": 5,
+            "published": 1,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/* \n   References\n   https:\/\/www.shadertoy.com\/view\/MsXSRn runes\n   https:\/\/www.shadertoy.com\/view\/4djSRW hash22\n   https:\/\/www.shadertoy.com\/view\/MlKcDD Quadratic Bezier\n*\/\n\nvec2 hash22(vec2 p)\n{\n\tvec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));\n    p3 += dot(p3, p3.yzx+33.33);\n    return fract((p3.xx+p3.yz)*p3.zy);\n}\n\nfloat dot2( in vec2 v ) { return dot(v,v); }\n\nfloat cro( in vec2 a, in vec2 b ) { return a.x*b.y - a.y*b.x; }\n\nfloat sdBezier( in vec2 pos, in vec2 A, in vec2 B, in vec2 C )\n{    \n    vec2 a = B - A;\n    vec2 b = A - 2.0*B + C;\n    vec2 c = a * 2.0;\n    vec2 d = A - pos;\n    float kk = 1.0\/dot(b,b);\n    float kx = kk * dot(a,b);\n    float ky = kk * (2.0*dot(a,a)+dot(d,b)) \/ 3.0;\n    float kz = kk * dot(d,a);      \n    float res = 0.0;\n    float p = ky - kx*kx;\n    float p3 = p*p*p;\n    float q = kx*(2.0*kx*kx-3.0*ky) + kz;\n    float h = q*q + 4.0*p3;\n    if( h >= 0.0) \n    { \n        h = sqrt(h);\n        vec2 x = (vec2(h,-h)-q)\/2.0;\n        vec2 uv = sign(x)*pow(abs(x), vec2(1.0\/3.0));\n        float t = clamp( uv.x+uv.y-kx, 0.0, 1.0 );\n        res = dot2(d + (c + b*t)*t);\n    }\n    else\n    {\n        float z = sqrt(-p);\n        float v = acos( q\/(p*z*2.0) ) \/ 3.0;\n        float m = cos(v);\n        float n = sin(v)*1.732050808;\n        vec3  t = clamp(vec3(m+m,-n-m,n-m)*z-kx,0.0,1.0);\n        res = min( dot2(d+(c+b*t.x)*t.x),\n                   dot2(d+(c+b*t.y)*t.y) );\n    }\n    return sqrt( res );\n}\n\n\nfloat ThickLine(vec2 uv, vec2 posA, vec2 posB, vec2 posC)\n{\n\treturn smoothstep(.04,.01,sdBezier(uv, posA, posB, posC));\n}\n\nfloat Rune(vec2 uv, int strokes, float scale, vec2 snaps) {\n\tfloat finalLine = 0.0;\n\tvec2 seed = floor(uv)-hash22(vec2(1));\n\tuv = fract(uv);\n\tfor (int i = 0; i < strokes; i++)\t\n\t{\n\t\tvec2 posA = hash22(floor(seed+1.5));\n\t\tvec2 posB = hash22(floor(seed+2.0));\n\t\tvec2 posC = hash22(floor(seed+3.5));\n\t\tseed += 3.0;\n\t\tposA = fract(posA * 128.0);\n\t\tposB = fract(posB * 128.0);\n        posC = fract(posC * 128.0);\n\t\tif (i == 0) posA.y = 0.0;\n\t\tif (i == 1) posA.x = 0.999;\n\t\tif (i == 2) posA.x = 0.0;\n\t\tif (i == 3) posA.y = 0.999;\n\t\tposA = (floor(posA * snaps) + 0.5) \/ snaps;\n\t\t\/\/posB = (floor(posB * snaps) + 0.5) \/ snaps;\n        posC = (floor(posC * snaps) + 0.5) \/ snaps;\n\t\tfinalLine = max(finalLine, ThickLine(uv, posA, posB, posC));\n\t}\n\treturn finalLine;\n}\n\nvoid mainImage( out vec4 O, in vec2 I )\n{\n    vec2 p = (7.*I - iResolution.xy) \/ iResolution.y;\n    \n    p.x += iTime * 0.2;\n\n    O = vec4(Rune(p,4,0.8,vec2(2.0,3.0)));\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    }
+]

@@ -5,6 +5,12 @@ GET {{baseUrl}}/{{resultsPath}}?query=elevated
 ###
 GET {{baseUrl}}/{{resultsPath}}?query=&sort=popular&from=12&num=12
 ###
+GET {{baseUrl}}/{{resultsPath}}?query=&sort=newest&from=0&num=12
+###
+GET {{baseUrl}}/{{resultsPath}}?query=&sort=newest&from=12&num=12
+###
+GET {{baseUrl}}/{{resultsPath}}?query=&sort=newest&from=24&num=12
+###
 GET {{baseUrl}}/{{resultsPath}}?query=%20fractal&sort=popular&filter=multipass&filter=musicstream
 ###
 GET {{baseUrl}}/{{resultsPath}}?query=raymarch&sort=love&filter=vr&filter=soundoutput&filter=multipass

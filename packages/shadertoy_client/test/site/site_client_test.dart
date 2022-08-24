@@ -492,8 +492,7 @@ void main() {
       final sl = await shaderListFixture('results/results_0_12.json');
       final adapter = newAdapter(options)
         ..addResultsRoute(response, options,
-            query: query, sort: sort, filters: filters, from: from)
-        ..addShadersRoute(sl, options);
+            query: query, sort: sort, filters: filters, from: from);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findShaders(
@@ -946,8 +945,7 @@ void main() {
       final response = await textFixture('user/iq_0_8.html');
       final sl = await shaderListFixture('user/iq_0_8.json');
       final adapter = newAdapter(options)
-        ..addUserShadersRoute(response, userId, options)
-        ..addShadersRoute(sl, options);
+        ..addUserShadersRoute(response, userId, options);
       final api = newClient(options, adapter);
       // act
       final sr = await api.findShadersByUserId(userId);
@@ -1075,7 +1073,6 @@ void main() {
       // assert
       expect(sr, isNotNull);
       expect(sr.error, isNull);
-
       expect(sr, FindShaderIdsResponse(count: 24, ids: sl));
     });
 

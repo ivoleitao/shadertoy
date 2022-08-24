@@ -1,0 +1,716 @@
+[
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "NlGyRh",
+            "date": "1661159786",
+            "viewed": 39,
+            "name": "Triquelize it",
+            "username": "deni_de",
+            "description": "triquetrum equalizer, nice on 60 sec ~",
+            "likes": 1,
+            "published": 3,
+            "flags": 64,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "Mt2SRw",
+                        "filepath": "https:\/\/soundcloud.com\/sergiy-gringauz-682196561\/the-maneken-onuka-feat-katya?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing",
+                        "previewfilepath": "https:\/\/soundcloud.com\/sergiy-gringauz-682196561\/the-maneken-onuka-feat-katya?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing",
+                        "type": "musicstream",
+                        "channel": 1,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 0
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "float smoothcircle(vec2 uv, vec2 pos, float wave, vec3 size)\n{\n    float c = length( uv - pos ) *  (1. - ( 0.69 + 1.1 * wave)); \n\n    vec3 max_mid_min_size = vec3( size.x, size.y, size.z );\n    \n    float e = smoothstep( max_mid_min_size.y, max_mid_min_size.x, c );\n    float e2 = smoothstep( max_mid_min_size.z, max_mid_min_size.y, c );\n    \n    return 1. - abs( e - e2 );\n}\n\nfloat circleDraw(vec2 uv, vec2 pos, float wave, vec3 size)\n{\n    vec2 _pos = pos + 1. * sin(iTime * wave * .1);\n    return 1. - smoothcircle( uv, _pos, wave, size);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord \/ iResolution.x ;\n    vec2 cells = ceil( 100. * uv ) ;\n    \n    float wave = texture( iChannel1, vec2( cells.y - (1. - cells.y), 0.15 ) ).x * .43  ;\n    \n    vec3 color = 0.5 + 0.5 * cos( 77.1251252 * wave * uv.xyx + pow( wave, 0.05 ) + ( vec3( 0.1,2,4 ) * iTime ) ) ;\n    vec3 size = vec3( 2.1, 1.75, 1.45 );\n    \n    \n    float image = circleDraw(cells, vec2(55., 33.), wave, size)\n                    + circleDraw( cells, vec2(45. , 33.), wave, size)\n                        +circleDraw( cells, vec2(50. , 25.), wave, size)\n                    \/\/BIG\n                +circleDraw( cells, vec2(50. , 30.), (wave * 1.5)  * (0.3 + 2.7 * wave), vec3(4.0, 2.5, 1.) * 1.3);  \n    fragColor = vec4( image * color, 1.);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "flKcRw",
+            "date": "1661158629",
+            "viewed": 19,
+            "name": "Polar rose with alpha",
+            "username": "nkaretnikov",
+            "description": "Polar rose with alpha.",
+            "likes": 0,
+            "published": 1,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Public domain or CC0.\n\n\/\/ This is a version of the parametric rose shader.\n\/\/ This one is efficient because it calculates the\n\/\/ distance using polar coordinates instead of sampling.\n\/\/ It uses the alpha channel to show the rose structure.\n\n#define PI acos(-1.)\n\nvec2 toPolar(vec2 uv)\n{\n  \/\/ phi, r\n  return vec2(atan(uv.y, uv.x), length(uv));\n}\n\nvec2 fromPolar(vec2 uv)\n{\n  return vec2(uv.y*cos(uv.x), uv.y*sin(uv.x));\n}\n\nfloat pRose(float a, float k, float theta)\n{\n  return a*sin(k*theta);\n  \/\/ return a*cos(k*theta);\n}\n\nvoid mainImage(out vec4 fragColor,in vec2 fragCoord)\n{\n  vec2 uv=(2.*fragCoord-iResolution.xy)\/iResolution.y; \/\/ -1<>1\n  uv*=1.2; \/\/ scale a bit\n  vec2 st=toPolar(uv);\n\n  vec3 b=vec3(0.,0.,1.);\n  vec3 color=vec3(0.);\n\n  float a=1.;\n  float n=1.+mod(iTime*.04,6.); \/\/ petals\n  float d=1.+8.-mod(iTime*.04,8.);\n  float k=n\/d;\n\n  \/\/ draw a rose using polar coords\n  for (float theta=0.;theta<24.*PI;theta+=PI) {\n    float d=pRose(a,k,theta+st.x);\n    if (st.y<d)\n      color=mix(color,b,.1);\n  }\n\n  fragColor=vec4(vec3(color),1.);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "7tyczw",
+            "date": "1661134519",
+            "viewed": 19,
+            "name": "shadder_P2",
+            "username": "nickodev",
+            "description": "moving cube",
+            "likes": 0,
+            "published": 1,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "vec2 rotate(vec2 uv, float th) {\n  return mat2(cos(th), cos(th)*sin(th), -sin(th), cos(th)) * uv;\n}\n\nfloat sdfSquare(vec2 uv, float size, vec2 offset) {\n  float x = uv.x - offset.x;\n  float y = uv.y - offset.y;\n  vec2 rotated = rotate(vec2(x,y), iTime);\n  float d = max(abs(rotated.x), abs(rotated.y)) - size;\n  \n  return d > 0. ? 0.0 : 1.0;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n  vec2 uv = fragCoord\/iResolution.xy; \/\/ <0, 1\n  \n  vec2 originalUV = uv;\n  uv -= 0.5; \/\/ <-0.5,0.5>\n  uv.x *= iResolution.x\/iResolution.y; \/\/ fix aspect ratio\n\n  vec2 offset = vec2(0.0, 0.0);\n  float f = sdfSquare(uv, 0.1, offset);\n\n  vec3 col = (f*vec3(1.0,0.7,0.2))+((1.0-f)*texture(iChannel0, originalUV)).rgb;\n  \n  \n\n  \/\/ Output to screen\n  fragColor = vec4(5.0*col,1.0);\n}\n\n",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "7lKczD",
+            "date": "1661128703",
+            "viewed": 99,
+            "name": "Spark Volcano 2",
+            "username": "fenix",
+            "description": "A reprisal of my very first public shader, but with 500x as many particles (50k particles vs ~100)! Made possible via vononoi tracking plus many cool tricks I've learned from the amazing people on this site since then.\n*space to reset* *mouse camera*",
+            "likes": 10,
+            "published": 3,
+            "flags": 48,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "4dXGR8",
+                        "filepath": "\/media\/previz\/buffer00.png",
+                        "previewfilepath": "\/media\/previz\/buffer00.png",
+                        "type": "buffer",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    },
+                    {
+                        "id": "XsXGR8",
+                        "filepath": "\/media\/previz\/buffer01.png",
+                        "previewfilepath": "\/media\/previz\/buffer01.png",
+                        "type": "buffer",
+                        "channel": 1,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    },
+                    {
+                        "id": "4sXGR8",
+                        "filepath": "\/media\/previz\/buffer02.png",
+                        "previewfilepath": "\/media\/previz\/buffer02.png",
+                        "type": "buffer",
+                        "channel": 2,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ ---------------------------------------------------------------------------------------\n\/\/\tCreated by fenix in 2022\n\/\/\tLicense Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.\n\/\/\n\/\/  Powered-up verison of my first public shader, with roughly five hundred times as many\n\/\/  particles. There are no interactions between particles so neighbor tracking is purely\n\/\/  for rendering.\n\/\/ \n\/\/  Buffer A computes the particle positions\n\/\/  Buffer B computes nearest particles to each screen pixel\n\/\/  Buffer C renders the background with depth in the w component\n\/\/\n\/\/ ---------------------------------------------------------------------------------------\n\n#define DIFFUSE_PER_PARTICLE 1\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ pixel\n\tvec2 p = (2.0*fragCoord-iResolution.xy)\/iResolution.y;\n    vec4 normalAndZ = texelFetch(iChannel2, ivec2(fragCoord), 0);\n\n    vec3 cameraLookAt, cameraPos, cameraFwd, cameraLeft, cameraUp;\n    fxCalcCamera(iTime, iMouse, iResolution, cameraLookAt, cameraPos, cameraFwd, cameraLeft, cameraUp);\n\n    \/\/ camera-to-world and world-to-camera transform\n    mat4 c2w = fxCalcCameraMat(iResolution, cameraLeft, cameraUp, cameraFwd, cameraPos);\n    mat4 w2c = inverse(c2w);\n      \n    float zDist = normalAndZ.w;\n\tconst vec3 reverseLightDir = normalize(vec3(1.0,2.0,3.0));\n\tconst vec3 lightColor = vec3(0.5,0.5,0.5);\t\n\tconst vec3 ambientColor = vec3(0.05,0.05,0.05);\n\n    \/\/ diffuse\n\tvec3 groundColor = ambientColor;\n\tfloat dp = dot(normalAndZ.xyz, reverseLightDir);\n\tif(dp > 0.0) groundColor += (dp * lightColor);\n    \n    \/\/ specular\n    vec3 reflection = reflect(reverseLightDir, normalAndZ.xyz);\n    dp = dot(cameraFwd, reflection);\n    if (dp > 0.0) groundColor += pow(abs(dp), 15.0) * vec3(0.5);\t\t\n   \n    fragColor = vec4(groundColor, 0.0) * smoothstep(-50.0, -17.0, -zDist);\n    \n#if DIFFUSE_PER_PARTICLE\n\tvec3 rayDir = fxCalcRay(fragCoord, iResolution, cameraFwd, cameraUp, cameraLeft);\n    vec3 groundPos = cameraPos + rayDir * zDist;\n#endif \/\/ DIFFUSE_PER_PARTICLE\n\n    ivec4 old = fxGetClosest( ivec2(fragCoord) );      \n\n    for(int j=0; j<4; j++)\n    {\n        int particle = old[j];\n        if (particle < 0 || particle >= MAX_PARTICLES) continue;\n        fxParticle data = fxGetParticle(particle);\n        \n        vec3 oldPos = data.pos;\n        vec3 newPos = data.pos + data.vel;\n         \n#if DIFFUSE_PER_PARTICLE\n        const float GLOW_INTENSITY = 0.001;\n        vec3 groundDelta = oldPos - groundPos.xyz;\n        float groundDotParticle = dot(groundDelta, normalAndZ.xyz);\n        \n        if (groundDotParticle > 0.001)\n        {\n            float distToGround = length(groundDelta);\n            float glow = GLOW_INTENSITY * normalize(groundDotParticle) \/ (distToGround * distToGround * distToGround);\n            vec3 glowTemp  = fxBlackBody(MAX_TEMP * 1.0 * (1.0 - data.age \/ 1.5));\n            fragColor += vec4(glow * glowTemp, 0.0);\n        }\n#endif \/\/ DIFFUSE_PER_PARTICLE\n \n        \/\/ convert to camera space\n        vec3 oldPosCamera = (w2c * vec4(oldPos,1.0)).xyz;\n        oldPosCamera.xy = oldPosCamera.xy \/ oldPosCamera.z;\n        vec3 newPosCamera = (w2c * vec4(newPos,1.0)).xyz;\n        newPosCamera.xy = newPosCamera.xy \/ newPosCamera.z;\n        \n        \/\/ if in front of clipping plane, not occluded by scene\n        if(oldPosCamera.z > 0.01 && newPosCamera.z > 0.01 && zDist > oldPosCamera.z && zDist > newPosCamera.z)\n        {\n            float dist2 = fxLinePointDist2(oldPosCamera.xy, newPosCamera.xy, p, iResolution);\n            float dist = sqrt(dist2);\n            \n            const float PARTICLE_SIZE = 0.01;\n            float particleTemp = max(0.0, PARTICLE_SIZE - dist) * MAX_TEMP \/ PARTICLE_SIZE;\n        \n            if (dist < PARTICLE_SIZE)\n            {\n                fragColor += vec4(fxBlackBody(particleTemp \/ (data.age + 0.1)), 0);\n            }\n        }\n    }\n}\n",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            },
+            {
+                "inputs": [],
+                "outputs": [],
+                "code": "const float MAX_AGE = 10.0;\nconst int MAX_PARTICLES = 50000;\n\nbool getVoxel(ivec3 c) {\n    return abs(c[0] + 3) + c[1] + abs(c[2]) < 1 ||\n    abs(c[0] - 3) + c[1] + abs(c[2]) < 0 ||\n    abs(c[0]) + c[1] + abs(c[2] + 3) < 2 ||\n    abs(c[0] - 6) + c[1] + abs(c[2] + 20) < -5 ||\n    abs(c[0] + 9) + c[1] + abs(c[2] - 11) < -3;    \n}\n\nuvec4 hash(uvec4 x){\n    x = ((x >> 16u) ^ x.yzwx) * 0x45d9f3bu;\n    x = ((x >> 16u) ^ x.yzwx) * 0x45d9f3bu;\n    x = ((x >> 16u) ^ x.yzwx) * 0x45d9f3bu;\n    x = ((x >> 16u) ^ x.yzwx) * 0x45d9f3bu;\n    \/\/x = (x >> 16u) ^ x;\n    return x;\n}\n\nuvec4 hash(uvec3 x0){\n    uvec4 x = x0.xyzz;\n    x = ((x >> 16u) ^ x.yzxy) * 0x45d9f3bu;\n    x = ((x >> 16u) ^ x.yzxz) * 0x45d9f3bu;\n    x = ((x >> 16u) ^ x.yzxx) * 0x45d9f3bu;\n    \/\/x = (x >> 16u) ^ x;\n    return x;\n}\n\nvec4 noise(ivec4 p){\n    const float scale = pow(2., -32.);\n    uvec4 h = hash(uvec4(p));\n    return vec4(h)*scale;\n}\n\nvec4 noise(ivec3 p){\n    const float scale = 1.0\/float(0xffffffffU);\n    uvec4 h = hash(uvec3(p));\n    return vec4(h)*scale;\n}\n\nvec4 noise(ivec2 p){\n    return noise(ivec3(p, 0));\n}\n\n\/\/hashing noise by IQ\nfloat hash( int k ) {\n    uint n = uint(k);\n\tn = (n << 13U) ^ n;\n    n = n * (n * n * 15731U + 789221U) + 1376312589U;\n    return uintBitsToFloat( (n>>9U) | 0x3f800000U ) - 1.0;\n}\n\nvoid fxCalcCamera(in float iTime, in vec4 iMouse, in vec3 iResolution, out vec3 cameraLookAt, out vec3 cameraPos, out vec3 cameraFwd, out vec3 cameraLeft, out vec3 cameraUp)\n{\n    vec2 mouse = iMouse.xy \/ iResolution.xy;\n    \n    float animate = (iMouse.x \/ iResolution.x) * 2.0 - 0.5;\n    \n    cameraLookAt = vec3(0.0, 0.0f, 0.0);\n    float angleX = iMouse.z > 0.0 ? 6.28 * mouse.x : 1.1*3.14 + iTime * 0.1;\n    float angleY = iMouse.z > 0.0 ? (mouse.y * 6.28) - 0.4 : 0.75*3.14;\n    cameraPos\t= (vec3(sin(angleX)*cos(angleY), sin(angleY), cos(angleX)*cos(angleY))) * 15.0;\n\n    cameraFwd  = normalize(cameraLookAt - cameraPos);\n    cameraLeft  = -normalize(cross(cameraFwd, vec3(0.0,1.0,0.0)));\n    cameraUp   = normalize(cross(cameraLeft, cameraFwd)) * 0.5;\n}\n\nmat4 fxCalcCameraMat(vec3 resolution, vec3 cameraLeft, vec3 cameraUp, vec3 cameraFwd, vec3 cameraPos)\n{\n    return mat4(vec4(-0.5*resolution.y \/ resolution.x * cameraLeft, 0.0),\n        vec4(-0.5*cameraUp, 0.0),\n        vec4(cameraFwd, 0.0),\n        vec4(cameraPos, 1.0));\n}\n\nvec3 fxCalcRay(in vec2 fragCoord, in vec3 iResolution, in vec3 cameraFwd, in vec3 cameraUp, in vec3 cameraLeft)\n{\n\tvec2 screenPos = (fragCoord.xy \/ iResolution.xy) * 1.0 - 0.5;\n\treturn normalize(cameraFwd - screenPos.x * cameraLeft - screenPos.y * cameraUp);\n}\n\nconst float MAX_TEMP = 1000.0;\n\nvec3 fxBlackBody(float _t)\n{\n    vec3 temp = vec3(min(1.0, _t \/ MAX_TEMP), min(1.0, _t \/ (2.0 * MAX_TEMP)), min(1.0, _t \/ (3.0 * MAX_TEMP)));\n    return temp * temp * temp * temp;\n}\n\nfloat fxLinePointDist2(in vec2 newPos, in vec2 oldPos, in vec2 fragCoord, in vec3 resolution)\n{\n    vec2 pDelta = (fragCoord - oldPos);\n    vec2 delta = newPos - oldPos;\n    float deltaLen2 = dot(delta, delta);\n\n    \/\/ Find the closest point on the line segment from old to new\n    vec2 closest;\n    if (deltaLen2 > 0.0000001)\n    {\n        float deltaInvSqrt = inversesqrt(deltaLen2);\n        vec2 deltaNorm = delta * deltaInvSqrt;\n        closest = oldPos + deltaNorm * max(0.0, min(1.0 \/ deltaInvSqrt, dot(deltaNorm, pDelta)));\n    }\n    else\n    {\n        closest = oldPos;\n    }\n\n    \/\/ Distance to closest point on line segment\n    vec2 closestDelta = closest - fragCoord;\n    \/\/closestDelta *= resolution.xy \/ resolution.y;\n    return dot(closestDelta, closestDelta);\n}\n\n\/\/returns the ids of the four closest particles from the input\nivec4 fxGetClosestInternal(sampler2D sampler, ivec2 xy)\n{\n    return ivec4(texelFetch(sampler, xy, 0));\n}\n\n#define fxGetClosest(X) fxGetClosestInternal(iChannel1, X)\n\n#define POS 0\n#define VEL 1\n#define NUM_PARTICLE_DATA_TYPES 2\n\n\/\/returns the location of the particle within the particle buffer corresponding with the input id \nivec2 fxLocFromIDInternal(int width, int id, int dataType)\n{\n    int index = id * NUM_PARTICLE_DATA_TYPES + dataType;\n    return ivec2( index % width, index \/ width);\n}\n\n#define fxLocFromID(X, Y) fxLocFromIDInternal(int(iResolution.x), X, Y)\n\nstruct fxParticle\n{\n    vec3 pos;\n    vec3 vel;\n    float age;\n};\n\n\/\/get the particle corresponding to the input id\nfxParticle fxGetParticleInternal(sampler2D sampler, int resolutionWidth, int id)\n{\n    vec4 particleData0 = texelFetch(sampler, fxLocFromIDInternal(resolutionWidth, id, POS), 0);\n    vec4 particleData1 = texelFetch(sampler, fxLocFromIDInternal(resolutionWidth, id, VEL), 0);\n\n    fxParticle particle;\n    particle.pos = particleData0.xyz;\n    particle.vel = particleData1.xyz;\n    particle.age = particleData0.w;\n    \n    return particle;\n}\n\nvec4 fxSaveParticle(fxParticle p, int dataType)\n{    \n    switch(dataType)\n    {\n    case POS:  \n        return vec4(p.pos, p.age);\n    case VEL:  \n        return vec4(p.vel, 0.0);\n    }\n}\n\n#define fxGetParticle(X) fxGetParticleInternal(iChannel0, int(iResolution.x), X)\n\nvec4 fxGetParticleDataInternal(sampler2D sampler, int resolutionWidth, int id, int dataType)\n{\n    return texelFetch(sampler, fxLocFromIDInternal(resolutionWidth, id, dataType), 0);\n}\n\n#define fxGetParticleData(X, Y) fxGetParticleDataInternal(iChannel0, int(iResolution.x), X, Y)\n\n#define keyDown(ascii)    ( texelFetch(iChannel3,ivec2(ascii,0),0).x > 0.)\n\n#define KEY_SPACE 32",
+                "name": "Common",
+                "description": "",
+                "type": "common"
+            },
+            {
+                "inputs": [
+                    {
+                        "id": "4dXGR8",
+                        "filepath": "\/media\/previz\/buffer00.png",
+                        "previewfilepath": "\/media\/previz\/buffer00.png",
+                        "type": "buffer",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    },
+                    {
+                        "id": "XsXGR8",
+                        "filepath": "\/media\/previz\/buffer01.png",
+                        "previewfilepath": "\/media\/previz\/buffer01.png",
+                        "type": "buffer",
+                        "channel": 1,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dXGR8",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ ---------------------------------------------------------------------------------------\n\/\/ Computes the position and velocity of each particle, one per texture fragment.\n\/\/ ---------------------------------------------------------------------------------------\n\nconst vec3 GRAVITY = vec3(0.0,-0.004,0.0);\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    ivec2 iFragCoord = ivec2(fragCoord);\n    int index = iFragCoord.x + iFragCoord.y*int(iResolution.x);\n    int id = index \/ NUM_PARTICLE_DATA_TYPES;\n    int dataType = index - id * NUM_PARTICLE_DATA_TYPES;\n    if(id>=MAX_PARTICLES) return;\n\n    vec4 state = texelFetch(iChannel1, ivec2(0), 0);\n\n    fxParticle p = fxGetParticle(id);\n    \n    \/\/ Integrate velocities\n    vec3 newVel = p.vel + GRAVITY;\n    ivec3 newMapPos = ivec3(floor(p.pos + newVel));\n\n    \/\/ Detect if we're about to enter a voxel and bounce off\n    if (getVoxel(newMapPos))\n    {\n        ivec3 oldMapPos = ivec3(floor(p.pos));\n        ivec3 mapDelta = abs(newMapPos - oldMapPos);\n\n        newVel += -1.6 * newVel * vec3(mapDelta);\n    }\n    \n    p.vel = newVel;\n\n    vec3 newPos = p.pos + newVel;\n    float newAge = p.age + min(iTimeDelta, 0.033) \/ MAX_AGE;\n    \n    p.pos = newPos;\n        \n    \/\/ Release particles slowly when shader starts\n    if (int(state.z) < (60*int(MAX_AGE)*id)\/MAX_PARTICLES)\n    {\n        newAge = 1.0;\n        p.pos = vec3(1e6);\n    }\n\n    \/\/ Reset particles that have gotten too old\n    if (newAge > 1.0)\n    {\n        const float XZ_SPREAD = 0.01;\n        const float Y_SPREAD = 0.02;\n        const float Y_SPRAY = 0.1;\n\n        p.vel = (noise(ivec2(fragCoord)) - 0.5).xyz * 2.0 * vec3(XZ_SPREAD, Y_SPREAD, XZ_SPREAD);\n        p.vel.y += Y_SPRAY;\n\n        p.pos = vec3(-0.1, 0.1, -0.1) + p.vel;\n        newAge = noise(ivec2(fragCoord) + 3).x * 0.25;\n    }\n    \n    p.age = newAge;\n    \n    fragColor = fxSaveParticle(p, dataType);\n}",
+                "name": "Buffer A",
+                "description": "",
+                "type": "buffer"
+            },
+            {
+                "inputs": [
+                    {
+                        "id": "4dXGRr",
+                        "filepath": "\/presets\/tex00.jpg",
+                        "previewfilepath": "\/presets\/tex00.jpg",
+                        "type": "keyboard",
+                        "channel": 3,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    },
+                    {
+                        "id": "4dXGR8",
+                        "filepath": "\/media\/previz\/buffer00.png",
+                        "previewfilepath": "\/media\/previz\/buffer00.png",
+                        "type": "buffer",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    },
+                    {
+                        "id": "XsXGR8",
+                        "filepath": "\/media\/previz\/buffer01.png",
+                        "previewfilepath": "\/media\/previz\/buffer01.png",
+                        "type": "buffer",
+                        "channel": 1,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "XsXGR8",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Gijs's Basic : Voronoi Tracking: https:\/\/www.shadertoy.com\/view\/WltSz7\n\n\/\/ Voronoi Buffer\n\/\/ every pixel stores the 4 closest particles to it\n\/\/ every frame this data is shared between neighbours\n\nvoid insertion_sort(inout ivec4 i, inout vec4 d, int i_, float d_){\t\n    if(any(equal(ivec4(i_),i))) return;\n    if     (d_ < d[0])             \n        i = ivec4(i_,i.xyz),    d = vec4(d_,d.xyz);\n    else if(d_ < d[1])             \n        i = ivec4(i.x,i_,i.yz), d = vec4(d.x,d_,d.yz);\n    else if(d_ < d[2])            \n        i = ivec4(i.xy,i_,i.z), d = vec4(d.xy,d_,d.z);\n    else if(d_ < d[3])           \n        i = ivec4(i.xyz,i_),    d = vec4(d.xyz,d_);\n}\n\nfloat distance2Particle(int id, vec2 fragCoord, mat4 w2cNew){\n    if(id==-1) return 1e20;\n    vec3 worldPos = fxGetParticleData(id, POS).xyz;\n    vec3 screenPos = (w2cNew * vec4(worldPos,1.0)).xyz;\n    screenPos.xy = screenPos.xy \/ screenPos.z;\n    vec2 delta = (screenPos.xy)-fragCoord;\n    return dot(delta, delta);\n}\n\nvoid mainImage( out vec4 fragColor, vec2 fragCoord ){\n   \tivec2 iFragCoord = ivec2(fragCoord);\n    if(iFragCoord == ivec2(0))\n    {\n        \/\/ Reset if resolution changes\n        vec4 state = texelFetch(iChannel1, ivec2(0), 0);\n        if (iFrame == 0 || iResolution.xy != state.xy || keyDown(KEY_SPACE))\n        {\n            state = vec4(iResolution.xy, -1.0, 0.0);\n        }\n        else\n        {\n            state.z += 1.0;\n        }\n        \n        fragColor = state;\n        return;\n    }\n\tvec2 p = (2.0*fragCoord-iResolution.xy)\/iResolution.y;\n\n    vec3 cameraLookAt, cameraPos, cameraFwd, cameraLeft, cameraUp;\n    fxCalcCamera(iTime, iMouse, iResolution, cameraLookAt, cameraPos, cameraFwd, cameraLeft, cameraUp);\n\n    \/\/ camera-to-world and world-to-camera transform\n    mat4 c2w = fxCalcCameraMat(iResolution, cameraLeft, cameraUp, cameraFwd, cameraPos);\n    mat4 w2c = inverse(c2w);\n\n    \/\/in this vector the four new closest particles' ids will be stored\n    ivec4 new = ivec4(-1);\n    \/\/in this vector the distance to these particles will be stored \n    vec4 dis = vec4(1e6);\n\n    ivec4 old   = fxGetClosest( iFragCoord );      \n    for(int j=0; j<4; j++){\n        int id = old[j];\n        float dis2 = distance2Particle(id, p, w2c);\n        insertion_sort( new, dis, id, dis2 );\n    }\n\n    uint searchRange = 15u;\n    uint searchCount = 32u;\n    \n    for(uint i=0u; i<searchCount; ++i)\n    {\n        uvec4 h0 = hash(uvec4(fragCoord, fragCoord) * i);\n\n        ivec4 old   = fxGetClosest( iFragCoord + ivec2( h0.xy % searchRange - searchRange \/ 2u) );      \n        for(int j=0; j<2; j++){\n            int id = old[j];\n            float dis2 = distance2Particle(id, p, w2c);\n            insertion_sort( new, dis, id, dis2 );\n        }        \n    }\n\n    int searchIterations = 10;\n    if (iFrame < 5)\n    {\n        searchIterations = 100;\n    }\n    for(int k = 0; k < searchIterations; k++){\n        \/\/random hash. We should make sure that two pixels in the same frame never make the same hash!\n        float h = hash(\n            iFragCoord.x + \n            iFragCoord.y*int(iResolution.x) + \n            iFrame*int(iResolution.x*iResolution.y) +\n            k\n        );\n\n        \/\/pick random id of particle\n        int id = int(h*float(MAX_PARTICLES));\n        insertion_sort(new, dis, id, distance2Particle(id, p, w2c));\n    }\n    \n    fragColor = vec4(new);\n}",
+                "name": "Buffer B",
+                "description": "",
+                "type": "buffer"
+            },
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4sXGR8",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ ---------------------------------------------------------------------------------------\n\/\/ Background rendering inspired by \"Branchless Voxel Raycasting\" by fb39ca4\n\/\/    https:\/\/www.shadertoy.com\/view\/4dX3zl\/\n\/\/\n\/\/ Added zDist computation based on math from the source cited: https:\/\/lodev.org\/cgtutor\/raycasting.html\n\/\/ Resulting buffer contains (normal.x, normal.y, normal.z, zDist) for each pixel.\n\/\/ ---------------------------------------------------------------------------------------\n\nconst int MAX_RAY_STEPS = 90;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec3 cameraLookAt, cameraPos, cameraFwd, cameraLeft, cameraUp;\n    fxCalcCamera(iTime, iMouse, iResolution, cameraLookAt, cameraPos, cameraFwd, cameraLeft, cameraUp);\n\n    vec3 rayDir = fxCalcRay(fragCoord, iResolution, cameraFwd, cameraUp, cameraLeft);\n\t\t\t\n\tivec3 mapPos = ivec3(floor(cameraPos + 0.));\n\tvec3 deltaDist = abs(vec3(length(rayDir)) \/ rayDir);\n    ivec3 rayStep = ivec3(sign(rayDir));\n\tvec3 sideDist = (sign(rayDir) * (vec3(mapPos) - cameraPos) + (sign(rayDir) * 0.5) + 0.5) * deltaDist; \n\t\n\tbvec3 mask;\n    bool hit = false;\n\t\n\tfor (int i = 0; i < MAX_RAY_STEPS; i++)\n    {\n\t\tif (getVoxel(mapPos))\n        {\n            hit = true;\n            break;\n        }\n\n        mask = lessThanEqual(sideDist.xyz, min(sideDist.yzx, sideDist.zxy));\n\t\n\t\tsideDist += vec3(mask) * deltaDist;\n\t\tmapPos += ivec3(vec3(mask)) * rayStep;\n\t}\n\t\n    if (!hit)\n    {\n        fragColor=vec4(0.0, 0.0, 0.0, 1000000000.0);\n        return;\n    }\n    \n\tvec3 normal;\n    float perpWallDist;\n\tif (mask.x)\n    {\n\t\tnormal = vec3(1.0, 0.0, 0.0);\n        perpWallDist = sideDist.x - deltaDist.x;\n\t}\n\tif (mask.y)\n    {\n\t\tnormal = vec3(0.0, 1.0, 0.0);\n        perpWallDist = sideDist.y - deltaDist.y;\n\t}\n\tif (mask.z)\n    {\n\t\tnormal = vec3(0.0, 0.0, 1.0);\n        perpWallDist = sideDist.z - deltaDist.z;\n\t}\n    \n    float zDist = dot(vec3(mapPos) - cameraPos, rayDir);\n\tfragColor = vec4(normal, perpWallDist);\n}\n\n\n",
+                "name": "Buffer C",
+                "description": "",
+                "type": "buffer"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "stGyRw",
+            "date": "1661121063",
+            "viewed": 19,
+            "name": "Disco Lights Ray Tracing",
+            "username": "AliAbdulKareem",
+            "description": "Just playing with ray tracing",
+            "likes": 0,
+            "published": 1,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\nfloat Tmin = 0.0001;\nfloat Tmax = 1000.0;\n\nstruct camera \n{\n\n    float AspectRatio;\n    float VFOV;\n    float HFOV;\n    vec3 WorldUpVec;\n    vec3 Origin;\n    vec3 DirX;\n    vec3 DirY;\n    vec3 DirZ;\n};\n\nstruct film \/\/camera Film, in the pinhole camera model\n{\n    vec3 Center;\n    \n    float W;\n    float H;\n    float HalfW;\n    float HalfH;\n    \n    float Dist;\n\n};\n\n\nstruct ray\n{\n    vec3 Origin;\n    vec3 Dir;\n};\n\n\nstruct sphere\n{\n    float R;\n    vec3 Center;\n    vec3 Color;\n \n};\n\n\nstruct plane\n{\n    vec3 N;  \/\/normal\n    float D; \/\/distance from origin\n};\n\nstruct light_ambient \n{\n    vec3 Color;\n    float Intensity;\n};\n\nstruct light_point\n{\n    vec3 Color;\n    vec3 Pos;\n    float Intensity;\n};\n\nstruct light_directional\n{\n    vec3 Color;\n    vec3 Dir;\n    float Intensity;\n};\n\nstruct light_specular\n{\n    vec3 Color;\n    vec3 Pos;\n    float Intensity;\n    float Power;\n};\n\nstruct scene_light\n{\n    light_directional DirectionalLights[5];\n    light_point PointLights[5];\n    light_ambient AmbientLights[5];\n    \n    int AbientCount;\n    int DirectionalCount;\n    int PointCount;\n\n};\n\nstruct world\n{\n    sphere Spheres[10];\n    plane  Planes [10];\n    \n    scene_light Lights;\n    \n    int SphereCount;\n    int  PlaneCount;\n};\n\n\nvec3 NOZ(vec3 V)\n{\n    return (normalize(V));\n}\n\nfloat Inner(vec3 V, vec3 U)\n{\n    return dot(V,U);\n}\n\nvec3 Cross(vec3 V,vec3 U)\n{\n    return cross(V,U);\n}\n\nfloat MagnitudeSquared(vec3 V)\n{\n    return (V.x * V.x) + (V.y * V.y) + (V.z * V.z);\n}\n\n\n\nfloat RayIntersectSphere(ray Ray, sphere S)\n{\n   \n    float T = Tmax;\n\n    vec3 X = Ray.Origin - S.Center;\n\n    float B = Inner(X, Ray.Dir);\n    float C = Inner(X,X) - (S.R * S.R);\n\n\n    float Disc = B*B - C;\n\n    if(Disc < 0.0f) \n    {\n        return T;\n    }\n    T = -B - sqrt(Disc);\n    if (T < Tmin)\n    {\n        T = -B + sqrt(Disc);\n    }\n\n    return T;\n}\n\nfilm CreateFilm(vec3 Center, float W, float H)\n{\n    film Film;\n    Film.W = W;\n    Film.H = H;\n    Film.HalfH = Film.H * 0.5;\n    Film.HalfW = Film.W * 0.5;\n    Film.Center = Center;\n    \n    return Film;\n}\n\ncamera CreateCam(film Film, float AspectRatio, vec3 Origin ,vec3 UpVec)\n{\n    camera Cam;\n    Cam.AspectRatio = AspectRatio;\n    \n    \n    Cam.Origin = Origin;\n    Cam.WorldUpVec = UpVec;\n    Cam.DirZ = NOZ(Film.Center - Cam.Origin);\n    Cam.DirX = NOZ(Cross(Cam.DirZ, Cam.WorldUpVec));\n    Cam.DirY = Cross(Cam.DirX, Cam.DirZ); \/\/both Z, X are orthogonal so the result is unit vector\n    \n    Cam.VFOV = 1.0; \/\/just for simplicity\n    Cam.HFOV = 1.0;\n    \n    return Cam;\n    \n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord\/iResolution.xy;\n    uv.xy = (uv.xy * 2.0) - 1.0;\n    \n    \n    \/\/--------------- Film and Camera Setup -------------\/\/\n    float AspectRatio = iResolution.x \/ iResolution.y;\n    \n                                \n    \/\/ -------------------------   Film Center    Width Hight ---------------------\/\/\n    film Film = CreateFilm(vec3 (0.0, 0.0, -1.0), 2.0, 2.0);\n\n    \n    \/\/-------------------------------------------   Origin          World Up Vector ---------\/\/\n    camera Cam = CreateCam(Film, AspectRatio, vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0));\n    Film.Dist = distance(Cam.Origin, Film.Center);\n    Film.HalfW *= Cam.AspectRatio;    \n    \n    \/\/-------------- World Object Setup ----------------\/\/\n    \n\n    sphere S1 = sphere ( 1.0 ,    vec3( 0.0, -1.0, -3.0), vec3(1.0, 0.0, 0.0) );\n    sphere S2 = sphere ( 0.8  ,   vec3(-2.0,  0.0, -4.0),  vec3(0.0, 1.0, 0.0) );\n    sphere S3 = sphere ( 0.8  ,   vec3( 2.0,  0.0, -4.0),  vec3(0.0, 0.0, 1.0) );\n    sphere S4 = sphere ( 5000.0 , vec3( 0.0, -5001.0, 0.0), vec3(1.0, 1.0, 0.0) );\n    \n    const int SphereCount = 4;\n    sphere Spheres[SphereCount];\n    Spheres[0] = S1;\n    Spheres[1] = S2;\n    Spheres[2] = S3;\n    Spheres[3] = S4;\n    \n    \n    \/\/----------- Light Setup --------------\/\/\n    \n    scene_light Lights;\n    light_ambient ALight = light_ambient(vec3(1.0, 1.0, 1.0), 0.1); \n    light_point   PLight = light_point (vec3(1.0, 1.0, 1.0), vec3(-0.5, 2.0, 0.0), 0.6); \n    light_directional DLight = light_directional(vec3(-0.5, 0.0, 1.0), vec3( 0.5, 0.5, 0.5), 0.6);   \n    \n    light_specular SLight = light_specular( vec3(1.0), vec3(2.5, 1.0, -1.5), 1.0, 10.0);\n    \n    \/\/-------- Shooting Rays -------------\/\/\n    \n    Cam.HFOV = 0.5;\n    Cam.VFOV = 0.5;\n    ray Ray;\n    Ray.Origin = Cam.Origin;\n    Ray.Dir = (Cam.DirZ * Film.Dist) + (Film.HalfW * uv.x * Cam.DirX *  Cam.HFOV) + (Film.HalfH * Cam.DirY * uv.y * Cam.VFOV);\n    Ray.Dir = NOZ(Ray.Dir);\n    \n    \n    float TClosest = Tmax;\n    int ClosestIndex = 0;\n    for(int SphereIndex = 0; SphereIndex < SphereCount; ++SphereIndex)\n    {\n        sphere CurrentSphere = Spheres[SphereIndex];\n        float T = RayIntersectSphere(Ray,CurrentSphere);\n        if(T > Tmin && T < TClosest) \n        {\n            TClosest = T;\n            ClosestIndex = SphereIndex;\n        }\n    }\n    \n    \n    \n    \n    \/\/----------- Moving the lights ---------\/\/\n    \n    \n    float CircleRadius = 5.0;\n    vec3 LightPos;\n    LightPos.x = sin(iTime) * CircleRadius;\n    LightPos.y = 0.0;\n    LightPos.z = cos(iTime) * CircleRadius;\n   \n       \n\n    PLight.Pos = LightPos;\n    DLight.Dir.y = sin(2.5*iTime);\n    SLight.Pos = Cross(PLight.Pos,DLight.Dir) * Inner(PLight.Pos, DLight.Dir); \n    \n  \/\/-------- Coloring the closest object --------\/\/ \n  float T = TClosest;\n  \n  vec3 col = vec3(1.0);\n  if(T < Tmax)\n    {\n       \/\/---- Current Object -------\/\/\n       \n       sphere S = Spheres[ClosestIndex];\n       \n        \/\/Intersection Point\n        vec3 IP = T*Ray.Dir + Ray.Origin;\n        \n        \n        vec3 Norm = (IP - S.Center)\/S.R;\n        \n        \n        \/\/------ Directional Light Effect -----------\/\/\n        \n        float DCosAngle = Inner(NOZ(DLight.Dir), Norm);\n        float PCosAngle = Inner(NOZ(PLight.Pos - IP), Norm);\n        \n        col = S.Color;\n        vec3 LightColors = vec3(0.0);\n          \n        \n       \/\/------- Diffuse Point Light -------\/\/\n        if(PCosAngle > 0.0)\n        {\n          LightColors += PLight.Color * PLight.Intensity * PCosAngle;\n        }\n        \n        \n        \/\/-------- Diffuse Directional Light ------\/\/\n        \n        if(DCosAngle>0.0)\n        {\n            LightColors += (DLight.Color * DLight.Intensity * DCosAngle);\n        }\n        \n        \n        \/\/--------- Specular Light -------\/\/\n        \n        vec3 V = NOZ(Cam.Origin - IP);\n        vec3 L = NOZ(SLight.Pos - IP);\n        vec3 R = 2.0 * Inner(Norm,L) * Norm - L;\n        \n        float SCosAngle = Inner(R,L);\n        \n        \n        if(SCosAngle > 0.0)\n        {\n            LightColors += SLight.Intensity * SLight.Color * pow(SCosAngle, SLight.Power);\n        }\n        \n        \n        col *= LightColors;\n\n    }\n    \n  else\n  \n    {\n        col = vec3(0.1);\n    }\n    \n    \n       col += ALight.Intensity*ALight.Color;\n    \n    \n    \/\/------ Light Effects --------\/\/ \n\n    \n    \n    \n    \n    \n    \n    \n    \n    \n    \/\/ Output to screen\n    fragColor = vec4(col,1.0);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "ftdcRS",
+            "date": "1661118836",
+            "viewed": 42,
+            "name": "Polar rose",
+            "username": "nkaretnikov",
+            "description": "Polar rose.\n",
+            "likes": 1,
+            "published": 1,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Public domain or CC0.\n\n\/\/ This is a version of the parametric rose shader.\n\/\/ This one uses the polar form, which could give you the\n\/\/ distance to the outer shape, but you still need to sample\n\/\/ points to see the entire curve, which is why this is slow.\n\n#define PI acos(-1.)\n\nvec2 toPolar(vec2 uv)\n{\n  \/\/ phi, r\n  return vec2(atan(uv.y, uv.x), length(uv));\n}\n\nvec2 fromPolar(vec2 uv)\n{\n  return vec2(uv.y*cos(uv.x), uv.y*sin(uv.x));\n}\n\nfloat pRose(float a, float k, float theta)\n{\n  return a*sin(k*theta);\n  \/\/ return a*cos(k*theta);\n}\n\nvec3 drawRose(vec3 color,vec2 uv,float a,float k,float t,vec3 pColor)\n{\n  float theta=PI*t; \/\/ 0<>12pi\n  float d=pRose(a,k,theta); \/\/ rose\n  vec2 pq=fromPolar(vec2(theta,d));\n\n  if (length(vec2(uv.x-pq.y,uv.y-pq.x))<.02) \/\/ sphere\n    color=+pColor; \/\/ combine colors\n\n  return color;\n}\n\nvoid mainImage(out vec4 fragColor,in vec2 fragCoord)\n{\n  vec2 uv=(2.*fragCoord-iResolution.xy)\/iResolution.y; \/\/ -1<>1\n  uv*=1.2; \/\/ scale a bit\n\n  vec3 r=vec3(1.,0.,0.);\n  vec3 g=vec3(0.,1.,0.);\n  vec3 b=vec3(0.,0.,1.);\n  vec3 color=r;\n\n  float a=1.;\n  float eps=.005; \/\/ sampling\n  float n=mod(iTime*.01,7.); \/\/ petals\n  float d=9.-mod(iTime*.01,9.);\n  float k=n\/d;\n\n  \/\/ sample a bunch of fixed points\n  for (float t=0.;t<24.;t+=eps) {\n    color+=drawRose(color,uv,a,k,t,b)-r;\n  }\n\n  \/\/ animate a rotating point\n  {\n    float t=mod(iTime*.2,24.);\n    color+=drawRose(color,uv,a,k,t,g)-r;\n  }\n\n  fragColor=vec4(color,1.);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "flGyzm",
+            "date": "1661116767",
+            "viewed": 113,
+            "name": "AVizMandelbulb PF",
+            "username": "senseedious",
+            "description": "Rave fractal\nStill suffers from spaghetti code curse",
+            "likes": 2,
+            "published": 3,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "XdfGzn",
+                        "filepath": "\/media\/a\/894a09f482fb9b2822c093630fc37f0ce6cfec02b652e4e341323e4b6e4a4543.mp3",
+                        "previewfilepath": "\/media\/ap\/894a09f482fb9b2822c093630fc37f0ce6cfec02b652e4e341323e4b6e4a4543.mp3",
+                        "type": "music",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Fork of \"Audio visualizer Mandelbulb\" by Pyromma. https:\/\/shadertoy.com\/view\/7djcDc\n\/\/ 2022-08-21 21:18:43\n\n#define PI 3.1415\n#define EPS 0.005\n\nstruct Ray\n{\n    vec3 origin;\n    vec3 direction;\n};\n\nstruct Light \n{\n\tvec3 position;\n\tvec3 color;\n};\n\n\/\/ Shoot Ray\nRay getFragCoordRay(const vec2 frag_coord) {\n  \t   \n    \/\/ FOV\n    float fov = 230.;\n    float cameraDistance = 1.0 \/ tan(fov * 0.5f * PI \/ 180.0);\n    vec3 position = vec3(0.0, 0.0, -6.5);\n    \n    vec3 rayTarget = vec3((frag_coord \/ iResolution.xy) * 2.0 - 1.0, cameraDistance);\n    rayTarget.y \/= (iResolution.x \/ iResolution.y);\n    \n  \tvec3 origin = vec3(-0., 0.0, -10.0);\n    vec3 direction = normalize(rayTarget - origin + position);\n  \n  \treturn Ray(origin, direction);\n}\n\n\/\/Rotate Mandelbulb\nvec3 rot(vec3 pos, float x, float y, float z)\n{\n\tmat3 rx = mat3(1.0, 0.0, 0.0, 0.0, cos(x), -sin(x), 0.0, sin(x), cos(x));\n\tmat3 ry = mat3(cos(y), 0.0, sin(y), 0.0, 1.0, 0.0, -sin(y), 0.0, cos(y));\n\tmat3 rz = mat3(cos(z), -sin(z), 0.0, sin(z), cos(z), 0.0, 0.0, 0.0, 1.0);\n\n\treturn rx * ry * rz * pos;\n}\n\n\/\/Distance Estimator - MandelBulb\nfloat distEst(vec3 pos)\n{\n    float fft[4];\n    fft[0] = texture( iChannel0, vec2( 0.01, 0.25 ) ).x;\n\tfft[1] = texture( iChannel0, vec2( 0.07, 0.25 ) ).x;\n\tfft[2] = texture( iChannel0, vec2( 0.15, 0.25 ) ).x;\n\tfft[3] = texture( iChannel0, vec2( 0.30, 0.25 ) ).x;\n    \n    float fftA = (fft[0]+fft[1]+fft[2]+fft[3])\/4.;\n    \n    float wave = 0.8*pow(texelFetch( iChannel0, ivec2(1,1), 0 ).x, 0.5);\n    \n    \n\tfloat dis = 0.0;\n\tfloat res = 0.0;\n    int iter = 5;\n\n    pos = rot(pos, sin(iTime * 0.2) * 0.01 - 0.3, cos(iTime * 0.2) * 0.02 - 0.3, 1.2);\n\tvec3 posN = vec3( pos.xyz );\n\n\tfloat p = sin(iTime * 0.1) + 8.0;\n\tfloat d = sin(iTime * 0.1) * 0.2 + 1.0;\n    \n\tfor(int l = 0; l < iter; ++l)\n\t{\n\t\t\n        dis = length(posN);\n\n        if( dis > 1.5 )\n        {\t\n            res = 0.3 * log(dis) * dis \/ d;\n        }\n        else\n        {\n            d = pow(dis, 7.0) * 7.0 * d + 1.0;\n            \n            float theta = atan( length( posN.xy ), posN.z );\n            float phi = atan( posN.y, posN.x );\n            \n            float tran = sin(theta * p);\n            float rPow = pow(dis, 8.0);\n            \n            posN.x = rPow * cos(phi * p + (1.0-fftA)) * tran;\n            posN.y = rPow * sin(phi * (1.0-fftA) - pow(fft[3],3.0) - pow(sin(fft[0]),3.0)) * tran;\n            posN.z = rPow * cos(theta * p) * wave;\n            \n            posN += pos;\n        }\n\t\t\t\n\t}\n\t\n\treturn res;\n}\n\n\/\/Global var\nconst int maxSteps = 100;\nconst float maxDistance = 500.;\n\nconst int lightAmount = 2;\n\n\/\/Ray Marching\nvec2 rayMarch(Ray ray)\n{\n    float totalDistance = 0.0;\n    int steps;\n    \n\tfor (steps = 0; steps < maxSteps; ++steps)\n    {\n\t\tvec3 p = ray.origin + totalDistance * ray.direction;\n\t\tfloat distance = distEst(p);\n        \n\t\ttotalDistance += distance;\n\t\tif (totalDistance > maxDistance)\n            break;\n            \n\t}\n\treturn vec2(totalDistance, float(steps) \/ float(maxSteps));\n}\n\n\/\/Normal\nvec3 getNormal(vec3 pos)\n{\n    vec2 e = vec2(EPS, 0);\n    float d = distEst(pos);\n    \n    vec3 n = d - vec3(\n        distEst(pos - e.xyy),\n        distEst(pos - e.yxy),\n        distEst(pos - e.yyx)\n    );\n    \n    return normalize(n);\n}\n\n\/\/Get light\nvec3 getLight(Ray ray, vec2 dist, Light[lightAmount] light)\n{\n    vec3 pos = ray.origin + ray.direction * dist.x;\n    float diff = 0.0;\n    vec2 shadow = vec2(0.0);\n    vec3 shade = vec3(0.0);\n    vec3 n = getNormal(pos);\n    \n    for(int i = 0; i < lightAmount; i++)\n    {\n        vec3 lightVec = normalize(light[i].position - pos);\n        diff = clamp(dot(n, lightVec), 0.0, 1.0);\n        shadow = rayMarch(Ray(pos + n * EPS, lightVec));\n        diff *= 1.0 - shadow.y;\n        shade += diff * light[i].color * pow(length(pos),3.);\n    }\n\n    return shade;\n}\n\n\/\/Main\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    float fft[4];\n    fft[0] = texture( iChannel0, vec2( 0.01, 0.25 ) ).x;\n\tfft[1] = texture( iChannel0, vec2( 0.07, 0.25 ) ).x;\n\tfft[2] = texture( iChannel0, vec2( 0.15, 0.25 ) ).x;\n\tfft[3] = texture( iChannel0, vec2( 0.30, 0.25 ) ).x;\n    \n    float fftA = (fft[0]+fft[1]+fft[2]+fft[3])\/4.;\n    \n    Light[2] light;\n\n    light[0].position = vec3(13.0, 7.0, -18.0);\n    light[0].color = vec3(0.0, 0.8, 0.9) * fft[0];\n    light[1].position = vec3(-1.0, 9.0, -6.0);\n    light[1].color = vec3(1.0, 0.0, 0.7) * fft[3];\n\n    Ray ray = getFragCoordRay(fragCoord);\n    \n    vec2 res = rayMarch(ray);\n    \n    vec3 color = vec3(0.0);\n\n    color = getLight(ray, res, light) + 0.4 * vec3(res.y * pow(fft[2],3.), 0.0, res.y * pow(fft[0], 10.) - fft[2]*0.3) + 0.5*vec3(pow(fftA,10.));\n\n    fragColor = vec4(color, 1.0);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "NtGyzm",
+            "date": "1661116607",
+            "viewed": 49,
+            "name": "RCV PubFo",
+            "username": "senseedious",
+            "description": "Nothing really interesting.\n\nIt makes nice visuaals if you put a video in iChannel0 instead of a music.",
+            "likes": 0,
+            "published": 3,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "XsXGzn",
+                        "filepath": "\/media\/a\/29de534ed5e4a6a224d2dfffab240f2e19a9d95f5e39de8898e850efdb2a99de.mp3",
+                        "previewfilepath": "\/media\/ap\/29de534ed5e4a6a224d2dfffab240f2e19a9d95f5e39de8898e850efdb2a99de.mp3",
+                        "type": "music",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Fork of \"Really cheap visualizer\" by stduhpf. https:\/\/shadertoy.com\/view\/MlV3DW\n\/\/ 2022-08-21 21:16:05\n\n#define usemic false \/\/for some reason the mic input does not work the same as soundcloud or the basic sound input\n#define n 5.  \/\/number of *rays?*\n\nvoid mainImage( out vec4 o, in vec2 u )\n{\n     vec2 R = iResolution.xy;\n    u = (u+u-R) \/R.y;\n     float t = cos(iTime+length(u)*10.)\/10.;\n    u*=mat2(cos(t),sin(t),-sin(t),cos(t));\n    vec2 p = vec2(exp2(length(u))-iTime,.5*n*atan(u.y,u.x)\/acos(-1.));\n    float s =texture(iChannel0,abs((usemic?1.:.5)-fract(p))).r;   \n    o+=pow(s,2.)-o;    \n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "ftGyzm",
+            "date": "1661116411",
+            "viewed": 45,
+            "name": "Polar audio visualizer22-PF",
+            "username": "senseedious",
+            "description": "Polar audio visualizer",
+            "likes": 1,
+            "published": 3,
+            "flags": 64,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "MtfGzj",
+                        "filepath": "https:\/\/soundcloud.com\/elektrik-dreams-music\/nicola-cite-borderline-original-mix-out-now-on-beatport",
+                        "previewfilepath": "https:\/\/soundcloud.com\/elektrik-dreams-music\/nicola-cite-borderline-original-mix-out-now-on-beatport",
+                        "type": "musicstream",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 0
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Fork of \"Polar audio visualizer22\" by made. https:\/\/shadertoy.com\/view\/Ndy3WV\n\/\/ 2022-08-21 21:13:04\n\n\/\/ Fork of \"Polar audio visualizer\" by edo_m18. https:\/\/shadertoy.com\/view\/tlB3Ry\n\/\/ 2021-09-20 20:30:34\n\n#define S(a, b, t) smoothstep(a, b, t)\n#define PI 3.141592653589793\n#define PI_TWO 6.283185307179586\n\nvoid mainImage(out vec4 O, in vec2 U)\n{    \n    vec2 uv = (U.xy - 0.5 * iResolution.xy) \/ iResolution.y;\n        \n    vec2 nuv = normalize(uv);\n    float r = length(uv);\n    float th = fract(atan(nuv.y, nuv.x) \/ PI_TWO);\n    \n    float c = texture(iChannel0, vec2(th, 0.5)).x;\n    float y = S(0.1, 0.2, (c - r) - 0.1);\n    float m = step(0.2, r);\n\n    O.rgb = (mod(th * 360., 3.) < 1.)\n        ? hue2rgb(th) * y * m\n        : vec3(0.0);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            },
+            {
+                "inputs": [],
+                "outputs": [],
+                "code": "vec3 hsv2rgb( in vec3 c )\n{\n    vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0 );\n\treturn c.z * mix(vec3(1.0), rgb, c.y);\n}\n\nvec3 hue2rgb(float h)\n{\n    return clamp(abs(mod(h * 6. + vec3(0, 4, 2), 6.) - 3.) - 1., 0., 1.);\n}",
+                "name": "Common",
+                "description": "",
+                "type": "common"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "NlGcRm",
+            "date": "1661116211",
+            "viewed": 31,
+            "name": "Circle Music Visualizer V5856-PF",
+            "username": "senseedious",
+            "description": "circle",
+            "likes": 2,
+            "published": 3,
+            "flags": 0,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "4sXGzn",
+                        "filepath": "\/media\/a\/a6a1cf7a09adfed8c362492c88c30d74fb3d2f4f7ba180ba34b98556660fada1.mp3",
+                        "previewfilepath": "\/media\/ap\/a6a1cf7a09adfed8c362492c88c30d74fb3d2f4f7ba180ba34b98556660fada1.mp3",
+                        "type": "music",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "false",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [],
+                "code": "\/\/ Fork of \"Circle Music Visualizer V5856\" by KitVanDeBunt. https:\/\/shadertoy.com\/view\/4tj3Dt\n\/\/ 2022-08-21 21:09:23\n\n#define bars 100.0                 \/\/ How many buckets to divide spectrum into\n#define barSize 1.0 \/ bars        \/\/ Constant to avoid division in main loop\n#define barGap 0.1 * barSize      \/\/ 0.1 represents gap on both sides, so a bar is\n#define sampleSize 5.0           \/\/ How accurately to sample spectrum, must be a factor of 1.0\n#define PI 3.14159265359\n\n\n\/\/ used\n\/\/ https:\/\/www.shadertoy.com\/view\/XdX3z2\n\n\/\/ atan2 en lerp:\n\/\/ http:\/\/http.developer.nvidia.com\/Cg\/index_stdlib.html\n\n\/\/ colors\n\/\/ https:\/\/color.adobe.com\/nl\/Mijn-Kuler-thema-color-theme-4149936\/?showPublished=true\n\n\nfloat lerp(float a, float b, float t)\n{\n  return a + t*(b-a);\n}\n\nvec4 lerp(vec4 a, vec4 b, float t)\n{\n  return a + t*(b-a);\n}\n\nfloat atan2(float y, float x)\n{\n  float t0, t1, t2, t3, t4;\n\n  t3 = abs(x);\n  t1 = abs(y);\n  t0 = max(t3, t1);\n  t1 = min(t3, t1);\n  t3 = float(1) \/ t0;\n  t3 = t1 * t3;\n\n  t4 = t3 * t3;\n  t0 =         - float(0.013480470);\n  t0 = t0 * t4 + float(0.057477314);\n  t0 = t0 * t4 - float(0.121239071);\n  t0 = t0 * t4 + float(0.195635925);\n  t0 = t0 * t4 - float(0.332994597);\n  t0 = t0 * t4 + float(0.999995630);\n  t3 = t0 * t3;\n\n  t3 = (abs(y) > abs(x)) ? float(1.570796327) - t3 : t3;\n  t3 = (x < 0.0) ?  float(3.141592654) - t3 : t3;\n  t3 = (y < 0.0) ? -t3 : t3;\n\n  return t3;\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \n    \/\/ create pixel coordinates\n\tvec2 uv = fragCoord.xy \/ vec2(iResolution.y,iResolution.y);\n\tvec2 mouse = iMouse.xy \/ vec2(iResolution.y,iResolution.y);\n    \n    \/\/ calculate stuff\n    vec2 center = vec2((0.5*(iResolution.x\/iResolution.y)),0.5);\n    \/\/float deltaYFromCenter = center.y - uv.y;\n    \/\/float deltaXFromCenter = center.x - uv.x;\n    float deltaYFromCenter = (mouse.y) - uv.y;\n    float deltaXFromCenter = (mouse.x) - uv.x;\n    \n    \/\/ create music map red (dist center)\n\tvec4 musicMap;\n    float angleFromCenter = atan2(deltaYFromCenter,deltaXFromCenter);  \n    musicMap.r = (angleFromCenter+PI)\/(PI*2.0);\n    \n    \/\/ create music map blue\n    float distFromCenter = sqrt((deltaYFromCenter*deltaYFromCenter)+(deltaXFromCenter*deltaXFromCenter));\n    \/\/musicMap.b = pow((distFromCenter),0.25);  \n    musicMap.b = clamp(pow((distFromCenter-0.2),2.5)\/0.02,0.0,1.0);\n    musicMap.g = (distFromCenter*6.0);\n   \n    \n    \/\/ use music map red\n    float musicChannelnput = texture( iChannel0, vec2( musicMap.r,0.0)).r;\n    \n    \n\t\/\/ Get the starting x for this bar by rounding down\n\tfloat barStart = floor(musicMap.r * bars) \/ bars;\n    \n    \/\/ Sample spectrum in bar area, keep cumulative total\n    float intensity = 0.0;\n    for(float s = 0.0; s < barSize; s += barSize * sampleSize) {\n        \/\/ Shader toy shows loudness at a given frequency at (f, 0) with the same value in all channels\n        intensity += texture(iChannel0, vec2(barStart + s, 0.0)).r;\n    }\n    intensity *= sampleSize;\n    \n    if(musicMap.r - barStart < barGap || musicMap.r > barStart + barSize - barGap) {\n\t\tintensity = 0.0;\n\t}\n    \n    \n    \/\/ use music map blue\n    vec4 colorOnCenter = vec4(0.24);\n    vec4 colorOnBars = vec4(0.27,0.48,0.44,1.0);\n    \n    vec4 colorOn = lerp(colorOnCenter,colorOnBars,floor( clamp(musicMap.b,0.0,1.0) ));\n    vec4 colorOff = vec4(0.21,0.40,0.51,1.0);\n    \n    \/\/float onOff = musicMap.b-musicChannelnput;\n\tfloat onOff = musicMap.g-intensity;\n    onOff = clamp(onOff,-0.5,0.5); \n    onOff = floor(onOff+1.0)+0.5;\n    fragColor = lerp(colorOn, colorOff,onOff);\n                       \n\t\/*\n    \tif(musicChannelnput>musicMap.b){\n\t\t\tfragColor = colorOn;\n    \t}else{\n\t\t\tfragColor = colorOff;   \n\t\t}\n    *\/\n    \n    \/\/ used to debug music map\n    \/\/ fragColor = musicMap;\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "ftGcRm",
+            "date": "1661115659",
+            "viewed": 55,
+            "name": "RL Style Visualizer publicfork",
+            "username": "senseedious",
+            "description": "Rough remake of Rocket League Visualizer",
+            "likes": 2,
+            "published": 3,
+            "flags": 96,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "4dXGR8",
+                        "filepath": "\/media\/previz\/buffer00.png",
+                        "previewfilepath": "\/media\/previz\/buffer00.png",
+                        "type": "buffer",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Fork of \"RL Style Visualizer\" by clintolibre. https:\/\/shadertoy.com\/view\/llXyzN\n\/\/ 2022-08-21 20:59:56\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{   \n    \/\/basic background\n    vec4 base = vec4(7.0\/255.0, 38.0\/255.0, 70.0\/255.0, 1.0);\n    fragColor = base;\n    \n    \/\/proper ratios\n    vec2 uv = fragCoord.xy \/ iResolution.xy;\n    uv.y = uv.y*1.1;\n    uv.x = uv.x*2.0 - .45;\n    \n    \n    \/\/lookup conversion (512 frequences returned by input)\n    int tx = int(uv.x*512.0);\n    \n    \/\/bucketed values of current and max frequencies\n    int starter = int(floor(float(tx)\/57.0))*57;\n    int diff = tx-starter;\n    float sum = 0.0;\n    float maxSum = 0.0;\n    for (int i = 0; i<9;i++) {\n\t\tsum = sum + texelFetch( iChannel0, ivec2(starter+i,2), 0 ).x;\n        maxSum = maxSum + texelFetch( iChannel0, ivec2(starter+i,1), 0 ).x;\n    }\n    \n    \/\/normalize values\n    sum = (sum\/9.0);\n    maxSum = (maxSum\/9.0);\n    \n    \/\/Draw bars\n    float height = sum;\n    float col = ((sum)-.2)*1.25;\n    if (sum > uv.y && diff>20) {\n        fragColor = vec4(uv.y + base.x, uv.y+base.y, uv.y+base.z, 1.0);\n    }\n    \n    \/\/draw \"max\" lines\n    float mDiff = abs((uv.y+.01)-maxSum);\n    float mVal = 1.0-(mDiff*50.0);\n    if (mDiff<.02 && diff>20 && maxSum > 0.001) {\n        fragColor = vec4(mix(fragColor.x,1.0, mVal),mix(fragColor.y, 1.0, mVal),mix(fragColor.z,1.0,  mVal), 1.0);\n    }\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            },
+            {
+                "inputs": [
+                    {
+                        "id": "4dXGR8",
+                        "filepath": "\/media\/previz\/buffer00.png",
+                        "previewfilepath": "\/media\/previz\/buffer00.png",
+                        "type": "buffer",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    },
+                    {
+                        "id": "XslSWf",
+                        "filepath": "https:\/\/soundcloud.com\/michael_ault\/angelwings",
+                        "previewfilepath": "https:\/\/soundcloud.com\/michael_ault\/angelwings",
+                        "type": "musicstream",
+                        "channel": 1,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 0
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dXGR8",
+                        "channel": 0
+                    }
+                ],
+                "code": "void mainImage( out vec4 fragColor, in vec2 fragCoord )\n{   \n    \/\/same as usual uv but we offset by one so we grab the previous frame\/texture from Buf A one frame higher;\n    vec2 ouv = vec2(fragCoord.x, fragCoord.y-1.0) \/ iResolution.xy;\n    \/\/not offset texture for grabbing \"max\" values\n    vec2 uv = vec2(fragCoord.x, fragCoord.y) \/ iResolution.xy;\n    \n    \/\/conversion factor for our texture to sound texture\n    int tx = int(fragCoord.x);\n    \n    \/\/grab previous frame but offset by one pixel\n    fragColor = texture(iChannel0, ouv);\n    \/\/old values for grabbing \"max\" values\n    vec4 fragColorOld = texture(iChannel0, uv);\n    \n    \/\/get frequency data\n    float freq = texelFetch( iChannel1, ivec2(tx,0), 0 ).x;\n    \n    \/\/only overwrite pixel if its the bottom one!\n    \/\/fragColor = mix(fragColor, vec4(vec3(freq), 1.0), clamp(1.0-fragCoord.y,0.0,1.0));\n    \n    \/\/simpler code for overwriting third to bottom pixel\n    if (int(fragCoord.y) == 2) {\n        fragColor = vec4(vec3(freq),1.0);\n    }\n    \/\/write max in second to bottom pixel\n    if (int(fragCoord.y) == 1) {\n        if (freq > fragColorOld.x) {\n        \tfragColor = vec4(freq, 0.0, 0.0,1.0);\n        } else {\n            \/\/reduce max over time\n        \tfragColor = vec4(fragColorOld.x-.005, 0.0, 0.0,1.0);\n        }\n    }\n}\n\n\/\/Also see https:\/\/www.shadertoy.com\/view\/XtKGzm by ttoinou for a similar effect",
+                "name": "Buffer A",
+                "description": "",
+                "type": "buffer"
+            }
+        ]
+    },
+    {
+        "ver": "0.1",
+        "info": {
+            "id": "ftyyzw",
+            "date": "1661109877",
+            "viewed": 95,
+            "name": "Auroras with bokeh blur",
+            "username": "fishy",
+            "description": "Bokeh blur! I made the blur myself here: https:\/\/www.shadertoy.com\/view\/NtGczw. Also has vignette and color correction.",
+            "likes": 9,
+            "published": 3,
+            "flags": 32,
+            "usePreview": 0,
+            "tags": []
+        },
+        "renderpass": [
+            {
+                "inputs": [
+                    {
+                        "id": "4dXGR8",
+                        "filepath": "\/media\/previz\/buffer00.png",
+                        "previewfilepath": "\/media\/previz\/buffer00.png",
+                        "type": "buffer",
+                        "channel": 0,
+                        "sampler": {
+                            "filter": "linear",
+                            "wrap": "clamp",
+                            "vflip": "true",
+                            "srgb": "false",
+                            "internal": "byte"
+                        },
+                        "published": 1
+                    }
+                ],
+                "outputs": [
+                    {
+                        "id": "4dfGRr",
+                        "channel": 0
+                    }
+                ],
+                "code": "float intensity(vec2 p)\n{\n    return float(distance(p, vec2(0.0)) < 1.0);\n}\n\nvec3 blur(sampler2D tex, float size, int res, vec2 uv, float ratio)\n{\n    float div = 0.0;\n    vec3 accumulate = vec3(0.0);\n    \n    for(int iy = 0; iy < res; iy++)\n    {\n        float y = (float(iy) \/ float(res))*2.0 - 1.0;\n        for(int ix = 0; ix < res; ix++)\n        {\n            float x = (float(ix) \/ float(res))*2.0 - 1.0;\n            vec2 p = vec2(x, y);\n            float i = intensity(p);\n            \n            div += i;\n            accumulate += vec3(texture(tex, uv+p*size*vec2(1.0, ratio)) * vec4(i));\n        }\n    }\n    \n    return accumulate \/ vec3(div);\n}\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    \/\/ Normalized pixel coordinates (from 0 to 1)\n    vec2 uv = fragCoord\/iResolution.xy;\n    vec2 mouse = iMouse.xy\/iResolution.xy;\n\n    fragColor = vec4(blur(iChannel0, clamp(-uv.y+0.6, -0.1, 1.0)*0.02, 4, uv, iResolution.x\/iResolution.y), 1.0);\n    fragColor = pow(fragColor, vec4(vec3(0.8), 1.0));\n    \n    fragColor *= vec4(vec3(pow(1.0-length(uv - vec2(0.5)),0.7)), 1.0);\n}",
+                "name": "Image",
+                "description": "",
+                "type": "image"
+            },
+            {
+                "inputs": [],
+                "outputs": [
+                    {
+                        "id": "4dXGR8",
+                        "channel": 0
+                    }
+                ],
+                "code": "\/\/ Auroras by nimitz 2017 (twitter: @stormoid)\n\/\/ License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License\n\/\/ Contact the author for other licensing options\n\n\/*\n\t\n\tThere are two main hurdles I encountered rendering this effect. \n\tFirst, the nature of the texture that needs to be generated to get a believable effect\n\tneeds to be very specific, with large scale band-like structures, small scale non-smooth variations\n\tto create the trail-like effect, a method for animating said texture smoothly and finally doing all\n\tof this cheaply enough to be able to evaluate it several times per fragment\/pixel.\n\n\tThe second obstacle is the need to render a large volume while keeping the computational cost low.\n\tSince the effect requires the trails to extend way up in the atmosphere to look good, this means\n\tthat the evaluated volume cannot be as constrained as with cloud effects. My solution was to make\n\tthe sample stride increase polynomially, which works very well as long as the trails are lower opcaity than\n\tthe rest of the effect. Which is always the case for auroras.\n\n\tAfter that, there were some issues with getting the correct emission curves and removing banding at lowered\n\tsample densities, this was fixed by a combination of sample number influenced dithering and slight sample blending.\n\n\tN.B. the base setup is from an old shader and ideally the effect would take an arbitrary ray origin and\n\tdirection. But this was not required for this demo and would be trivial to fix.\n*\/\n\n#define time iTime*2.0\n\nmat2 mm2(in float a){float c = cos(a), s = sin(a);return mat2(c,s,-s,c);}\nmat2 m2 = mat2(0.95534, 0.29552, -0.29552, 0.95534);\nfloat tri(in float x){return clamp(abs(fract(x)-.5),0.01,0.49);}\nvec2 tri2(in vec2 p){return vec2(tri(p.x)+tri(p.y),tri(p.y+tri(p.x)));}\n\nfloat triNoise2d(in vec2 p, float spd)\n{\n    float z=1.8;\n    float z2=2.5;\n\tfloat rz = 0.;\n    p *= mm2(p.x*0.06);\n    vec2 bp = p;\n\tfor (float i=0.; i<5.; i++ )\n\t{\n        vec2 dg = tri2(bp*1.85)*.75;\n        dg *= mm2(time*spd);\n        p -= dg\/z2;\n\n        bp *= 1.3;\n        z2 *= .45;\n        z *= .42;\n\t\tp *= 1.21 + (rz-1.0)*.02;\n        \n        rz += tri(p.x+tri(p.y))*z;\n        p*= -m2;\n\t}\n    return clamp(1.\/pow(rz*29., 1.3),0.,.55);\n}\n\nfloat hash21(in vec2 n){ return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453); }\nvec4 aurora(vec3 ro, vec3 rd)\n{\n    vec4 col = vec4(0);\n    vec4 avgCol = vec4(0);\n    \n    for(float i=0.;i<50.;i++)\n    {\n        float of = 0.006*hash21(gl_FragCoord.xy)*smoothstep(0.,15., i);\n        float pt = ((.8+pow(i,1.4)*.002)-ro.y)\/(rd.y*2.+0.4);\n        pt -= of;\n    \tvec3 bpos = ro + pt*rd;\n        vec2 p = bpos.zx;\n        float rzt = triNoise2d(p, 0.06);\n        vec4 col2 = vec4(0,0,0, rzt);\n        col2.rgb = (sin(1.-vec3(2.15,-.5, 1.2)+i*0.043)*0.5+0.5)*rzt;\n        avgCol =  mix(avgCol, col2, .5);\n        col += avgCol*exp2(-i*0.065 - 2.5)*smoothstep(0.,5., i);\n        \n    }\n    \n    col *= (clamp(rd.y*15.+.4,0.,1.));\n    \n    \n    \/\/return clamp(pow(col,vec4(1.3))*1.5,0.,1.);\n    \/\/return clamp(pow(col,vec4(1.7))*2.,0.,1.);\n    \/\/return clamp(pow(col,vec4(1.5))*2.5,0.,1.);\n    \/\/return clamp(pow(col,vec4(1.8))*1.5,0.,1.);\n    \n    \/\/return smoothstep(0.,1.1,pow(col,vec4(1.))*1.5);\n    return col*1.8;\n    \/\/return pow(col,vec4(1.))*2.\n}\n\n\n\/\/-------------------Background and Stars--------------------\n\nvec3 nmzHash33(vec3 q)\n{\n    uvec3 p = uvec3(ivec3(q));\n    p = p*uvec3(374761393U, 1103515245U, 668265263U) + p.zxy + p.yzx;\n    p = p.yzx*(p.zxy^(p >> 3U));\n    return vec3(p^(p >> 16U))*(1.0\/vec3(0xffffffffU));\n}\n\nvec3 stars(in vec3 p)\n{\n    vec3 c = vec3(0.);\n    float res = iResolution.x*1.;\n    \n\tfor (float i=0.;i<4.;i++)\n    {\n        vec3 q = fract(p*(.15*res))-0.5;\n        vec3 id = floor(p*(.15*res));\n        vec2 rn = nmzHash33(id).xy;\n        float c2 = 1.-smoothstep(0.,.6,length(q));\n        c2 *= step(rn.x,.0005+i*i*0.001);\n        c += c2*(mix(vec3(1.0,0.49,0.1),vec3(0.75,0.9,1.),rn.y)*0.1+0.9);\n        p *= 1.3;\n    }\n    return c*c*.8;\n}\n\nvec3 bg(in vec3 rd)\n{\n    float sd = dot(normalize(vec3(-0.5, -0.6, 0.9)), rd)*0.5+0.5;\n    sd = pow(sd, 5.);\n    vec3 col = mix(vec3(0.05,0.1,0.2), vec3(0.1,0.05,0.2), sd);\n    return col*.63;\n}\n\/\/-----------------------------------------------------------\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\tvec2 q = fragCoord.xy \/ iResolution.xy;\n    vec2 p = q - 0.5;\n\tp.x*=iResolution.x\/iResolution.y;\n    \n    vec3 ro = vec3(0,0,-6.7);\n    vec3 rd = normalize(vec3(p,1.3));\n    vec2 mo = iMouse.xy \/ iResolution.xy-.5;\n    mo *= float(iMouse.z > 0.5);\n    mo = (mo==vec2(-.5))?mo=vec2(-0.1,0.1):mo;\n\tmo.x *= iResolution.x\/iResolution.y;\n    rd.yz *= mm2(mo.y);\n    rd.xz *= mm2(mo.x + time*0.01);\n    \n    vec3 col = vec3(0.);\n    vec3 brd = rd;\n    float fade = smoothstep(0.,0.01,abs(brd.y))*0.1+0.9;\n    \n    col = bg(rd)*fade;\n    \n    if (rd.y > 0.){\n        vec4 aur = smoothstep(0.,1.5,aurora(ro,rd))*fade;\n        col += stars(rd);\n        col = col*(1.-aur.a) + aur.rgb;\n    }\n    else \/\/Reflections\n    {\n        rd.y = abs(rd.y);\n        col = bg(rd)*fade*0.6;\n        vec4 aur = smoothstep(0.0,2.5,aurora(ro,rd));\n        col += stars(rd)*0.1;\n        col = col*(1.-aur.a) + aur.rgb;\n        vec3 pos = ro + ((0.5-ro.y)\/rd.y)*rd;\n        float nz2 = triNoise2d(pos.xz*vec2(.5,.7), 0.);\n        col += mix(vec3(0.2,0.25,0.5)*0.08,vec3(0.3,0.3,0.5)*0.7, nz2*0.4);\n    }\n    \n\tfragColor = vec4(col, 1.);\n}\n",
+                "name": "Buffer A",
+                "description": "",
+                "type": "buffer"
+            }
+        ]
+    }
+]
