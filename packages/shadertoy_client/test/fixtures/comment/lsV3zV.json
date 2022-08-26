@@ -1,0 +1,50 @@
+{
+  "text": [
+    "Beautiful code! Thank you! ",
+    "good point koiava. the specular intensities converge, but when I'm brdf sampling, I disable the diffuse sampling since it's just a source of noise when multiple sampling. I'll fix in the future.",
+    "Intensities for both technique should match. They should converge to same result.\nNice demo BTW. I could not find time to port my shadertoy to multipass.\nhttps:\/\/www.shadertoy.com\/view\/4sSXWt",
+    "It's a really nice looking demo, and it's quick to render.",
+    "Blown out on my MacBook Pro (AMD) under OS X 10.11 w\/ Chrome",
+    "On Macbook Pro some people are seeing blown out results from the brdf importance sampling.  Other Mac's seem to be fine.  Let me know if you're seeing it."
+  ],
+  "date": [
+    "1574165494",
+    "1472496435",
+    "1464076223",
+    "1460904275",
+    "1460863975",
+    "1460839517"
+  ],
+  "username": [
+    "jeyko",
+    "mplanck",
+    "koiava",
+    "Dave_Hoskins",
+    "morgan3d",
+    "mplanck"
+  ],
+  "userpicture": [
+    "\/media\/users\/jeyko\/profile.png",
+    "\/media\/users\/mplanck\/profile.png",
+    "\/media\/users\/koiava\/profile.jpeg",
+    "\/media\/users\/Dave_Hoskins\/profile.jpeg",
+    "\/media\/users\/morgan3d\/profile.png",
+    "\/media\/users\/mplanck\/profile.png"
+  ],
+  "id": [
+    "Xd3yzr",
+    "ldcGzl",
+    "ltjSDW",
+    "MtlXWl",
+    "4lsXDs",
+    "XtsXDs"
+  ],
+  "hidden": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ]
+}

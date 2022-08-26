@@ -1,0 +1,50 @@
+{
+  "text": [
+    "My jaw literally dropped. <3",
+    "@Shane I'm working on a (hopefully) seamless cubemap version of this sort of thing. Here's the 2D-packed 3D reaction-diffusion system btw: https:\/\/www.shadertoy.com\/view\/MscXzS",
+    "Pretty cool. I was going to raymarch the original, but just as a raised 2D surface on a back plane. For the sphere, I though it might be possible to wrap the diffusion process to make it tileable, then cube map the result, but I think that'd still show some surface seams. Tri-planar mapping might roughly work, but only bump mapped.\n\nThat leaves tileable 3D diffusion packed into a 2D texture, and so far, I've been feeling too lazy to try that. :) Having said that, Shadertoy user \"cornusammonis\" has a really nice example along those lines.",
+    "There's a way to do this without visible distortion, but I don't know how. I'm pretty sure bugman123 knows!",
+    "good 3d-spheremap use of the ice effect from last week. seam is hard to hide,spheremapping the buffer should be doable. is also not resolution independent.",
+    "nice"
+  ],
+  "date": [
+    "1536929103",
+    "1461396088",
+    "1461374827",
+    "1461335149",
+    "1461314757",
+    "1461314183"
+  ],
+  "username": [
+    "etale_cohomology",
+    "cornusammonis",
+    "Shane",
+    "stb",
+    "ollj",
+    "aiekick"
+  ],
+  "userpicture": [
+    "\/media\/users\/etale_cohomology\/profile.png",
+    "\/media\/users\/cornusammonis\/profile.jpeg",
+    "\/img\/profile.jpg",
+    "\/media\/users\/stb\/profile.jpeg",
+    "\/media\/users\/ollj\/profile.jpeg",
+    "\/media\/users\/aiekick\/profile.jpeg"
+  ],
+  "id": [
+    "XdXBD7",
+    "MlSXzh",
+    "MlSSzh",
+    "XlBXz1",
+    "4lSXz1",
+    "XlSXz1"
+  ],
+  "hidden": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ]
+}

@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:shadertoy/shadertoy_api.dart';
-import 'package:shadertoy_client/shadertoy_client.dart';
+import 'package:shadertoy_client/src/site/site_client.dart';
+import 'package:shadertoy_client/src/site/site_options.dart';
 import 'package:test/test.dart';
 
 import '../fixtures/fixtures.dart';
@@ -435,8 +436,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.backendResponse(
-              message:
-                  'No script block matches with "${ShadertoySiteClient.shaderArrayRegExp.pattern}" pattern'));
+              message: 'No script block matches with the pattern'));
     });
 
     test('Find shaders with Dio error', () async {

@@ -1,6 +1,6 @@
-GET {{baseUrl}}/{{userPath}}/shaderflix
+GET {{baseUrl}}/{{userPath}}/iq
 ###
-GET {{baseUrl}}/{{userPath}}/bonzaj
+GET {{baseUrl}}/{{userPath}}/KylBlz
 ###
 GET {{baseUrl}}/{{userPath}}/yx
 ###
