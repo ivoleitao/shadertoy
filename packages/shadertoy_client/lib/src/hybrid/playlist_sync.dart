@@ -158,7 +158,7 @@ class PlaylistSyncProcessor extends SyncProcessor {
   ///
   /// * [playlists]: The map of playlists to shaders ids
   Future<List<PlaylistSyncTask>> _addPlaylists(
-      Map<Playlist, Set<String>> playlists) async {
+      Map<Playlist, Set<String>> playlists) {
     final tasks = <Future<PlaylistSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
@@ -189,7 +189,7 @@ class PlaylistSyncProcessor extends SyncProcessor {
   ///
   /// * [playlists]: The map of playlists to shaders ids
   Future<List<PlaylistSyncTask>> _deletePlaylists(
-      Map<Playlist, Set<String>> playlists) async {
+      Map<Playlist, Set<String>> playlists) {
     final tasks = <Future<PlaylistSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
@@ -201,8 +201,7 @@ class PlaylistSyncProcessor extends SyncProcessor {
         message: 'Deleting ${playlists.length} playlist(s)');
   }
 
-  Future<List<PlaylistSyncTask>> _clientPlaylists(
-      Set<String> playlistIds) async {
+  Future<List<PlaylistSyncTask>> _clientPlaylists(Set<String> playlistIds) {
     final tasks = <Future<PlaylistSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 

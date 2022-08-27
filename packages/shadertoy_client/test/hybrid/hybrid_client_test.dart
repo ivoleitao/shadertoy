@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as p;
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 import 'package:shadertoy_client/src/site/site_parser.dart';
@@ -687,36 +688,91 @@ void main() {
           userId: await textFixture('user/$userId.html')
       };
 
-      final userMap = {
+      final userList = [
         for (var userEntry in userHtmlMap.entries)
-          userEntry.key:
-              parseUser(userEntry.key, parseDocument(userEntry.value)).user!
+          parseUser(userEntry.key, parseDocument(userEntry.value)).user
+      ];
+
+      final userMediaMap = {
+        for (var picture
+            in userList.map((user) => user?.picture).whereType<String>())
+          p.relative(picture, from: '/'): await binaryFixture(picture)
       };
 
-      final userMedia = {
-        for (var userEntry in userMap.entries)
-          userEntry.key: await binaryFixture(userEntry.value.picture!)
-      };
+      final results1 = await textFixture('results/results_0_12.html');
+      final results2 = await textFixture('results/results_12_12.html');
+      final results3 = await textFixture('results/results_24_12.html');
 
       final playlistId = 'week';
-      final playlistNum = siteOptions.pagePlaylistShaderCount;
+      final playlist1 = await textFixture('playlist/${playlistId}_0_12.html');
+      final playlist2 = await textFixture('playlist/${playlistId}_12_12.html');
+      final playlist3 = await textFixture('playlist/${playlistId}_24_12.html');
 
-      final response1 = await textFixture('results/results_0_12.html');
-      final response2 = await textFixture('results/results_12_12.html');
-      final response3 = await textFixture('results/results_24_12.html');
+      final playlistShaderPaths = [
+        // 1
+        'shaders/kitties.json',
+        'shaders/fire_fire.json',
+        'shaders/giant_ventifacts_of_calientis_v.json',
+        'shaders/controllable_machinery.json',
+        'shaders/battleships.json',
+        'shaders/soul_creature.json',
+        'shaders/hex_marching.json',
+        'shaders/saturday_torus.json',
+        'shaders/jeweled_vortex.json',
+        'shaders/fluffballs.json',
+        'shaders/coastal_landscape.json',
+        'shaders/night_circuit.json',
+        // 2
+        'shaders/pig_squad_9_year_anniversary.json',
+        'shaders/cubic_dispersal.json',
+        'shaders/color_processing.json',
+        'shaders/space_ship.json',
+        'shaders/space_ship.json',
+        'shaders/danger_noodle.json',
+        'shaders/stars_and_galaxy.json',
+        'shaders/desperate_distraction.json',
+        'shaders/party_concert_visuals.json',
+        'shaders/omzg_shader_royale.json',
+        'shaders/morning_commute.json',
+        'shaders/quartz_wip.json',
+        // 3
+        'shaders/synthwave_song.json',
+        'shaders/a_paper_heart_for_my_valentine.json',
+        'shaders/terraform.json',
+        'shaders/star_gazing_hippo.json',
+        'shaders/undulating_columns.json',
+        'shaders/trippy_triangle.json',
+        'shaders/exit_the_matrix.json',
+        'shaders/on_the_salt_lake.json',
+        'shaders/recursive_donut.json',
+        'shaders/truchet_kaleidoscope_ftw.json',
+        'shaders/paper_plane.json',
+        'shaders/hyper_dough.json'
+      ];
+      final playlistShaders = await shaderFixtures(playlistShaderPaths);
 
       final adapter = newAdapter()
-        ..addResultsRoute(response1, siteOptions)
-        ..addResultsRoute(response2, siteOptions,
+        ..addResultsRoute(results1, siteOptions)
+        ..addResultsRoute(results2, siteOptions,
             from: siteOptions.pageResultsShaderCount,
             num: siteOptions.pageResultsShaderCount)
-        ..addResultsRoute(response3, siteOptions,
+        ..addResultsRoute(results3, siteOptions,
             from: siteOptions.pageResultsShaderCount * 2,
             num: siteOptions.pageResultsShaderCount)
+        ..addShaderRouteList(shaders, siteOptions)
         ..addCommentsRouteMap(shaderCommentMap, siteOptions)
         ..addDownloadMediaMap(shaderMediaMap, siteOptions)
         ..addUserRouteMap(userHtmlMap, siteOptions)
-        ..addDownloadMediaMap(userMedia, siteOptions);
+        ..addDownloadMediaMap(userMediaMap, siteOptions)
+        ..addPlaylistRoute(playlist1, playlistId, siteOptions)
+        ..addPlaylistShadersRoute(playlist1, playlistId, siteOptions)
+        ..addPlaylistShadersRoute(playlist2, playlistId, siteOptions,
+            from: siteOptions.pagePlaylistShaderCount,
+            num: siteOptions.pagePlaylistShaderCount)
+        ..addPlaylistShadersRoute(playlist3, playlistId, siteOptions,
+            from: siteOptions.pagePlaylistShaderCount * 2,
+            num: siteOptions.pagePlaylistShaderCount)
+        ..addShadersRoute(playlistShaders, siteOptions);
 
       final metadataStore = newShadertoySqliteStore();
       final assetStore =
@@ -724,9 +780,31 @@ void main() {
       final api = newClient(adapter, siteOptions: siteOptions);
 
       // act
-      await api.rsync(metadataStore, assetStore,
-          HybridSyncMode.full /*, playlistIds: [playlistId]*/);
+      await api.rsync(metadataStore, assetStore, HybridSyncMode.full,
+          playlistIds: [playlistId]);
       // assert
+      final allSyncs = await metadataStore.findAllSyncs();
+      expect(allSyncs, isNotNull);
+      expect(allSyncs.error, isNull);
+
+      final syncs = allSyncs.syncs ?? [];
+
+      final shaderSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.shader);
+      expect(shaderSyncs.length, 36);
+      final shaderPictureSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.shaderAsset);
+      expect(shaderPictureSyncs.length, shaderMediaMap.length);
+
+      final userSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok && fsr.sync?.type == SyncType.user);
+      expect(userSyncs.length, 22);
+      final userPictureSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.userAsset);
+      expect(userPictureSyncs.length, userMediaMap.length);
 
       /*
       final shaderPaths = {
@@ -807,28 +885,6 @@ void main() {
       await api
           .rsync(store, vault, HybridSyncMode.full, playlistIds: [playlistId]);
       // assert
-      final allSyncs = await store.findAllSyncs();
-      expect(allSyncs, isNotNull);
-      expect(allSyncs.error, isNull);
-
-      final syncs = allSyncs.syncs ?? [];
-
-      final shaderSyncs = syncs.where((fsr) =>
-          fsr.sync?.status == SyncStatus.ok &&
-          fsr.sync?.type == SyncType.shader);
-      expect(shaderSyncs.length, 24);
-      final shaderPictureSyncs = syncs.where((fsr) =>
-          fsr.sync?.status == SyncStatus.ok &&
-          fsr.sync?.type == SyncType.shaderAsset);
-      expect(shaderPictureSyncs.length, shaderMedia.length);
-
-      final userSyncs = syncs.where((fsr) =>
-          fsr.sync?.status == SyncStatus.ok && fsr.sync?.type == SyncType.user);
-      expect(userSyncs.length, 15);
-      final userPictureSyncs = syncs.where((fsr) =>
-          fsr.sync?.status == SyncStatus.ok &&
-          fsr.sync?.type == SyncType.userAsset);
-      expect(userPictureSyncs.length, userMedia.length);
       */
     }, timeout: Timeout(Duration(days: 1)));
   });

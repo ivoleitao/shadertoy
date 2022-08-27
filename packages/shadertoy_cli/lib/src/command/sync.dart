@@ -81,15 +81,15 @@ abstract class SyncCommand extends HybridCommand implements SyncTaskRunner {
   Future<List<T>> process<T extends IterableMixin<APIResponse>>(
       List<Future<T>> tasks,
       {String? message,
-      int progressBarWidth = 10}) async {
-    var responses = <T>[];
+      int progressBarWidth = 10}) {
+    var taskResults = Future.value(<T>[]);
 
     if (tasks.isNotEmpty) {
       if (verbose || !stdout.hasTerminal) {
         if (message != null) {
           log(message);
         }
-        responses = await Future.wait(tasks);
+        taskResults = Future.wait(tasks);
       } else {
         final bar = ProgressBar('${message ?? ''}: [:bar] :percent :eta',
             total: tasks.length, width: progressBarWidth);
@@ -100,29 +100,35 @@ abstract class SyncCommand extends HybridCommand implements SyncTaskRunner {
             return response;
           }));
         }
-        responses = await Future.wait(barTasks);
+        taskResults = Future.wait(barTasks);
       }
 
-      final table = <List<String>>[];
-      for (var response in responses) {
-        ResponseError? error;
-        for (APIResponse item in response) {
-          error = item.error;
-          if (error != null) {
-            table.add([
-              error.context ?? '(none)',
-              error.target ?? '(none)',
-              error.message
-            ]);
+      return taskResults.then((results) {
+        final table = <List<String>>[];
+
+        for (var result in results) {
+          ResponseError? error;
+          for (APIResponse item in result) {
+            error = item.error;
+            if (error != null) {
+              table.add([
+                error.context ?? '(none)',
+                error.target ?? '(none)',
+                error.message
+              ]);
+            }
           }
         }
-      }
 
-      if (table.isNotEmpty) {
-        stderr.write(_tabulate(const ['Context', 'Target', 'Message'], table));
-      }
+        if (table.isNotEmpty) {
+          stderr
+              .write(_tabulate(const ['Context', 'Target', 'Message'], table));
+        }
+
+        return results;
+      });
     }
 
-    return responses;
+    return taskResults;
   }
 }

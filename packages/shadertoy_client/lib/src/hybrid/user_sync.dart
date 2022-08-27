@@ -178,7 +178,7 @@ class UserSyncProcessor extends SyncProcessor {
   /// Saves a list of users with [userIds]
   ///
   /// * [userIds]: The list user ids
-  Future<List<UserSyncTask>> _addUsers(Set<String> userIds) async {
+  Future<List<UserSyncTask>> _addUsers(Set<String> userIds) {
     final tasks = <Future<UserSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
@@ -204,7 +204,7 @@ class UserSyncProcessor extends SyncProcessor {
   /// Deletes a list of users with [userIds]
   ///
   /// * [userIds]: The list user ids
-  Future<List<UserSyncTask>> _deleteUsers(Set<String> userIds) async {
+  Future<List<UserSyncTask>> _deleteUsers(Set<String> userIds) {
     final tasks = <Future<UserSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
@@ -274,8 +274,7 @@ class UserSyncProcessor extends SyncProcessor {
   /// Stores a list of user pictures
   ///
   /// * [pathMap]: A map where the key is the remote path and the value the local path
-  Future<List<DownloadSyncTask>> _addUserPicture(
-      Map<String, String> pathMap) async {
+  Future<List<DownloadSyncTask>> _addUserPicture(Map<String, String> pathMap) {
     final tasks = <Future<DownloadSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
@@ -292,7 +291,7 @@ class UserSyncProcessor extends SyncProcessor {
   ///
   /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _deleteUserPicture(
-      Map<String, String> pathMap) async {
+      Map<String, String> pathMap) {
     final tasks = <Future<DownloadSyncTask>>[];
 
     pathMap.forEach((userPicturePath, userPictureFilePath) {

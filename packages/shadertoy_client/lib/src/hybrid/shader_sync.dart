@@ -243,7 +243,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// Saves a list of shaders with [shaderIds]
   ///
   /// * [shaderIds]: The list shader ids
-  Future<List<ShaderSyncTask>> _addShaders(Set<String> shaderIds) async {
+  Future<List<ShaderSyncTask>> _addShaders(Set<String> shaderIds) {
     final tasks = <Future<ShaderSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
@@ -270,7 +270,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// Deletes a list of shaders with [shaderIds]
   ///
   /// * [shaderIds]: The list shader ids
-  Future<List<ShaderSyncTask>> _deleteShaders(Set<String> shaderIds) async {
+  Future<List<ShaderSyncTask>> _deleteShaders(Set<String> shaderIds) {
     final tasks = <Future<ShaderSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
@@ -361,7 +361,7 @@ class ShaderSyncProcessor extends SyncProcessor {
           .then((cr) => CommentsSyncTask(cr))));
     }
 
-    return runner
+    return await runner
         .process<CommentsSyncTask>(tasks,
             message: 'Downloading comments of ${shaderIds.length} shader(s)')
         .then((commentTasks) => [
@@ -467,7 +467,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   ///
   /// * [shaderComments]: A map of shader comments
   Future<List<CommentsSyncTask>> _addShaderComments(
-      Map<String, List<Comment>> shaderCommentsMap) async {
+      Map<String, List<Comment>> shaderCommentsMap) {
     final tasks = <Future<CommentsSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
@@ -485,7 +485,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   ///
   /// * [shaderComments]: A map of shader comments
   Future<List<CommentsSyncTask>> _deleteShaderComments(
-      Map<String, List<Comment>> shaderCommentsMap) async {
+      Map<String, List<Comment>> shaderCommentsMap) {
     final tasks = <Future<CommentsSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
@@ -582,7 +582,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   ///
   /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _addShaderPictures(
-      Map<String, String> pathMap) async {
+      Map<String, String> pathMap) {
     final tasks = <Future<DownloadSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
@@ -599,7 +599,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   ///
   /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _deleteShaderPictures(
-      Map<String, String> pathMap) async {
+      Map<String, String> pathMap) {
     final tasks = <Future<DownloadSyncTask>>[];
 
     pathMap.forEach((shaderPicturePath, shaderPictureFilePath) {
