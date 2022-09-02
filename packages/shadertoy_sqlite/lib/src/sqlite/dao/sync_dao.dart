@@ -80,7 +80,7 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
         hasCreatedBefore ||
         hasUpdatedBefore) {
       query.where((entry) {
-        Expression<bool?>? exp;
+        Expression<bool>? exp;
 
         if (hasType) {
           exp = entry.type.equals(type.name);

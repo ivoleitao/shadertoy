@@ -22,7 +22,7 @@ RenderPass _$RenderPassFromJson(Map<String, dynamic> json) => RenderPass(
 Map<String, dynamic> _$RenderPassToJson(RenderPass instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'type': _$RenderPassTypeEnumMap[instance.type],
+      'type': _$RenderPassTypeEnumMap[instance.type]!,
       'description': instance.description,
       'code': instance.code,
       'inputs': instance.inputs.map((e) => e.toJson()).toList(),

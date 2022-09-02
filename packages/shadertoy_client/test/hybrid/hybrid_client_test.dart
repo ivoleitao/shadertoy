@@ -442,8 +442,8 @@ void main() {
                   id: userId,
                   picture: '/media/users/$userId/profile.png',
                   memberSince: DateTime(2013, 1, 11),
-                  following: 53,
-                  followers: 353,
+                  following: 67,
+                  followers: 1176,
                   about:
                       '\n\n*[url]http://www.iquilezles.org[/url]\n*[url]https://www.patreon.com/inigoquilez[/url]\n*[url]https://www.youtube.com/c/InigoQuilez[/url]\n*[url]https://www.facebook.com/inigo.quilez.art[/url]\n*[url]https://twitter.com/iquilezles[/url]')));
     });

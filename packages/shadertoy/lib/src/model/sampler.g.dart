@@ -15,8 +15,8 @@ Sampler _$SamplerFromJson(Map<String, dynamic> json) => Sampler(
     );
 
 Map<String, dynamic> _$SamplerToJson(Sampler instance) => <String, dynamic>{
-      'filter': _$FilterTypeEnumMap[instance.filter],
-      'wrap': _$WrapTypeEnumMap[instance.wrap],
+      'filter': _$FilterTypeEnumMap[instance.filter]!,
+      'wrap': _$WrapTypeEnumMap[instance.wrap]!,
       'vflip': const StringToBoolConverter().toJson(instance.vflip),
       'srgb': const StringToBoolConverter().toJson(instance.srgb),
       'internal': instance.internal,

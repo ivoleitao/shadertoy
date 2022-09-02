@@ -101,7 +101,7 @@ class ShaderDao extends DatabaseAccessor<DriftStore> with _$ShaderDaoMixin {
         (userId != null && userId.isNotEmpty) ||
         (tags != null && tags.isNotEmpty)) {
       query.where((entry) {
-        Expression<bool?>? exp;
+        Expression<bool>? exp;
 
         if (term != null && term.isNotEmpty) {
           exp = entry.name.like(term);
@@ -113,7 +113,7 @@ class ShaderDao extends DatabaseAccessor<DriftStore> with _$ShaderDaoMixin {
         }
 
         if (tags != null && tags.isNotEmpty) {
-          Expression<bool?> tagExp;
+          Expression<bool> tagExp;
           for (var tag in tags) {
             tagExp = entry.tagsJson.like('%$tag%');
             exp = (exp == null ? tagExp : exp & tagExp);
@@ -140,7 +140,7 @@ class ShaderDao extends DatabaseAccessor<DriftStore> with _$ShaderDaoMixin {
               expression: shaderTable.likes, mode: OrderingMode.desc),
         if (sort == Sort.hot)
           (u) => OrderingTerm(
-              expression: CustomExpression<RealType>(
+              expression: CustomExpression<double>(
                   "(cast(views as real) / (strftime('%s','now') - date))"),
               mode: OrderingMode.desc)
       ]);

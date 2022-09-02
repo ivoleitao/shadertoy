@@ -28,7 +28,7 @@ void main() {
 
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
 
-  Future<List<FindShaderResponse>> _nameSort(List<String> shaderPaths) async {
+  Future<List<FindShaderResponse>> getNameSort(List<String> shaderPaths) async {
     nameSort(FindShaderResponse fsr) => fsr.shader?.info.name ?? '';
     final response = await findShadersResponseFixture(shaderPaths);
     final shaders = response.shaders ?? [];
@@ -42,7 +42,7 @@ void main() {
     return result;
   }
 
-  Future<List<FindShaderResponse>> _dateSort(List<String> shaderPaths) async {
+  Future<List<FindShaderResponse>> getDateSort(List<String> shaderPaths) async {
     dateSort(FindShaderResponse fsr) =>
         fsr.shader?.info.date ?? DateTime(2013, 1, 2);
     final response = await findShadersResponseFixture(shaderPaths);
@@ -57,7 +57,7 @@ void main() {
     return result;
   }
 
-  Future<List<FindShaderResponse>> _popularitySort(
+  Future<List<FindShaderResponse>> getPopularitySort(
       List<String> shaderPaths) async {
     popularitySort(FindShaderResponse fsr) => fsr.shader?.info.views ?? 1;
     final response = await findShadersResponseFixture(shaderPaths);
@@ -78,7 +78,7 @@ void main() {
     return result;
   }
 
-  Future<List<FindShaderResponse>> _loveSort(List<String> shaderPaths) async {
+  Future<List<FindShaderResponse>> getLoveSort(List<String> shaderPaths) async {
     loveSort(FindShaderResponse fsr) => fsr.shader?.info.likes ?? 1;
     final response = await findShadersResponseFixture(shaderPaths);
     final shaders = response.shaders ?? [];
@@ -98,7 +98,7 @@ void main() {
     return result;
   }
 
-  Future<List<FindShaderResponse>> _hotSort(List<String> shaderPaths) async {
+  Future<List<FindShaderResponse>> getHotSort(List<String> shaderPaths) async {
     hotSort(FindShaderResponse fsr) {
       final info = fsr.shader?.info;
       final views = info?.views ?? 1;
@@ -294,7 +294,8 @@ void main() {
       final response = await store.findShaders();
       // assert
       final actual = response.shaders ?? [];
-      final expected = (await _hotSort(shaderPaths)).take(options.shaderCount);
+      final expected =
+          (await getHotSort(shaderPaths)).take(options.shaderCount);
 
       expect(actual.length, options.shaderCount);
       expect(actual, containsAllInOrder(expected));
@@ -324,7 +325,8 @@ void main() {
       final response = await store.findShaders(sort: Sort.name);
       // assert
       final actual = response.shaders;
-      final expected = (await _nameSort(shaderPaths)).take(options.shaderCount);
+      final expected =
+          (await getNameSort(shaderPaths)).take(options.shaderCount);
 
       expect(actual, containsAllInOrder(expected));
     });
@@ -354,7 +356,7 @@ void main() {
       // assert
       final actual = response.shaders;
       final expected =
-          (await _popularitySort(shaderPaths)).take(options.shaderCount);
+          (await getPopularitySort(shaderPaths)).take(options.shaderCount);
 
       expect(actual, containsAllInOrder(expected));
     });
@@ -383,7 +385,8 @@ void main() {
       final response = await store.findShaders(sort: Sort.newest);
       // assert
       final actual = response.shaders;
-      final expected = (await _dateSort(shaderPaths)).take(options.shaderCount);
+      final expected =
+          (await getDateSort(shaderPaths)).take(options.shaderCount);
 
       expect(actual, containsAllInOrder(expected));
     });
@@ -412,7 +415,8 @@ void main() {
       final response = await store.findShaders(sort: Sort.love);
       // assert
       final actual = response.shaders;
-      final expected = (await _loveSort(shaderPaths)).take(options.shaderCount);
+      final expected =
+          (await getLoveSort(shaderPaths)).take(options.shaderCount);
 
       expect(actual, containsAllInOrder(expected));
     });
@@ -443,7 +447,8 @@ void main() {
       final response = await store.findShaders(sort: Sort.hot);
       // assert
       final actual = response.shaders;
-      final expected = (await _hotSort(shaderPaths)).take(options.shaderCount);
+      final expected =
+          (await getHotSort(shaderPaths)).take(options.shaderCount);
 
       expect(actual, containsAllInOrder(expected));
     });
@@ -764,7 +769,7 @@ void main() {
       final response = await store.findShadersByUserId(userId);
       // assert
       final actualShaders = response.shaders;
-      final expected = await _popularitySort(shaderPaths);
+      final expected = await getPopularitySort(shaderPaths);
       final expectedShaders = expected
           .where((element) => element.shader?.info.userId == userId)
           .take(options.userShaderCount);
@@ -800,7 +805,7 @@ void main() {
       final response = await store.findShaderIdsByUserId(userId);
       // assert
       final actualShaders = response.ids;
-      final expected = await _popularitySort(shaderPaths);
+      final expected = await getPopularitySort(shaderPaths);
       final expectedShaders = expected
           .where((element) => element.shader?.info.userId == userId)
           .take(options.userShaderCount)

@@ -33,7 +33,7 @@ Map<String, dynamic> _$InfoToJson(Info instance) => <String, dynamic>{
       'username': instance.userId,
       'description': instance.description,
       'likes': instance.likes,
-      'published': _$ShaderPrivacyEnumMap[instance.privacy],
+      'published': _$ShaderPrivacyEnumMap[instance.privacy]!,
       'flags': instance.flags,
       'tags': instance.tags,
       'hasliked': const IntToBoolConverter().toJson(instance.hasLiked),

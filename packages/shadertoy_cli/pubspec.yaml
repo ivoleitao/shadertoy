@@ -15,24 +15,18 @@ dependencies:
   # Other dependencies  
   args: ^2.3.1
   progress_bar: ^1.0.0
-  stash: ^4.3.2
-  stash_sqlite: ^4.3.2
-  drift: ^1.7.1
-  # shadertoy: ^2.0.3
-  shadertoy:
-    path: ../shadertoy
-  # shadertoy_client: ^2.0.3
-  shadertoy_client:
-    path: ../shadertoy_client
-  # shadertoy_sqlite: ^2.0.3
-  shadertoy_sqlite:
-    path: ../shadertoy_sqlite
+  stash: ^4.3.3
+  stash_sqlite: ^4.3.3
+  drift: ^2.1.0
+  shadertoy: ^2.0.3
+  shadertoy_client: ^2.0.3
+  shadertoy_sqlite: ^2.0.3
   shadertoy_wgpu:
     path: ../shadertoy_wgpu
 
 dev_dependencies:
   lints: ^2.0.0
-  test: ^1.21.4
+  test: ^1.21.5
 
 executables:
   shadertoy: shadertoy_cli

@@ -18,9 +18,9 @@ Sync _$SyncFromJson(Map<String, dynamic> json) => Sync(
     );
 
 Map<String, dynamic> _$SyncToJson(Sync instance) => <String, dynamic>{
-      'type': _$SyncTypeEnumMap[instance.type],
+      'type': _$SyncTypeEnumMap[instance.type]!,
       'target': instance.target,
-      'status': _$SyncStatusEnumMap[instance.status],
+      'status': _$SyncStatusEnumMap[instance.status]!,
       'message': instance.message,
       'creationTime': instance.creationTime.toIso8601String(),
       'updateTime': instance.updateTime.toIso8601String(),

@@ -3,7 +3,7 @@
 part of 'store.dart';
 
 // **************************************************************************
-// MoorGenerator
+// DriftDatabaseGenerator
 // **************************************************************************
 
 // ignore_for_file: type=lint
@@ -25,42 +25,25 @@ class UserEntry extends DataClass implements Insertable<UserEntry> {
 
   /// Abouth this user
   final String? about;
-  UserEntry(
+  const UserEntry(
       {required this.id,
       this.picture,
       required this.memberSince,
       required this.following,
       required this.followers,
       this.about});
-  factory UserEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return UserEntry(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      picture: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}picture']),
-      memberSince: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}member_since'])!,
-      following: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}following'])!,
-      followers: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}followers'])!,
-      about: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}about']),
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     if (!nullToAbsent || picture != null) {
-      map['picture'] = Variable<String?>(picture);
+      map['picture'] = Variable<String>(picture);
     }
     map['member_since'] = Variable<DateTime>(memberSince);
     map['following'] = Variable<int>(following);
     map['followers'] = Variable<int>(followers);
     if (!nullToAbsent || about != null) {
-      map['about'] = Variable<String?>(about);
+      map['about'] = Variable<String>(about);
     }
     return map;
   }
@@ -106,18 +89,18 @@ class UserEntry extends DataClass implements Insertable<UserEntry> {
 
   UserEntry copyWith(
           {String? id,
-          String? picture,
+          Value<String?> picture = const Value.absent(),
           DateTime? memberSince,
           int? following,
           int? followers,
-          String? about}) =>
+          Value<String?> about = const Value.absent()}) =>
       UserEntry(
         id: id ?? this.id,
-        picture: picture ?? this.picture,
+        picture: picture.present ? picture.value : this.picture,
         memberSince: memberSince ?? this.memberSince,
         following: following ?? this.following,
         followers: followers ?? this.followers,
-        about: about ?? this.about,
+        about: about.present ? about.value : this.about,
       );
   @override
   String toString() {
@@ -173,11 +156,11 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
         memberSince = Value(memberSince);
   static Insertable<UserEntry> custom({
     Expression<String>? id,
-    Expression<String?>? picture,
+    Expression<String>? picture,
     Expression<DateTime>? memberSince,
     Expression<int>? following,
     Expression<int>? followers,
-    Expression<String?>? about,
+    Expression<String>? about,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -213,7 +196,7 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
       map['id'] = Variable<String>(id.value);
     }
     if (picture.present) {
-      map['picture'] = Variable<String?>(picture.value);
+      map['picture'] = Variable<String>(picture.value);
     }
     if (memberSince.present) {
       map['member_since'] = Variable<DateTime>(memberSince.value);
@@ -225,7 +208,7 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
       map['followers'] = Variable<int>(followers.value);
     }
     if (about.present) {
-      map['about'] = Variable<String?>(about.value);
+      map['about'] = Variable<String>(about.value);
     }
     return map;
   }
@@ -252,39 +235,39 @@ class $UserTableTable extends UserTable
   $UserTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _pictureMeta = const VerificationMeta('picture');
   @override
-  late final GeneratedColumn<String?> picture = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> picture = GeneratedColumn<String>(
       'picture', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _memberSinceMeta =
       const VerificationMeta('memberSince');
   @override
-  late final GeneratedColumn<DateTime?> memberSince =
-      GeneratedColumn<DateTime?>('member_since', aliasedName, false,
-          type: const IntType(), requiredDuringInsert: true);
+  late final GeneratedColumn<DateTime> memberSince = GeneratedColumn<DateTime>(
+      'member_since', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
   final VerificationMeta _followingMeta = const VerificationMeta('following');
   @override
-  late final GeneratedColumn<int?> following = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> following = GeneratedColumn<int>(
       'following', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   final VerificationMeta _followersMeta = const VerificationMeta('followers');
   @override
-  late final GeneratedColumn<int?> followers = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> followers = GeneratedColumn<int>(
       'followers', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   final VerificationMeta _aboutMeta = const VerificationMeta('about');
   @override
-  late final GeneratedColumn<String?> about = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> about = GeneratedColumn<String>(
       'about', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
       [id, picture, memberSince, following, followers, about];
@@ -333,8 +316,21 @@ class $UserTableTable extends UserTable
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   UserEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return UserEntry.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserEntry(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      picture: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}picture']),
+      memberSince: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}member_since'])!,
+      following: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}following'])!,
+      followers: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}followers'])!,
+      about: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}about']),
+    );
   }
 
   @override
@@ -379,7 +375,7 @@ class ShaderEntry extends DataClass implements Insertable<ShaderEntry> {
 
   /// The render passses in json
   final String renderPassesJson;
-  ShaderEntry(
+  const ShaderEntry(
       {required this.id,
       required this.userId,
       required this.version,
@@ -392,35 +388,6 @@ class ShaderEntry extends DataClass implements Insertable<ShaderEntry> {
       required this.flags,
       required this.tagsJson,
       required this.renderPassesJson});
-  factory ShaderEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return ShaderEntry(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      version: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}version'])!,
-      name: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      date: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}date'])!,
-      description: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}description']),
-      views: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}views'])!,
-      likes: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}likes'])!,
-      privacy: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}privacy'])!,
-      flags: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}flags'])!,
-      tagsJson: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}tags_json'])!,
-      renderPassesJson: const StringType().mapFromDatabaseResponse(
-          data['${effectivePrefix}render_passes_json'])!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -430,7 +397,7 @@ class ShaderEntry extends DataClass implements Insertable<ShaderEntry> {
     map['name'] = Variable<String>(name);
     map['date'] = Variable<DateTime>(date);
     if (!nullToAbsent || description != null) {
-      map['description'] = Variable<String?>(description);
+      map['description'] = Variable<String>(description);
     }
     map['views'] = Variable<int>(views);
     map['likes'] = Variable<int>(likes);
@@ -503,7 +470,7 @@ class ShaderEntry extends DataClass implements Insertable<ShaderEntry> {
           String? version,
           String? name,
           DateTime? date,
-          String? description,
+          Value<String?> description = const Value.absent(),
           int? views,
           int? likes,
           String? privacy,
@@ -516,7 +483,7 @@ class ShaderEntry extends DataClass implements Insertable<ShaderEntry> {
         version: version ?? this.version,
         name: name ?? this.name,
         date: date ?? this.date,
-        description: description ?? this.description,
+        description: description.present ? description.value : this.description,
         views: views ?? this.views,
         likes: likes ?? this.likes,
         privacy: privacy ?? this.privacy,
@@ -617,7 +584,7 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
     Expression<String>? version,
     Expression<String>? name,
     Expression<DateTime>? date,
-    Expression<String?>? description,
+    Expression<String>? description,
     Expression<int>? views,
     Expression<int>? likes,
     Expression<String>? privacy,
@@ -689,7 +656,7 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
       map['date'] = Variable<DateTime>(date.value);
     }
     if (description.present) {
-      map['description'] = Variable<String?>(description.value);
+      map['description'] = Variable<String>(description.value);
     }
     if (views.present) {
       map['views'] = Variable<int>(views.value);
@@ -740,74 +707,74 @@ class $ShaderTableTable extends ShaderTable
   $ShaderTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _versionMeta = const VerificationMeta('version');
   @override
-  late final GeneratedColumn<String?> version = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> version = GeneratedColumn<String>(
       'version', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
-  late final GeneratedColumn<DateTime?> date = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
       'date', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: true);
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
   @override
-  late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _viewsMeta = const VerificationMeta('views');
   @override
-  late final GeneratedColumn<int?> views = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> views = GeneratedColumn<int>(
       'views', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   final VerificationMeta _likesMeta = const VerificationMeta('likes');
   @override
-  late final GeneratedColumn<int?> likes = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> likes = GeneratedColumn<int>(
       'likes', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   final VerificationMeta _privacyMeta = const VerificationMeta('privacy');
   @override
-  late final GeneratedColumn<String?> privacy = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> privacy = GeneratedColumn<String>(
       'privacy', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _flagsMeta = const VerificationMeta('flags');
   @override
-  late final GeneratedColumn<int?> flags = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> flags = GeneratedColumn<int>(
       'flags', aliasedName, false,
-      type: const IntType(),
+      type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   final VerificationMeta _tagsJsonMeta = const VerificationMeta('tagsJson');
   @override
-  late final GeneratedColumn<String?> tagsJson = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> tagsJson = GeneratedColumn<String>(
       'tags_json', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: Constant('[]'));
   final VerificationMeta _renderPassesJsonMeta =
       const VerificationMeta('renderPassesJson');
   @override
-  late final GeneratedColumn<String?> renderPassesJson =
-      GeneratedColumn<String?>('render_passes_json', aliasedName, false,
-          type: const StringType(), requiredDuringInsert: true);
+  late final GeneratedColumn<String> renderPassesJson = GeneratedColumn<String>(
+      'render_passes_json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -904,8 +871,33 @@ class $ShaderTableTable extends ShaderTable
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   ShaderEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return ShaderEntry.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShaderEntry(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      userId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      version: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}version'])!,
+      name: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      date: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+      description: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      views: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}views'])!,
+      likes: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}likes'])!,
+      privacy: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}privacy'])!,
+      flags: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}flags'])!,
+      tagsJson: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}tags_json'])!,
+      renderPassesJson: attachedDatabase.options.types.read(
+          DriftSqlType.string, data['${effectivePrefix}render_passes_json'])!,
+    );
   }
 
   @override
@@ -935,7 +927,7 @@ class CommentEntry extends DataClass implements Insertable<CommentEntry> {
 
   /// If this comment should be not appear
   final bool hidden;
-  CommentEntry(
+  const CommentEntry(
       {required this.id,
       required this.shaderId,
       required this.userId,
@@ -943,25 +935,6 @@ class CommentEntry extends DataClass implements Insertable<CommentEntry> {
       required this.date,
       required this.comment,
       required this.hidden});
-  factory CommentEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return CommentEntry(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      shaderId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}shader_id'])!,
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      picture: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}picture']),
-      date: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}date'])!,
-      comment: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}comment'])!,
-      hidden: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}hidden'])!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -969,7 +942,7 @@ class CommentEntry extends DataClass implements Insertable<CommentEntry> {
     map['shader_id'] = Variable<String>(shaderId);
     map['user_id'] = Variable<String>(userId);
     if (!nullToAbsent || picture != null) {
-      map['picture'] = Variable<String?>(picture);
+      map['picture'] = Variable<String>(picture);
     }
     map['date'] = Variable<DateTime>(date);
     map['comment'] = Variable<String>(comment);
@@ -1022,7 +995,7 @@ class CommentEntry extends DataClass implements Insertable<CommentEntry> {
           {String? id,
           String? shaderId,
           String? userId,
-          String? picture,
+          Value<String?> picture = const Value.absent(),
           DateTime? date,
           String? comment,
           bool? hidden}) =>
@@ -1030,7 +1003,7 @@ class CommentEntry extends DataClass implements Insertable<CommentEntry> {
         id: id ?? this.id,
         shaderId: shaderId ?? this.shaderId,
         userId: userId ?? this.userId,
-        picture: picture ?? this.picture,
+        picture: picture.present ? picture.value : this.picture,
         date: date ?? this.date,
         comment: comment ?? this.comment,
         hidden: hidden ?? this.hidden,
@@ -1099,7 +1072,7 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
     Expression<String>? id,
     Expression<String>? shaderId,
     Expression<String>? userId,
-    Expression<String?>? picture,
+    Expression<String>? picture,
     Expression<DateTime>? date,
     Expression<String>? comment,
     Expression<bool>? hidden,
@@ -1147,7 +1120,7 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (picture.present) {
-      map['picture'] = Variable<String?>(picture.value);
+      map['picture'] = Variable<String>(picture.value);
     }
     if (date.present) {
       map['date'] = Variable<DateTime>(date.value);
@@ -1184,41 +1157,41 @@ class $CommentTableTable extends CommentTable
   $CommentTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _shaderIdMeta = const VerificationMeta('shaderId');
   @override
-  late final GeneratedColumn<String?> shaderId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> shaderId = GeneratedColumn<String>(
       'shader_id', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL REFERENCES Shader(id) ON DELETE CASCADE');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _pictureMeta = const VerificationMeta('picture');
   @override
-  late final GeneratedColumn<String?> picture = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> picture = GeneratedColumn<String>(
       'picture', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
-  late final GeneratedColumn<DateTime?> date = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
       'date', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: true);
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
   final VerificationMeta _commentMeta = const VerificationMeta('comment');
   @override
-  late final GeneratedColumn<String?> comment = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> comment = GeneratedColumn<String>(
       'comment', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _hiddenMeta = const VerificationMeta('hidden');
   @override
-  late final GeneratedColumn<bool?> hidden = GeneratedColumn<bool?>(
+  late final GeneratedColumn<bool> hidden = GeneratedColumn<bool>(
       'hidden', aliasedName, false,
-      type: const BoolType(),
+      type: DriftSqlType.bool,
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (hidden IN (0, 1))',
       defaultValue: const Constant(false));
@@ -1278,8 +1251,23 @@ class $CommentTableTable extends CommentTable
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   CommentEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return CommentEntry.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CommentEntry(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      shaderId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}shader_id'])!,
+      userId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      picture: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}picture']),
+      date: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+      comment: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}comment'])!,
+      hidden: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}hidden'])!,
+    );
   }
 
   @override
@@ -1300,24 +1288,11 @@ class PlaylistEntry extends DataClass implements Insertable<PlaylistEntry> {
 
   /// The description of the playlist
   final String description;
-  PlaylistEntry(
+  const PlaylistEntry(
       {required this.id,
       required this.userId,
       required this.name,
       required this.description});
-  factory PlaylistEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return PlaylistEntry(
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      name: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      description: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}description'])!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1474,25 +1449,25 @@ class $PlaylistTableTable extends PlaylistTable
   $PlaylistTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
       'user_id', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
   @override
-  late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [id, userId, name, description];
   @override
@@ -1536,8 +1511,17 @@ class $PlaylistTableTable extends PlaylistTable
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   PlaylistEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return PlaylistEntry.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlaylistEntry(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      userId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      name: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      description: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+    );
   }
 
   @override
@@ -1556,20 +1540,8 @@ class PlaylistShaderEntry extends DataClass
 
   /// The order of the shader on the playlist
   final int order;
-  PlaylistShaderEntry(
+  const PlaylistShaderEntry(
       {required this.playlistId, required this.shaderId, required this.order});
-  factory PlaylistShaderEntry.fromData(Map<String, dynamic> data,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return PlaylistShaderEntry(
-      playlistId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}playlist_id'])!,
-      shaderId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}shader_id'])!,
-      order: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}order'])!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1706,23 +1678,23 @@ class $PlaylistShaderTableTable extends PlaylistShaderTable
   $PlaylistShaderTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _playlistIdMeta = const VerificationMeta('playlistId');
   @override
-  late final GeneratedColumn<String?> playlistId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> playlistId = GeneratedColumn<String>(
       'playlist_id', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL REFERENCES Playlist(id) ON DELETE CASCADE');
   final VerificationMeta _shaderIdMeta = const VerificationMeta('shaderId');
   @override
-  late final GeneratedColumn<String?> shaderId = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> shaderId = GeneratedColumn<String>(
       'shader_id', aliasedName, false,
-      type: const StringType(),
+      type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL REFERENCES Shader(id) ON DELETE CASCADE');
   final VerificationMeta _orderMeta = const VerificationMeta('order');
   @override
-  late final GeneratedColumn<int?> order = GeneratedColumn<int?>(
+  late final GeneratedColumn<int> order = GeneratedColumn<int>(
       'order', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: true);
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [playlistId, shaderId, order];
   @override
@@ -1762,8 +1734,15 @@ class $PlaylistShaderTableTable extends PlaylistShaderTable
   Set<GeneratedColumn> get $primaryKey => {playlistId, shaderId};
   @override
   PlaylistShaderEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return PlaylistShaderEntry.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlaylistShaderEntry(
+      playlistId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}playlist_id'])!,
+      shaderId: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}shader_id'])!,
+      order: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}order'])!,
+    );
   }
 
   @override
@@ -1790,30 +1769,13 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
 
   /// The update time
   final DateTime updateTime;
-  SyncEntry(
+  const SyncEntry(
       {required this.type,
       required this.target,
       required this.status,
       this.message,
       required this.creationTime,
       required this.updateTime});
-  factory SyncEntry.fromData(Map<String, dynamic> data, {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return SyncEntry(
-      type: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      target: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}target'])!,
-      status: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}status'])!,
-      message: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}message']),
-      creationTime: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}creation_time'])!,
-      updateTime: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}update_time'])!,
-    );
-  }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1821,7 +1783,7 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
     map['target'] = Variable<String>(target);
     map['status'] = Variable<String>(status);
     if (!nullToAbsent || message != null) {
-      map['message'] = Variable<String?>(message);
+      map['message'] = Variable<String>(message);
     }
     map['creation_time'] = Variable<DateTime>(creationTime);
     map['update_time'] = Variable<DateTime>(updateTime);
@@ -1870,14 +1832,14 @@ class SyncEntry extends DataClass implements Insertable<SyncEntry> {
           {String? type,
           String? target,
           String? status,
-          String? message,
+          Value<String?> message = const Value.absent(),
           DateTime? creationTime,
           DateTime? updateTime}) =>
       SyncEntry(
         type: type ?? this.type,
         target: target ?? this.target,
         status: status ?? this.status,
-        message: message ?? this.message,
+        message: message.present ? message.value : this.message,
         creationTime: creationTime ?? this.creationTime,
         updateTime: updateTime ?? this.updateTime,
       );
@@ -1940,7 +1902,7 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
     Expression<String>? type,
     Expression<String>? target,
     Expression<String>? status,
-    Expression<String?>? message,
+    Expression<String>? message,
     Expression<DateTime>? creationTime,
     Expression<DateTime>? updateTime,
   }) {
@@ -1984,7 +1946,7 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
       map['status'] = Variable<String>(status.value);
     }
     if (message.present) {
-      map['message'] = Variable<String?>(message.value);
+      map['message'] = Variable<String>(message.value);
     }
     if (creationTime.present) {
       map['creation_time'] = Variable<DateTime>(creationTime.value);
@@ -2017,35 +1979,35 @@ class $SyncTableTable extends SyncTable
   $SyncTableTable(this.attachedDatabase, [this._alias]);
   final VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
-  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
       'type', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _targetMeta = const VerificationMeta('target');
   @override
-  late final GeneratedColumn<String?> target = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> target = GeneratedColumn<String>(
       'target', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
-  late final GeneratedColumn<String?> status = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
       'status', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _messageMeta = const VerificationMeta('message');
   @override
-  late final GeneratedColumn<String?> message = GeneratedColumn<String?>(
+  late final GeneratedColumn<String> message = GeneratedColumn<String>(
       'message', aliasedName, true,
-      type: const StringType(), requiredDuringInsert: false);
+      type: DriftSqlType.string, requiredDuringInsert: false);
   final VerificationMeta _creationTimeMeta =
       const VerificationMeta('creationTime');
   @override
-  late final GeneratedColumn<DateTime?> creationTime =
-      GeneratedColumn<DateTime?>('creation_time', aliasedName, false,
-          type: const IntType(), requiredDuringInsert: true);
+  late final GeneratedColumn<DateTime> creationTime = GeneratedColumn<DateTime>(
+      'creation_time', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
   final VerificationMeta _updateTimeMeta = const VerificationMeta('updateTime');
   @override
-  late final GeneratedColumn<DateTime?> updateTime = GeneratedColumn<DateTime?>(
+  late final GeneratedColumn<DateTime> updateTime = GeneratedColumn<DateTime>(
       'update_time', aliasedName, false,
-      type: const IntType(), requiredDuringInsert: true);
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
       [type, target, status, message, creationTime, updateTime];
@@ -2103,8 +2065,21 @@ class $SyncTableTable extends SyncTable
   Set<GeneratedColumn> get $primaryKey => {type, target};
   @override
   SyncEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return SyncEntry.fromData(data,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncEntry(
+      type: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      target: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}target'])!,
+      status: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      message: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}message']),
+      creationTime: attachedDatabase.options.types.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}creation_time'])!,
+      updateTime: attachedDatabase.options.types
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}update_time'])!,
+    );
   }
 
   @override
@@ -2114,7 +2089,7 @@ class $SyncTableTable extends SyncTable
 }
 
 abstract class _$DriftStore extends GeneratedDatabase {
-  _$DriftStore(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+  _$DriftStore(QueryExecutor e) : super(e);
   late final $UserTableTable userTable = $UserTableTable(this);
   late final $ShaderTableTable shaderTable = $ShaderTableTable(this);
   late final $CommentTableTable commentTable = $CommentTableTable(this);
@@ -2128,7 +2103,8 @@ abstract class _$DriftStore extends GeneratedDatabase {
   late final PlaylistDao playlistDao = PlaylistDao(this as DriftStore);
   late final SyncDao syncDao = SyncDao(this as DriftStore);
   @override
-  Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
+  Iterable<TableInfo<Table, dynamic>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         userTable,
