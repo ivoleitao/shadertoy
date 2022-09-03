@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:shadertoy/shadertoy_api.dart';
@@ -53,16 +52,16 @@ abstract class ShadertoyHybrid implements ShadertoySite, ShadertoyWS {
   /// provided
   Future<FindShaderIdsResponse> findNewShaderIds(Set<String> storeShaderIds);
 
-  /// Synchronizes the [store] with the remote shadertoy data.
+  /// Synchronizes the [metadataStore] with the remote shadertoy data.
   ///
-  /// * [store]: A [ShadertoyStore] implementation
-  /// * [vault]: A [Vault] implementation to store shader and user assets
+  /// * [metadataStore]: A [ShadertoyStore] implementation to store the metadata
+  /// * [assetStore]: A [VaultStore] implementation to store shader and user assets
   /// * [mode]: Specifies the mode used on the synchronization, either full or newest
   /// * [concurrency]: Maximum number of simultaneous requests
   /// * [timeout]: Request timeout in seconds
   /// * [playlistIds]: The playlists to synchronize
   Future<void> rsync(
-      ShadertoyStore store, Vault<Uint8List> vault, HybridSyncMode mode,
+      ShadertoyStore metadataStore, VaultStore assetStore, HybridSyncMode mode,
       {SyncTaskRunner? runner,
       int? concurrency,
       int? timeout,
@@ -239,21 +238,22 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
 
   @override
   Future<void> rsync(
-      ShadertoyStore store, Vault<Uint8List> vault, HybridSyncMode mode,
+      ShadertoyStore metadataStore, VaultStore assetStore, HybridSyncMode mode,
       {SyncTaskRunner? runner,
       int? concurrency,
       int? timeout,
       List<String> playlistIds = const <String>[]}) async {
-    final shaderProcessor = ShaderSyncProcessor(this, store, vault,
+    final shaderProcessor = ShaderSyncProcessor(this, metadataStore, assetStore,
         runner: runner, concurrency: concurrency, timeout: timeout);
     final shaderSyncResult = await shaderProcessor.syncShaders(mode);
 
-    final userProcessor = UserSyncProcessor(this, store, vault,
+    final userProcessor = UserSyncProcessor(this, metadataStore, assetStore,
         runner: runner, concurrency: concurrency, timeout: timeout);
     final userSyncResult =
         await userProcessor.syncUsers(shaderSyncResult, mode);
 
-    final playlistProcessor = PlaylistSyncProcessor(this, store, vault,
+    final playlistProcessor = PlaylistSyncProcessor(
+        this, metadataStore, assetStore,
         runner: runner, concurrency: concurrency, timeout: timeout);
     await playlistProcessor.syncPlaylists(
         shaderSyncResult, userSyncResult, playlistIds);

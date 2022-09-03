@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
@@ -38,15 +37,15 @@ abstract class DatabaseCommand extends SyncCommand {
           defaultsTo: ['week', 'featured']);
   }
 
-  /// Abstracts the creation of a new [ShadertoyStore]
+  /// Abstracts the creation of a [ShadertoyStore]
   ///
   /// [path]: The path to the database file
-  ShadertoyStore newStore(String path);
+  ShadertoyStore newMetadataStore(String path);
 
-  /// Abstracts the creation of new [Vault]
+  /// Abstracts the creation of a [VaultStore]
   ///
   /// [path]: The path to the database file
-  Future<Vault<Uint8List>> newVault(String path);
+  Future<VaultStore> newAssetStore(String path);
 
   @override
   void call(ShadertoyHybrid client) async {
@@ -71,8 +70,8 @@ abstract class DatabaseCommand extends SyncCommand {
       return null;
     }
 
-    final store = newStore(p.join(fsPath, '$name.mdb'));
-    final vault = await newVault(p.join(fsPath, '$name.adb'));
+    final store = newMetadataStore(p.join(fsPath, '$name.mdb'));
+    final vault = await newAssetStore(p.join(fsPath, '$name.adb'));
     await client.rsync(store, vault, mode,
         runner: this,
         concurrency: concurrency,

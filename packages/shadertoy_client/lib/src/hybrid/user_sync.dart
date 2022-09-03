@@ -4,7 +4,7 @@ import 'package:glob/glob.dart';
 import 'package:pool/pool.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy/shadertoy_util.dart';
-import 'package:stash/stash_api.dart' show Vault;
+import 'package:stash/stash_api.dart' show Vault, VaultStore, VaultExtension;
 
 import 'hybrid_client.dart';
 import 'shader_sync.dart';
@@ -81,6 +81,9 @@ class UserSyncResult extends SyncResult<UserSyncTask> {
 
 /// The processor of user synchronization tasks
 class UserSyncProcessor extends SyncProcessor {
+  /// The name of the user media vault
+  static const userMediaVaultName = 'userMedia';
+
   /// A [Glob] defining the location of the local user media files
   static final Glob _userMediaFiles = Glob(
       '**/{${ShadertoyContext.userMediaPath}/*/{*.jpg,*.png,*.jpeg,*.gif},${ShadertoyContext.imgPath}/profile.jpg}');
@@ -88,15 +91,15 @@ class UserSyncProcessor extends SyncProcessor {
   /// The [UserSyncProcessor] constructur
   ///
   /// * [client]: The [ShadertoyHybridClient] instance
-  /// * [store]: The [ShadertoyStore] instance
-  /// * [vault]: The [Vault] instance
+  /// * [metadataStore]: A [ShadertoyStore] implementation to store the metadata
+  /// * [assetStore]: A [VaultStore] implementation to store shader and user assets
   /// * [runner]: The [SyncTaskRunner] that will be used in this processor
   /// * [concurrency]: The number of concurrent tasks
   /// * [timeout]: The maximum timeout waiting for a task completion
-  UserSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
-      Vault<Uint8List> vault,
+  UserSyncProcessor(ShadertoyHybridClient client, ShadertoyStore metadataStore,
+      VaultStore assetStore,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
-      : super(client, store, vault,
+      : super(client, metadataStore, assetStore,
             runner: runner, concurrency: concurrency, timeout: timeout);
 
   /// Creates a [FindUserResponse] with a error
@@ -123,7 +126,7 @@ class UserSyncProcessor extends SyncProcessor {
     return client.findUserById(userId).then((fuser) {
       final user = fuser.user;
       if (user != null) {
-        return store.saveUser(user).then(
+        return metadataStore.saveUser(user).then(
             (suser) => _getUserResponse(userId, fuser: fuser, response: suser));
       }
 
@@ -135,7 +138,7 @@ class UserSyncProcessor extends SyncProcessor {
   ///
   /// * [userId]: The user id
   Future<UserSyncTask> _syncUser(String userId) {
-    return store.findSyncById(SyncType.user, userId).then((fsync) {
+    return metadataStore.findSyncById(SyncType.user, userId).then((fsync) {
       final sync = fsync.sync;
       if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
         final preSync = sync != null
@@ -147,7 +150,7 @@ class UserSyncProcessor extends SyncProcessor {
                 status: SyncStatus.pending,
                 creationTime: DateTime.now());
 
-        return store.saveSync(preSync).then((ssync1) {
+        return metadataStore.saveSync(preSync).then((ssync1) {
           if (ssync1.ok) {
             return _addUser(userId).then((FindUserResponse fuser) {
               final posSync = fuser.ok
@@ -158,7 +161,7 @@ class UserSyncProcessor extends SyncProcessor {
                       message: fuser.error?.message,
                       updateTime: DateTime.now());
 
-              return store.saveSync(posSync).then((ssync2) {
+              return metadataStore.saveSync(posSync).then((ssync2) {
                 return Future.value(UserSyncTask(
                     _getUserResponse(userId, fuser: fuser, response: ssync2)));
               });
@@ -194,10 +197,11 @@ class UserSyncProcessor extends SyncProcessor {
   ///
   /// * [userId]: The user id
   Future<UserSyncTask> _deleteUser(String userId) {
-    return store
+    return metadataStore
         .findUserById(userId)
-        .then((fur) =>
-            store.deleteUserById(userId).then((value) => UserSyncTask(fur)))
+        .then((fur) => metadataStore
+            .deleteUserById(userId)
+            .then((value) => UserSyncTask(fur)))
         .catchError((e) => UserSyncTask(_getUserResponse(userId, e: e)));
   }
 
@@ -222,9 +226,9 @@ class UserSyncProcessor extends SyncProcessor {
   /// * [mode]: The synchronization mode
   Future<UserSyncResult> _syncUsers(
       ShaderSyncResult shaderSync, HybridSyncMode mode) async {
-    final storeSyncsResponse = await store.findSyncs(
+    final storeSyncsResponse = await metadataStore.findSyncs(
         type: SyncType.user, status: {SyncStatus.pending, SyncStatus.error});
-    final storeUserResponse = await store.findAllUsers();
+    final storeUserResponse = await metadataStore.findAllUsers();
 
     if (storeSyncsResponse.ok && storeUserResponse.ok) {
       final storeSyncs = storeSyncsResponse.syncs ?? [];
@@ -273,13 +277,15 @@ class UserSyncProcessor extends SyncProcessor {
 
   /// Stores a list of user pictures
   ///
+  /// * [vault]: The binary [Vault] where the files are stored
   /// * [pathMap]: A map where the key is the remote path and the value the local path
-  Future<List<DownloadSyncTask>> _addUserPicture(Map<String, String> pathMap) {
+  Future<List<DownloadSyncTask>> _addUserPicture(
+      Vault<Uint8List> vault, Map<String, String> pathMap) {
     final tasks = <Future<DownloadSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     pathMap.forEach((userPicturePath, userPictureFilePath) {
-      tasks.add(taskPool.withResource(() => syncMedia(SyncType.userAsset,
+      tasks.add(taskPool.withResource(() => syncMedia(vault, SyncType.userAsset,
           contextUser, userPicturePath, userPictureFilePath)));
     });
 
@@ -289,14 +295,15 @@ class UserSyncProcessor extends SyncProcessor {
 
   /// Deletes a list of user pictures
   ///
+  /// * [vault]: The binary [Vault] where the files are stored
   /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _deleteUserPicture(
-      Map<String, String> pathMap) {
+      Vault<Uint8List> vault, Map<String, String> pathMap) {
     final tasks = <Future<DownloadSyncTask>>[];
 
     pathMap.forEach((userPicturePath, userPictureFilePath) {
-      tasks.add(deleteMedia(SyncType.userAsset, contextUser, userPicturePath,
-          userPictureFilePath));
+      tasks.add(deleteMedia(vault, SyncType.userAsset, contextUser,
+          userPicturePath, userPictureFilePath));
     });
 
     return runner.process<DownloadSyncTask>(tasks,
@@ -309,7 +316,7 @@ class UserSyncProcessor extends SyncProcessor {
   /// * [mode]: The synchronization mode
   Future<DownloadSyncResult> _syncUserPictures(
       UserSyncResult userSync, HybridSyncMode mode) async {
-    final storeSyncsResponse = await store.findSyncs(
+    final storeSyncsResponse = await metadataStore.findSyncs(
         type: SyncType.userAsset,
         status: {SyncStatus.pending, SyncStatus.error});
 
@@ -318,8 +325,9 @@ class UserSyncProcessor extends SyncProcessor {
       final storeUserPicturesError =
           storeSyncs.map((fsr) => fsr.sync?.target).whereType<String>();
       final storeUserPictures = Set<String>.from(storeUserPicturesError);
-
-      for (final path in await listPaths(_userMediaFiles)) {
+      final userMediaVault =
+          await assetStore.vault<Uint8List>(name: userMediaVaultName);
+      for (final path in await listPaths(userMediaVault, _userMediaFiles)) {
         storeUserPictures.add(path);
       }
 
@@ -339,9 +347,10 @@ class UserSyncProcessor extends SyncProcessor {
         })
           path: path
       };
-      final added = await _addUserPicture(addUserPicturePaths)
+      final added = await _addUserPicture(userMediaVault, addUserPicturePaths)
           .then((value) => value.where((task) => task.response.ok).toList());
-      final removed = await _deleteUserPicture(removeUserPicturePaths)
+      final removed = await _deleteUserPicture(
+              userMediaVault, removeUserPicturePaths)
           .then((value) => value.where((task) => task.response.ok).toList());
 
       return DownloadSyncResult(added: added, removed: removed);

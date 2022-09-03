@@ -6,7 +6,7 @@ import 'package:pool/pool.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy/shadertoy_util.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
-import 'package:stash/stash_api.dart' show Vault;
+import 'package:stash/stash_api.dart' show Vault, VaultStore, VaultExtension;
 
 import 'hybrid_client.dart';
 import 'sync.dart';
@@ -138,7 +138,11 @@ class CommentTaskResult extends SyncResult<CommentsSyncTask> {
 }
 
 /// The processor of shader synchronization tasks
+///
 class ShaderSyncProcessor extends SyncProcessor {
+  /// The name of the shader media vault
+  static const shaderMediaVaultName = 'shaderMedia';
+
   /// A [Glob] defining the location of the local shader media files
   static final Glob _shaderMediaFiles =
       Glob('${ShadertoyContext.shaderMediaPath}/*.jpg');
@@ -150,15 +154,15 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// The [ShaderSyncProcessor] constructur
   ///
   /// * [client]: The [ShadertoyHybridClient] instance
-  /// * [store]: The [ShadertoyStore] instance
-  /// * [vault]: The [Vault] instance
+  /// * [metadataStore]: A [ShadertoyStore] implementation to store the metadata
+  /// * [assetStore]: A [VaultStore] implementation to store shader and user assets
   /// * [runner]: The [SyncTaskRunner] that will be used in this processor
   /// * [concurrency]: The number of concurrent tasks
   /// * [timeout]: The maximum timeout waiting for a task completion
-  ShaderSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
-      Vault<Uint8List> vault,
+  ShaderSyncProcessor(ShadertoyHybridClient client,
+      ShadertoyStore metadataStore, VaultStore assetStore,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
-      : super(client, store, vault,
+      : super(client, metadataStore, assetStore,
             runner: runner, concurrency: concurrency, timeout: timeout);
 
   /// Creates a [FindShaderResponse] with a error
@@ -188,7 +192,7 @@ class ShaderSyncProcessor extends SyncProcessor {
     return client.findShaderById(shaderId).then((fshader) {
       final shader = fshader.shader;
       if (shader != null) {
-        return store.saveShader(shader).then((sshader) =>
+        return metadataStore.saveShader(shader).then((sshader) =>
             _getShaderResponse(shaderId, fshader: fshader, response: sshader));
       }
 
@@ -200,7 +204,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   ///
   /// * [shaderId]: The shader id
   Future<ShaderSyncTask> _syncShader(String shaderId) {
-    return store.findSyncById(SyncType.shader, shaderId).then((fsync) {
+    return metadataStore.findSyncById(SyncType.shader, shaderId).then((fsync) {
       final sync = fsync.sync;
       if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
         final preSync = sync != null
@@ -212,7 +216,7 @@ class ShaderSyncProcessor extends SyncProcessor {
                 status: SyncStatus.pending,
                 creationTime: DateTime.now());
 
-        return store.saveSync(preSync).then((ssync1) {
+        return metadataStore.saveSync(preSync).then((ssync1) {
           if (ssync1.ok) {
             return _addShader(shaderId).then((FindShaderResponse fshader) {
               final posSync = fshader.ok
@@ -223,7 +227,7 @@ class ShaderSyncProcessor extends SyncProcessor {
                       message: fshader.error?.message,
                       updateTime: DateTime.now());
 
-              return store.saveSync(posSync).then((ssync2) {
+              return metadataStore.saveSync(posSync).then((ssync2) {
                 return Future.value(ShaderSyncTask(_getShaderResponse(shaderId,
                     fshader: fshader, response: ssync2)));
               });
@@ -259,9 +263,9 @@ class ShaderSyncProcessor extends SyncProcessor {
   ///
   /// * [shaderId]: The shader id
   Future<ShaderSyncTask> _deleteShader(String shaderId) {
-    return store
+    return metadataStore
         .findShaderById(shaderId)
-        .then((fsr) => store
+        .then((fsr) => metadataStore
             .deleteShaderById(shaderId)
             .then((value) => ShaderSyncTask(fsr)))
         .catchError((e) => ShaderSyncTask(_getShaderResponse(shaderId, e: e)));
@@ -286,9 +290,9 @@ class ShaderSyncProcessor extends SyncProcessor {
   ///
   /// * [mode]: The sync mode
   Future<ShaderSyncResult> _syncShaders(HybridSyncMode mode) async {
-    final storeSyncsResponse = await store.findSyncs(
+    final storeSyncsResponse = await metadataStore.findSyncs(
         type: SyncType.shader, status: {SyncStatus.pending, SyncStatus.error});
-    final storeShadersResponse = await store.findAllShaders();
+    final storeShadersResponse = await metadataStore.findAllShaders();
 
     if (storeSyncsResponse.ok && storeShadersResponse.ok) {
       final storeSyncs = storeSyncsResponse.syncs ?? [];
@@ -399,8 +403,9 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// * [comments]: The comments to save
   Future<FindCommentsResponse> _addComments(
       String shaderId, List<Comment> comments) {
-    return store.saveShaderComments(shaderId, comments).then((scomment) =>
-        _getCommentsResponse(shaderId, comments, response: scomment));
+    return metadataStore.saveShaderComments(shaderId, comments).then(
+        (scomment) =>
+            _getCommentsResponse(shaderId, comments, response: scomment));
   }
 
   /// Deletes a list of [shaderId] comments
@@ -409,7 +414,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// * [comments]: The comments to save
   Future<CommentsSyncTask> _deleteComments(
       String shaderId, List<Comment> comments) {
-    return store.deleteShaderComments(shaderId).then(
+    return metadataStore.deleteShaderComments(shaderId).then(
         (DeleteShaderCommentsResponse dComments) => CommentsSyncTask(
             _getCommentsResponse(shaderId, comments, response: dComments)));
   }
@@ -420,7 +425,9 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// * [comments]: The comment
   Future<CommentsSyncTask> _syncComments(
       String shaderId, List<Comment> comments) {
-    return store.findSyncById(SyncType.shaderComments, shaderId).then((fsync) {
+    return metadataStore
+        .findSyncById(SyncType.shaderComments, shaderId)
+        .then((fsync) {
       final sync = fsync.sync;
       if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
         final preSync = sync != null
@@ -432,7 +439,7 @@ class ShaderSyncProcessor extends SyncProcessor {
                 status: SyncStatus.pending,
                 creationTime: DateTime.now());
 
-        return store.saveSync(preSync).then((ssync1) {
+        return metadataStore.saveSync(preSync).then((ssync1) {
           if (ssync1.ok) {
             return _addComments(shaderId, comments)
                 .then((FindCommentsResponse fcomments) {
@@ -444,7 +451,7 @@ class ShaderSyncProcessor extends SyncProcessor {
                       message: fcomments.error?.message,
                       updateTime: DateTime.now());
 
-              return store.saveSync(posSync).then((ssync2) {
+              return metadataStore.saveSync(posSync).then((ssync2) {
                 return Future.value(CommentsSyncTask(_getCommentsResponse(
                     shaderId, comments,
                     fcomments: fcomments, response: ssync2)));
@@ -460,7 +467,7 @@ class ShaderSyncProcessor extends SyncProcessor {
       return Future.value(CommentsSyncTask(
           _getCommentsResponse(shaderId, comments, response: fsync)));
     }).catchError((e) =>
-        CommentsSyncTask(_getCommentsResponse(shaderId, comments, e: e)));
+            CommentsSyncTask(_getCommentsResponse(shaderId, comments, e: e)));
   }
 
   /// Saves a map of shader comments
@@ -505,7 +512,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// * [mode]: The synchronization mode
   Future<CommentTaskResult> _syncShaderComments(
       ShaderSyncResult shaderSync, HybridSyncMode mode) async {
-    final storeResponse = await store.findAllComments();
+    final storeResponse = await metadataStore.findAllComments();
     if (storeResponse.ok) {
       final storeComments = storeResponse.comments ?? [];
       final storeCommentMap = {
@@ -580,15 +587,20 @@ class ShaderSyncProcessor extends SyncProcessor {
 
   /// Stores a list of shader pictures
   ///
+  /// * [vault]: The binary [Vault] where the files are stored
   /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _addShaderPictures(
-      Map<String, String> pathMap) {
+      Vault<Uint8List> vault, Map<String, String> pathMap) {
     final tasks = <Future<DownloadSyncTask>>[];
     final taskPool = Pool(concurrency, timeout: Duration(seconds: timeout));
 
     pathMap.forEach((shaderPicturePath, shaderPictureFilePath) {
-      tasks.add(taskPool.withResource(() => syncMedia(SyncType.shaderAsset,
-          contextShader, shaderPicturePath, shaderPictureFilePath)));
+      tasks.add(taskPool.withResource(() => syncMedia(
+          vault,
+          SyncType.shaderAsset,
+          contextShader,
+          shaderPicturePath,
+          shaderPictureFilePath)));
     });
 
     return runner.process<DownloadSyncTask>(tasks,
@@ -597,13 +609,14 @@ class ShaderSyncProcessor extends SyncProcessor {
 
   /// Deletes a list of shader pictures
   ///
+  /// * [vault]: The binary [Vault] where the files are stored
   /// * [pathMap]: A map where the key is the remote path and the value the local path
   Future<List<DownloadSyncTask>> _deleteShaderPictures(
-      Map<String, String> pathMap) {
+      Vault<Uint8List> vault, Map<String, String> pathMap) {
     final tasks = <Future<DownloadSyncTask>>[];
 
     pathMap.forEach((shaderPicturePath, shaderPictureFilePath) {
-      tasks.add(deleteMedia(SyncType.shaderAsset, contextShader,
+      tasks.add(deleteMedia(vault, SyncType.shaderAsset, contextShader,
           shaderPicturePath, shaderPictureFilePath));
     });
 
@@ -617,7 +630,7 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// * [mode]: The synchronization mode
   Future<DownloadSyncResult> _syncShaderPictures(
       ShaderSyncResult shaderSync, HybridSyncMode mode) async {
-    final storeSyncsResponse = await store.findSyncs(
+    final storeSyncsResponse = await metadataStore.findSyncs(
         type: SyncType.shaderAsset,
         status: {SyncStatus.pending, SyncStatus.error});
 
@@ -627,13 +640,16 @@ class ShaderSyncProcessor extends SyncProcessor {
           storeSyncs.map((fsr) => fsr.sync?.target).whereType<String>();
       final storeShaderIds = <String>{};
       final shaderMediaPath = ShadertoyContext.shaderMediaPath;
-      for (final path in await listPaths(_shaderMediaFiles)) {
+      final shaderMediaVault =
+          await assetStore.vault<Uint8List>(name: shaderMediaVaultName);
+      for (final path in await listPaths(shaderMediaVault, _shaderMediaFiles)) {
         storeShaderIds
             .add(fileNameToShaderId(p.basenameWithoutExtension(path)));
       }
 
       final storeShaderInputSources = <String>{};
-      for (final path in await listPaths(_shaderInputSourceFiles)) {
+      for (final path
+          in await listPaths(shaderMediaVault, _shaderInputSourceFiles)) {
         storeShaderInputSources.add(path);
       }
 
@@ -690,9 +706,10 @@ class ShaderSyncProcessor extends SyncProcessor {
         removeShaderPaths.putIfAbsent(path, () => path);
       }
 
-      final added = await _addShaderPictures(addShaderPaths)
+      final added = await _addShaderPictures(shaderMediaVault, addShaderPaths)
           .then((value) => value.where((task) => task.response.ok).toList());
-      final removed = await _deleteShaderPictures(removeShaderPaths)
+      final removed = await _deleteShaderPictures(
+              shaderMediaVault, removeShaderPaths)
           .then((value) => value.where((task) => task.response.ok).toList());
 
       return DownloadSyncResult(added: added, removed: removed);

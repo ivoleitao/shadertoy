@@ -92,10 +92,10 @@ abstract class SyncProcessor {
   final ShadertoyHybridClient client;
 
   /// The [ShadertoyStore] instance
-  final ShadertoyStore store;
+  final ShadertoyStore metadataStore;
 
-  /// The [Vault] instance
-  final Vault<Uint8List> vault;
+  /// The [VaultStore] instance
+  final VaultStore assetStore;
 
   /// The [SyncTaskRunner] that will be used in this processor
   final SyncTaskRunner runner;
@@ -109,12 +109,12 @@ abstract class SyncProcessor {
   /// The [SyncProcessor] constructur
   ///
   /// * [client]: The [ShadertoyHybridClient] instance
-  /// * [store]: The [ShadertoyStore] instance
-  /// * [vault]: The [Vault] instance
+  /// * [metadataStore]: A [ShadertoyStore] implementation to store the metadata
+  /// * [assetStore]: A [VaultStore] implementation to store shader and user assets
   /// * [runner]: The [SyncTaskRunner] that will be used in this processor
   /// * [concurrency]: The number of concurrent tasks
   /// * [timeout]: The maximum timeout waiting for a task completion
-  SyncProcessor(this.client, this.store, this.vault,
+  SyncProcessor(this.client, this.metadataStore, this.assetStore,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
       : runner = runner ?? const DefaultTaskRunner(),
         concurrency = concurrency ?? 10,
@@ -122,9 +122,10 @@ abstract class SyncProcessor {
 
   /// Lists the files on a vault according with a [Glob] expression
   ///
+  /// * [vault]: The binary [Vault] where the files are stored
   /// * [glob]: The glob class
   @protected
-  Future<Iterable<String>> listPaths(Glob glob) {
+  Future<Iterable<String>> listPaths(Vault<Uint8List> vault, Glob glob) {
     return vault.keys.then((keys) {
       return keys.where((key) => glob.matches(key));
     });
@@ -132,8 +133,10 @@ abstract class SyncProcessor {
 
   /// Reads the bytes from the [Vault] creates a [DownloadFileResponse] from them
   ///
+  /// * [vault]: The binary [Vault] where the files are stored
   /// * [mediaFilePath]: The media file path
-  Future<DownloadFileResponse> _getDownloadFileResponse(String mediaFilePath) {
+  Future<DownloadFileResponse> _getDownloadFileResponse(
+      Vault<Uint8List> vault, String mediaFilePath) {
     return vault
         .get(mediaFilePath)
         .then((bytes) => DownloadFileResponse(bytes: bytes));
@@ -159,13 +162,14 @@ abstract class SyncProcessor {
 
   /// Creates a media file on a [FileSystem]
   ///
+  /// * [vault]: The binary [Vault] where the files are stored
   /// * [context]: The context
   /// * [mediaPath]: The media path
   /// * [mediaFilePath]: The media file path
-  Future<DownloadFileResponse> _addMedia(
-      String context, String mediaPath, String mediaFilePath) {
+  Future<DownloadFileResponse> _addMedia(Vault<Uint8List> vault, String context,
+      String mediaPath, String mediaFilePath) {
     return vault.containsKey(mediaFilePath).then((exists) => exists
-        ? _getDownloadFileResponse(mediaFilePath)
+        ? _getDownloadFileResponse(vault, mediaFilePath)
         : client.downloadMedia('/$mediaPath').then((apiFile) {
             final bytes = apiFile.bytes;
             final error = apiFile.error;
@@ -181,9 +185,17 @@ abstract class SyncProcessor {
   }
 
   @protected
-  Future<DownloadSyncTask> syncMedia(SyncType syncType, String context,
-      String mediaPath, String mediaFilePath) {
-    return store.findSyncById(syncType, mediaPath).then((fsync) {
+
+  /// Syncs a media file store on a [Vault]
+  ///
+  /// * [vault]: The binary [Vault] where the files are stored
+  /// * [syncType]: The sync type
+  /// * [context]: The context
+  /// * [mediaPath]: The media path
+  /// * [mediaFilePath]: The media file path
+  Future<DownloadSyncTask> syncMedia(Vault<Uint8List> vault, SyncType syncType,
+      String context, String mediaPath, String mediaFilePath) {
+    return metadataStore.findSyncById(syncType, mediaPath).then((fsync) {
       final sync = fsync.sync;
       if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
         final preSync = sync != null
@@ -194,9 +206,9 @@ abstract class SyncProcessor {
                 target: mediaPath,
                 status: SyncStatus.pending,
                 creationTime: DateTime.now());
-        return store.saveSync(preSync).then((ssync1) {
+        return metadataStore.saveSync(preSync).then((ssync1) {
           if (ssync1.ok) {
-            return _addMedia(context, mediaPath, mediaFilePath)
+            return _addMedia(vault, context, mediaPath, mediaFilePath)
                 .then((DownloadFileResponse dfile) {
               final posSync = dfile.ok
                   ? preSync.copyWith(
@@ -206,7 +218,7 @@ abstract class SyncProcessor {
                       message: dfile.error?.message,
                       updateTime: DateTime.now());
 
-              return store.saveSync(posSync).then((ssync2) {
+              return metadataStore.saveSync(posSync).then((ssync2) {
                 return Future.value(DownloadSyncTask(_getDownloadResponse(
                     context, mediaPath,
                     dfile: dfile, response: ssync2)));
@@ -226,17 +238,22 @@ abstract class SyncProcessor {
 
   /// Deletes a media file from a [FileSystem]
   ///
+  /// * [vault]: The binary [Vault] where the files are stored
   /// * [syncType]: The [SyncType]
   /// * [context]: An optional context
   /// * [mediaPath]: The media path
   /// * [mediaFilePath]: The media file path
   @protected
-  Future<DownloadSyncTask> deleteMedia(SyncType syncType, String context,
-      String mediaPath, String mediaFilePath) {
+  Future<DownloadSyncTask> deleteMedia(
+      Vault<Uint8List> vault,
+      SyncType syncType,
+      String context,
+      String mediaPath,
+      String mediaFilePath) {
     return vault.containsKey(mediaFilePath).then((exists) => exists
-        ? _getDownloadFileResponse(mediaFilePath)
+        ? _getDownloadFileResponse(vault, mediaFilePath)
             .then((dfr) => vault.remove(mediaFilePath).then((_) {
-                  return store.deleteSyncById(syncType, mediaPath).then(
+                  return metadataStore.deleteSyncById(syncType, mediaPath).then(
                       (dsync) => DownloadSyncTask(_getDownloadResponse(
                           context, mediaPath,
                           response: dsync)));

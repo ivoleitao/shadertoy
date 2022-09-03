@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +7,6 @@ import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 import 'package:shadertoy_client/src/site/site_parser.dart';
 import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
-import 'package:stash/stash_api.dart';
 import 'package:stash_memory/stash_memory.dart';
 import 'package:test/test.dart';
 
@@ -775,8 +773,7 @@ void main() {
         ..addShadersRoute(playlistShaders, siteOptions);
 
       final metadataStore = newShadertoySqliteStore();
-      final assetStore =
-          await newMemoryVaultStore().then((store) => store.vault<Uint8List>());
+      final assetStore = await newMemoryVaultStore();
       final api = newClient(adapter, siteOptions: siteOptions);
 
       // act
@@ -806,86 +803,10 @@ void main() {
           fsr.sync?.type == SyncType.userAsset);
       expect(userPictureSyncs.length, userMediaMap.length);
 
-      /*
-      final shaderPaths = {
-        'shaders/fractal_explorer_multi_res.json',
-        'shaders/rave_fractal.json',
-        'shaders/rhodium_fractalscape.json',
-        'shaders/fractal_explorer_dof.json',
-        'shaders/kleinian_variations.json',
-        'shaders/simplex_noise_fire_milkdrop_beat.json',
-        'shaders/fight_them_all_fractal.json',
-        'shaders/trilobyte_julia_fractal_smasher.json',
-        'shaders/rapping_fractal.json',
-        'shaders/trilobyte_bipolar_daisy_complex.json',
-        'shaders/smashing_fractals.json',
-        'shaders/trilobyte_multi_turing_pattern.json',
-        'shaders/surfer_boy.json',
-        'shaders/alien_corridor.json',
-        'shaders/turn_burn.json',
-        'shaders/ice_primitives.json',
-        'shaders/basic_montecarlo.json',
-        'shaders/crossy_penguin.json',
-        'shaders/full_scene_radial_blur.json',
-        'shaders/gargantua_with_hdr_bloom.json',
-        'shaders/blueprint_of_architekt.json',
-        'shaders/three_pass_dof.json',
-        'shaders/elephant.json',
-        'shaders/multiple_transparency.json'
-      };
-
-      final shaders = [
-        for (var shader in shaderPaths) await shaderFixture(shader)
-      ];
-      final commentsReponseMap = {
-        for (var shader in shaders)
-          shader.info.id:
-              await commentsResponseFixture('comment/${shader.info.id}.json')
-      };
-      final shaderMedia = {
-        for (var shader in shaders)
-          for (var path in shader.picturePaths())
-            path: await binaryFixture(path)
-      };
-
-      final userIds = {...shaders.map((s) => s.info.userId)};
-      final userResponseMap = {
-        for (var userId in userIds)
-          userId: await textFixture('user/$userId.html')
-      };
-      final userMedia = {
-        for (var userId in userIds)
-          'media/users/$userId/profile.png':
-              await binaryFixture('media/users/$userId/profile.png')
-      };
-
-      final results1 = await textFixture('results/sync_step_1.html');
-      final results2 = await textFixture('results/sync_step_2.html');
-      final playlist = await textFixture('playlist/week_by_mu6k.html');
-      final playlist1 = await textFixture('playlist/week_24_page_1.html');
-      final playlist2 = await textFixture('playlist/week_24_page_2.html');
-      final adapter = newAdapter()
-        ..addResultsRoute(results1, siteOptions)
-        ..addResultsRoute(results2, siteOptions, from: 12, num: 12)
-        ..addPlaylistRoute(playlist, playlistId, siteOptions)
-        ..addPlaylistShadersRoute(playlist1, playlistId, siteOptions,
-            from: 0, num: playlistNum)
-        ..addPlaylistShadersRoute(playlist2, playlistId, siteOptions,
-            from: siteOptions.pagePlaylistShaderCount, num: playlistNum)
-        ..addShaderRouteList(shaders, siteOptions)
-        ..addCommentsRouteMap(commentsReponseMap, siteOptions)
-        ..addDownloadMediaMap(shaderMedia, siteOptions)
-        ..addUserRouteMap(userResponseMap, siteOptions)
-        ..addDownloadMediaMap(userMedia, siteOptions);
-      final api = newClient(adapter, siteOptions: siteOptions);
-      final store = newShadertoySqliteStore();
-      final vault =
-          await newMemoryVaultStore().then((store) => store.vault<Uint8List>());
-      // act
-      await api
-          .rsync(store, vault, HybridSyncMode.full, playlistIds: [playlistId]);
-      // assert
-      */
+      final playlistSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.playlist);
+      expect(playlistSyncs.length, 1);
     }, timeout: Timeout(Duration(days: 1)));
   });
 

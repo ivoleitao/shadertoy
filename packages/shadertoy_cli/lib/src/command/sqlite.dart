@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:path/path.dart' as p;
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
 import 'package:stash/stash_api.dart';
@@ -20,16 +18,12 @@ class SqliteCommand extends DatabaseCommand {
   SqliteCommand();
 
   @override
-  ShadertoyStore newStore(String path) {
+  ShadertoyStore newMetadataStore(String path) {
     return newShadertoySqliteStore(file: File(path), logStatements: verbose);
   }
 
   @override
-  Future<Vault<Uint8List>> newVault(String path) {
-    final file = File(path);
-    final name = p.basenameWithoutExtension(path);
-
-    return newSqliteLocalVaultStore(file: file)
-        .then((store) => store.vault<Uint8List>(name: name));
+  Future<VaultStore> newAssetStore(String path) {
+    return newSqliteLocalVaultStore(file: File(path));
   }
 }

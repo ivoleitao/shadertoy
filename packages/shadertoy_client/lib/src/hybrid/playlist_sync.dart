@@ -1,10 +1,9 @@
 import 'dart:collection';
-import 'dart:typed_data';
 
 import 'package:pool/pool.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/src/hybrid/user_sync.dart';
-import 'package:stash/stash_api.dart' show Vault;
+import 'package:stash/stash_api.dart' show VaultStore;
 
 import 'hybrid_client.dart';
 import 'shader_sync.dart';
@@ -62,15 +61,15 @@ class PlaylistSyncProcessor extends SyncProcessor {
   /// The [PlaylistSyncProcessor] constructur
   ///
   /// * [client]: The [ShadertoyHybridClient] instance
-  /// * [store]: The [ShadertoyStore] instance
-  /// * [vault]: The [Vault] instance
+  /// * [metadataStore]: A [ShadertoyStore] implementation to store the metadata
+  /// * [assetStore]: A [VaultStore] implementation to store shader and user assets
   /// * [runner]: The [SyncTaskRunner] that will be used in this processor
   /// * [concurrency]: The number of concurrent tasks
   /// * [timeout]: The maximum timeout waiting for a task completion
-  PlaylistSyncProcessor(ShadertoyHybridClient client, ShadertoyStore store,
-      Vault<Uint8List> vault,
+  PlaylistSyncProcessor(ShadertoyHybridClient client,
+      ShadertoyStore metadataStore, VaultStore assetStore,
       {SyncTaskRunner? runner, int? concurrency, int? timeout})
-      : super(client, store, vault,
+      : super(client, metadataStore, assetStore,
             runner: runner, concurrency: concurrency, timeout: timeout);
 
   /// Creates a [FindPlaylistResponse] with a error
@@ -99,7 +98,7 @@ class PlaylistSyncProcessor extends SyncProcessor {
   /// * [shaderIds]: The playlist shaders
   Future<FindPlaylistResponse> _addPlaylist(
       Playlist playlist, List<String> shaderIds) {
-    return store.savePlaylist(playlist, shaderIds: shaderIds).then(
+    return metadataStore.savePlaylist(playlist, shaderIds: shaderIds).then(
         (splaylist) => _getPlaylistResponse(playlist, response: splaylist));
   }
 
@@ -110,7 +109,9 @@ class PlaylistSyncProcessor extends SyncProcessor {
   Future<PlaylistSyncTask> _syncPlaylist(
       Playlist playlist, List<String> shaderIds) {
     final playlistId = playlist.id;
-    return store.findSyncById(SyncType.playlist, playlistId).then((fsync) {
+    return metadataStore
+        .findSyncById(SyncType.playlist, playlistId)
+        .then((fsync) {
       final sync = fsync.sync;
       if (fsync.ok || fsync.error?.code == ErrorCode.notFound) {
         final preSync = sync != null
@@ -122,7 +123,7 @@ class PlaylistSyncProcessor extends SyncProcessor {
                 status: SyncStatus.pending,
                 creationTime: DateTime.now());
 
-        return store.saveSync(preSync).then((ssync1) {
+        return metadataStore.saveSync(preSync).then((ssync1) {
           if (ssync1.ok) {
             return _addPlaylist(playlist, shaderIds)
                 .then((FindPlaylistResponse fplaylist) {
@@ -134,7 +135,7 @@ class PlaylistSyncProcessor extends SyncProcessor {
                       message: fplaylist.error?.message,
                       updateTime: DateTime.now());
 
-              return store.saveSync(posSync).then((ssync2) {
+              return metadataStore.saveSync(posSync).then((ssync2) {
                 return Future.value(PlaylistSyncTask(_getPlaylistResponse(
                     playlist,
                     fplaylist: fplaylist,
@@ -151,7 +152,7 @@ class PlaylistSyncProcessor extends SyncProcessor {
       return Future.value(
           PlaylistSyncTask(_getPlaylistResponse(playlist, response: fsync)));
     }).catchError(
-        (e) => PlaylistSyncTask(_getPlaylistResponse(playlist, e: e)));
+            (e) => PlaylistSyncTask(_getPlaylistResponse(playlist, e: e)));
   }
 
   /// Saves a list of playlists with [playlistIds]
@@ -176,9 +177,9 @@ class PlaylistSyncProcessor extends SyncProcessor {
   /// * [playlist]: The playlist
   Future<PlaylistSyncTask> _deletePlaylist(Playlist playlist) {
     final playlistId = playlist.id;
-    return store
+    return metadataStore
         .findPlaylistById(playlistId)
-        .then((fpr) => store
+        .then((fpr) => metadataStore
             .deletePlaylistById(playlistId)
             .then((value) => PlaylistSyncTask(fpr)))
         .catchError(
@@ -231,10 +232,10 @@ class PlaylistSyncProcessor extends SyncProcessor {
   /// * [playlistIds]: The list playlist ids
   Future<PlaylistSyncResult> _syncPlaylists(ShaderSyncResult shaderSync,
       UserSyncResult userSync, List<String> playlistIds) async {
-    final storeSyncsResponse = await store.findSyncs(
+    final storeSyncsResponse = await metadataStore.findSyncs(
         type: SyncType.playlist,
         status: {SyncStatus.pending, SyncStatus.error});
-    final storePlaylistResponse = await store.findAllPlaylists();
+    final storePlaylistResponse = await metadataStore.findAllPlaylists();
 
     if (storeSyncsResponse.ok && storePlaylistResponse.ok) {
       final storeSyncs = storeSyncsResponse.syncs ?? [];
