@@ -1,7 +1,6 @@
 import 'package:args/command_runner.dart';
 
 import 'command/comments.dart';
-import 'command/image.dart';
 import 'command/playlist.dart';
 import 'command/preview.dart';
 import 'command/search.dart';
@@ -17,7 +16,6 @@ Future run(List<String> args) async {
     ..addCommand(UserCommand())
     ..addCommand(ShaderCommand())
     ..addCommand(PreviewCommand())
-    ..addCommand(ImageCommand())
     ..addCommand(CommentsCommand())
     ..addCommand(PlaylistCommand())
     ..addCommand(SearchCommand())

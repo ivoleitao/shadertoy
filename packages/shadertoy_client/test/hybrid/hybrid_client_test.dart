@@ -781,58 +781,56 @@ void main() {
           playlistIds: [playlistId]);
 
       // assert 1
-      final allSyncs = await metadataStore.findAllSyncs();
+      var allSyncs = await metadataStore.findAllSyncs();
       expect(allSyncs, isNotNull);
       expect(allSyncs.error, isNull);
 
-      final syncs = allSyncs.syncs ?? [];
+      var syncs = allSyncs.syncs ?? [];
 
-      final shaderSyncs = syncs.where((fsr) =>
+      var shaderSyncs = syncs.where((fsr) =>
           fsr.sync?.status == SyncStatus.ok &&
           fsr.sync?.type == SyncType.shader);
       expect(shaderSyncs.length, 36);
-      final shaderPictureSyncs = syncs.where((fsr) =>
+      var shaderPictureSyncs = syncs.where((fsr) =>
           fsr.sync?.status == SyncStatus.ok &&
           fsr.sync?.type == SyncType.shaderAsset);
-      expect(shaderPictureSyncs.length, shaderMediaMap_1.length);
+      expect(shaderPictureSyncs.length, 55);
 
-      final userSyncs = syncs.where((fsr) =>
+      var userSyncs = syncs.where((fsr) =>
           fsr.sync?.status == SyncStatus.ok && fsr.sync?.type == SyncType.user);
       expect(userSyncs.length, 22);
-      final userPictureSyncs = syncs.where((fsr) =>
+      var userPictureSyncs = syncs.where((fsr) =>
           fsr.sync?.status == SyncStatus.ok &&
           fsr.sync?.type == SyncType.userAsset);
-      expect(userPictureSyncs.length, userMediaMap_1.length);
+      expect(userPictureSyncs.length, 17);
 
-      final playlistSyncs = syncs.where((fsr) =>
+      var playlistSyncs = syncs.where((fsr) =>
           fsr.sync?.status == SyncStatus.ok &&
           fsr.sync?.type == SyncType.playlist);
       expect(playlistSyncs.length, 1);
 
-      final actualShaderIds = await metadataStore.findAllShaderIds();
+      var actualShaderIds = await metadataStore.findAllShaderIds();
       expect((actualShaderIds.ids ?? []).length, 36);
 
-      final actualShaderPictures = await assetStore.keys('shaderMedia');
+      var actualShaderPictures = await assetStore.keys('shaderMedia');
       expect(actualShaderPictures.length, 55);
 
-      final actualUserIds = await metadataStore.findAllUserIds();
+      var actualUserIds = await metadataStore.findAllUserIds();
       expect((actualUserIds.ids ?? []).length, 22);
 
-      final actualUserPictures = await assetStore.keys('userMedia');
+      var actualUserPictures = await assetStore.keys('userMedia');
       expect(actualUserPictures.length, 17);
 
-      final actualPlaylist = await metadataStore.findPlaylistById(playlistId);
+      var actualPlaylist = await metadataStore.findPlaylistById(playlistId);
       expect(actualPlaylist.playlist, isNotNull);
 
-      final actualPlaylistShaderIds =
+      var actualPlaylistShaderIds =
           await metadataStore.findAllShaderIdsByPlaylistId(playlistId);
       expect((actualPlaylistShaderIds.ids ?? []).length, 36);
 
       // prepare 2
-
-      print('=====');
-
-      final shaders_2 = await shaderListFixtures(['sync/results_36_12.json']);
+      final shaders_2 = await shaderListFixtures(
+          ['sync/results_24_12.json', 'sync/results_36_12.json']);
 
       final shaderCommentMap_2 = {
         for (var shader in shaders_2)
@@ -889,6 +887,52 @@ void main() {
           playlistIds: [playlistId]);
 
       // assert 2
+      allSyncs = await metadataStore.findAllSyncs();
+      expect(allSyncs, isNotNull);
+      expect(allSyncs.error, isNull);
+
+      syncs = allSyncs.syncs ?? [];
+
+      shaderSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.shader);
+      expect(shaderSyncs.length, 37);
+      shaderPictureSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.shaderAsset);
+      expect(shaderPictureSyncs.length, 53);
+
+      userSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok && fsr.sync?.type == SyncType.user);
+      expect(userSyncs.length, 23);
+      userPictureSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.userAsset);
+      expect(userPictureSyncs.length, 18);
+
+      playlistSyncs = syncs.where((fsr) =>
+          fsr.sync?.status == SyncStatus.ok &&
+          fsr.sync?.type == SyncType.playlist);
+      expect(playlistSyncs.length, 1);
+
+      actualShaderIds = await metadataStore.findAllShaderIds();
+      expect((actualShaderIds.ids ?? []).length, 37);
+
+      actualShaderPictures = await assetStore.keys('shaderMedia');
+      expect(actualShaderPictures.length, 53);
+
+      actualUserIds = await metadataStore.findAllUserIds();
+      expect((actualUserIds.ids ?? []).length, 23);
+
+      actualUserPictures = await assetStore.keys('userMedia');
+      expect(actualUserPictures.length, 18);
+
+      actualPlaylist = await metadataStore.findPlaylistById(playlistId);
+      expect(actualPlaylist.playlist, isNotNull);
+
+      actualPlaylistShaderIds =
+          await metadataStore.findAllShaderIdsByPlaylistId(playlistId);
+      expect((actualPlaylistShaderIds.ids ?? []).length, 35);
     });
   });
 

@@ -24,3 +24,5 @@ GET {{baseUrl}}/{{resultsPath}}?query=raymarch&sort=love&filter=multipass&from=0
 GET {{baseUrl}}/{{resultsPath}}?query=raymarch&sort=love&filter=multipass&from=12&num=12
 ###
 GET {{baseUrl}}/{{resultsPath}}?query=raymarch&sort=love&filter=multipass&from=24&num=12
+###
+GET {{baseUrl}}/{{resultsPath}}??query=&sort=hot&from=72&num=12

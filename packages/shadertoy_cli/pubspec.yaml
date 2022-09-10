@@ -21,8 +21,6 @@ dependencies:
   shadertoy: ^2.0.3
   shadertoy_client: ^2.0.3
   shadertoy_sqlite: ^2.0.3
-  shadertoy_wgpu:
-    path: ../shadertoy_wgpu
 
 dev_dependencies:
   lints: ^2.0.0
