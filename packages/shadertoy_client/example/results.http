@@ -11,7 +11,11 @@ GET {{baseUrl}}/{{resultsPath}}?query=&sort=newest&from=12&num=12
 ###
 GET {{baseUrl}}/{{resultsPath}}?query=&sort=newest&from=24&num=12
 ###
+GET {{baseUrl}}/{{resultsPath}}?query=&sort=hot&from=36&num=12
+###
 GET {{baseUrl}}/{{resultsPath}}?query=%20fractal&sort=popular&filter=multipass&filter=musicstream
+###
+GET {{baseUrl}}/{{resultsPath}}?query=ice&sort=popular&filter=soundoutput&from=48&num=12
 ###
 GET {{baseUrl}}/{{resultsPath}}?query=raymarch&sort=love&filter=vr&filter=soundoutput&filter=multipass
 ###

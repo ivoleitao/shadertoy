@@ -661,47 +661,47 @@ void main() {
 
   group('Sync', () {
     test('Full Mode', () async {
-      // prepare
+      // prepare 1
       final siteOptions = ShadertoySiteOptions();
 
-      final shaders = await shaderListFixtures([
+      final shaders_1 = await shaderListFixtures([
         'results/results_0_12.json',
         'results/results_12_12.json',
         'results/results_24_12.json'
       ]);
-      final shaderCommentMap = {
-        for (var shader in shaders)
+      final shaderCommentMap_1 = {
+        for (var shader in shaders_1)
           shader.info.id:
               await commentsResponseFixture('comment/${shader.info.id}.json')
       };
-      final shaderMediaMap = {
-        for (var shader in shaders)
+      final shaderMediaMap_1 = {
+        for (var shader in shaders_1)
           for (var path in shader.picturePaths())
             path: await binaryFixture(path)
       };
 
-      final userIds = {...shaders.map((s) => s.info.userId)};
-      final userHtmlMap = {
-        for (var userId in userIds)
+      final userIds_1 = {...shaders_1.map((s) => s.info.userId)};
+      final userHtmlMap_1 = {
+        for (var userId in userIds_1)
           userId: await textFixture('user/$userId.html')
       };
 
-      final userList = [
-        for (var userEntry in userHtmlMap.entries)
+      final userList_1 = [
+        for (var userEntry in userHtmlMap_1.entries)
           parseUser(userEntry.key, parseDocument(userEntry.value)).user
       ];
 
-      final userMediaMap = {
+      final userMediaMap_1 = {
         for (var picture
-            in userList.map((user) => user?.picture).whereType<String>())
+            in userList_1.map((user) => user?.picture).whereType<String>())
           p.relative(picture, from: '/'): await binaryFixture(picture)
       };
 
-      final results1 = await textFixture('results/results_0_12.html');
-      final results2 = await textFixture('results/results_12_12.html');
-      final results3 = await textFixture('results/results_24_12.html');
+      final results1_1 = await textFixture('results/results_0_12.html');
+      final results2_1 = await textFixture('results/results_12_12.html');
+      final results3_1 = await textFixture('results/results_24_12.html');
 
-      final playlistId = 'week';
+      final playlistId = 'custom';
       final playlist1 = await textFixture('playlist/${playlistId}_0_12.html');
       final playlist2 = await textFixture('playlist/${playlistId}_12_12.html');
       final playlist3 = await textFixture('playlist/${playlistId}_24_12.html');
@@ -750,18 +750,18 @@ void main() {
       final playlistShaders = await shaderFixtures(playlistShaderPaths);
 
       final adapter = newAdapter()
-        ..addResultsRoute(results1, siteOptions)
-        ..addResultsRoute(results2, siteOptions,
+        ..addResultsRoute(results1_1, siteOptions)
+        ..addResultsRoute(results2_1, siteOptions,
             from: siteOptions.pageResultsShaderCount,
             num: siteOptions.pageResultsShaderCount)
-        ..addResultsRoute(results3, siteOptions,
+        ..addResultsRoute(results3_1, siteOptions,
             from: siteOptions.pageResultsShaderCount * 2,
             num: siteOptions.pageResultsShaderCount)
-        ..addShaderRouteList(shaders, siteOptions)
-        ..addCommentsRouteMap(shaderCommentMap, siteOptions)
-        ..addDownloadMediaMap(shaderMediaMap, siteOptions)
-        ..addUserRouteMap(userHtmlMap, siteOptions)
-        ..addDownloadMediaMap(userMediaMap, siteOptions)
+        ..addShaderRouteList(shaders_1, siteOptions)
+        ..addCommentsRouteMap(shaderCommentMap_1, siteOptions)
+        ..addDownloadMediaMap(shaderMediaMap_1, siteOptions)
+        ..addUserRouteMap(userHtmlMap_1, siteOptions)
+        ..addDownloadMediaMap(userMediaMap_1, siteOptions)
         ..addPlaylistRoute(playlist1, playlistId, siteOptions)
         ..addPlaylistShadersRoute(playlist1, playlistId, siteOptions)
         ..addPlaylistShadersRoute(playlist2, playlistId, siteOptions,
@@ -776,10 +776,11 @@ void main() {
       final assetStore = await newMemoryVaultStore();
       final api = newClient(adapter, siteOptions: siteOptions);
 
-      // act
+      // act 1
       await api.rsync(metadataStore, assetStore, HybridSyncMode.full,
           playlistIds: [playlistId]);
-      // assert
+
+      // assert 1
       final allSyncs = await metadataStore.findAllSyncs();
       expect(allSyncs, isNotNull);
       expect(allSyncs.error, isNull);
@@ -793,7 +794,7 @@ void main() {
       final shaderPictureSyncs = syncs.where((fsr) =>
           fsr.sync?.status == SyncStatus.ok &&
           fsr.sync?.type == SyncType.shaderAsset);
-      expect(shaderPictureSyncs.length, shaderMediaMap.length);
+      expect(shaderPictureSyncs.length, shaderMediaMap_1.length);
 
       final userSyncs = syncs.where((fsr) =>
           fsr.sync?.status == SyncStatus.ok && fsr.sync?.type == SyncType.user);
@@ -801,13 +802,94 @@ void main() {
       final userPictureSyncs = syncs.where((fsr) =>
           fsr.sync?.status == SyncStatus.ok &&
           fsr.sync?.type == SyncType.userAsset);
-      expect(userPictureSyncs.length, userMediaMap.length);
+      expect(userPictureSyncs.length, userMediaMap_1.length);
 
       final playlistSyncs = syncs.where((fsr) =>
           fsr.sync?.status == SyncStatus.ok &&
           fsr.sync?.type == SyncType.playlist);
       expect(playlistSyncs.length, 1);
-    }, timeout: Timeout(Duration(days: 1)));
+
+      final actualShaderIds = await metadataStore.findAllShaderIds();
+      expect((actualShaderIds.ids ?? []).length, 36);
+
+      final actualShaderPictures = await assetStore.keys('shaderMedia');
+      expect(actualShaderPictures.length, 55);
+
+      final actualUserIds = await metadataStore.findAllUserIds();
+      expect((actualUserIds.ids ?? []).length, 22);
+
+      final actualUserPictures = await assetStore.keys('userMedia');
+      expect(actualUserPictures.length, 17);
+
+      final actualPlaylist = await metadataStore.findPlaylistById(playlistId);
+      expect(actualPlaylist.playlist, isNotNull);
+
+      final actualPlaylistShaderIds =
+          await metadataStore.findAllShaderIdsByPlaylistId(playlistId);
+      expect((actualPlaylistShaderIds.ids ?? []).length, 36);
+
+      // prepare 2
+
+      print('=====');
+
+      final shaders_2 = await shaderListFixtures(['sync/results_36_12.json']);
+
+      final shaderCommentMap_2 = {
+        for (var shader in shaders_2)
+          shader.info.id:
+              await commentsResponseFixture('comment/${shader.info.id}.json')
+      };
+      final shaderMediaMap_2 = {
+        for (var shader in shaders_2)
+          for (var path in shader.picturePaths())
+            path: await binaryFixture(path)
+      };
+
+      final userIds_2 = {...shaders_2.map((s) => s.info.userId)};
+      final userHtmlMap_2 = {
+        for (var userId in userIds_2)
+          userId: await textFixture('user/$userId.html')
+      };
+
+      final userList_2 = [
+        for (var userEntry in userHtmlMap_2.entries)
+          parseUser(userEntry.key, parseDocument(userEntry.value)).user
+      ];
+
+      final userMediaMap_2 = {
+        for (var picture
+            in userList_2.map((user) => user?.picture).whereType<String>())
+          p.relative(picture, from: '/'): await binaryFixture(picture)
+      };
+
+      final results1_2 = await textFixture('sync/results_0_12.html');
+      final results2_2 = await textFixture('sync/results_12_12.html');
+      final results3_2 = await textFixture('sync/results_24_12.html');
+      final results4_2 = await textFixture('sync/results_36_12.html');
+
+      adapter
+        ..addResultsRoute(results1_2, siteOptions)
+        ..addResultsRoute(results2_2, siteOptions,
+            from: siteOptions.pageResultsShaderCount,
+            num: siteOptions.pageResultsShaderCount)
+        ..addResultsRoute(results3_2, siteOptions,
+            from: siteOptions.pageResultsShaderCount * 2,
+            num: siteOptions.pageResultsShaderCount)
+        ..addResultsRoute(results4_2, siteOptions,
+            from: siteOptions.pageResultsShaderCount * 3,
+            num: siteOptions.pageResultsShaderCount)
+        ..addShaderRouteList(shaders_2, siteOptions)
+        ..addCommentsRouteMap(shaderCommentMap_2, siteOptions)
+        ..addDownloadMediaMap(shaderMediaMap_2, siteOptions)
+        ..addUserRouteMap(userHtmlMap_2, siteOptions)
+        ..addDownloadMediaMap(userMediaMap_2, siteOptions);
+
+      // act 2
+      await api.rsync(metadataStore, assetStore, HybridSyncMode.full,
+          playlistIds: [playlistId]);
+
+      // assert 2
+    });
   });
 
   test('Latest Mode', () async {});

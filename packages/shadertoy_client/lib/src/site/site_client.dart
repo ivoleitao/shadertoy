@@ -843,7 +843,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
 
   @override
   Future<FindShadersResponse> findShadersByPlaylistId(String playlistId,
-      {int? from, int? num = 0}) {
+      {int? from, int? num}) {
     return catchDioError<FindShadersResponse>(
         _getShaderIdsByPlaylistId(playlistId,
                 from: from, num: num ?? options.playlistShaderCount)

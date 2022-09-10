@@ -1,6 +1,6 @@
 GET {{baseUrl}}/{{userPath}}/iq
 ###
-GET {{baseUrl}}/{{userPath}}/KylBlz
+GET {{baseUrl}}/{{userPath}}/bitless
 ###
 GET {{baseUrl}}/{{userPath}}/yx
 ###

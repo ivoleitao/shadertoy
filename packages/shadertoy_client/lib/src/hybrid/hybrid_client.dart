@@ -223,7 +223,7 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
   @override
   Future<FindShaderIdsResponse> findAllShaderIdsByPlaylistId(
       String playlistId) {
-    return _siteClient.findShaderIdsByPlaylistId(playlistId);
+    return _siteClient.findAllShaderIdsByPlaylistId(playlistId);
   }
 
   @override

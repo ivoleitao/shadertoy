@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     
-<title>Playlist - Shadertoy BETA</title>
+<title>bitless - Shadertoy BETA</title>
 <meta charset="utf-8" />
 <meta name="Keywords" content="shadertoy, shader toy, quilez, inigo, jeremias, pol, fractals, demoscene, computer graphics, mathematics, rendering, demo, 3D, realtime, shader, raytracing, raymarching, webgl, glsl" />
 <meta name="Description" content="Build shaders, share them, and learn from the best community." />
@@ -8581,9 +8581,42 @@ me.mThumbnailImg.style.opacity = 1.0;
 </script>
 
     <style>
-    div#privacy
+
+    #content
     {
-        margin-left:4px;
+        user-select: text;
+        -moz-user-select: -moz-text;
+        -webkit-user-select: text;
+        padding:0px;
+        margin:0px;
+        position:relative;
+    }
+
+    #divUser
+    {
+        padding:0px;
+        padding-top:24px;
+        padding-bottom:16px;
+        width:100%;
+    }
+
+    div#controls
+    {
+        width:100%;
+        padding-top:16px;
+        padding-bottom:16px;
+        display:flex;
+        justify-content:space-between; 
+        flex-wrap:wrap;
+    }
+
+    div#controls > div
+    {
+        display:inline-flex;
+    }
+
+    .controlOptions
+    {
         display:inline-block;
     }
 
@@ -8594,9 +8627,9 @@ me.mThumbnailImg.style.opacity = 1.0;
         margin:0px;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
         grid-column-gap: 64px;
-        grid-row-gap: 24px;
+        grid-row-gap: 16px;
     }
 
     .searchResult
@@ -8613,8 +8646,28 @@ me.mThumbnailImg.style.opacity = 1.0;
         position: relative;
     }
 
+    div#navigation
+    {
+        text-align: center;
+        width: 100%;
+    }
+
+
+    #userPicture
+    {
+        background-color:#808080;
+        border: 1px solid #000000;
+        padding:0px;
+        left:0px;
+        top:0px;
+        width:128px;
+        height:128px;
+    }
+
     a.pageButtons, .pageButtonsCurrent
     {
+        
+        //background-color: #303030;
         border-style: solid;
         border-width: 1px;
         border-color: #808080;
@@ -8652,30 +8705,11 @@ me.mThumbnailImg.style.opacity = 1.0;
         color:#000000;
     }
 
-    div#controls
-    {
-        width:100%;
-        padding-top:16px;
-        padding-bottom:16px;
-        display:flex;
-        justify-content:space-between; 
-        flex-wrap:wrap;
-    }
-
-    div#controls > div
-    {
-        display:inline-flex;
-    }
-
-    .controlOptions
-    {
-        display:inline-block;
-    }
     /* ----------------------- media resolutions ------------------------ */
 
     @media screen and (max-width:799px) 
     {
-        div#shaderGrid  { grid-template-columns: 1fr; grid-template-rows: repeat(12, 1fr); grid-column-gap: 0px; grid-row-gap: 16px; }
+        div#shaderGrid  { grid-template-columns: 1fr; grid-template-rows: repeat(8, 1fr); grid-column-gap: 0px; grid-row-gap: 16px; padding-bottom:16px; }
 
         div#controls
         {
@@ -8695,41 +8729,17 @@ me.mThumbnailImg.style.opacity = 1.0;
         }
     }
     </style>
+
     <script>
-    var gShaderIDs = ['7lcyz8','sdGBzt','7dGfWW','fsXyDj','7dscD2','WldBW2','NdKyDw','fd33zn','fdjfDc','fscczX','fstyD4','tdyBR1'];
-var gShaders = [{ "info": {"id": "7lcyz8"}},{ "info": {"id": "sdGBzt"}},{ "info": {"id": "7dGfWW"}},{ "info": {"id": "fsXyDj"}},{ "info": {"id": "7dscD2"}},{ "info": {"id": "WldBW2"}},{ "info": {"id": "NdKyDw"}},{ "info": {"id": "fd33zn"}},{ "info": {"id": "fdjfDc"}},{ "info": {"id": "fscczX"}},{ "info": {"id": "fstyD4"}},{ "info": {"id": "tdyBR1"}}];
-var gPlaylistID="week";    var gUseScreenshots = piIsMobile();
+
+    var gShaders=[{"ver":"0.1","info":{"id":"fstyD4","date":"1653482786","viewed":11241,"name":"Coastal Landscape","username":"bitless","description":"I wanted to do something in the spirit of Van Gogh. It looks better on the full screen.","likes":359,"published":1,"flags":0,"usePreview":0,"tags":[]},"renderpass":[{"inputs":[],"outputs":[{"id":"4dfGRr","channel":0}],"code":"\/\/ Author: bitless\n\/\/ Title: Coastal Landscape\n\n\/\/ Thanks to Patricio Gonzalez Vivo & Jen Lowe for \"The Book of Shaders\"\n\/\/ and Fabrice Neyret (FabriceNeyret2) for https:\/\/shadertoyunofficial.wordpress.com\/\n\/\/ and Inigo Quilez (iq) for  https:\/\/iquilezles.org\/www\/index.htm\n\/\/ and whole Shadertoy community for inspiration.\n\n#define p(t, a, b, c, d) ( a + b*cos( 6.28318*(c*t+d) ) ) \/\/IQ's palette function (https:\/\/www.iquilezles.org\/www\/articles\/palettes\/palettes.htm)\n#define sp(t) p(t,vec3(.26,.76,.77),vec3(1,.3,1),vec3(.8,.4,.7),vec3(0,.12,.54)) \/\/sky palette\n#define hue(v) ( .6 + .76 * cos(6.3*(v) + vec4(0,23,21,0) ) ) \/\/hue\n\n\/\/ \"Hash without Sine\" by Dave_Hoskins.\n\/\/ https:\/\/www.shadertoy.com\/view\/4djSRW\nfloat hash12(vec2 p)\n{\n  vec3 p3  = fract(vec3(p.xyx) * .1031);\n    p3 += dot(p3, p3.yzx + 33.33);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nvec2 hash22(vec2 p)\n{\n  vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));\n    p3 += dot(p3, p3.yzx+33.33);\n    return fract((p3.xx+p3.yz)*p3.zy);\n}\n\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\n\nvec2 rotate2D (vec2 st, float a){\n    return  mat2(cos(a),-sin(a),sin(a),cos(a))*st;\n}\n\nfloat st(float a, float b, float s) \/\/AA bar\n{\n    return smoothstep (a-s, a+s, b);\n}\n\nfloat noise( in vec2 p ) \/\/gradient noise\n{\n    vec2 i = floor( p );\n    vec2 f = fract( p );\n    \n    vec2 u = f*f*(3.-2.*f);\n\n    return mix( mix( dot( hash22( i+vec2(0,0) ), f-vec2(0,0) ), \n                     dot( hash22( i+vec2(1,0) ), f-vec2(1,0) ), u.x),\n                mix( dot( hash22( i+vec2(0,1) ), f-vec2(0,1) ), \n                     dot( hash22( i+vec2(1,1) ), f-vec2(1,1) ), u.x), u.y);\n}\n\nvoid mainImage( out vec4 O, in vec2 g)\n{\n    vec2 r = iResolution.xy\n        ,uv = (g+g-r)\/r.y\n        ,sun_pos = vec2(r.x\/r.y*.42,-.53) \/\/sun position \n        ,tree_pos = vec2(-r.x\/r.y*.42,-.2) \/\/tree position \n        ,sh, u, id, lc, t;\n\n    vec3 f, c;\n    float xd, yd, h, a, l;\n    vec4 C;\n    \n    float sm = 3.\/r.y; \/\/smoothness factor for AA\n\n    sh = rotate2D(sun_pos, noise(uv+iTime*.25)*.3); \/\/big noise on the sky\n     \n    if (uv.y > -.4) \/\/drawing the sky\n    {\n        u = uv + sh;\n        \n        yd = 60.; \/\/number of rings \n        \n        id =  vec2((length(u)+.01)*yd,0); \/\/segment id: x - ring number, y - segment number in the ring  \n        xd = floor(id.x)*.09; \/\/number of ring segments\n        h = (hash12(floor(id.xx))*.5+.25)*(iTime+10.)*.25; \/\/ring shift\n        t = rotate2D (u,h); \/\/rotate the ring to the desired angle\n    \n        id.y = atan(t.y,t.x)*xd;\n        lc = fract(id); \/\/segment local coordinates\n        id -= lc;\n    \n        \/\/ determining the coordinates of the center of the segment in uv space\n        t = vec2(cos((id.y+.5)\/xd)*(id.x+.5)\/yd,sin((id.y+.5)\/xd)*(id.x+.5)\/yd); \n        t = rotate2D(t,-h) - sh;\n    \n        h = noise(t*vec2(.5,1)-vec2(iTime*.2,0)) \/\/clouds\n            * step(-.25,t.y); \/\/do not draw clouds below -.25\n        h = smoothstep (.052,.055, h);\n        \n        \n        lc += (noise(lc*vec2(1,4)+id))*vec2(.7,.2); \/\/add fine noise\n        \n        f = mix (sp(sin(length(u)-.1))*.35, \/\/sky background\n                mix(sp(sin(length(u)-.1)+(hash12(id)-.5)*.15),vec3(1),h), \/\/mix sky color and clouds\n                st(abs(lc.x-.5),.4,sm*yd)*st(abs(lc.y-.5),.48,sm*xd));\n    };\n\n    if (uv.y < -.35) \/\/drawing water\n    {\n\n        float cld = noise(-sh*vec2(.5,1)  - vec2(iTime*.2,0)); \/\/cloud density opposite the center of the sun\n        cld = 1.- smoothstep(.0,.15,cld)*.5;\n\n        u = uv*vec2(1,15);\n        id = floor(u);\n\n        for (float i = 1.; i > -1.; i--) \/\/drawing a wave and its neighbors from above and below\n        {\n            if (id.y+i < -5.)\n            {\n                lc = fract(u)-.5;\n                lc.y = (lc.y+(sin(uv.x*12.-iTime*3.+id.y+i))*.25-i)*4.; \/\/set the waveform and divide it into four strips\n                h = hash12(vec2(id.y+i,floor(lc.y))); \/\/the number of segments in the strip and its horizontal offset\n                \n                xd = 6.+h*4.;\n                yd = 30.;\n                lc.x = uv.x*xd+sh.x*9.; \/\/divide the strip into segments\n                lc.x += sin(iTime * (.5 + h*2.))*.5; \/\/add a cyclic shift of the strips horizontally\n                h = .8*smoothstep(5.,.0,abs(floor(lc.x)))*cld+.1; \/\/determine brightness of the sun track \n                f = mix(f,mix(vec3(0,.1,.5),vec3(.35,.35,0),h),st(lc.y,0.,sm*yd)); \/\/mix the color of the water and the color of the track for the background of the water \n                lc += noise(lc*vec2(3,.5))*vec2(.1,.6); \/\/add fine noise to the segment\n                \n                f = mix(f,                                                                         \/\/mix the background color \n                    mix(hue(hash12(floor(lc))*.1+.56).rgb*(1.2+floor(lc.y)*.17),vec3(1,1,0),h)     \/\/and the stroke color\n                    ,st(lc.y,0.,sm*xd)\n                    *st(abs(fract(lc.x)-.5),.48,sm*xd)*st(abs(fract(lc.y)-.5),.3,sm*yd)\n                    );\n            }\n        }\n    }\n    \n    O = vec4(f,1);\n\n    \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ drawing the grass\n    a = 0.;\n    u = uv+noise(uv*2.)*.1 + vec2(0,sin(uv.x*1.+3.)*.4+.8);\n    \n    f = mix(vec3(.7,.6,.2),vec3(0,1,0),sin(iTime*.2)*.5+.5); \/\/color of the grass, changing from green to yellow and back again\n    O = mix(O,vec4(f*.4,1),step(u.y,.0)); \/\/draw grass background\n\n    xd = 60.;  \/\/grass size\n    u = u*vec2(xd,xd\/3.5); \n    \n\n    if (u.y < 1.2)\n    {\n        for (float y = 0.; y > -3.; y--)\n          {\n            for (float x = -2.; x <3.; x++)\n            {\n                id = floor(u) + vec2(x,y);\n                lc = (fract(u) + vec2(1.-x,-y))\/vec2(5,3);\n                h = (hash12(id)-.5)*.25+.5; \/\/shade and length for an individual blade of grass\n\n                lc-= vec2(.3,.5-h*.4);\n                lc.x += sin(((iTime*1.7+h*2.-id.x*.05-id.y*.05)*1.1+id.y*.5)*2.)*(lc.y+.5)*.5;\n                t = abs(lc)-vec2(.02,.5-h*.5);\n                l =  length(max(t,0.)) + min(max(t.x,t.y),0.); \/\/distance to the segment (blade of grass)\n\n                l -= noise (lc*7.+id)*.1; \/\/add fine noise\n                C = vec4(f*.25,st(l,.1,sm*xd*.09)); \/\/grass outline                \n                C = mix(C,vec4(f                  \/\/grass foregroud\n                            *(1.2+lc.y*2.)  \/\/the grass is a little darker at the root\n                            *(1.8-h*2.5),1.)    \/\/brightness variations for individual blades of grass\n                            ,st(l,.04,sm*xd*.09));\n                \n                O = mix (O,C,C.a*step (id.y,-1.));\n                a = max (a, C.a*step (id.y,-5.));  \/\/a mask to cover the trunk of the tree with grasses in the foreground\n            }\n        }\n    }\n\n    float T = sin(iTime*.5); \/\/tree swing cycle\n \n    if (abs(uv.x+tree_pos.x-.1-T*.1) < .6) \/\/ drawing the tree\n    {\n        u = uv + tree_pos;\n        \/\/ draw the trunk of the tree first\n        u.x -= sin(u.y+1.)*.2*(T+.75); \/\/the trunk bends in the wind\n        u += noise(u*4.5-7.)*.25; \/\/trunk curvature\n        \n        xd = 10., yd = 60.; \n        t = u * vec2(1,yd); \/\/divide the trunk into segments\n        h = hash12(floor(t.yy)); \/\/horizontal shift of the segments and the color tint of the segment  \n        t.x += h*.01;\n        t.x *= xd;\n        \n        lc = fract(t); \/\/segment local coordinates\n        \n        float m = st(abs(t.x-.5),.5,sm*xd)*step(abs(t.y+20.),45.); \/\/trunk mask\n        C = mix(vec4(.07) \/\/outline color\n                ,vec4(.5,.3,0,1)*(.4+h*.4) \/\/foreground color \n                ,st(abs(lc.y-.5),.4,sm*yd)*st(abs(lc.x-.5),.45,sm*xd));\n        C.a = m;\n        \n        xd = 30., yd = 15.;\n        \n        for (float xs =0.;xs<4.;xs++) \/\/drawing four layers of foliage\n        {\n            u = uv + tree_pos + vec2 (xs\/xd*.5 -(T +.75)*.15,-.7); \/\/crown position\n            u += noise(u*vec2(2,1)+vec2(-iTime+xs*.05,0))*vec2(-.25,.1)*smoothstep (.5,-1.,u.y+.7)*.75; \/\/leaves rippling in the wind\n    \n            t = u * vec2(xd,1.);\n            h = hash12(floor(t.xx)+xs*1.4); \/\/number of segments for the row\n            \n            yd = 5.+ h*7.;\n            t.y *= yd;\n    \n            sh = t;\n            lc = fract(t);\n            h = hash12(t-lc); \/\/segment color shade\n    \n            \n            t = (t-lc)\/vec2(xd,yd)+vec2(0,.7);\n            \n            m = (step(0.,t.y)*step (length(t),.45) \/\/the shape of the crown - the top \n                + step (t.y,0.)*step (-0.7+sin((floor(u.x)+xs*.5)*15.)*.2,t.y)) \/\/the bottom\n                *step (abs(t.x),.5) \/\/crown size horizontally\n                *st(abs(lc.x-.5),.35,sm*xd*.5); \n    \n            lc += noise((sh)*vec2(1.,3.))*vec2(.3,.3); \/\/add fine noise\n            \n            f = hue((h+(sin(iTime*.2)*.5+.5))*.2).rgb-t.x; \/\/color of the segment changes cyclically\n    \n            C = mix(C,\n                    vec4(mix(f*.15,f*.6*(.7+xs*.2), \/\/mix outline and foreground color\n                        st(abs(lc.y-.5),.47,sm*yd)*st(abs(lc.x-.5),.2,sm*xd)),m)\n                    ,m);\n        }\n\n        O = mix (O,C,C.a*(1.-a));\n    }\n}","name":"Image","description":"","type":"image"}]},{"ver":"0.1","info":{"id":"3sKSRw","date":"1573652605","viewed":922,"name":"Tunnel of Disco lights","username":"bitless","description":"Thanks to Patricio Gonzalez Vivo & Jen Lowe for \"The Book of Shaders\" and inspiration","likes":27,"published":1,"flags":0,"usePreview":0,"tags":[]},"renderpass":[{"inputs":[],"outputs":[{"id":"4dfGRr","channel":0}],"code":"\/\/ Author: bitless\n\/\/ Title: Tunnel of Disco lights\n\/\/ Thanks to Patricio Gonzalez Vivo & Jen Lowe for \"The Book of Shaders\" and inspiration \n\n#define SCALE_X 16.\n#define SCALE_Y 5.\n#define TIME_SCALE 0.1\n#define BORDER 1.2\n\nfloat hash1( float n ) { return fract(sin(n)*437518.56453)+0.1; }\n\nfloat box(vec2 st) {\n    vec2 s = vec2(0.001); \/\/ border size\n    vec2 w = vec2(0.05); \/\/ border smoothness\n    vec2 uv = smoothstep(s,s+w,st);\n    uv *= smoothstep(s,s+w,vec2(1.0)-st);\n    return uv.x*uv.y*(1.-length(0.5-st)*0.75);\n}\n\n\/\/ translate color from HSB space to RGB space\nvec3 hsb2rgb( in vec3 c ){\n    vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0,0.0,1.0 );\n    rgb = rgb*rgb*(3.0-2.0*rgb);\n    return c.z * mix(vec3(1.0), rgb, c.y);\n}\n\n\nfloat fbm (in vec2 st) {\n\tfloat value = (sin(iTime*5.*hash1(st.x+hash1(st.y)))+4.0)*0.25;\n    return max(0.75,pow(value,3.));\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n   \tvec2 g = fragCoord;\n\tvec2 si = iResolution.xy;\n\tvec2 uv = (g+g-si)\/si.y;\n\t\n\tfloat a = atan(uv.x, uv.y);\n\tfloat r = length(uv);\n\t\n\tuv = vec2(a,r\/dot(uv,uv));\n\n    vec3 color = vec3(0.);\n    float c = 1.;\n\n    float lt = mod(iTime*TIME_SCALE,1.\/SCALE_Y); \/\/local time cycle\n    \n    \n    uv.x *= SCALE_X\/3.1415926;\n    float i = floor(uv.x); \/\/ row\n    uv.x = fract(uv.x);\n\n    if (uv.y < BORDER-lt)\n    {\n        uv.y += iTime*TIME_SCALE;\n        uv.y *= SCALE_Y;\n        float j = floor(uv.y);\n\n        uv.y = fract(uv.y);\n        color = hsb2rgb(vec3((hash1(j+hash1(i))),0.7,fbm(vec2(i,j))))*box(uv);\n    }\n    else {\n        float fade = smoothstep (3.0,0.,sqrt(uv.y)); \/\/fade to darkness\n        uv.y += lt - BORDER;\n        float j = floor ((BORDER-lt+iTime*TIME_SCALE)*SCALE_Y+floor(uv.y)); \n\t\tuv.y = fract(uv.y)*SCALE_Y + min(0., 1.-SCALE_Y+lt*(SCALE_Y\/TIME_SCALE*SCALE_Y*hash1(i+hash1(j))+1.));\n    \tc *=  box (uv); \/\/cell\n        c += smoothstep(3.0,1.0,sqrt(uv.y))*smoothstep(1.0,1.05,uv.y)*smoothstep(0.5,0.45,abs(uv.x-0.5))*0.25; \/\/cell trail\n        c *= fade; \/\/fade to darkness\n        color = mix (color,hsb2rgb(vec3((hash1(j+hash1(i))),0.7,fbm(vec2(i,j)))),c);\n\n    }\n\tfragColor = vec4(color,1.0);\n}","name":"Image","description":"","type":"image"}]},{"ver":"0.1","info":{"id":"WtjfRG","date":"1599489954","viewed":614,"name":"Microwaves","username":"bitless","description":"Microwaves","likes":52,"published":1,"flags":0,"usePreview":0,"tags":[]},"renderpass":[{"inputs":[],"outputs":[{"id":"4dfGRr","channel":0}],"code":"\/\/ Author: bitless\n\/\/ Title: Microwaves\n\n\/\/ Thanks to Patricio Gonzalez Vivo & Jen Lowe for \"The Book of Shaders\"\n\/\/ and Fabrice Neyret (FabriceNeyret2) for https:\/\/shadertoyunofficial.wordpress.com\/\n\/\/ and Inigo Quilez (iq) for  https:\/\/iquilezles.org\/www\/index.htm\n\/\/ and whole Shadertoy community for inspiration.\n\n#define p(t, a, b, c, d) ( a + b*cos( 6.28318*(c*t+d) ) ) \/\/palette function (https:\/\/iquilezles.org\/articles\/palettes)\n#define S(x,y,z) smoothstep(x,y,z)\n\nfloat w(float x, float p){ \/\/sin wave function\n    x *= 5.;\n    float t= p*.5+sin(iTime*.25)*10.5;\n    return (sin(x*.25 + t)*5. + sin(x*4.5 + t*3.)*.2 + sin(x + t*3.)*2.3  + sin(x*.8 + t*1.1)*2.5)*0.275;\n}\n\n\n\nvoid mainImage( out vec4 fragColor, in vec2 g)\n{\n    vec2 r = iResolution.xy\n        ,st = (g+g-r)\/r.y;\n\n    float \tth = .05 \/\/thickness\n    \t\t,sm = 15.\/r.y+.85*length(S(vec2(01.,.2),vec2(2.,.7),abs(st))) \/\/smoothing factor\n    \t\t,c = 0. \n            ,t = iTime*0.25\n            ,n = floor((st.y+t)\/.1)\n            ,y = fract((st.y+t)\/.1);\n    \n    vec3 clr;\n    for (float i = -5.;i<5.;i++)\n    {\n        float f = w(st.x,(n-i))-y-i;\n        c = mix(c,0.,S(-0.3,abs(st.y),f));\n        c += S(th+sm,th-sm,abs(f))\n            *(1.-abs(st.y)*.75)\n            + S(5.5-abs(f*0.5),0.,f)*0.25;\n            \n        clr = mix(clr,p(sin((n-i)*.15),vec3(.5),vec3(.5), vec3(.270), vec3(.0,.05,0.15))*c,S(-0.3,abs(st.y),f));\n    }\n    fragColor = vec4(clr,1.);\n}","name":"Image","description":"","type":"image"}]},{"ver":"0.1","info":{"id":"NlK3Wt","date":"1639050222","viewed":611,"name":"Cyberspace data warehouse","username":"bitless","description":"Should look good on full screen.","likes":67,"published":1,"flags":0,"usePreview":0,"tags":[]},"renderpass":[{"inputs":[],"outputs":[{"id":"4dfGRr","channel":0}],"code":"\/\/ Author: bitless\n\/\/ Title: Cyberspace data warehouse\n\n\/\/ Thanks to Patricio Gonzalez Vivo & Jen Lowe for \"The Book of Shaders\"\n\/\/ and Fabrice Neyret (FabriceNeyret2) for https:\/\/shadertoyunofficial.wordpress.com\/\n\/\/ and Inigo Quilez (iq) for  https:\/\/iquilezles.org\/www\/index.htm\n\/\/ and whole Shadertoy community for inspiration.\n\n#define h21(p) ( fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453) ) \/\/hash21\n#define BC vec3(.26,.4,.6) \/\/base color\n\n\/\/  Minimal Hexagonal Grid - Shane\n\/\/  https:\/\/www.shadertoy.com\/view\/Xljczw\nvec4 getHex(vec2 p) \/\/hex grid coords \n{\n    vec2 s = vec2(1, 1.7320508);\n    vec4 hC = floor(vec4(p, p - vec2(.5, 1))\/s.xyxy) + .5;\n    vec4 h = vec4(p - hC.xy*s, p - (hC.zw + .5)*s);\n    return dot(h.xy, h.xy)<dot(h.zw, h.zw) ? vec4(h.xy, hC.xy) : vec4(h.zw, hC.zw + .5);\n}\n\nfloat noise( in vec2 f ) \/\/gradient noise\n{\n    vec2 i = floor( f );\n    f -= i;\n    \n    vec2 u = f*f*(3.-2.*f);\n\n    return mix( mix( h21( i + vec2(0,0) ), \n                     h21( i + vec2(1,0) ), u.x),\n                mix( h21( i + vec2(0,1) ), \n                     h21( i + vec2(1,1) ), u.x), u.y);\n}\n\nvec3 HexToSqr (vec2 st, inout vec2 uf) \/\/hexagonal cell coords to square face coords \n{ \n    vec3 r;\n    uf = vec2((st.x+st.y*1.73),(st.x-st.y*1.73))-.5; \/\/upper face coord space\n    if (st.y > 0.-abs(st.x)*0.57777)\n        if (st.x > 0.) \n            r = vec3(fract(vec2(-st.x,(st.y+st.x\/1.73)*0.86)*2.),2.); \/\/right face\n        else\n            r = vec3(fract(vec2(st.x,(st.y-st.x\/1.73)*0.86)*2.),3.); \/\/left face\n    else \n        r = vec3 (fract(uf+.5),1); \/\/top face\n    return r;\n} \n\n\nvoid sphere (vec4 hx, vec2 st, float sm,  inout vec4 R) \/\/memory sphere full of data\n{\n    R -= R;\n\n    float   T = mod(iTime+h21(hx.zw*20.)*20.,20.)        \/\/local time\n        ,   d = .4* ((T < 3.) ? sin(T*.52) :      \/\/hole diameter\n                    ((T < 6.) ? 1. :   \n                    ((T < 9.) ? sin((9.-T)*.52) : \n                                0.)))\n        ,   y = .4* ((T < 4.) ? sin((T-1.)*.52) :  \/\/sphere position\n                    ((T < 5.5) ? 1. :   \n                    ((T < 8.5) ? sin((8.5-T)*.52) : \n                    0.))) - .06          \n        ,   f = (.9 + noise(vec2(hx.x*50.+iTime*4.))*.3) \/\/hole inner noise\n                * smoothstep(-.57,1.7,st.y-st.x); \n\n    R = mix (vec4(0), vec4(BC*f,1.), smoothstep(d+sm, d-sm, length(st)));\/\/hole inner surface \n    R = mix (R, vec4(BC*.5,1.), smoothstep(sm, -sm, abs(length(st)-d)-.02)*smoothstep(0.,.02,d)); \/\/hole ring\n\n    f = noise(hx.xy*vec2(12,7)+vec2(0,iTime*-4.))*.25+.5; \/\/sphere noise\n\n    R = mix (R, \n                vec4(mix(\n                vec3(BC*8.)*f,          \/\/sphere start color + noise\n                vec3(.15,.1,.1)             \/\/sphere final color\n                ,sin(T*.48-1.8))             \/\/transition timer\n                *(smoothstep(.1,.2,length(hx.xy+vec2(.0,y)))*.5 + .5) \/\/brightness gradient from centre \n                *(smoothstep(-.02,-0.52,hx.y)),1.) ,             \/\/illumination of the top of the sphere\n            smoothstep (.2+sm,.2-sm,length(hx.xy+vec2(.0,y))) \/\/sphere mask\n            *((st.y-st.x >0.) ? 1. : smoothstep(d-.02+sm, d-.02-sm, abs(length(st)))) \/\/hole mask\n        );\n}\n\nvoid pixel (float hh, float sm, vec2 st, vec2 s, float n,  vec4 R, inout vec4 C) \/\/blinking pixels\n{\n    st = vec2(st.x,1.-st.y);\n    vec2    lc = 1.-fract(st*10.) \/\/pixel local coords\n        ,   id = floor(st*10.) + s; \/\/id of pixel or neigbour \n\n    float   b = ((4.-n)*2.2+.8)*.05 \/\/face lightness\n        ,   th = .05            \/\/pixel border thickness\n        ,   T = mod(iTime+hh*20.,20.) \/\/local timer\n        ,   d = ((T < 3.) ? sin((T)*.52) :  \/\/hole diameter\n                        ((T < 6.5) ? 1. :   \n                        ((T < 9.5) ? sin((9.5-T)*.52) : \n                                0.)))\n        ,   f =  min(\n                (pow(noise(id*hh*n+iTime*(.75+h21(id)*.15)*1.),8.)*2. \/\/small picks\n                + (noise(id*.2 + iTime*(.5+hh*n)*.5)-.1)) \/\/big noise\n                * smoothstep (6.,2.,length(id-4.5)) \/\/fade noise to face edges\n                * ((n == 1.) ? (smoothstep(d*5., d*5.+2. ,length(id-4.5)+.5)) : 1.) \/\/remove noise on top face while sphere is up \n                , 0.95); \n\n    vec4 P =  vec4(BC*(1.+hh*.75)*b,1); \/\/ pixel base color\n    if (s == vec2(0)) C = mix (P*.7, P*.9, step(0.,lc.x-lc.y)); \/\/pixel background\n\n    vec2 m = s*2.-1.;\n    \n    if (s.x!=s.y) C = mix (C\n                            ,   mix(    P*.7\n                                    ,   P*.9\n                                    ,   step(lc.x-lc.y,0.))\n                            , step(lc.x+lc.y,f+f)\n                    *((m.y==-1.)?step(lc.x-lc.y+1.,1.):step(1.,lc.x-lc.y+1.))); \/\/pixel side faces\n    C = mix (C, P,smoothstep(f+sm*m.x,f-sm*m.x,lc.x)*smoothstep(f+sm*m.y,f-sm*m.y,lc.y)); \/\/pixel top face background\n    C = mix (C, mix(P*(.4+(f+pow(f,2.))*4.),R,.25) \n    ,smoothstep(f-(th-sm)*m.x,f-(th+sm)*m.x,lc.x)*smoothstep(f-(th-sm)*m.y,f-(th+sm)*m.y,lc.y)); \/\/pixel top face color + sphere reflection\n}\n\nvoid tile(vec2 uv,inout vec4 C) \n{\n    vec4 hx = getHex(uv);\n    vec2 s; \/\/top face square coordiantes \n    vec3 sqr = HexToSqr(hx.xy, s);\n    float n = sqr.z       \/\/face id\n          ,sm = 3.\/iResolution.y  \/\/smoothness\n          ,hh = h21(hx.zw*20.); \/\/random value for tile\n          \n    vec2 st = sqr.xy; \/\/  face square coordinates\n\n    vec4 R; \/\/sphere or sphere reflection\n    \n    if (n == 1.) sphere (hx, st-vec2(.5), sm, R);  \/\/sphere on top face\n    else if (n == 2.) sphere (hx +  vec4(0,-.6,.5,.5), s + vec2(0,1), .01, R);  \/\/sphere reflection on right face \n    else sphere (hx + vec4(0,-.6,-.5,.5), s + vec2(0,1), .01, R);   \/\/sphere reflection on left face\n\n    pixel (hh, sm, st, vec2(0,0), n,  R, C); \/\/drawing pixel and his neighbors\n    pixel (hh, sm, st, vec2(1,0), n,  R, C);\n    pixel (hh, sm, st, vec2(0,1), n,  R, C);\n    pixel (hh, sm, st, vec2(1,1), n,  R, C);\n\n    if (n==1.) C = mix (C,R,R.a); \/\/draw sphere on top face\n}\n\nvoid mainImage( out vec4 C, in vec2 g)\n{\n    vec2 rz = iResolution.xy\n        ,uv = (g+g-rz)\/-rz.y;\n\n    uv *= .8+sin(iTime*.3)*.25; \/\/camera scale\n    uv -= uv * pow(length(uv),2.5-sin(iTime*.3)*.5)*.025 +  \/\/camera distortion\n        vec2(iTime*.2,cos(iTime*.2));   \/\/camera translate\n    \n    C -= C;\n    tile(uv,C);\n}","name":"Image","description":"","type":"image"}]},{"ver":"0.1","info":{"id":"NtVXDh","date":"1640611042","viewed":570,"name":"Lonely sphere","username":"bitless","description":"A lonely sphere running over a field of voxels","likes":44,"published":1,"flags":0,"usePreview":0,"tags":[]},"renderpass":[{"inputs":[],"outputs":[{"id":"4dfGRr","channel":0}],"code":"\/\/ Author: bitless\n\/\/ Title: A lonely sphere running over a field of voxels\n\n\/\/ Thanks to Patricio Gonzalez Vivo & Jen Lowe for \"The Book of Shaders\"\n\/\/ and Fabrice Neyret (FabriceNeyret2) for https:\/\/shadertoyunofficial.wordpress.com\/\n\/\/ and Inigo Quilez (iq) for  https:\/\/iquilezles.org\/www\/index.htm\n\/\/ and whole Shadertoy community for inspiration.\n\n\/\/ Special thanks to Shane for the \"Isometric Height Map\"\n\/\/ https:\/\/www.shadertoy.com\/view\/flcSzX. \n\/\/ I got some ideas there to improve my code.\n\n#define h21(p) ( fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453) ) \/\/hash21\n#define rot(a)   mat2(cos(a + vec4(0,11,33,0)))                             \/\/rotate 2d\n#define p(t, a, b, c, d) ( a + b*cos( 6.28318*(c*t+d) ) )                   \/\/iq's palette\n\n\nfloat noise( in vec2 f ) \/\/gradient noise\n{\n    vec2 i = floor( f );\n    f -= i;\n    \n    vec2 u = f*f*(3.-2.*f);\n\n    return mix( mix( h21( i + vec2(0,0) ), \n                     h21( i + vec2(1,0) ), u.x),\n                mix( h21( i + vec2(0,1) ), \n                     h21( i + vec2(1,1) ), u.x), u.y);\n}\n\nvec3 hexToSqr (vec2 st) \/\/hexagonal cell coords to square face coords \n{ \n    vec3 r;\n    if (st.y > 0.-abs(st.x)*.57777)\n        if (st.x > 0.) \n            r = vec3((vec2(st.x,(st.y+st.x\/1.73)*.86)*2.),3); \/\/right face\n        else\n            r = vec3(-(vec2(st.x,-(st.y-st.x\/1.73)*.86)*2.),2); \/\/left face\n    else \n        r = vec3 (-(vec2(st.x+st.y*1.73,-st.x+st.y*1.73)),1); \/\/top face\n    return r;\n}\n\nvec2 toSqr  (vec2 lc)\n {\n    return vec2((lc.x+lc.y)*.5,(lc.x-lc.y)*0.28902);\n }\n \nfloat T; \/\/global timer\nfloat sm; \/\/smoothness factor\nvec2 sp; \/\/sphere position on isometric plane\n \nvoid voxel (vec2 uv, vec2 id, vec2 lc, vec2 sh, inout vec4 C)\n{\n\n    vec2 ic = vec2((uv.x+uv.y*1.73),(uv.x-uv.y*1.73)); \/\/isometic coordinates\n\n    uv += sh*vec2(-1,.28902) ;\n    vec2 ii = floor(vec2((uv.x+uv.y*1.73),(uv.x-uv.y*1.73))); \/\/isometric grid cell's id\n    float th = mix (                                                                                     \/\/sphere track depth\n                        mix(1.,noise (ii*.5)*.3,smoothstep (4.,1.,abs(ii.x+15.-noise(vec2(ii.y*.1,0.))*15.))) \/\/sphere track\n                        ,smoothstep(2.,4.,length(ii+sp-vec2(-.5,T+.5)))                                     \/\/spot under sphere\n                        ,smoothstep (2., -1., ii.y-T)) \n    \n         , s =  pow(noise(vec2(h21(ii)*ii+iTime*.5)),8.)*.75 \/\/small picks of altitude \n         , hg = (pow(noise(ii*.2*rot(1.) - iTime*.02),4.)-.5)*2.     \/\/large noise\n                 + s;\n\n    hg = (hg+1.)*th - 1.;   \/\/voxel altitude\n    float sz = 1.1 + s*1.5*th; \/\/voxel size variation\n    \n    vec3 vx = hexToSqr(lc-vec2(sh.x,(sh.y-(hg*2.-1.)\/sz)*0.28902));  \/\/voxel sides coords and side id\n    \n    vx.xy *= sz;\n    \n    vec4 V = vec4(p(ii.y*.05+hg*.3*th,vec3(.9),vec3(.7),vec3(.26),vec3(.0,.1,.2)),1.); \/\/voxel color\n    \n    float f = mix(.3, (.9 - vx.z*.15),smoothstep (.45+sm,.45-sm, max(abs(vx.x-.5),abs(vx.y-.5)))); \/\/sides of voxel \n    f = mix (f, 1.-length(vx.xy-vec2(.6)*1.2), smoothstep (.4+sm,.4-sm,length(vx.xy-.5))); \/\/circles on sides\n    f = mix (f, .4, smoothstep (.04+sm,-sm,abs(length(vx.xy-.5)-.4))); \/\/circles edge\n    f -= f*smoothstep(5.,3.,length(ic+sp-vec2(-.5,T+.5)))*.5; \/\/shadow under sphere\n    f += (hg+1.)*.07; \/\/highlighting high-altitude voxels    \n\/\/    f = smoothstep (-0.5,1.6,f); \/\/gamma correcton\n    C = mix (C, V*f , smoothstep(1.+sm,1.-sm,max(vx.x,vx.y))); \/\/mix colors with voxel mask \n}\n \nvoid Draw (vec2 uv, inout vec4 C)\n{\n    sp = vec2((1.-noise(vec2(T*.1,0.)))*15.,0.); \/\/sphere position on isometric plane\n    vec2    st = vec2((uv.x+uv.y*1.73),(uv.x-uv.y*1.73)) \/\/isometic coordinates\n         ,  sc = toSqr(st+sp)-uv+vec2(.0,2.+noise(vec2(iTime*5.,0.))*.2) \/\/sphere center\n         ,  vc = uv; \/\/coordinates for voxels \n\n    if (length(vc+sc) < 3.) \/\/change coords for distortion effect on sphere\n    {\n        vc += sc;\n        vc += vc*(pow(length(vc*.35),4.)) - sc; \n        sm = sm + .07;  \/\/add small blur \n    }\n    vc += toSqr(vec2(0.,T));\n\n    vec2 id = floor(vec2((vc.x+vc.y*1.73),(vc.x-vc.y*1.73))); \/\/cell id\n    float n = mod(id.x+id.y+1.,2.);  \/\/even and odd cells\n\n    st = vec2((1.-n)*.5-vc.x,vc.y*1.73-n*.5); \n    id = floor(st)*vec2(1.,2.) + vec2(n*.5,n); \/\/corrected cell id\n    vec2 lc = fract(st) - vec2(.5);  \/\/local cell corrdinates\n    lc.y *= .57804;\n\n    vec2[7] sh = vec2[7] (vec2(0,-2),vec2(.5,-1),vec2(-.5,-1),vec2(0,0),vec2(.5,1),vec2(-.5,1),vec2(0,2)); \/\/coordinate offsets for voxel neighbors \n    \n    for (int i = 0 ; i<7 ; i++) voxel (vc, id, lc, sh[i], C); \/\/draw voxel and his neighbors\n    \n    uv+= sc;\n\n    if (length(uv) < 3.) \/\/add some colors for sphere\n    {\n        C = mix (C, \n            vec4(0,.05,.15,1),  \n            noise(vec2(-uv.x,(uv.y+uv.x\/1.73)*.86)*1.5*rot(-T*.15))*.4); \/\/color spots on sphere);\n        C += smoothstep(3.,-10., uv.y)*length(uv)*.1; \/\/small light gradient on top of sphere \n    }\n    \n    C = mix (C, vec4(0),smoothstep (.02+sm,.02-sm,abs(length(uv)-3.))*.25); \/\/small outline of sphere\n}\n\nvoid mainImage( out vec4 C, in vec2 g)\n{\n    vec2 rz = iResolution.xy\n        ,uv = (g+g-rz)\/-rz.y;\n    uv += -.5;\n    uv *= 1.+sin(iTime*.3)*.25; \/\/camera scale\n    sm = 3.\/iResolution.y;\n    \n    T = -iTime*4.-((sin(iTime*.5)+1.)*5.); \/\/local timer with speed variation\n\n    C = -C;\n\n    Draw (uv*5., C);\n\n    uv*=5.;\n    C=pow(C,vec4(1.\/1.4));\n}","name":"Image","description":"","type":"image"}]},{"ver":"0.1","info":{"id":"WsV3Dt","date":"1571217992","viewed":500,"name":"Another Triangular Voronoi","username":"bitless","description":"Thanks to Patricio Gonzalez Vivo & Jen Lowe for \"The Book of Shaders\" and inspiration \nThanks to aiekick and iq for some code from https:\/\/www.shadertoy.com\/view\/ltK3WD and https:\/\/www.shadertoy.com\/view\/MdSGRc","likes":47,"published":1,"flags":0,"usePreview":0,"tags":[]},"renderpass":[{"inputs":[],"outputs":[{"id":"4dfGRr","channel":0}],"code":"\/\/ Author: bitless\n\/\/ Title: another triangular voronoi \n\/\/ Thanks to Patricio Gonzalez Vivo & Jen Lowe for \"The Book of Shaders\" and inspiration\n\/\/ Thanks to aiekick and iq for some code from https:\/\/www.shadertoy.com\/view\/ltK3WD and https:\/\/www.shadertoy.com\/view\/MdSGRc\n\nuniform vec2 u_resolution;\nuniform vec2 u_mouse;\nuniform float u_time;\n\n#define PI 3.1415926\n\nvec2 random2( vec2 p ) {\n    return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);\n}\n\nvec2 rotate2D(vec2 _st, float _angle,vec2 m){\n   \n    _st -= m;\n    _st =  mat2(cos(_angle),-sin(_angle),\n                sin(_angle),cos(_angle)) * _st;\n    _st += m;\n    return _st;\n}\n\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 st = fragCoord.xy\/iResolution.xy;\n    vec2 m = vec2(0.5,0.5); \n    \n    if (iResolution.y > iResolution.x ) {\n        st.y *= iResolution.y\/iResolution.x;\n        m.y *= iResolution.y\/iResolution.x;\n    }       \n    else {\n        st.x *= iResolution.x\/iResolution.y;\n        m.x *= iResolution.x\/iResolution.y;\n    }\n    vec3 color = vec3(.0);\n\n\n\tst = rotate2D(st,PI*0.666666*((floor(mod(iTime,15.0)\/5.0)-1.0)),m);  \/\/rotation on 120 degrees\n    st = rotate2D(st,PI*0.666666*pow(smoothstep(0.0,1.0,mod(iTime+1.0,5.0))*(1.0-step(1.0,mod(iTime+1.0,5.0))),2.5),m);  \/\/animate rotation cicle\n    \/\/ Scale\n    st -= m;\n    st *= sin(iTime*0.2)*1.0+3.0+cos(smoothstep(0.0,1.0,mod(iTime+1.0,5.0))*(1.0-step(1.0,mod(iTime+1.0,5.0)))*PI*2.0)*0.5; \n\n    \/\/ Tile the space\n    vec2 i_st = floor(st);\n    vec2 f_st = fract(st);\n    \n    float m_dist = 9.;  \/\/ minimun distance\n\n    vec2 p; \n    vec4 f;\n    f.x = 9.;\n    \n    for(int x=-2;x<=2;x++)\n    for(int y=-2;y<=2;y++)\n    {\t\n        p = vec2(x,y); \/\/neightbour\n        p += 0.5*sin(iTime*0.2+6.2831*random2(i_st+p)); \/\/animate\n\t\tp += .5  - f_st;\n\n        f.y = max(abs(p.x)*.866 - p.y*.5, p.y); \n        if (f.y < f.x)\n        {\n            m_dist = f.x;\n            f.x = f.y;\n            f.zw = p;\n        }\n        else if( f.y < m_dist )\n\t\t{\n\t\t\tm_dist = f.y;\n\t\t}\n    }\n\t\n    m_dist -= f.x;\n    \n    vec3 n = vec3(0);\n    \n    if ( (f.x - (-f.z*.866 - f.w*.5)) \t<.0001) \tn = vec3(0.940,0.860,0.907); \n\tif ( (f.x - (f.z*.866 - f.w*.5))\t<.0001) \tn = vec3(0.970,0.949,0.888);\n\tif ( (f.x - f.w)\t\t\t\t\t<.0001) \tn = vec3(0.871,0.900,0.960);\n\t\n    color =  n*(0.6+length(f.x)); \/\/base color + distance field shadow\n    color -= 0.45*pow(clamp(m_dist*4.0,0.0,1.0),0.2); \/\/edges\n    color *= 1.0-smoothstep(0.0,10.0,mod(length(f.x)*100.0,15.0))*0.06; \/\/gradient stripes\n    color *= 1.0-step(2.0,mod(length(f.x)*100.0,15.0))*0.05; \/\/thin light stripes\n\n    fragColor = vec4(color,1.);\n}\n","name":"Image","description":"","type":"image"}]},{"ver":"0.1","info":{"id":"ttd3Wr","date":"1576139234","viewed":399,"name":"Magnetic field indicators","username":"bitless","description":"An experiment with hexagonal tiling","likes":21,"published":1,"flags":0,"usePreview":0,"tags":[]},"renderpass":[{"inputs":[],"outputs":[{"id":"4dfGRr","channel":0}],"code":"\/\/ Author: bitless\n\/\/ Title: Magnetic field indicators\n\/\/ Thanks to Patricio Gonzalez Vivo & Jen Lowe for \"The Book of Shaders\"\n\/\/ and Fabrice Neyret (FabriceNeyret2) for https:\/\/shadertoyunofficial.wordpress.com\/\n\/\/ and Inigo Quilez (iq) for  https:\/\/iquilezles.org\/www\/index.htm\n\/\/ and whole Shadertoy community for inspiration.\n\n\/\/Force field function based on https:\/\/www.shadertoy.com\/view\/Xl2Gz1 by Gijs\n\n#define SCALE 10.\n\nvec4 hex(vec2 uv)\n{\n    vec2    rf = vec2(1.,1.73),\n            h = rf\/2.,\n            a = mod(uv,rf)-h,\n            b = mod(uv-h,rf)-h,\n            c = dot(a,a)<dot(b,b) ? a : b,\n            d = (uv-c)\/SCALE;\n    return vec4(c.x,c.y,d.x,d.y); \/\/local cell coord , cell center \n}\n\nvoid mainImage( out vec4 C, in vec2 P)\n{\n    vec2 r = iResolution.xy\n        ,uv = (P+P-r)\/r.y;\n    uv += uv * length(uv)*-.15;\n\n    vec4    hx = hex(uv*SCALE); \/\/hex grid\n    float \tl = length(hx.xy);\/\/dist to cell center\n    \n    vec2    d =  vec2(cos(iTime)*.5,sin(iTime)*.5),\n            d0 = d + vec2(cos(iTime*1.7)*.4,sin(iTime*1.7)*.4) - hx.zw, \/\/red pole\n            d1 = d - vec2(cos(iTime*1.7)*.4,sin(iTime*1.7)*.4) - hx.zw, \/\/blue pole\n            f = d0\/dot(d0,d0)-d1\/dot(d1,d1); \/\/force field vector\n    \n    float   dp = abs(dot(hx.xy*vec2(-1.,1),f.yx))\/length(f), \n            df = abs(dot(hx.xy,f))\/length(f);\n            \n    C = smoothstep (.08,.004, dp*df) \/\/ X shape\n         *smoothstep(.5,.45,l) \n         *(smoothstep(.15,.2,l) + smoothstep(.25,.0,l)) \/\/center circle\n         *(vec4(1.,0.,0.,1.)*dot(f,hx.xy)*length(d1) \/\/red light\n            +vec4(0.,0.,1.,1.)*(-dot(f,hx.xy))*length(d0) \/\/blue light\n            +vec4(.2,.2,.2,1.)); \/\/neutral light\n}","name":"Image","description":"","type":"image"}]},{"ver":"0.1","info":{"id":"NdK3R3","date":"1631871498","viewed":385,"name":"Strange Wave","username":"bitless","description":"A small experiment with my loved glowing neon lines.","likes":17,"published":1,"flags":0,"usePreview":0,"tags":[]},"renderpass":[{"inputs":[],"outputs":[{"id":"4dfGRr","channel":0}],"code":"\/\/ Author: bitless\n\/\/ Title: Strange Wave\n\n\/\/ Thanks to Patricio Gonzalez Vivo & Jen Lowe for \"The Book of Shaders\"\n\/\/ and Fabrice Neyret (FabriceNeyret2) for https:\/\/shadertoyunofficial.wordpress.com\/\n\/\/ and Inigo Quilez (iq) for  https:\/\/iquilezles.org\/www\/index.htm\n\/\/ and whole Shadertoy community for inspiration.\n\n#define r( n ) fract(sin(n)*43758.5453) \/\/random\n#define n(v) mix(r(floor(v)),r(floor(v)+1.),smoothstep(0.,1.,fract(v))) \n#define h(v) ( .6 + .6 * cos(6.3*(v) + vec4(0,23,21,0) ) ) \/\/hue\n\nvoid w(vec2 u, float s, inout vec4 C)\n{\n    float   t = n(u.x)*n(u.x-s-iTime)+.4 \/\/top edge\n            ,b = n(u.x+5.)*n(u.x-9.-s-iTime)-.8; \/\/bottom edge\n    \n    C = mix(C, \n            h(s*.2+iTime*.3+u.x*.1), \n            pow(abs((u.y-b)\/(t-b)-.5)*2.,9.)+.05)*smoothstep(0.,5.\/iResolution.y,(t-u.y)*(u.y-b));\n}\n\nvoid mainImage( out vec4 C, in vec2 g)\n{\n    vec2 r = iResolution.xy\n        ,u = (g+g-r)\/r.y;\n        \n    u.x-=iTime\/5.;\n    for (float s = 1.5; s > 0.; s-=.1)\n        w(u*vec2(2.,1.+s),-s,C);\n}","name":"Image","description":"","type":"image"}]}];var gFollow = -1;
+    var gUseScreenshots = piIsMobile();
     var gThemeName = "classic";
-
-    function onDeleteShader(shaderID)
-    {
-        var playlistID = gPlaylistID;
-
-        var req = new XMLHttpRequest();
-        req.onload = function()
-        {
-            var jsn = req.response;
-            if( jsn==null ) return;
-            if( jsn.result!=0 )
-            {
-                alert( "The shader couldn't be removed from the playlist. Please try again." );
-                console.log( "Error: The shader couldn't be removed from the playlist. Please try again." );
-            }
-            else
-            {
-                window.location.reload();
-            }
-        }
-        req.open( "POST", "/shadertoy", true );
-        req.responseType = "json";
-        req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        var str = "prs=1&pid=" + playlistID + "&sid=" + shaderID;
-        req.send( str );
-    }
     </script>
+
 </head>
 
-<body onload="resultsInit(12,onDeleteShader,'Shaders of the Week');">
+<body onload="resultsInitStatic(8,null,null)">
 
 <!-- header =================================================================================== -->
 
@@ -8755,40 +8765,83 @@ var gPlaylistID="week";    var gUseScreenshots = piIsMobile();
 
 <div id="content">
 
-  <div>
-        <span style="font-size:1.5em">
-        <br>
-        <span style="font-weight:bold;font-size:2.0em;margin-right:8px;">Shaders of the Week</span> by <a class='user' href='/user/shadertoy'> shadertoy </a>
+    
+    <script>
+    function follow()
+    {
+        if (gFollow < 0) return;
+        try
+        {
+            var req = new XMLHttpRequest();
+            req.onload = function()
+            {
+                var jsn = req.response;
+                if( jsn==null ) return;
+                let btnFollow = document.getElementById( "btnFollow");
+                if (gFollow == 1) {
+                    gFollow = 0;
+                    btnFollow.value="Follow";
+                } else if (gFollow == 0) {
+                    gFollow = 1;
+                    btnFollow.value="Unfollow";
+                }
+            }
+            req.open( "POST", "/shadertoy", true );
+            req.responseType = "json";
+            req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            if (gFollow == 1) {
+                var str = "fu=1&uid=bitless";
+            } else if (gFollow == 0) {
+                var str = "fs=1&uid=bitless";
+            }
+            req.send( str );
+        }
+        catch(e)
+        {
+            alert( "exception: " + e );
+        }
+    }
+    </script>
 
-                <br>
-        <br>
-        Playlist with every single shader of the week ever.        </span>
-  </div>
+    <!-- ---------------------------------- --> 
+
+    <div id="divUser">
+        <table style="border:0px;border-spacing:0px;border-collapse:collapse;"><tr>
+        <td style="vertical-align:top;">
+        <img id="userPicture" src="/media/users/bitless/profile.jpeg"></img>        </td>
+        <td style="vertical-align:top;padding-left:16px;">
+        <b>Name</b>: bitless <br/><b>Joined</b>: October 6, 2019 <br/> <br/><b>Shaders</b>: 30<br/><b>Playlists</b>: 0<br/><b>Comments</b>: 50<br/> <br/><b>Following</b>: 17<br/><b>Followers</b>: 42<br/>        </td>
+        <td style="vertical-align:top;padding-left:32px;">
+        <b>About</b><br><br>GIS specialist, database engineer and an old demoscene fan        </td>
+        <td style="vertical-align:top;padding-left:32px;">
+                    </td>
+        </tr></table>
+    </div>
+
+<!-- --------------------------- -->
 
   <div id="controls">
 
-  <!--
-      <div id="goSlideshow"><a class="pageButtons" href="/slideshow?playlist=week&sort=popular">Slideshow</a></div>
-  -->
-      <div>
+    <div>
+      <div style="text-align: center; vertical-align: middle; display: inline-block; padding-bottom:5px; padding-top:4px; margin-right:8px; margin-bottom:8px; margin-top:8px;">
+      Sort:      </div>
+      <div class="controlOptions"><div class="pageButtonsCurrent" href="/user/bitless/sort=popular">Popular</div><a class="pageButtons" href="/user/bitless/sort=newest">Newest</a><a class="pageButtons" href="/user/bitless/sort=love">Love</a></div>
+    </div>
+
+    <div id="controlFilter">
+      <div style="display:flex;margin-right:8px;align-items:center;">Filter:</div>
+      <div class="controlOptions"> <a class="pageButtons" href="/user/bitless&sort=popular&filter=multipass">Multipass</a><a class="pageButtons" href="/user/bitless&sort=popular&filter=soundoutput">GPU Sound</a><a class="pageButtons" href="/user/bitless&sort=popular&filter=vr">VR</a><a class="pageButtons" href="/user/bitless&sort=popular&filter=soundinput">Microphone</a><a class="pageButtons" href="/user/bitless&sort=popular&filter=musicstream">Soundcloud</a><a class="pageButtons" href="/user/bitless&sort=popular&filter=webcam">Webcam</a></div>
+    </div>
+
+    <div>
         <div style="text-align: center; vertical-align: middle; display: inline-block; padding-bottom:5px; padding-top:4px; margin-right:8px; margin-bottom:8px; margin-top:8px;">
-        View:</div>
-        <div><a class="pageButtons" href="/slideshow?playlist=week&sort=popular">Slideshow</a></div>
-      </div>
-
-
-
-      <div>
-
-        <div style="text-align: center; vertical-align: middle; display: inline-block; padding-bottom:5px; padding-top:4px; margin-right:8px; margin-bottom:8px; margin-top:8px;">
-        36 Shaders:        </div>
+        Results (30):        </div>
 
         <div class="controlOptions">
-    
-              <div id="pageButton"0 class="pageButtonsCurrent" href='week&from=0&num=12'>1</div><a id="pageButton"1 class="pageButtons" href='week&from=12&num=12'>2</a><a id="pageButton"2 class="pageButtons" href='week&from=24&num=12'>3</a><span>...</span><a id="pageButtonLast" class="pageButtons" href='week?from=468&num=12'>40</a>
-        </div>
-      </div>
+              <div id="pageButton"0 class="pageButtonsCurrent" href="/user/bitless/sort=popular&from=0&num=8">1</div><a id="pageButton"1 class="pageButtons" href="/user/bitless/sort=popular&from=8&num=8">2</a><a id="pageButton"2 class="pageButtons" href="/user/bitless/sort=popular&from=16&num=8">3</a><span>...</span><a id="pageButtonLast" class="pageButtons" href="/user/bitless/sort=popular&from=24&num=8">4</a>        </div>
+    </div>
   </div>
+
 
   <div id="shaderGrid">
     <div class='searchResult'><div class='searchResultContainer' id='Preview_0_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_0_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_0_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_0_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_0_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_0_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_0_Thumnail'>        <img class='previewThumbnailImage' id='Preview_0_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_0_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
@@ -8807,15 +8860,7 @@ Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas 
 Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_6_ThumnailWarning2' title='You are using static shader previews.
 Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_6_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_6_Info'>  <span class='previewText'  id='Preview_6_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_6_TextUser'></span>  <span class='previewStats' id='Preview_6_Stats'></span></div></div><div class='searchResult'><div class='searchResultContainer' id='Preview_7_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_7_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_7_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_7_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_7_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_7_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_7_Thumnail'>        <img class='previewThumbnailImage' id='Preview_7_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_7_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
 Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_7_ThumnailWarning2' title='You are using static shader previews.
-Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_7_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_7_Info'>  <span class='previewText'  id='Preview_7_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_7_TextUser'></span>  <span class='previewStats' id='Preview_7_Stats'></span></div></div><div class='searchResult'><div class='searchResultContainer' id='Preview_8_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_8_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_8_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_8_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_8_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_8_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_8_Thumnail'>        <img class='previewThumbnailImage' id='Preview_8_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_8_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
-Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_8_ThumnailWarning2' title='You are using static shader previews.
-Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_8_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_8_Info'>  <span class='previewText'  id='Preview_8_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_8_TextUser'></span>  <span class='previewStats' id='Preview_8_Stats'></span></div></div><div class='searchResult'><div class='searchResultContainer' id='Preview_9_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_9_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_9_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_9_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_9_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_9_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_9_Thumnail'>        <img class='previewThumbnailImage' id='Preview_9_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_9_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
-Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_9_ThumnailWarning2' title='You are using static shader previews.
-Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_9_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_9_Info'>  <span class='previewText'  id='Preview_9_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_9_TextUser'></span>  <span class='previewStats' id='Preview_9_Stats'></span></div></div><div class='searchResult'><div class='searchResultContainer' id='Preview_10_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_10_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_10_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_10_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_10_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_10_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_10_Thumnail'>        <img class='previewThumbnailImage' id='Preview_10_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_10_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
-Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_10_ThumnailWarning2' title='You are using static shader previews.
-Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_10_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_10_Info'>  <span class='previewText'  id='Preview_10_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_10_TextUser'></span>  <span class='previewStats' id='Preview_10_Stats'></span></div></div><div class='searchResult'><div class='searchResultContainer' id='Preview_11_Container'>  <a class='shaderPreview searchResultCanvas' id='Preview_11_Link'>    <div class='previewNoGLContainter searchResultCanvas' id='Preview_11_NoWebGL'>        <img class='previewThumbnailImage' id='Preview_11_ThumnailImageNoWebGL'></img>        <div class='previewNoGLMessage' id='Preview_11_MessageNoWebGL'>No Screenshot Availabe</div>    </div>    <div class='previewErrorContainer searchResultCanvas' id='Preview_11_Error'>        <div class='previewErrorMessage'>Shader Error</div>    </div>    <div class='previewThumbnailContainer searchResultCanvas' id='Preview_11_Thumnail'>        <img class='previewThumbnailImage' id='Preview_11_ThumnailImage'></img>        <div class='previewThumbnailIcon' id='Preview_11_ThumnailWarning1' title='This shader takes too long to compile, a preview image is shown instead to improve browsing.
-Click on the shader to see it in real-time.'>Warning</div>        <div class='previewThumbnailIcon' id='Preview_11_ThumnailWarning2' title='You are using static shader previews.
-Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_11_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_11_Info'>  <span class='previewText'  id='Preview_11_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_11_TextUser'></span>  <span class='previewStats' id='Preview_11_Stats'></span></div></div>  </div>
+Click on the shader to see it in real-time.'>Preview</div>    </div>    <canvas class='previewCanvas searchResultCanvas' id='Preview_7_Canvas'></canvas>  </a></div><div class='previewInfo' id='Preview_7_Info'>  <span class='previewText'  id='Preview_7_Text'></span>  <span>by</span>  <span class='previewTextUser'  id='Preview_7_TextUser'></span>  <span class='previewStats' id='Preview_7_Stats'></span></div></div>  </div>
 </div>
 
 <!-- footer ================================================================================== -->
@@ -8921,5 +8966,6 @@ function acceptCompliance()
 
     ga('create', 'UA-44068895-1', 'shadertoy.com');
     ga('send', 'pageview');
-</script></body>
+</script>
+</body>
 </html>

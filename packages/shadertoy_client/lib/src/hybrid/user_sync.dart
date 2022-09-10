@@ -86,7 +86,7 @@ class UserSyncProcessor extends SyncProcessor {
 
   /// A [Glob] defining the location of the local user media files
   static final Glob _userMediaFiles = Glob(
-      '**/{${ShadertoyContext.userMediaPath}/*/{*.jpg,*.png,*.jpeg,*.gif},${ShadertoyContext.imgPath}/profile.jpg}');
+      '{${ShadertoyContext.userMediaPath}/*/{*.jpg,*.png,*.jpeg,*.gif},${ShadertoyContext.imgPath}/profile.jpg}');
 
   /// The [UserSyncProcessor] constructur
   ///
