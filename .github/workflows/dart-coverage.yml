@@ -41,8 +41,7 @@ jobs:
 
       - name: Bootstrap
         run: |
-          melos build
-          melos get
+          melos bs
 
       - name: Coverage
         run: |

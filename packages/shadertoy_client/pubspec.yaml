@@ -1,16 +1,16 @@
 name: shadertoy_client
-version: 2.0.3
+version: 2.1.0
 publish_to: none
 description: >-
   An http client implementation of the shadertoy API using
   Dio Http client. Supports the REST API (using an application key) 
   and the Site API (registered and anonymous users)
-homepage: https://pub.dev/packages/shadertoy
+homepage: https://github.com/ivoleitao/shadertoy
 repository: https://github.com/ivoleitao/shadertoy
 issue_tracker: https://github.com/ivoleitao/shadertoy/issues
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '>=2.18.0 <3.0.0'
 
 dependencies:
   # Flutter shared dependencies

@@ -8,7 +8,7 @@ A [shadertoy](https://github.com/ivoleitao/shadertoy) HTTP client implementation
 
 ## Overview
 
-This package implements the client APIs defined in the [shadertoy](https://pub.dev/packages/shadertoy) package providing access to the [Shadertoy](https://www.shadertoy.com) REST and Site APIs. 
+This package implements the client APIs defined in the [shadertoy](https://github.com/ivoleitao/shadertoy) package providing access to the [Shadertoy](https://www.shadertoy.com) REST and Site APIs. 
 
 ## Getting Started
 

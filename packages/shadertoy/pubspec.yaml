@@ -1,15 +1,15 @@
 name: shadertoy
-version: 2.0.3
+version: 2.1.0
 publish_to: none
 description: >-
   Main entities and contracts supported by the shadertoy REST and WEB APIs. 
   Can be used to create shadertoy web or persistent clients.
-homepage: https://pub.dev/packages/shadertoy
+homepage: https://github.com/ivoleitao/shadertoy
 repository: https://github.com/ivoleitao/shadertoy
 issue_tracker: https://github.com/ivoleitao/shadertoy/issues
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '>=2.18.0 <3.0.0'
 
 dependencies:
   # Flutter shared dependencies

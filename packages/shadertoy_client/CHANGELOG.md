@@ -1,3 +1,10 @@
+# 2.1.0
+
+- BREAKING CHANGE: Changed minimum sdk version
+- chore: Updated dependencies
+- fix: tons of bugs
+- feat: much better unit tests for the sync
+
 ## 2.0.3
 
 - Updated dependencies

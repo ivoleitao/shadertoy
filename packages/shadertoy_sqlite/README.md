@@ -8,7 +8,7 @@ A [shadertoy](https://github.com/ivoleitao/shadertoy) storage implementation on 
 
 ## Overview
 
-This package implements the storage APIs defined in the [shadertoy](https://pub.dev/packages/shadertoy) package on sqlite through the [drift](https://pub.dev/packages/drift) package
+This package implements the storage APIs defined in the [shadertoy](https://github.com/ivoleitao/shadertoy) package on sqlite through the [drift](https://pub.dev/packages/drift) package
 
 ## Getting Started
 

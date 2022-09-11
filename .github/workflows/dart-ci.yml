@@ -52,8 +52,7 @@ jobs:
 
       - name: Bootstrap
         run: |
-          melos build
-          melos get
+          melos bs
           
       - name: Linter
         run: |
@@ -70,4 +69,5 @@ jobs:
 
       - name: Verify
         run: |
+          melos clean
           melos verify
