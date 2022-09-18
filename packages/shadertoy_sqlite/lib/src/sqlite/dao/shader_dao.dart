@@ -3,15 +3,15 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_sqlite/src/sqlite/store.dart';
+import 'package:shadertoy_sqlite/src/sqlite/table/comment_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/playlist_shader_table.dart';
-import 'package:shadertoy_sqlite/src/sqlite/table/playlist_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/shader_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/sync_table.dart';
 
 part 'shader_dao.g.dart';
 
 @DriftAccessor(
-    tables: [ShaderTable, PlaylistTable, PlaylistShaderTable, SyncTable],
+    tables: [ShaderTable, CommentTable, PlaylistShaderTable, SyncTable],
     queries: {'shaderId': 'SELECT id FROM Shader'})
 
 /// Shader data access object
@@ -322,7 +322,8 @@ class ShaderDao extends DatabaseAccessor<DriftStore> with _$ShaderDaoMixin {
   /// Deletes a [Shader] by [shaderId]
   ///
   /// * [shaderId]: The id of the [Shader]
-  Future<void> deleteById(String shaderId) {
+  /// * [foreignKeysEnabled]: If the foreign keys are enabled
+  Future<void> deleteById(String shaderId, {bool foreignKeysEnabled = true}) {
     return transaction(() async {
       // Delete any sync reference
       await (delete(syncTable)
@@ -330,6 +331,19 @@ class ShaderDao extends DatabaseAccessor<DriftStore> with _$ShaderDaoMixin {
                 sync.type.equals(SyncType.shader.name) &
                 sync.target.equals(shaderId)))
           .go();
+
+      if (!foreignKeysEnabled) {
+        // Delete the comment references
+        await (delete(commentTable)
+              ..where((comment) => comment.shaderId.equals(shaderId)))
+            .go();
+
+        // Delete the playlist references
+        await (delete(playlistShaderTable)
+              ..where(
+                  (playlistShader) => playlistShader.shaderId.equals(shaderId)))
+            .go();
+      }
 
       // Delete the shader
       await (delete(shaderTable)..where((shader) => shader.id.equals(shaderId)))

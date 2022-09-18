@@ -18,8 +18,9 @@ class SqliteCommand extends DatabaseCommand {
   SqliteCommand();
 
   @override
-  ShadertoyStore newMetadataStore(String path) {
-    return newShadertoySqliteStore(file: File(path), logStatements: verbose);
+  Future<ShadertoyStore> newMetadataStore(String path) {
+    return newShadertoySqliteLocalStore(
+        path: path, logStatementsEnabled: verbose);
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:shadertoy_sqlite/src/sqlite/table/shader_table.dart';
 
 @DataClassName('CommentEntry')
 
@@ -11,8 +12,8 @@ class CommentTable extends Table {
   TextColumn get id => text()();
 
   /// The shader id
-  TextColumn get shaderId => text()
-      .customConstraint('NOT NULL REFERENCES Shader(id) ON DELETE CASCADE')();
+  TextColumn get shaderId =>
+      text().references(ShaderTable, #id, onDelete: KeyAction.cascade)();
 
   /// The user id
   TextColumn get userId => text()();

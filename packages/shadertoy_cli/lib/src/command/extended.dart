@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
@@ -18,7 +16,7 @@ abstract class ExtendedCommand extends MultiCommand
   }
 
   @override
-  void run() {
+  void run() async {
     final user = argResults?['user'];
     final password = argResults?['password'];
     final apiKey = argResults?['apiKey'];
@@ -26,8 +24,8 @@ abstract class ExtendedCommand extends MultiCommand
 
     ShadertoyExtendedClient client;
     if (dbPath != null) {
-      client =
-          newShadertoySqliteStore(file: File(dbPath), logStatements: verbose);
+      client = await newShadertoySqliteLocalStore(
+          path: dbPath, logStatementsEnabled: verbose);
     } else {
       client = newShadertoyHybridClient(
           apiKey: apiKey, user: user, password: password);

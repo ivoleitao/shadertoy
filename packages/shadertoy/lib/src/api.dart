@@ -246,25 +246,6 @@ abstract class ShadertoyBaseClient implements ShadertoyClient {
   ShadertoyBaseClient(String baseUrl) : context = ShadertoyContext(baseUrl);
 }
 
-/// Extensions for [ShadertoyClient] implementors
-extension ShadertoyClientExtension on ShadertoyClient {
-  Future<R> catchError<R extends APIResponse, E>(
-      Future<R> future, R Function(E) handle, ErrorMode errorMode) {
-    return future.catchError((e) {
-      if (e is E) {
-        final apiResponse = handle(e);
-        if (errorMode == ErrorMode.handleAndReturn) {
-          return Future.value(apiResponse);
-        } else if (errorMode == ErrorMode.handleAndRetrow) {
-          return Future<R>.error(apiResponse.error ??
-              ResponseError.unknown(message: 'Unknown Error'));
-        }
-      }
-      return Future<R>.error(e);
-    });
-  }
-}
-
 /// A definition of a shadertoy store
 ///
 /// It supports the same operations as [ShadertoyExtendedClient] plus

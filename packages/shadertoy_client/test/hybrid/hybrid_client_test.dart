@@ -322,7 +322,7 @@ void main() {
     test('Find new shader ids with WS client', () async {
       // prepare
       final options = newWSOptions();
-      final num = options.shaderCount;
+      final num = ShadertoySqliteOptions.defaultShaderCount;
       final shaders1 = [
         'shaders/voxel_game_evolution.json', // wsByWV 1587452922
         'shaders/kleinian_variations.json', // ldSyRd 1493419573
@@ -772,7 +772,7 @@ void main() {
             num: siteOptions.pagePlaylistShaderCount)
         ..addShadersRoute(playlistShaders, siteOptions);
 
-      final metadataStore = newShadertoySqliteStore();
+      final metadataStore = await newShadertoySqliteMemoryStore();
       final assetStore = await newMemoryVaultStore();
       final api = newClient(adapter, siteOptions: siteOptions);
 

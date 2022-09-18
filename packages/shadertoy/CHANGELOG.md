@@ -66,7 +66,7 @@
 
 ## 1.0.13
 
-- `catchError` is not an extension of the ShadertoyClient 
+- `catchError` is now an extension of the ShadertoyClient 
 
 ## 1.0.12
 

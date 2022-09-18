@@ -1,41 +1,24 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
+import 'package:resource_portable/resource.dart' show Resource;
 import 'package:shadertoy/shadertoy_api.dart';
-import 'package:universal_platform/universal_platform.dart';
 
-bool _isWeb() => UniversalPlatform.isWeb;
+Resource _resourceFixture(String path) {
+  final baseUri = Uri.base;
 
-File _fileFixture(String path) => File('test/fixtures/$path');
+  return Resource(baseUri.isScheme('file')
+      ? baseUri.resolve('test/fixtures/$path')
+      : baseUri.resolve('fixtures/$path'));
+}
 
-Future<Uint8List> binaryFileFixture(String path) =>
-    _fileFixture(path).readAsBytes();
-
-Future<Uint8List> binaryHttpFixture(String path) => Dio()
-    .get<Uint8List>(Uri.base.resolve('../fixtures/$path').toString(),
-        options: Options(responseType: ResponseType.bytes))
-    .then((response) => response.data!);
-
-Future<Uint8List> binaryFixture(String path) =>
-    _isWeb() ? binaryHttpFixture(path) : binaryFileFixture(path);
-
-Future<String> textFileFixture(String path) =>
-    _fileFixture(path).readAsString();
-
-Future<String> textHttpFixture(String path) => Dio()
-    .get<String>(Uri.base.resolve('../fixtures/$path').toString())
-    .then((response) => response.data!);
-
-Future<String> textFixture(String path) =>
-    _isWeb() ? textHttpFixture(path) : textFileFixture(path);
+Future<String> _textFixture(String path) =>
+    _resourceFixture(path).readAsString(encoding: utf8);
 
 Future<Map<String, dynamic>> jsonFixture(String path) =>
-    textFixture(path).then((text) => json.decode(text));
+    _textFixture(path).then((text) => json.decode(text));
 
 Future<List> jsonListFixture(String path) =>
-    textFixture(path).then((text) => json.decode(text));
+    _textFixture(path).then((text) => json.decode(text));
 
 Future<User> userFixture(String path) =>
     jsonFixture(path).then((json) => User.fromJson(json));

@@ -1,4 +1,6 @@
 import 'package:drift/drift.dart';
+import 'package:shadertoy_sqlite/src/sqlite/table/playlist_table.dart';
+import 'package:shadertoy_sqlite/src/sqlite/table/shader_table.dart';
 
 @DataClassName('PlaylistShaderEntry')
 
@@ -8,12 +10,12 @@ class PlaylistShaderTable extends Table {
   String get tableName => 'PlaylistShader';
 
   /// The playlist id
-  TextColumn get playlistId => text()
-      .customConstraint('NOT NULL REFERENCES Playlist(id) ON DELETE CASCADE')();
+  TextColumn get playlistId =>
+      text().references(PlaylistTable, #id, onDelete: KeyAction.cascade)();
 
   /// The shader id
-  TextColumn get shaderId => text()
-      .customConstraint('NOT NULL REFERENCES Shader(id) ON DELETE CASCADE')();
+  TextColumn get shaderId =>
+      text().references(ShaderTable, #id, onDelete: KeyAction.cascade)();
 
   /// The order of the shader on the playlist
   IntColumn get order => integer()();

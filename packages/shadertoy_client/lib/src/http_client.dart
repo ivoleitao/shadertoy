@@ -8,6 +8,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:pool/pool.dart';
 import 'package:retry/retry.dart';
 import 'package:shadertoy/shadertoy_api.dart';
+import 'package:shadertoy/shadertoy_util.dart';
 import 'package:shadertoy_client/src/http_options.dart';
 
 /// The base Shadertoy http client class

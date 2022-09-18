@@ -1,31 +1,11 @@
-import 'package:drift/drift.dart' show QueryExecutor, driftRuntimeOptions;
-import 'package:drift/native.dart';
+import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:shadertoy/shadertoy_api.dart';
-import 'package:shadertoy_sqlite/src/sqlite/store.dart';
-import 'package:shadertoy_sqlite/src/sqlite_options.dart';
-import 'package:shadertoy_sqlite/src/sqlite_store.dart';
+import 'package:shadertoy_sqlite/shadertoy_sqlite.dart';
 import 'package:test/test.dart';
 
 import 'fixtures/fixtures.dart';
 
 void main() {
-  ShadertoySqliteOptions newOptions() {
-    return ShadertoySqliteOptions();
-  }
-
-  QueryExecutor memoryExecutor({bool logStatements = false}) {
-    return NativeDatabase.memory(logStatements: logStatements);
-  }
-
-  DriftStore newStore(QueryExecutor? executor) {
-    return DriftStore(executor ?? memoryExecutor());
-  }
-
-  ShadertoySqliteStore newDriftStore(ShadertoySqliteOptions options,
-      {QueryExecutor? executor}) {
-    return ShadertoySqliteStore(newStore(executor), options);
-  }
-
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
 
   Future<List<FindShaderResponse>> getNameSort(List<String> shaderPaths) async {
@@ -130,8 +110,7 @@ void main() {
   group('Shader', () {
     test('Save shader', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shader = await shaderFixture('shaders/happy_jumping.json');
       // act
       final response = await store.saveShader(shader);
@@ -142,8 +121,7 @@ void main() {
 
     test('Save shaders', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaders = await shadersFixture(
           ['shaders/seascape.json', 'shaders/happy_jumping.json']);
       // act
@@ -155,8 +133,7 @@ void main() {
 
     test('Save shader twice', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final originalShader = await shaderFixture('shaders/happy_jumping.json');
       final updatedShader = originalShader.copyWith(version: 'a');
       // act
@@ -171,8 +148,7 @@ void main() {
 
     test('Find shader by id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shader = await shaderFixture('shaders/happy_jumping.json');
       await store.saveShader(shader);
       // act
@@ -185,8 +161,7 @@ void main() {
 
     test('Find shader by id with not found response', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderId = 'xxxx';
       // act
       final response = await store.findShaderById(shaderId);
@@ -203,8 +178,7 @@ void main() {
 
     test('Find shaders by id set', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/seascape.json',
         'shaders/happy_jumping.json'
@@ -220,8 +194,7 @@ void main() {
 
     test('Find shader ids by query', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/clouds.json',
         'shaders/elevated.json',
@@ -249,8 +222,7 @@ void main() {
 
     test('Find all shader ids', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/seascape.json',
         'shaders/happy_jumping.json'
@@ -270,8 +242,7 @@ void main() {
 
     test('Find shaders', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/clouds.json',
         'shaders/creation.json',
@@ -294,17 +265,16 @@ void main() {
       final response = await store.findShaders();
       // assert
       final actual = response.shaders ?? [];
-      final expected =
-          (await getHotSort(shaderPaths)).take(options.shaderCount);
+      final expected = (await getHotSort(shaderPaths))
+          .take(ShadertoySqliteOptions.defaultShaderCount);
 
-      expect(actual.length, options.shaderCount);
+      expect(actual.length, ShadertoySqliteOptions.defaultShaderCount);
       expect(actual, containsAllInOrder(expected));
     });
 
     test('Find shaders, sort by name asc', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/clouds.json',
         'shaders/creation.json',
@@ -325,16 +295,15 @@ void main() {
       final response = await store.findShaders(sort: Sort.name);
       // assert
       final actual = response.shaders;
-      final expected =
-          (await getNameSort(shaderPaths)).take(options.shaderCount);
+      final expected = (await getNameSort(shaderPaths))
+          .take(ShadertoySqliteOptions.defaultShaderCount);
 
       expect(actual, containsAllInOrder(expected));
     });
 
     test('Find shaders, sort by popularity (views)', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/clouds.json',
         'shaders/creation.json',
@@ -355,16 +324,15 @@ void main() {
       final response = await store.findShaders(sort: Sort.popular);
       // assert
       final actual = response.shaders;
-      final expected =
-          (await getPopularitySort(shaderPaths)).take(options.shaderCount);
+      final expected = (await getPopularitySort(shaderPaths))
+          .take(ShadertoySqliteOptions.defaultShaderCount);
 
       expect(actual, containsAllInOrder(expected));
     });
 
     test('Find shaders, sort by date desc', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/clouds.json',
         'shaders/creation.json',
@@ -385,16 +353,15 @@ void main() {
       final response = await store.findShaders(sort: Sort.newest);
       // assert
       final actual = response.shaders;
-      final expected =
-          (await getDateSort(shaderPaths)).take(options.shaderCount);
+      final expected = (await getDateSort(shaderPaths))
+          .take(ShadertoySqliteOptions.defaultShaderCount);
 
       expect(actual, containsAllInOrder(expected));
     });
 
     test('Find shaders, sort by love (likes) desc', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/clouds.json',
         'shaders/creation.json',
@@ -415,16 +382,15 @@ void main() {
       final response = await store.findShaders(sort: Sort.love);
       // assert
       final actual = response.shaders;
-      final expected =
-          (await getLoveSort(shaderPaths)).take(options.shaderCount);
+      final expected = (await getLoveSort(shaderPaths))
+          .take(ShadertoySqliteOptions.defaultShaderCount);
 
       expect(actual, containsAllInOrder(expected));
     });
 
     test('Find shaders, sort by hot desc', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
 
       final shaderPaths = [
         'shaders/day_at_the_lake.json',
@@ -447,16 +413,15 @@ void main() {
       final response = await store.findShaders(sort: Sort.hot);
       // assert
       final actual = response.shaders;
-      final expected =
-          (await getHotSort(shaderPaths)).take(options.shaderCount);
+      final expected = (await getHotSort(shaderPaths))
+          .take(ShadertoySqliteOptions.defaultShaderCount);
 
       expect(actual, containsAllInOrder(expected));
     });
 
     test('Find shaders by term', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/clouds.json',
         'shaders/creation.json',
@@ -486,8 +451,7 @@ void main() {
 
     test('Find shaders by tag', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/clouds.json',
         'shaders/creation.json',
@@ -517,8 +481,7 @@ void main() {
 
     test('Find shaders by query', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/clouds.json',
         'shaders/creation.json',
@@ -550,8 +513,7 @@ void main() {
     /*
     test('Find shaders with from and limit', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/clouds.json',
         'shaders/creation.json',
@@ -580,8 +542,7 @@ void main() {
 
     test('Find all shaders', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shaderPaths = [
         'shaders/seascape.json',
         'shaders/happy_jumping.json'
@@ -602,8 +563,7 @@ void main() {
 
     test('Delete shader by id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shader = await shaderFixture('shaders/happy_jumping.json');
       await store.saveShader(shader);
       final fsr1 = await store.findShaderById(shader.info.id);
@@ -619,8 +579,7 @@ void main() {
 
     test('Delete shader by id with comments', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shader = await shaderFixture('shaders/elevated.json');
       final shaderId = shader.info.id;
       await store.saveShader(shader);
@@ -628,7 +587,7 @@ void main() {
       await store.saveShaderComments(shaderId, comments);
       final fcr1 = await store.findCommentsByShaderId(shaderId);
       // act
-      final dsr = await store.deleteShaderById(shader.info.id);
+      final dsr = await store.deleteShaderById(shaderId);
       final fcr2 = await store.findCommentsByShaderId(shaderId);
       // assert
       expect(fcr1.comments, isNotEmpty);
@@ -639,8 +598,7 @@ void main() {
 
     test('Delete shader by id with playlist reference', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final shaderPaths = [
         'shaders/seascape.json',
@@ -668,8 +626,7 @@ void main() {
   group('User', () {
     test('Save user', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final userId = 'iq';
       final user = await userFixture('users/$userId.json');
       // act
@@ -681,8 +638,7 @@ void main() {
 
     test('Save users', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final users =
           await usersFixture(['users/iq.json', 'users/shaderflix.json']);
       // act
@@ -694,8 +650,7 @@ void main() {
 
     test('Save user twice', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final userId = 'iq';
       final originalUser = await userFixture('users/$userId.json');
       final updatedUser = originalUser.copyWith(followers: 1);
@@ -711,8 +666,7 @@ void main() {
 
     test('Find user by id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final user = await userFixture('users/iq.json');
       await store.saveUser(user);
       // act
@@ -725,9 +679,8 @@ void main() {
 
     test('Find user by id with not found response', () async {
       // prepare
-      final options = newOptions();
       final userId = 'xxx';
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       // act
       final response = await store.findUserById(userId);
       // assert
@@ -742,8 +695,7 @@ void main() {
     });
 
     test('Find shaders by user id', () async {
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final userId = 'iq';
       final user = await userFixture('users/$userId.json');
       await store.saveUser(user);
@@ -772,14 +724,13 @@ void main() {
       final expected = await getPopularitySort(shaderPaths);
       final expectedShaders = expected
           .where((element) => element.shader?.info.userId == userId)
-          .take(options.userShaderCount);
+          .take(ShadertoySqliteOptions.defaultUserShaderCount);
 
       expect(actualShaders, containsAllInOrder(expectedShaders));
     });
 
     test('Find shader ids by user id', () async {
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final userId = 'iq';
       final user = await userFixture('users/$userId.json');
       await store.saveUser(user);
@@ -808,7 +759,7 @@ void main() {
       final expected = await getPopularitySort(shaderPaths);
       final expectedShaders = expected
           .where((element) => element.shader?.info.userId == userId)
-          .take(options.userShaderCount)
+          .take(ShadertoySqliteOptions.defaultShaderCount)
           .map((e) => e.shader?.info.id)
           .toList();
 
@@ -817,8 +768,7 @@ void main() {
 
     test('Find all shader ids by user id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final user = await userFixture('users/iq.json');
       await store.saveUser(user);
       final shaderPaths = [
@@ -842,8 +792,7 @@ void main() {
 
     test('Find all user ids', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final userPaths = ['users/iq.json', 'users/shaderflix.json'];
       final users = await usersFixture(userPaths);
       await store.saveUsers(users);
@@ -860,8 +809,7 @@ void main() {
 
     test('Find all users', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final userPaths = ['users/iq.json', 'users/shaderflix.json'];
       final users = await usersFixture(userPaths);
       await store.saveUsers(users);
@@ -878,8 +826,7 @@ void main() {
 
     test('Delete user by id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final userId = 'iq';
       final user = await userFixture('users/$userId.json');
       await store.saveUser(user);
@@ -898,8 +845,7 @@ void main() {
   group('Comment', () {
     test('Save comment', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shader = await shaderFixture('shaders/elevated.json');
       final shaderId = shader.info.id;
       await store.saveShader(shader);
@@ -913,8 +859,7 @@ void main() {
 
     test('Save comments twice', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shader = await shaderFixture('shaders/elevated.json');
       final shaderId = shader.info.id;
       await store.saveShader(shader);
@@ -934,8 +879,7 @@ void main() {
 
     test('Find comment by id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shader = await shaderFixture('shaders/elevated.json');
       final shaderId = shader.info.id;
       await store.saveShader(shader);
@@ -951,8 +895,7 @@ void main() {
 
     test('Find all comment ids', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shader = await shaderFixture('shaders/elevated.json');
       final shaderId = shader.info.id;
       await store.saveShader(shader);
@@ -972,8 +915,7 @@ void main() {
 
     test('Find all comments', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shader = await shaderFixture('shaders/elevated.json');
       final shaderId = shader.info.id;
       await store.saveShader(shader);
@@ -993,8 +935,7 @@ void main() {
 
     test('Delete comment by id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final shader = await shaderFixture('shaders/elevated.json');
       final shaderId = shader.info.id;
       await store.saveShader(shader);
@@ -1015,8 +956,7 @@ void main() {
   group('Playlist', () {
     test('Save playlist', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final playlist = await playlistFixture('playlist/$playlistId.json');
       // act
@@ -1028,8 +968,7 @@ void main() {
 
     test('Save playlist twice', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final originalPlaylist =
           await playlistFixture('playlist/$playlistId.json');
@@ -1046,8 +985,7 @@ void main() {
 
     test('Save playlist with shader ids', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final shaderPaths = [
         'shaders/seascape.json',
@@ -1066,9 +1004,8 @@ void main() {
 
     test('Find playlist by id with not found response', () async {
       // prepare
-      final options = newOptions();
       final playlistId = 'xxx';
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       // act
       final response = await store.findPlaylistById(playlistId);
       // assert
@@ -1084,8 +1021,7 @@ void main() {
 
     test('Find all playlist ids', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId1 = 'week';
       final playlist1Path = 'playlist/$playlistId1.json';
       final playlist1 = await playlistFixture(playlist1Path);
@@ -1109,8 +1045,7 @@ void main() {
 
     test('Find all playlists', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId1 = 'week';
       final playlist1Path = 'playlist/$playlistId1.json';
       final playlist1 = await playlistFixture(playlist1Path);
@@ -1134,8 +1069,7 @@ void main() {
 
     test('Save playlist shaders', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final shaderPaths = [
         'shaders/seascape.json',
@@ -1155,8 +1089,7 @@ void main() {
 
     test('Save playlist shader ids with FOREIGN KEY constraint', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final shaderPaths = [
         'shaders/seascape.json',
@@ -1177,12 +1110,11 @@ void main() {
               message: 'FOREIGN KEY constraint failed',
               context: contextPlaylist,
               target: playlistId));
-    });
+    }, onPlatform: {'chrome': Skip('Foreign keys are not working on chrome')});
 
     test('Save playlist shader ids', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final shaderPaths = [
         'shaders/seascape.json',
@@ -1202,8 +1134,7 @@ void main() {
 
     test('Find shaders by playlist id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final shaderPaths = [
         'shaders/clouds.json',
@@ -1236,8 +1167,7 @@ void main() {
 
     test('Find shader ids by playlist id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final shaderPaths = [
         'shaders/clouds.json',
@@ -1270,8 +1200,7 @@ void main() {
 
     test('Find all shader ids by playlist id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final shaderPaths = [
         'shaders/clouds.json',
@@ -1304,8 +1233,7 @@ void main() {
 
     test('Delete playlist by id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final playlist = await playlistFixture('playlist/$playlistId.json');
       await store.savePlaylist(playlist);
@@ -1322,8 +1250,7 @@ void main() {
 
     test('Delete playlist by id with playlist reference', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final playlistId = 'week';
       final shaderPaths = [
         'shaders/seascape.json',
@@ -1350,8 +1277,7 @@ void main() {
   group('Sync', () {
     test('Save sync', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final sync = Sync(
           type: SyncType.shader,
           target: '3sBGRt',
@@ -1366,8 +1292,7 @@ void main() {
 
     test('Save syncs', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final syncs = [
         Sync(
             type: SyncType.shader,
@@ -1391,8 +1316,7 @@ void main() {
 
     test('Save sync twice', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final creationTime = DateTime(2000, 1, 1, 0, 0, 0);
       final originalSync = Sync(
           type: SyncType.shader,
@@ -1415,8 +1339,7 @@ void main() {
 
     test('Find sync by id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final creationTime = DateTime(2000, 1, 1, 0, 0, 0);
       final sync = Sync(
           type: SyncType.shader,
@@ -1434,8 +1357,7 @@ void main() {
 
     test('Find sync by id with not found response', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final type = SyncType.shader;
       final target = '3sBGRt';
       // act
@@ -1453,8 +1375,7 @@ void main() {
 
     test('Find syncs', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final creationTime = DateTime(2000, 1, 1, 0, 0, 0);
       final syncs = [
         Sync(
@@ -1484,8 +1405,7 @@ void main() {
 
     test('Find syncs by query', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final syncs = [
         Sync(
             type: SyncType.shader,
@@ -1524,8 +1444,7 @@ void main() {
 
     test('Find all syncs', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final creationTime = DateTime(2000, 1, 1, 0, 0, 0);
       final syncs = [
         Sync(
@@ -1557,8 +1476,7 @@ void main() {
 
     test('Delete sync by id', () async {
       // prepare
-      final options = newOptions();
-      final store = newDriftStore(options);
+      final store = await newShadertoySqliteMemoryStore();
       final syncType = SyncType.shader;
       final target = '3sBGRt';
       final creationTime = DateTime(2000, 1, 1, 0, 0, 0);

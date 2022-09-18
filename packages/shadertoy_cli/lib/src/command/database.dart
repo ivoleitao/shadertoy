@@ -40,7 +40,7 @@ abstract class DatabaseCommand extends SyncCommand {
   /// Abstracts the creation of a [ShadertoyStore]
   ///
   /// [path]: The path to the database file
-  ShadertoyStore newMetadataStore(String path);
+  Future<ShadertoyStore> newMetadataStore(String path);
 
   /// Abstracts the creation of a [VaultStore]
   ///
@@ -70,7 +70,7 @@ abstract class DatabaseCommand extends SyncCommand {
       return null;
     }
 
-    final store = newMetadataStore(p.join(fsPath, '$name.mdb'));
+    final store = await newMetadataStore(p.join(fsPath, '$name.mdb'));
     final vault = await newAssetStore(p.join(fsPath, '$name.adb'));
     await client.rsync(store, vault, mode,
         runner: this,

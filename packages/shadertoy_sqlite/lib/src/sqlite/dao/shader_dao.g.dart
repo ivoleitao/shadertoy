@@ -8,7 +8,7 @@ part of 'shader_dao.dart';
 
 mixin _$ShaderDaoMixin on DatabaseAccessor<DriftStore> {
   $ShaderTableTable get shaderTable => attachedDatabase.shaderTable;
-  $PlaylistTableTable get playlistTable => attachedDatabase.playlistTable;
+  $CommentTableTable get commentTable => attachedDatabase.commentTable;
   $PlaylistShaderTableTable get playlistShaderTable =>
       attachedDatabase.playlistShaderTable;
   $SyncTableTable get syncTable => attachedDatabase.syncTable;

@@ -7,6 +7,7 @@ import 'package:shadertoy_sqlite/src/sqlite/table/playlist_shader_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/playlist_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/shader_table.dart';
 import 'package:shadertoy_sqlite/src/sqlite/table/sync_table.dart';
+import 'package:shadertoy_sqlite/src/sqlite_options.dart';
 
 import 'dao/shader_dao.dart';
 import 'dao/user_dao.dart';
@@ -34,10 +35,13 @@ class DriftStore extends _$DriftStore {
   /// The current schema version
   static const int _schemaVersion = 1;
 
+  /// The store options
+  final ShadertoySqliteOptions storeOptions;
+
   /// Creates a [DriftStore]
   ///
   /// * [executor]: The selected [QueryExecutor]
-  DriftStore(QueryExecutor executor) : super(executor);
+  DriftStore(QueryExecutor executor, this.storeOptions) : super(executor);
 
   @override
   int get schemaVersion => _schemaVersion;
@@ -45,8 +49,9 @@ class DriftStore extends _$DriftStore {
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(beforeOpen: (details) async {
-      if (details.wasCreated) {}
-      await customStatement('PRAGMA foreign_keys = ON;');
+      if (storeOptions.foreignKeysEnabled) {
+        await customStatement('PRAGMA foreign_keys=ON');
+      }
     });
   }
 }

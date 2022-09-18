@@ -136,7 +136,8 @@ class PlaylistDao extends DatabaseAccessor<DriftStore> with _$PlaylistDaoMixin {
   /// Deletes a [Playlist] by [Id]
   ///
   /// * [playlistId]: The id of the [Playlist]
-  Future<void> deleteById(String playlistId) {
+  /// * [foreignKeysEnabled]: If the foreign keys are enabled
+  Future<void> deleteById(String playlistId, {bool foreignKeysEnabled = true}) {
     return transaction(() async {
       // Delete any sync reference
       await (delete(syncTable)
@@ -144,6 +145,14 @@ class PlaylistDao extends DatabaseAccessor<DriftStore> with _$PlaylistDaoMixin {
                 sync.type.equals(SyncType.playlist.name) &
                 sync.target.equals(playlistId)))
           .go();
+
+      if (!foreignKeysEnabled) {
+        // Delete the playlist references
+        await (delete(playlistShaderTable)
+              ..where((playlistShader) =>
+                  playlistShader.playlistId.equals(playlistId)))
+            .go();
+      }
 
       // Delete the playlist
       await (delete(playlistTable)
