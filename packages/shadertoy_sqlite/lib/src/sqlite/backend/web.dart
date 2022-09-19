@@ -48,17 +48,31 @@ Future<QueryExecutor> memoryExecutor(ShadertoySqliteOptions options) async {
     return Resource(Uri.parse(options.sqliteWasmPath))
         .readAsBytes()
         .then((bytes) => WasmSqlite3.load(Uint8List.fromList(bytes)))
-        .then((sqlite3) => WasmDatabase(
-            sqlite3: sqlite3,
+        .then((sqlite) => WasmDatabase(
+            sqlite3: sqlite,
             path: options.path,
             logStatements: options.logStatementsEnabled));
   }
 }
 
 Future<QueryExecutor> localExecutor(ShadertoySqliteOptions options) async {
-  return WebDatabase.withStorage(
-      await DriftWebStorage.indexedDbIfSupported(options.name),
-      logStatements: options.logStatementsEnabled);
+  if (options.webBackend == WebBackend.sqljs) {
+    return WebDatabase.withStorage(
+        await DriftWebStorage.indexedDbIfSupported(options.name),
+        logStatements: options.logStatementsEnabled);
+  } else {
+    return Resource(Uri.parse(options.sqliteWasmPath))
+        .readAsBytes()
+        .then((bytes) {
+      return IndexedDbFileSystem.open(dbName: options.name)
+          .then((fs) => WasmSqlite3.load(
+              Uint8List.fromList(bytes), SqliteEnvironment(fileSystem: fs)))
+          .then((sqlite) => WasmDatabase(
+              sqlite3: sqlite,
+              path: options.path,
+              logStatements: options.logStatementsEnabled));
+    });
+  }
 }
 
 /// Converts a [Exception] to a [ResponseError]
