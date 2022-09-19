@@ -2,6 +2,7 @@
 
 - BREAKING CHANGE: Changed minimum sdk version
 - chore: Updated dependencies
+- feat: Added web support
 
 ## 2.0.3
 
