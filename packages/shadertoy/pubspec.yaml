@@ -12,6 +12,7 @@ environment:
 
 dependencies:
   # Flutter shared dependencies
+  meta: ^1.7.0
   path: ^1.8.1
   # Other dependencies
   equatable: ^2.0.5
