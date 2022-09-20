@@ -1,5 +1,5 @@
 import 'package:shadertoy/src/converter/error_converter.dart';
-import 'package:shadertoy/src/response.dart';
+import 'package:shadertoy/src/model/response/error.dart';
 import 'package:test/test.dart';
 
 void main() {

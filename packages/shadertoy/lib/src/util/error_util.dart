@@ -1,5 +1,6 @@
 import 'package:shadertoy/src/api.dart';
-import 'package:shadertoy/src/response.dart';
+import 'package:shadertoy/src/model/response/error.dart';
+import 'package:shadertoy/src/model/response/response.dart';
 
 Future<R> catchError<R extends APIResponse, E>(
     Future<R> future, R Function(E) handle, ErrorMode errorMode) {

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'request.g.dart';
+part 'find_shaders.g.dart';
 
 @JsonSerializable()
 class FindShadersRequest extends Equatable {

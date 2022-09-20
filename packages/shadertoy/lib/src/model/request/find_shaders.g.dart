@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'request.dart';
+part of 'find_shaders.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

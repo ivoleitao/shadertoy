@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:shadertoy/src/response.dart';
+import 'package:shadertoy/src/model/response/error.dart';
 
 /// Converts back and forth from string to a [ResponseError]
 class ResponseErrorConverter implements JsonConverter<ResponseError?, String?> {

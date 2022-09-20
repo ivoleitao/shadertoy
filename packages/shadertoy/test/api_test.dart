@@ -1,5 +1,7 @@
 import 'package:shadertoy/src/api.dart';
-import 'package:shadertoy/src/response.dart';
+import 'package:shadertoy/src/model/response/find_shader.dart';
+import 'package:shadertoy/src/model/response/find_shader_ids.dart';
+import 'package:shadertoy/src/model/response/find_shaders.dart';
 import 'package:test/test.dart';
 
 class ShadertoyTestClient extends ShadertoyBaseClient {

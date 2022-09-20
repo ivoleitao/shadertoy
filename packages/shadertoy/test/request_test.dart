@@ -1,4 +1,4 @@
-import 'package:shadertoy/src/request.dart';
+import 'package:shadertoy/src/model/request/find_shaders.dart';
 import 'package:test/test.dart';
 
 void main() {
