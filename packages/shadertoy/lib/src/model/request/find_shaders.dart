@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'find_shaders.g.dart';
 
 @JsonSerializable()
-class FindShadersRequest extends Equatable {
+class FindShadersRequest with EquatableMixin {
   @JsonKey(name: 'shaders')
 
   /// The set of ids
