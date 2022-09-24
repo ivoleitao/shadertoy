@@ -1,5 +1,3 @@
-import 'package:shadertoy/src/model/response/error.dart';
-
 import 'response.dart';
 
 /// Save playlist API response
@@ -11,5 +9,5 @@ class SavePlaylistResponse extends APIResponse {
   /// Builds a [SavePlaylistResponse]
   ///
   /// [error]: An error if there was error while saving the playlist
-  SavePlaylistResponse({ResponseError? error}) : super(error: error);
+  SavePlaylistResponse({super.error});
 }

@@ -1,5 +1,3 @@
-import 'package:shadertoy/src/model/response/error.dart';
-
 import 'response.dart';
 
 /// Delete sync API response
@@ -11,5 +9,5 @@ class DeleteSyncResponse extends APIResponse {
   /// Builds a [DeleteSyncResponse]
   ///
   /// [error]: An error if there was error while deleting the sync
-  DeleteSyncResponse({ResponseError? error}) : super(error: error);
+  DeleteSyncResponse({super.error});
 }

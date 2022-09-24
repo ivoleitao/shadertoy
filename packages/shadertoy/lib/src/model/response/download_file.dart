@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'download_file.g.dart';
@@ -23,6 +22,8 @@ class DownloadFileResponse extends APIResponse {
   ///
   /// [bytes]: The bytes of the file
   /// [error]: An error if there was error while fetching the file
-  DownloadFileResponse({this.bytes, ResponseError? error})
-      : super(error: error);
+  DownloadFileResponse({this.bytes, super.error});
+
+  @override
+  List<Object?> get props => [...super.props, bytes];
 }

@@ -2,7 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/response/find_sync.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'find_syncs.g.dart';
@@ -30,9 +29,13 @@ class FindSyncsResponse extends APIResponse {
   /// [total]: The total number of syncs returned
   /// [syncs]: The list of syncs
   /// [error]: An error if there was error while fetching the syncs
-  FindSyncsResponse({int? total, this.syncs, ResponseError? error})
-      : total = total ?? syncs?.length ?? 0,
-        super(error: error);
+  FindSyncsResponse({int? total, this.syncs, super.error})
+      : total = total ?? syncs?.length ?? 0;
+
+  @override
+  List<Object?> get props {
+    return [...super.props, syncs];
+  }
 
   /// Creates a [FindSyncsResponse] from json map
   factory FindSyncsResponse.fromJson(Map<String, dynamic> json) =>

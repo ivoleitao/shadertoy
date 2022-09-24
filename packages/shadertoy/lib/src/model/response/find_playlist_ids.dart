@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'find_playlist_ids.g.dart';
@@ -29,9 +28,13 @@ class FindPlaylistIdsResponse extends APIResponse {
   /// [total]: The total number of playlist ids returned
   /// [ids]: The list of ids
   /// [error]: An error if there was error while fetching the playlist ids
-  FindPlaylistIdsResponse({int? count, this.ids, ResponseError? error})
-      : total = count ?? ids?.length ?? 0,
-        super(error: error);
+  FindPlaylistIdsResponse({int? count, this.ids, super.error})
+      : total = count ?? ids?.length ?? 0;
+
+  @override
+  List<Object?> get props {
+    return [...super.props, total, ids];
+  }
 
   /// Creates a [FindPlaylistIdsResponse] from json map
   factory FindPlaylistIdsResponse.fromJson(Map<String, dynamic> json) =>

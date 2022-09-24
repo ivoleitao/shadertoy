@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 
@@ -8,7 +9,7 @@ import 'error.dart';
 /// It should be used as the base class for every API response. It provides support for
 /// error aware responses with a field that should be set when there was an error in
 /// the API
-abstract class APIResponse {
+abstract class APIResponse extends Equatable {
   @JsonKey(name: 'Error')
   @ResponseErrorConverter()
 
@@ -21,6 +22,9 @@ abstract class APIResponse {
   bool get ok {
     return error == null;
   }
+
+  @override
+  List<Object?> get props => [error];
 
   /// Builds an [APIResponse]
   ///

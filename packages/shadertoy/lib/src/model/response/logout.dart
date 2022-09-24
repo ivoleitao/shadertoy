@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'logout.g.dart';
@@ -17,7 +16,7 @@ class LogoutResponse extends APIResponse {
   /// Builds an [LogoutResponse]
   ///
   /// An optional [error] can be provided
-  LogoutResponse({ResponseError? error}) : super(error: error);
+  LogoutResponse({super.error});
 
   /// Creates a [LogoutResponse] from json map
   factory LogoutResponse.fromJson(Map<String, dynamic> json) =>

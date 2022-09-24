@@ -2,7 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/user.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'find_user.g.dart';
@@ -24,7 +23,12 @@ class FindUserResponse extends APIResponse {
   ///
   /// [user]: The user
   /// [error]: An error if there was error while fetching the user
-  FindUserResponse({this.user, ResponseError? error}) : super(error: error);
+  FindUserResponse({this.user, super.error});
+
+  @override
+  List<Object?> get props {
+    return [...super.props, user];
+  }
 
   /// Creates a [FindUserResponse] from json map
   factory FindUserResponse.fromJson(Map<String, dynamic> json) =>

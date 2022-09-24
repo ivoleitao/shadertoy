@@ -2,7 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/sync.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'find_sync.g.dart';
@@ -26,7 +25,12 @@ class FindSyncResponse extends APIResponse {
   /// * [error]: An error
   ///
   /// Upon construction either [sync] or [error] should be provided, not both
-  FindSyncResponse({this.sync, ResponseError? error}) : super(error: error);
+  FindSyncResponse({this.sync, super.error});
+
+  @override
+  List<Object?> get props {
+    return [...super.props, sync];
+  }
 
   /// Creates a [FindSyncResponse] from json map
   factory FindSyncResponse.fromJson(Map<String, dynamic> json) =>

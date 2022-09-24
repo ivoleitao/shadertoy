@@ -2,7 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/shader.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'find_shader.g.dart';
@@ -26,7 +25,12 @@ class FindShaderResponse extends APIResponse {
   /// * [error]: An error
   ///
   /// Upon construction either [shader] or [error] should be provided, not both
-  FindShaderResponse({this.shader, ResponseError? error}) : super(error: error);
+  FindShaderResponse({this.shader, super.error});
+
+  @override
+  List<Object?> get props {
+    return [...super.props, shader];
+  }
 
   /// Creates a [FindShaderResponse] from json map
   factory FindShaderResponse.fromJson(Map<String, dynamic> json) =>

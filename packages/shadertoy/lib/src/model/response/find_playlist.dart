@@ -2,7 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/playlist.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'find_playlist.g.dart';
@@ -24,8 +23,12 @@ class FindPlaylistResponse extends APIResponse {
   ///
   /// [playlist]: The playlist
   /// [error]: An error if there was error while fetching the playlist
-  FindPlaylistResponse({this.playlist, ResponseError? error})
-      : super(error: error);
+  FindPlaylistResponse({this.playlist, super.error});
+
+  @override
+  List<Object?> get props {
+    return [...super.props, playlist];
+  }
 
   /// Creates a [FindPlaylistResponse] from json map
   factory FindPlaylistResponse.fromJson(Map<String, dynamic> json) =>

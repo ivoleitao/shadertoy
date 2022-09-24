@@ -1,5 +1,3 @@
-import 'package:shadertoy/src/model/response/error.dart';
-
 import 'response.dart';
 
 /// Save playlist shaders API response
@@ -11,5 +9,5 @@ class SavePlaylistShadersResponse extends APIResponse {
   /// Builds a [SavePlaylistShadersResponse]
   ///
   /// [error]: An error if there was error while saving the playlist shaders
-  SavePlaylistShadersResponse({ResponseError? error}) : super(error: error);
+  SavePlaylistShadersResponse({super.error});
 }

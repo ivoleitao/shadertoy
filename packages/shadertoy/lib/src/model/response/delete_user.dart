@@ -1,4 +1,3 @@
-import 'error.dart';
 import 'response.dart';
 
 /// Delete user API response
@@ -10,5 +9,5 @@ class DeleteUserResponse extends APIResponse {
   /// Builds a [DeleteUserResponse]
   ///
   /// [error]: An error if there was error while deleting the user
-  DeleteUserResponse({ResponseError? error}) : super(error: error);
+  DeleteUserResponse({super.error});
 }

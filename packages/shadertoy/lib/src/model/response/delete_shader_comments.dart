@@ -1,5 +1,3 @@
-import 'package:shadertoy/src/model/response/error.dart';
-
 import 'response.dart';
 
 /// Delete shader comments API response
@@ -11,5 +9,5 @@ class DeleteShaderCommentsResponse extends APIResponse {
   /// Builds a [DeleteShaderCommentsResponse]
   ///
   /// [error]: An error if there was error while saving the shader comments
-  DeleteShaderCommentsResponse({ResponseError? error}) : super(error: error);
+  DeleteShaderCommentsResponse({super.error});
 }

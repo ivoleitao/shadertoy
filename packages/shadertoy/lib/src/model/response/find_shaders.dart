@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 
-import 'error.dart';
 import 'find_shader.dart';
 import 'response.dart';
 
@@ -30,9 +29,13 @@ class FindShadersResponse extends APIResponse {
   /// [total]: The total number of shader returned
   /// [shaders]: The list of shaders
   /// [error]: An error if there was error while fetching the shaders
-  FindShadersResponse({int? total, this.shaders, ResponseError? error})
-      : total = total ?? shaders?.length ?? 0,
-        super(error: error);
+  FindShadersResponse({int? total, this.shaders, super.error})
+      : total = total ?? shaders?.length ?? 0;
+
+  @override
+  List<Object?> get props {
+    return [...super.props, total, shaders];
+  }
 
   /// Creates a [FindShadersResponse] from json map
   factory FindShadersResponse.fromJson(Map<String, dynamic> json) =>

@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'login.g.dart';
@@ -17,7 +16,7 @@ class LoginResponse extends APIResponse {
   /// Builds an [LoginResponse]
   ///
   /// An optional [error] can be provided
-  LoginResponse({ResponseError? error}) : super(error: error);
+  LoginResponse({super.error});
 
   /// Creates a [LoginResponse] from json map
   factory LoginResponse.fromJson(Map<String, dynamic> json) =>

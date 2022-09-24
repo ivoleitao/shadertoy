@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'comments.g.dart';
@@ -63,8 +62,12 @@ class CommentsResponse extends APIResponse {
       this.userPictures,
       this.ids,
       this.hidden,
-      ResponseError? error})
-      : super(error: error);
+      super.error});
+
+  @override
+  List<Object?> get props {
+    return [...super.props, texts, dates, userIds, userPictures, ids, hidden];
+  }
 
   /// Creates a [CommentsResponse] from json list
   factory CommentsResponse.fromList(List<dynamic> json) => CommentsResponse(

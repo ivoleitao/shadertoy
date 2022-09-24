@@ -1,5 +1,3 @@
-import 'package:shadertoy/src/model/response/error.dart';
-
 import 'response.dart';
 
 /// Save shader comment API response
@@ -11,5 +9,5 @@ class SaveShaderCommentResponse extends APIResponse {
   /// Builds a [SaveShaderCommentResponse]
   ///
   /// [error]: An error if there was error while saving the shader comments
-  SaveShaderCommentResponse({ResponseError? error}) : super(error: error);
+  SaveShaderCommentResponse({super.error});
 }

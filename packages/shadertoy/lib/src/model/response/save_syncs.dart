@@ -1,5 +1,3 @@
-import 'package:shadertoy/src/model/response/error.dart';
-
 import 'response.dart';
 
 /// Save syncs API response
@@ -10,5 +8,5 @@ class SaveSyncsResponse extends APIResponse {
   /// Builds a [SaveSyncsResponse]
   ///
   /// [error]: An error if there was error while saving the sync
-  SaveSyncsResponse({ResponseError? error}) : super(error: error);
+  SaveSyncsResponse({super.error});
 }

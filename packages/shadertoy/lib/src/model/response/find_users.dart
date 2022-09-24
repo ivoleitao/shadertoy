@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 
-import 'error.dart';
 import 'find_user.dart';
 import 'response.dart';
 
@@ -30,9 +29,13 @@ class FindUsersResponse extends APIResponse {
   /// [total]: The total number of users returned
   /// [users]: The list of users
   /// [error]: An error if there was error while fetching the shaders
-  FindUsersResponse({int? total, this.users, ResponseError? error})
-      : total = total ?? users?.length ?? 0,
-        super(error: error);
+  FindUsersResponse({int? total, this.users, super.error})
+      : total = total ?? users?.length ?? 0;
+
+  @override
+  List<Object?> get props {
+    return [super.props, total, users];
+  }
 
   /// Creates a [FindUsersResponse] from json map
   factory FindUsersResponse.fromJson(Map<String, dynamic> json) =>

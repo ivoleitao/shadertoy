@@ -1,16 +1,20 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/model/request/request.dart';
 
 part 'find_shaders.g.dart';
 
 @JsonSerializable()
-class FindShadersRequest {
+class FindShadersRequest extends APIRequest {
   @JsonKey(name: 'shaders')
 
   /// The set of ids
   final Set<String> ids;
 
   /// Builds a [FindShadersRequest]
-  const FindShadersRequest(this.ids);
+  FindShadersRequest(this.ids);
+
+  @override
+  List<Object> get props => [ids];
 
   /// Creates a [FindShadersRequest] from json map
   factory FindShadersRequest.fromJson(Map<String, dynamic> json) =>

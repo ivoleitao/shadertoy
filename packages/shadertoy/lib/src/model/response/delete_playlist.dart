@@ -1,5 +1,3 @@
-import 'package:shadertoy/src/model/response/error.dart';
-
 import 'response.dart';
 
 /// Delete playlist API response
@@ -11,5 +9,5 @@ class DeletePlaylistResponse extends APIResponse {
   /// Builds a [DeletePlaylistResponse]
   ///
   /// [error]: An error if there was error while deleting the playlist
-  DeletePlaylistResponse({ResponseError? error}) : super(error: error);
+  DeletePlaylistResponse({super.error});
 }

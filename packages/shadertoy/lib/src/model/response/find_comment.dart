@@ -2,7 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/comment.dart';
 
-import 'error.dart';
 import 'response.dart';
 
 part 'find_comment.g.dart';
@@ -24,8 +23,12 @@ class FindCommentResponse extends APIResponse {
   ///
   /// [comment]: The comment
   /// [error]: An error if there was error while fetching the comment
-  FindCommentResponse({this.comment, ResponseError? error})
-      : super(error: error);
+  FindCommentResponse({this.comment, super.error});
+
+  @override
+  List<Object?> get props {
+    return [...super.props, comment];
+  }
 
   /// Creates a [FindCommentResponse] from json map
   factory FindCommentResponse.fromJson(Map<String, dynamic> json) =>

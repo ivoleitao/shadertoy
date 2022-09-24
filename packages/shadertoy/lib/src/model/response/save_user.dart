@@ -1,4 +1,3 @@
-import 'error.dart';
 import 'response.dart';
 
 /// Save user API response
@@ -10,5 +9,5 @@ class SaveUserResponse extends APIResponse {
   /// Builds a [SaveUserResponse]
   ///
   /// [error]: An error if there was error while saving the user
-  SaveUserResponse({ResponseError? error}) : super(error: error);
+  SaveUserResponse({super.error});
 }
