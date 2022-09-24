@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/playlist.dart';
 
 import 'error.dart';
@@ -14,16 +14,11 @@ part 'find_playlist.g.dart';
 /// The response returned upon the execution of a find playlist API call
 /// When [FindPlaylistResponse.error] is *not null* there was an error in the find playlist call
 /// When [FindPlaylistResponse.error] is *null* the [FindPlaylistResponse.playlist] has the returned playlist
-class FindPlaylistResponse extends APIResponse with EquatableMixin {
+class FindPlaylistResponse extends APIResponse {
   @JsonKey(name: 'Playlist')
 
   /// The playlist returned, null when there is an error
   final Playlist? playlist;
-
-  @override
-  List get props {
-    return [playlist, error];
-  }
 
   /// Builds a [FindPlaylistResponse]
   ///

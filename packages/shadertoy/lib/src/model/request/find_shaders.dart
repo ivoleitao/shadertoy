@@ -1,10 +1,9 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'find_shaders.g.dart';
 
 @JsonSerializable()
-class FindShadersRequest with EquatableMixin {
+class FindShadersRequest {
   @JsonKey(name: 'shaders')
 
   /// The set of ids
@@ -12,9 +11,6 @@ class FindShadersRequest with EquatableMixin {
 
   /// Builds a [FindShadersRequest]
   const FindShadersRequest(this.ids);
-
-  @override
-  List<Object> get props => [ids];
 
   /// Creates a [FindShadersRequest] from json map
   factory FindShadersRequest.fromJson(Map<String, dynamic> json) =>

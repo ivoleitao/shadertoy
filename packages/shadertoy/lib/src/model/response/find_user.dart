@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/user.dart';
 
 import 'error.dart';
@@ -14,16 +14,11 @@ part 'find_user.g.dart';
 /// The response returned upon the execution of a find user API call
 /// When [FindUserResponse.error] is *not null* there was an error in the find user call
 /// When [FindUserResponse.error] is *null* the [FindUserResponse.user] has the returned user
-class FindUserResponse extends APIResponse with EquatableMixin {
+class FindUserResponse extends APIResponse {
   @JsonKey(name: 'User')
 
   /// The user returned, null when there is an error
   final User? user;
-
-  @override
-  List get props {
-    return [user, error];
-  }
 
   /// Builds a [FindUserResponse]
   ///

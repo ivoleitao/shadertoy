@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/shader.dart';
 
 import 'error.dart';
@@ -14,16 +14,11 @@ part 'find_shader.g.dart';
 /// The response returned upon the execution of a find shader API call
 /// When [FindShaderResponse.error] is *not null* there was an error in the find shader call
 /// When [FindShaderResponse.error] is *null* the [FindShaderResponse.shader] has the returned shader
-class FindShaderResponse extends APIResponse with EquatableMixin {
+class FindShaderResponse extends APIResponse {
   @JsonKey(name: 'Shader')
 
   /// The shader returned, null when there is an error
   final Shader? shader;
-
-  @override
-  List get props {
-    return [shader, error];
-  }
 
   /// Builds an [FindShaderResponse]
   ///

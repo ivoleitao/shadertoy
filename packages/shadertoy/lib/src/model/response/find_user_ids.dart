@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/converter/error_converter.dart';
 
 import 'error.dart';
 import 'response.dart';
@@ -13,7 +13,7 @@ part 'find_user_ids.g.dart';
 /// The response returned upon the execution of a find user ids API call
 /// When [FindUserIdsResponse.error] is *not null* there was an error in the find user ids call
 /// When [FindUserIdsResponse.error] is *null* the [FindUserIdsResponse.ids] has the returned use ids
-class FindUserIdsResponse extends APIResponse with EquatableMixin {
+class FindUserIdsResponse extends APIResponse {
   @JsonKey(name: 'Users')
 
   /// The total number of user ids
@@ -23,11 +23,6 @@ class FindUserIdsResponse extends APIResponse with EquatableMixin {
 
   /// The list of user ids returned
   final List<String>? ids;
-
-  @override
-  List get props {
-    return [total, ids, error];
-  }
 
   /// Builds a [FindUserIdsResponse]
   ///

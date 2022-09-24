@@ -15,12 +15,6 @@ abstract class APIResponse {
   /// The error
   final ResponseError? error;
 
-  /// The [List] of `props` (properties) which will be used to determine whether
-  /// two Equatables are equal.
-  List get props {
-    return [error];
-  }
-
   /// Returns `true` if there is not error
   ///
   /// Simply check if [error] is null

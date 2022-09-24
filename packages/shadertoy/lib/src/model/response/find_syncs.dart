@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/converter/error_converter.dart';
 import 'package:shadertoy/src/model/response/find_sync.dart';
 
 import 'error.dart';
@@ -14,7 +14,7 @@ part 'find_syncs.g.dart';
 /// The response returned upon the execution of a find syncs API call
 /// When [FindSyncsResponse.error] is *not null* there was an error in the find syncs call
 /// When [FindSyncsResponse.error] is *null* the [FindSyncsResponse.syncs] has the returned syncs
-class FindSyncsResponse extends APIResponse with EquatableMixin {
+class FindSyncsResponse extends APIResponse {
   @JsonKey(name: 'Syncs')
 
   /// The total number of syncs
@@ -24,11 +24,6 @@ class FindSyncsResponse extends APIResponse with EquatableMixin {
 
   /// The list of the syncs returned
   final List<FindSyncResponse>? syncs;
-
-  @override
-  List get props {
-    return [total, syncs, error];
-  }
 
   /// Builds a [FindSyncsResponse]
   ///

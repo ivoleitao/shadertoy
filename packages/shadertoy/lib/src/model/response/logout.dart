@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/converter/error_converter.dart';
 
 import 'error.dart';
 import 'response.dart';
@@ -13,7 +13,7 @@ part 'logout.g.dart';
 /// The response returned upon the execution of a logout in the Shadertoy website
 /// When [LogoutResponse.error] is *not null* there was an error in the logout process
 /// When [LogoutResponse.error] is *null* the logout was sucessfull
-class LogoutResponse extends APIResponse with EquatableMixin {
+class LogoutResponse extends APIResponse {
   /// Builds an [LogoutResponse]
   ///
   /// An optional [error] can be provided

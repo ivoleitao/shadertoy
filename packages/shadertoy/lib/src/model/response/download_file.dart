@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/converter/error_converter.dart';
 
 import 'error.dart';
 import 'response.dart';
@@ -13,16 +13,11 @@ part 'download_file.g.dart';
 /// The response returned upon the execution of the download file API call
 /// When [DownloadFileResponse.error] is *not null* there was an error in the donwload file call
 /// When [DownloadFileResponse.error] is *null* the [DownloadFileResponse.bytes] has the bytes of the file
-class DownloadFileResponse extends APIResponse with EquatableMixin {
+class DownloadFileResponse extends APIResponse {
   @JsonKey(name: 'Bytes')
 
   /// File bytes
   final List<int>? bytes;
-
-  @override
-  List get props {
-    return [bytes, error];
-  }
 
   /// Builds a [DownloadFileResponse]
   ///

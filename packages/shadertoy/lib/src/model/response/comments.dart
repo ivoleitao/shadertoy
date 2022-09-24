@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/converter/error_converter.dart';
 
 import 'error.dart';
 import 'response.dart';
@@ -16,7 +16,7 @@ part 'comments.g.dart';
 /// text, date, user id's and user picture all with the same size. The first index of
 /// of the text list corresponds to the first index of the date list and so on. This is a structure
 /// used for the intermediary storage of the response. It is transformed in [FindCommentsResponse] later
-class CommentsResponse extends APIResponse with EquatableMixin {
+class CommentsResponse extends APIResponse {
   @JsonKey(name: 'text')
 
   /// The list of comment texts
@@ -65,11 +65,6 @@ class CommentsResponse extends APIResponse with EquatableMixin {
       this.hidden,
       ResponseError? error})
       : super(error: error);
-
-  @override
-  List get props {
-    return [texts, dates, userIds, userPictures, ids, hidden, error];
-  }
 
   /// Creates a [CommentsResponse] from json list
   factory CommentsResponse.fromList(List<dynamic> json) => CommentsResponse(

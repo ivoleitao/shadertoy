@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/converter/error_converter.dart';
 
 import 'error.dart';
 import 'response.dart';
@@ -13,7 +13,7 @@ part 'find_comment_ids.g.dart';
 /// The response returned upon the execution of a find comment ids API call
 /// When [FindCommentIdsResponse.error] is *not null* there was an error in the find comment ids call
 /// When [FindCommentIdsResponse.error] is *null* the [FindCommentIdsResponse.ids] has the returned comment ids
-class FindCommentIdsResponse extends APIResponse with EquatableMixin {
+class FindCommentIdsResponse extends APIResponse {
   @JsonKey(name: 'Comments')
 
   /// The total number of comment ids
@@ -23,11 +23,6 @@ class FindCommentIdsResponse extends APIResponse with EquatableMixin {
 
   /// The list of comment ids returned
   final List<String>? ids;
-
-  @override
-  List get props {
-    return [total, ids, error];
-  }
 
   /// Builds a [FindCommentIdsResponse]
   ///

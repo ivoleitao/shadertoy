@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:shadertoy/src/converter/error_converter.dart';
 
 import 'error.dart';
 import 'find_shader.dart';
@@ -14,7 +14,7 @@ part 'find_shaders.g.dart';
 /// The response returned upon the execution of a find shaders API call
 /// When [FindShadersResponse.error] is *not null* there was an error in the find shaders call
 /// When [FindShadersResponse.error] is *null* the [FindShadersResponse.shaders] has the returned shaders
-class FindShadersResponse extends APIResponse with EquatableMixin {
+class FindShadersResponse extends APIResponse {
   @JsonKey(name: 'Shaders')
 
   /// The total number of shaders
@@ -24,11 +24,6 @@ class FindShadersResponse extends APIResponse with EquatableMixin {
 
   /// The list of the shaders returned
   final List<FindShaderResponse>? shaders;
-
-  @override
-  List get props {
-    return [total, shaders, error];
-  }
 
   /// Builds a [FindShadersResponse]
   ///
