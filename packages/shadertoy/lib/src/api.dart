@@ -437,7 +437,7 @@ abstract class ShadertoyStore extends ShadertoyExtendedClient {
   /// * [createdBefore]: Syncs created before this date
   /// * [updatedBefore]: Syncs updated before this date
   ///
-  /// Upon success a list of [Syncs] objects is provided as well as the overall
+  /// Upon success a list of [Sync] objects is provided as well as the overall
   /// number of records in total (not the number of syncs in the list, the
   /// number of total results). The error is set to null
   ///

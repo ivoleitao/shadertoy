@@ -62,7 +62,6 @@ Future<ShadertoyStore> newShadertoySqliteMemoryStore(
 /// * [logStatementsEnabled]: If true (defaults to `false`), generated sql statements will be printed before executing.
 /// * [webBackend]: The web backend to use
 /// * [sqliteWasmPath]: The sqlite wasm path for the wasm backend
-/// * [target]: The path to the database file for native or the name in web
 /// * [shaderCount]: The number of shaders requested for a paged call
 /// * [userShaderCount]: The number of shaders requested for a user paged call
 /// * [playlistShaderCount]: The number of shaders requested for a playlist paged call
