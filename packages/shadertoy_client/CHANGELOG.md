@@ -1,3 +1,8 @@
+# 2.1.1
+
+- chore: Updated dependencies
+- fix: tons of bugs
+
 # 2.1.0
 
 - BREAKING CHANGE: Changed minimum sdk version

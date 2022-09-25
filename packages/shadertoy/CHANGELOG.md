@@ -1,5 +1,12 @@
 ## 2.1.0
 
+- fix: documentation problems
+- fix: json_serializable issues
+- chore: refactores response and request files
+- chore: Updated dependencies
+
+## 2.1.0
+
 - BREAKING CHANGE: Changed minimum sdk version
 - chore: Updated dependencies
 
