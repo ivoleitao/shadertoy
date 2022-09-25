@@ -20,7 +20,7 @@ dependencies:
   drift: ^2.1.0
   shadertoy: ^2.1.1
   shadertoy_client: ^2.1.0
-  shadertoy_sqlite: ^2.1.0
+  shadertoy_sqlite: ^2.1.1
 
 dev_dependencies:
   lints: ^2.0.0
