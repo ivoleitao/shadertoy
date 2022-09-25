@@ -934,7 +934,6 @@ void main() {
           await metadataStore.findAllShaderIdsByPlaylistId(playlistId);
       expect((actualPlaylistShaderIds.ids ?? []).length, 35);
     });
-  });
-
-  test('Latest Mode', () async {});
+    test('Latest Mode', () async {});
+  }, testOn: '!js');
 }
