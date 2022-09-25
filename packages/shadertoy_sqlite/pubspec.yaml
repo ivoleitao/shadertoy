@@ -17,7 +17,7 @@ dependencies:
   resource_portable: ^3.0.0
   drift: ^2.1.0
   sqlite3: ^1.9.0
-  shadertoy: ^2.1.0
+  shadertoy: ^2.1.1
 
 dev_dependencies:
   lints: ^2.0.0
