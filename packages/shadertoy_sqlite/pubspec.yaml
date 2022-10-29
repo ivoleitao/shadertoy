@@ -1,5 +1,5 @@
 name: shadertoy_sqlite
-version: 2.1.1
+version: 2.1.2
 description: >-
   A implementation of the shadertoy storage API using
   Sqlite as the storage backend
@@ -12,15 +12,15 @@ environment:
 
 dependencies:
   # Flutter shared dependencies
-  path: ^1.8.1
+  path: ^1.8.2
   # Other dependencies
   resource_portable: ^3.0.0
-  drift: ^2.1.0
-  sqlite3: ^1.9.0
+  drift: ^2.2.0
+  sqlite3: ^1.9.1
   shadertoy: ^2.1.1
 
 dev_dependencies:
-  lints: ^2.0.0
-  build_runner: ^2.2.0
-  test: ^1.21.5
-  drift_dev: ^2.1.0
+  lints: ^2.0.1
+  build_runner: ^2.3.2
+  test: ^1.21.7
+  drift_dev: ^2.2.0+1

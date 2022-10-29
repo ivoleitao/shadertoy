@@ -1166,7 +1166,7 @@ class $CommentTableTable extends CommentTable
       'shader_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES Shader (id) ON DELETE CASCADE');
+      defaultConstraints: 'REFERENCES "Shader" ("id") ON DELETE CASCADE');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
@@ -1193,7 +1193,7 @@ class $CommentTableTable extends CommentTable
       'hidden', aliasedName, false,
       type: DriftSqlType.bool,
       requiredDuringInsert: false,
-      defaultConstraints: 'CHECK (hidden IN (0, 1))',
+      defaultConstraints: 'CHECK ("hidden" IN (0, 1))',
       defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns =>
@@ -1682,14 +1682,14 @@ class $PlaylistShaderTableTable extends PlaylistShaderTable
       'playlist_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES Playlist (id) ON DELETE CASCADE');
+      defaultConstraints: 'REFERENCES "Playlist" ("id") ON DELETE CASCADE');
   final VerificationMeta _shaderIdMeta = const VerificationMeta('shaderId');
   @override
   late final GeneratedColumn<String> shaderId = GeneratedColumn<String>(
       'shader_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES Shader (id) ON DELETE CASCADE');
+      defaultConstraints: 'REFERENCES "Shader" ("id") ON DELETE CASCADE');
   final VerificationMeta _orderMeta = const VerificationMeta('order');
   @override
   late final GeneratedColumn<int> order = GeneratedColumn<int>(

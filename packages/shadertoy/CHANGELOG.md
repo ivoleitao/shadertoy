@@ -1,3 +1,7 @@
+# 2.1.2
+
+- chore: Updated dependencies
+
 ## 2.1.1
 
 - fix: documentation problems
