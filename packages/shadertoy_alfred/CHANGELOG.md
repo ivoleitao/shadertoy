@@ -1,3 +1,7 @@
+## 2.2.1
+
+ - **DOCS**: removed demo.
+
 ## 2.2.0
 
  - **FEAT**: added support alfred.
