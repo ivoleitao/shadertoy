@@ -10,8 +10,8 @@ part 'login.g.dart';
 /// Login API response
 ///
 /// The response returned upon the execution of a login in the Shadertoy website
-/// When [LoginResponse.fail] is *not null* there was an error in the login process
-/// When [LoginResponse.fail] is *null* the login was sucessfull
+/// When [LoginResponse.error] is *not null* there was an error in the login process
+/// When [LoginResponse.error] is *null* the login was sucessfull
 class LoginResponse extends APIResponse {
   /// Builds an [LoginResponse]
   ///

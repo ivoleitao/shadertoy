@@ -11,8 +11,8 @@ part 'find_comment.g.dart';
 /// Find comment API response
 ///
 /// The response returned upon the execution of a find comment API call
-/// When [FindCommentResponse.fail] is *not null* there was an error in the find comment call
-/// When [FindCommentResponse.fail] is *null* the [FindCommentResponse.comment] has the returned comment
+/// When [FindCommentResponse.error] is *not null* there was an error in the find comment call
+/// When [FindCommentResponse.error] is *null* the [FindCommentResponse.comment] has the returned comment
 class FindCommentResponse extends APIResponse {
   @JsonKey(name: 'Comment')
 

@@ -10,8 +10,8 @@ part 'download_file.g.dart';
 /// Download file API response
 ///
 /// The response returned upon the execution of the download file API call
-/// When [DownloadFileResponse.fail] is *not null* there was an error in the donwload file call
-/// When [DownloadFileResponse.fail] is *null* the [DownloadFileResponse.bytes] has the bytes of the file
+/// When [DownloadFileResponse.error] is *not null* there was an error in the donwload file call
+/// When [DownloadFileResponse.error] is *null* the [DownloadFileResponse.bytes] has the bytes of the file
 class DownloadFileResponse extends APIResponse {
   @JsonKey(name: 'Bytes')
 

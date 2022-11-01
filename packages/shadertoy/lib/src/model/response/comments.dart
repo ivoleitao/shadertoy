@@ -10,8 +10,8 @@ part 'comments.g.dart';
 /// Comments response
 ///
 /// The response returned from a call to the Shadertoy comments endpoint
-/// When [CommentsResponse.fail] is *not null* there was an error while fetching the comments
-/// When [CommentsResponse.fail] is *null* the [CommentsResponse] has a individual list of
+/// When [CommentsResponse.error] is *not null* there was an error while fetching the comments
+/// When [CommentsResponse.error] is *null* the [CommentsResponse] has a individual list of
 /// text, date, user id's and user picture all with the same size. The first index of
 /// of the text list corresponds to the first index of the date list and so on. This is a structure
 /// used for the intermediary storage of the response. It is transformed in [FindCommentsResponse] later
