@@ -3,4 +3,4 @@ targets:
     builders:
       pubspec_generator:
         options:
-          output: lib/src/constant/package.dart
+          output: lib/src/constant/pubspec.g.dart

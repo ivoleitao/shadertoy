@@ -1,7 +1,7 @@
 /// GENERATED CODE - DO NOT MODIFY BY HAND
 
 /// ***************************************************************************
-/// *                            pubspec_generator                            *
+/// *                            pubspec_generator                            * 
 /// ***************************************************************************
 
 /*
@@ -40,13 +40,13 @@
 // ignore_for_file: prefer_single_quotes
 
 /// Current app version
-const String version = r'2.1.2';
+const String version = r'2.2.2';
 
 /// The major version number: "1" in "1.2.3".
 const int major = 2;
 
 /// The minor version number: "2" in "1.2.3".
-const int minor = 1;
+const int minor = 2;
 
 /// The patch version number: "3" in "1.2.3".
 const int patch = 2;
@@ -58,7 +58,7 @@ const List<String> pre = <String>[];
 const List<String> build = <String>[];
 
 /// Build date in Unix Time (in seconds)
-const int timestamp = 1667320986;
+const int timestamp = 1667340062;
 
 /// Name [name]
 const String name = r'shadertoy_alfred';
@@ -79,7 +79,7 @@ const String homepage = r'https://github.com/ivoleitao/shadertoy';
 const String documentation = r'';
 
 /// Publish to [publish_to]
-const String publishTo = r'https://pub.dev/';
+const String publishTo = r'none';
 
 /// Environment
 const Map<String, String> environment = <String, String>{
@@ -91,10 +91,9 @@ const Map<String, Object> dependencies = <String, Object>{
   'meta': r'^1.8.0',
   'path': r'^1.8.2',
   'args': r'^2.3.1',
-  'stream_transform': r'^2.0.1',
   'alfred_workflow': r'^0.2.7',
-  'shadertoy': r'^2.1.1',
-  'shadertoy_client': r'^2.1.1',
+  'shadertoy': r'^2.2.0',
+  'shadertoy_client': r'^2.2.0',
 };
 
 /// Developer dependencies
@@ -109,7 +108,7 @@ const Map<String, Object> dependencyOverrides = <String, Object>{};
 
 /// Executables
 const Map<String, Object> executables = <String, Object>{
-  'shadertoy_alfred': r'st',
+  'st': r'shadertoy_alfred',
 };
 
 /// Source data from pubspec.yaml
@@ -127,6 +126,6 @@ const Map<String, Object> source = <String, Object>{
   'dev_dependencies': devDependencies,
   'dependency_overrides': dependencyOverrides,
   'executables': <String, Object>{
-    'shadertoy_alfred': r'st',
+    'st': r'shadertoy_alfred',
   },
 };

@@ -121,4 +121,4 @@ scripts:
       Creates release distributions   
 
   postbootstrap: |
-      melos run build 
+      melos run generate 

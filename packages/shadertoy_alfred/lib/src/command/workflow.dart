@@ -4,14 +4,14 @@ import 'package:alfred_workflow/alfred_workflow.dart';
 import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
 import 'package:shadertoy_alfred/src/constant/config.dart';
-import 'package:shadertoy_alfred/src/constant/package.dart' as package;
+import 'package:shadertoy_alfred/src/constant/constants.dart';
 
 /// Base workflow command class
 abstract class WorkflowCommand extends Command {
   /// The updater instance
   final AlfredUpdater updater = AlfredUpdater(
-      githubRepositoryUrl: Uri.parse(package.repository),
-      currentVersion: package.version,
+      githubRepositoryUrl: Constants.repository,
+      currentVersion: Constants.version,
       updateInterval: Config.updateInterval);
 
   /// Builds a [WorkflowCommand]
