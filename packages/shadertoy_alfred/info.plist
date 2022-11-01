@@ -3,141 +3,72 @@
 <plist version="1.0">
 <dict>
 	<key>bundleid</key>
-	<string>com.techouse.alfred-gitmoji</string>
+	<string>com.github.ivoleitao.shadertoy</string>
 	<key>category</key>
 	<string>Tools</string>
 	<key>connections</key>
 	<dict>
-		<key>E50F9D21-04DF-4185-A2CB-40B7111F31C0</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>F404D930-F17D-43D0-B06B-28D6A000A93F</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>sourceoutputuid</key>
-				<string>D850B7E1-B6F7-4A5E-8EF6-522CBF4E0A21</string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>B1E797A8-B1C1-4A07-A340-67D2AC741B3C</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
-		<key>F6F9BD70-3218-4D80-A4D2-63C6A77142CA</key>
-		<array>
-			<dict>
-				<key>destinationuid</key>
-				<string>E50F9D21-04DF-4185-A2CB-40B7111F31C0</string>
-				<key>modifiers</key>
-				<integer>0</integer>
-				<key>modifiersubtext</key>
-				<string></string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-			<dict>
-				<key>destinationuid</key>
-				<string>D6793604-058B-4867-A1EA-BF8C2B8B3733</string>
-				<key>modifiers</key>
-				<integer>1048576</integer>
-				<key>modifiersubtext</key>
-				<string>Only copy to clipboard</string>
-				<key>vitoclose</key>
-				<false/>
-			</dict>
-		</array>
+		<key>9D3D6B13-3143-4CF9-B404-0337A9D46453</key>
+		<array/>
+		<key>F733E77D-3B06-4145-BE94-ADC0E58CDBB1</key>
+		<array/>
 	</dict>
 	<key>createdby</key>
-	<string>Klemen Tušar</string>
+	<string>Ivo Leitão</string>
 	<key>description</key>
-	<string>Search for gitmojis and copy them to the clipboard easily</string>
+	<string>Search for shaders on Shadertoy</string>
 	<key>disabled</key>
 	<false/>
 	<key>name</key>
-	<string>Gitmoji</string>
+	<string>alfred_shadertoy</string>
 	<key>objects</key>
 	<array>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>concurrently</key>
+				<key>alfredfiltersresults</key>
 				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>0</integer>
 				<key>escaping</key>
 				<integer>102</integer>
-				<key>script</key>
-				<string>./gm -u</string>
-				<key>scriptargtype</key>
+				<key>keyword</key>
+				<string>stp</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<false/>
+				<key>queuedelaymode</key>
+				<integer>2</integer>
+				<key>queuemode</key>
 				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>Fetching shaders ...</string>
+				<key>script</key>
+				<string>./st playlist -i {query}</string>
+				<key>scriptargtype</key>
+				<integer>0</integer>
 				<key>scriptfile</key>
 				<string></string>
+				<key>subtext</key>
+				<string>Browse Shadertoy playlist by name</string>
+				<key>title</key>
+				<string>Browse Shadertoy playlist</string>
 				<key>type</key>
 				<integer>0</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>F404D930-F17D-43D0-B06B-28D6A000A93F</string>
-			<key>version</key>
-			<integer>2</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>conditions</key>
-				<array>
-					<dict>
-						<key>inputstring</key>
-						<string>{query}</string>
-						<key>matchcasesensitive</key>
-						<false/>
-						<key>matchmode</key>
-						<integer>0</integer>
-						<key>matchstring</key>
-						<string>update:workflow</string>
-						<key>outputlabel</key>
-						<string>Update Workflow</string>
-						<key>uid</key>
-						<string>D850B7E1-B6F7-4A5E-8EF6-522CBF4E0A21</string>
-					</dict>
-				</array>
-				<key>elselabel</key>
-				<string>Copy to Clipboard</string>
-				<key>hideelse</key>
-				<false/>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.utility.conditional</string>
-			<key>uid</key>
-			<string>E50F9D21-04DF-4185-A2CB-40B7111F31C0</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>autopaste</key>
-				<true/>
-				<key>clipboardtext</key>
-				<string>{query} </string>
-				<key>ignoredynamicplaceholders</key>
-				<false/>
-				<key>transient</key>
+				<key>withspace</key>
 				<true/>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.output.clipboard</string>
+			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
-			<string>B1E797A8-B1C1-4A07-A340-67D2AC741B3C</string>
+			<string>A58A4B27-22F7-4A46-B37D-E2AE155A098F</string>
 			<key>version</key>
 			<integer>3</integer>
 		</dict>
@@ -157,7 +88,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>keyword</key>
-				<string>gm</string>
+				<string>stb</string>
 				<key>queuedelaycustom</key>
 				<integer>3</integer>
 				<key>queuedelayimmediatelyinitially</key>
@@ -167,17 +98,17 @@
 				<key>queuemode</key>
 				<integer>1</integer>
 				<key>runningsubtext</key>
-				<string>Fetching gitmojis ...</string>
+				<string>Fetching shaders ...</string>
 				<key>script</key>
-				<string>./gm -q "{query}"</string>
+				<string>./st search -s {query}</string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
 				<key>scriptfile</key>
 				<string></string>
 				<key>subtext</key>
-				<string>Search for gitmojis and copy them to the clipboard easily</string>
+				<string>Displays shaders by sort order (hot, popular, newest, love)</string>
 				<key>title</key>
-				<string>Search for gitmojis</string>
+				<string>Browse Shadertoy shaders</string>
 				<key>type</key>
 				<integer>0</integer>
 				<key>withspace</key>
@@ -186,26 +117,105 @@
 			<key>type</key>
 			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
-			<string>F6F9BD70-3218-4D80-A4D2-63C6A77142CA</string>
+			<string>3190B80E-ABBD-46AE-802A-04E1D8A2A791</string>
 			<key>version</key>
 			<integer>3</integer>
 		</dict>
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>autopaste</key>
+				<key>alfredfiltersresults</key>
 				<false/>
-				<key>clipboardtext</key>
-				<string>{query}</string>
-				<key>ignoredynamicplaceholders</key>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>sts</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
 				<false/>
-				<key>transient</key>
+				<key>queuedelaymode</key>
+				<integer>2</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>Fetching shaders ...</string>
+				<key>script</key>
+				<string>./st search -t "{query}"</string>
+				<key>scriptargtype</key>
+				<integer>0</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>Search Shadertoy shaders by name</string>
+				<key>title</key>
+				<string>Search Shadertoy shaders</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>9D3D6B13-3143-4CF9-B404-0337A9D46453</string>
+			<key>version</key>
+			<integer>3</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttreatemptyqueryasnil</key>
+				<true/>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>keyword</key>
+				<string>stu</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<false/>
+				<key>queuedelaymode</key>
+				<integer>2</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>Updating workflow....</string>
+				<key>script</key>
+				<string>./st update</string>
+				<key>scriptargtype</key>
+				<integer>0</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>Update workflow from Github</string>
+				<key>title</key>
+				<string>Update workflow</string>
+				<key>type</key>
+				<integer>0</integer>
+				<key>withspace</key>
 				<false/>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.output.clipboard</string>
+			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
-			<string>D6793604-058B-4867-A1EA-BF8C2B8B3733</string>
+			<string>F733E77D-3B06-4145-BE94-ADC0E58CDBB1</string>
 			<key>version</key>
 			<integer>3</integer>
 		</dict>
@@ -214,49 +224,38 @@
 	<string></string>
 	<key>uidata</key>
 	<dict>
-		<key>B1E797A8-B1C1-4A07-A340-67D2AC741B3C</key>
+		<key>3190B80E-ABBD-46AE-802A-04E1D8A2A791</key>
 		<dict>
 			<key>xpos</key>
-			<integer>845</integer>
+			<real>30</real>
 			<key>ypos</key>
-			<integer>205</integer>
+			<real>125</real>
 		</dict>
-		<key>D6793604-058B-4867-A1EA-BF8C2B8B3733</key>
+		<key>9D3D6B13-3143-4CF9-B404-0337A9D46453</key>
 		<dict>
 			<key>xpos</key>
-			<integer>580</integer>
+			<real>30</real>
 			<key>ypos</key>
-			<integer>395</integer>
+			<real>240</real>
 		</dict>
-		<key>E50F9D21-04DF-4185-A2CB-40B7111F31C0</key>
+		<key>A58A4B27-22F7-4A46-B37D-E2AE155A098F</key>
 		<dict>
 			<key>xpos</key>
-			<integer>580</integer>
+			<real>30</real>
 			<key>ypos</key>
-			<integer>105</integer>
+			<real>15</real>
 		</dict>
-		<key>F404D930-F17D-43D0-B06B-28D6A000A93F</key>
+		<key>F733E77D-3B06-4145-BE94-ADC0E58CDBB1</key>
 		<dict>
 			<key>xpos</key>
-			<integer>845</integer>
+			<real>30</real>
 			<key>ypos</key>
-			<integer>10</integer>
-		</dict>
-		<key>F6F9BD70-3218-4D80-A4D2-63C6A77142CA</key>
-		<dict>
-			<key>xpos</key>
-			<integer>325</integer>
-			<key>ypos</key>
-			<integer>220</integer>
+			<real>355</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
 	<array/>
-	<key>variablesdontexport</key>
-	<array/>
-	<key>version</key>
-	<string>1.1.7</string>
 	<key>webaddress</key>
-	<string>https://github.com/techouse</string>
+	<string>https://github.com/ivoleitao</string>
 </dict>
 </plist>

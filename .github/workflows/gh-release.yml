@@ -1,0 +1,64 @@
+name: Github Release
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'
+
+jobs:
+  alfred_workflow:
+    name: Github release Alfred workflow
+
+    strategy:
+      matrix:
+        host: ['ubuntu-latest']
+        sdk: ['stable']
+
+    runs-on: ${{ matrix.host }}
+
+    steps:
+      - name: Set up dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
+      
+      - name: Install packages
+        run: |
+          dart pub global activate melos
+
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Bootstrap
+        run: |
+          melos bs
+
+      - name: Build
+        run: |
+          melos build
+
+      - name: Package
+        uses: mperezi/build-alfred-workflow@v1
+        with:
+          workflow_dir: packages/shadertoy_alfred/build/dist
+
+      - name: Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.alfred_builder.outputs.workflow_file }}
+          asset_name: ${{ steps.alfred_builder.outputs.workflow_file }}
+          asset_content_type: application/zip          
