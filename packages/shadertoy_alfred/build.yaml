@@ -1,0 +1,6 @@
+targets:
+  $default:
+    builders:
+      pubspec_generator:
+        options:
+          output: lib/src/constant/package.dart

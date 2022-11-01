@@ -11,8 +11,8 @@ part 'find_shader.g.dart';
 /// Find shader API response
 ///
 /// The response returned upon the execution of a find shader API call
-/// When [FindShaderResponse.error] is *not null* there was an error in the find shader call
-/// When [FindShaderResponse.error] is *null* the [FindShaderResponse.shader] has the returned shader
+/// When [FindShaderResponse.fail] is *not null* there was an error in the find shader call
+/// When [FindShaderResponse.fail] is *null* the [FindShaderResponse.shader] has the returned shader
 class FindShaderResponse extends APIResponse {
   @JsonKey(name: 'Shader')
 

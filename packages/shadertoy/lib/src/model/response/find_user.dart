@@ -11,8 +11,8 @@ part 'find_user.g.dart';
 /// Find user API response
 ///
 /// The response returned upon the execution of a find user API call
-/// When [FindUserResponse.error] is *not null* there was an error in the find user call
-/// When [FindUserResponse.error] is *null* the [FindUserResponse.user] has the returned user
+/// When [FindUserResponse.fail] is *not null* there was an error in the find user call
+/// When [FindUserResponse.fail] is *null* the [FindUserResponse.user] has the returned user
 class FindUserResponse extends APIResponse {
   @JsonKey(name: 'User')
 

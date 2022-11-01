@@ -10,8 +10,8 @@ part 'logout.g.dart';
 /// Logout API response
 ///
 /// The response returned upon the execution of a logout in the Shadertoy website
-/// When [LogoutResponse.error] is *not null* there was an error in the logout process
-/// When [LogoutResponse.error] is *null* the logout was sucessfull
+/// When [LogoutResponse.fail] is *not null* there was an error in the logout process
+/// When [LogoutResponse.fail] is *null* the logout was sucessfull
 class LogoutResponse extends APIResponse {
   /// Builds an [LogoutResponse]
   ///

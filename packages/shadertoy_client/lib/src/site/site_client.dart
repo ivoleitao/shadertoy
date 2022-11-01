@@ -211,6 +211,9 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
             error: toResponseError(de, context: contextShader)));
   }
 
+  /// Builds the results url used in the call to Shadertoy results page in order to obtain user data.
+  String _getResultsUrl() => '/results';
+
   /// Gets the results query
   ///
   /// * [num]: The number of results
@@ -220,7 +223,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   /// * [from]: A 0 based index for results returned
   ///
   /// Returns the results query
-  String _getResultsQuery(int num,
+  String getResultsQuery(int num,
       {String? term, Set<String>? filters, Sort? sort, int? from}) {
     final queryParameters = [];
     if (term != null && term.isNotEmpty) {
@@ -243,7 +246,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
 
     queryParameters.add('num=$num');
 
-    var sb = StringBuffer('/results');
+    var sb = StringBuffer(_getResultsUrl());
     for (var i = 0; i < queryParameters.length; i++) {
       sb.write(i == 0 ? '?' : '&');
       sb.write(queryParameters[i]);
@@ -265,7 +268,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
     final num = options.pageResultsShaderCount;
 
     return client
-        .get(_getResultsQuery(num,
+        .get(getResultsQuery(num,
             term: term, filters: filters, sort: sort, from: from))
         .then((Response<dynamic> response) =>
             parseShaders(parseDocument(response.data), num));
@@ -416,7 +419,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   ///
   /// The call is performed to a user page identified by it's id, for example user
   /// iq [page](https://www.shadertoy.com/user/iq)
-  String _getUserQueryUrl(String userId,
+  String getUserQuery(String userId,
       {Set<String>? filters, Sort? sort, int? from}) {
     var num = options.pageUserShaderCount;
 
@@ -462,7 +465,7 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   Future<FindShadersResponse> _getShadersPageByUserId(String userId,
       {Set<String>? filters, Sort? sort, int? from}) {
     return client
-        .get(_getUserQueryUrl(userId, filters: filters, sort: sort, from: from))
+        .get(getUserQuery(userId, filters: filters, sort: sort, from: from))
         .then((Response<dynamic> response) => parseShaders(
             parseDocument(response.data), options.pageUserShaderCount,
             context: contextUser, target: userId));
@@ -715,13 +718,12 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   /// Builds the playlist url used in the call to Shadertoy playlist page.
   ///
   /// * [playlistId]: The playlist id
+  /// * [num]: The number of results
   /// * [from]: A 0 based index for results returned
   ///
   /// The call is performed to a playlist page identified by it's id, for example week
   /// [playlist](https://www.shadertoy.com/playlist/week)
-  String _getPlaylistQueryUrl(String playlistId, {int? from}) {
-    var num = options.pagePlaylistShaderCount;
-
+  String getPlaylistQuery(String playlistId, int num, {int? from}) {
     var queryParameters = [];
     if (from != null) {
       queryParameters.add('from=$from');
@@ -757,8 +759,10 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
   /// Returns a [FindShaderIdsResponse] with a list of shader id's or a [ResponseError]
   Future<FindShaderIdsResponse> _getShaderIdsPageByPlayListId(String playlistId,
       {int? from}) {
-    return client.get(_getPlaylistQueryUrl(playlistId, from: from)).then(
-        (Response<dynamic> response) => parseShaderIds(
+    return client
+        .get(getPlaylistQuery(playlistId, options.pagePlaylistShaderCount,
+            from: from))
+        .then((Response<dynamic> response) => parseShaderIds(
             parseDocument(response.data), options.pagePlaylistShaderCount,
             context: contextPlaylist, target: playlistId));
   }

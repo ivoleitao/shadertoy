@@ -10,8 +10,8 @@ part 'find_comment_ids.g.dart';
 /// Find comment ids API response
 ///
 /// The response returned upon the execution of a find comment ids API call
-/// When [FindCommentIdsResponse.error] is *not null* there was an error in the find comment ids call
-/// When [FindCommentIdsResponse.error] is *null* the [FindCommentIdsResponse.ids] has the returned comment ids
+/// When [FindCommentIdsResponse.fail] is *not null* there was an error in the find comment ids call
+/// When [FindCommentIdsResponse.fail] is *null* the [FindCommentIdsResponse.ids] has the returned comment ids
 class FindCommentIdsResponse extends APIResponse {
   @JsonKey(name: 'Comments')
 

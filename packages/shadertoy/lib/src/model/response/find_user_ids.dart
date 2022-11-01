@@ -10,8 +10,8 @@ part 'find_user_ids.g.dart';
 /// Find user ids API response
 ///
 /// The response returned upon the execution of a find user ids API call
-/// When [FindUserIdsResponse.error] is *not null* there was an error in the find user ids call
-/// When [FindUserIdsResponse.error] is *null* the [FindUserIdsResponse.ids] has the returned use ids
+/// When [FindUserIdsResponse.fail] is *not null* there was an error in the find user ids call
+/// When [FindUserIdsResponse.fail] is *null* the [FindUserIdsResponse.ids] has the returned use ids
 class FindUserIdsResponse extends APIResponse {
   @JsonKey(name: 'Users')
 

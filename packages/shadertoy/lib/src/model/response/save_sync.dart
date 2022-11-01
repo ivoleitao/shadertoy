@@ -3,8 +3,8 @@ import 'response.dart';
 /// Save sync API response
 ///
 /// The response returned upon the execution of the save sync API call
-/// When [SaveSyncResponse.error] is *not null* there was an error in the save sync call
-/// When [SaveSyncResponse.error] is *null* the save was sucessful
+/// When [SaveSyncResponse.fail] is *not null* there was an error in the save sync call
+/// When [SaveSyncResponse.fail] is *null* the save was sucessful
 class SaveSyncResponse extends APIResponse {
   /// Builds a [SaveSyncResponse]
   ///

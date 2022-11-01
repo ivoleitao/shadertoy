@@ -11,8 +11,8 @@ part 'find_sync.g.dart';
 /// Find sync API response
 ///
 /// The response returned upon the execution of a find sync API call
-/// When [FindSyncResponse.error] is *not null* there was an error in the find sync call
-/// When [FindSyncResponse.error] is *null* the [FindSyncResponse.sync] has the returned sync
+/// When [FindSyncResponse.fail] is *not null* there was an error in the find sync call
+/// When [FindSyncResponse.fail] is *null* the [FindSyncResponse.sync] has the returned sync
 class FindSyncResponse extends APIResponse {
   @JsonKey(name: 'Sync')
 

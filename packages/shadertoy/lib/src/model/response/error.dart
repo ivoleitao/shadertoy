@@ -37,7 +37,7 @@ enum ErrorCode {
 ///
 /// Provides details of an error after the execution of an API call. It should be instantiated in every
 /// response object when there is an error of some sort during the execution. All the API responses should
-/// return a class extending [APIResponse] which stores in [APIResponse.error] and instance of [ResponseError]
+/// return a class extending [APIResponse] which stores in [APIResponse.fail] and instance of [ResponseError]
 class ResponseError with EquatableMixin {
   /// The error code
   ErrorCode code;

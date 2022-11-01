@@ -11,8 +11,8 @@ part 'find_playlists.g.dart';
 /// Find playlists API response
 ///
 /// The response returned upon the execution of a find playlists API call
-/// When [FindPlaylistsResponse.error] is *not null* there was an error in the find playlists call
-/// When [FindPlaylistsResponse.error] is *null* the [FindPlaylistsResponse.playlists] has the returned playlists
+/// When [FindPlaylistsResponse.fail] is *not null* there was an error in the find playlists call
+/// When [FindPlaylistsResponse.fail] is *null* the [FindPlaylistsResponse.playlists] has the returned playlists
 class FindPlaylistsResponse extends APIResponse {
   @JsonKey(name: 'Playlists')
 

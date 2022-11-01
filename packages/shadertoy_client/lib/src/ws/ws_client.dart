@@ -64,7 +64,7 @@ class ShadertoyWSClient extends ShadertoyHttpClient<ShadertoyWSOptions>
     return _getShadersByIdSet(shaderIds);
   }
 
-  /// Finds shader ids
+  /// Returns the query used to search for shaders
   ///
   /// * [term]: Shaders that have [term] in the name or in description
   /// * [filters]: A set of tag filters
@@ -72,8 +72,8 @@ class ShadertoyWSClient extends ShadertoyHttpClient<ShadertoyWSOptions>
   /// * [from]: A 0 based index for results returned
   /// * [num]: The total number of results
   ///
-  /// Returns a [FindShaderIdsResponse] with a list of ids or a [ResponseError]
-  Future<FindShaderIdsResponse> _getShaderIds(
+  /// Returns the query
+  String getShadersQuery(
       {String? term, Set<String>? filters, Sort? sort, int? from, int? num}) {
     var sb = StringBuffer('${options.apiPath}/shaders/query');
 
@@ -101,9 +101,26 @@ class ShadertoyWSClient extends ShadertoyHttpClient<ShadertoyWSOptions>
       sb.write('&num=$num');
     }
 
-    return client.get(sb.toString()).then((Response<dynamic> response) =>
-        jsonResponse<FindShaderIdsResponse>(
-            response, (data) => FindShaderIdsResponse.fromJson(data)));
+    return sb.toString();
+  }
+
+  /// Finds shader ids
+  ///
+  /// * [term]: Shaders that have [term] in the name or in description
+  /// * [filters]: A set of tag filters
+  /// * [sort]: The sort order of the shaders
+  /// * [from]: A 0 based index for results returned
+  /// * [num]: The total number of results
+  ///
+  /// Returns a [FindShaderIdsResponse] with a list of ids or a [ResponseError]
+  Future<FindShaderIdsResponse> _getShaderIds(
+      {String? term, Set<String>? filters, Sort? sort, int? from, int? num}) {
+    return client
+        .get(getShadersQuery(
+            term: term, filters: filters, sort: sort, from: from, num: num))
+        .then((Response<dynamic> response) =>
+            jsonResponse<FindShaderIdsResponse>(
+                response, (data) => FindShaderIdsResponse.fromJson(data)));
   }
 
   @override

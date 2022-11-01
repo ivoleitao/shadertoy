@@ -11,6 +11,8 @@ coverage:
         flags: shadertoy_sqlite
       shadertoy_cli:
         flags: shadertoy_cli
+      shadertoy_alfred:
+        flags: shadertoy_alfred
 
 
 flags:
@@ -26,3 +28,6 @@ flags:
   shadertoy_cli:
     paths:
       - packages/shadertoy_cli/lib/
+  shadertoy_alfred:
+    paths:
+      - packages/shadertoy_alfred/lib/

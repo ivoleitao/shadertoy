@@ -1,0 +1,29 @@
+name: shadertoy_alfred
+version: 2.1.2
+description: >-
+  Shadertoy alfred support
+homepage: https://github.com/ivoleitao/shadertoy
+repository: https://github.com/ivoleitao/shadertoy
+issue_tracker: https://github.com/ivoleitao/shadertoy/issues
+
+environment:
+  sdk: '>=2.18.0 <3.0.0'
+
+dependencies:
+  # Flutter shared dependencies
+  meta: ^1.8.0
+  path: ^1.8.2
+  # Other dependencies
+  args: ^2.3.1
+  stream_transform: ^2.0.1
+  alfred_workflow: ^0.2.7
+  shadertoy: ^2.1.1
+  shadertoy_client: ^2.1.1
+
+dev_dependencies:
+  lints: ^2.0.1
+  build_runner: ^2.3.2
+  pubspec_generator: ^3.0.0
+
+executables:
+  shadertoy_alfred: st
