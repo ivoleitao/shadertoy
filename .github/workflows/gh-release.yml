@@ -39,7 +39,7 @@ jobs:
       - name: Package
         uses: mperezi/build-alfred-workflow@v1
         with:
-          workflow_dir: packages/shadertoy_alfred/build/dist
+          workflow_dir: ./packages/shadertoy_alfred/build/dist
 
       - name: Release
         uses: actions/create-release@v1
