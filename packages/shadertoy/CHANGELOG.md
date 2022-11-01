@@ -1,3 +1,8 @@
+## 2.3.0
+
+ - **FEAT**: added support alfred.
+ - **DOCS**: fixed wrong reference in the docs.
+
 ## 2.2.0
 
  - **FEAT**: added support alfred.

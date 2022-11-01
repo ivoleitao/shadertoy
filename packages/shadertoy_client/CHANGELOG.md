@@ -1,3 +1,7 @@
+## 2.3.0
+
+ - **FEAT**: added support alfred.
+
 ## 2.2.0
 
  - **FEAT**: added support alfred.
