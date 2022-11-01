@@ -1,5 +1,5 @@
 name: shadertoy_sqlite
-version: 2.1.2
+version: 2.1.3
 description: >-
   A implementation of the shadertoy storage API using
   Sqlite as the storage backend
@@ -17,8 +17,7 @@ dependencies:
   resource_portable: ^3.0.0
   drift: ^2.2.0
   sqlite3: ^1.9.1
-  shadertoy: ^2.1.1
-
+  shadertoy: ^2.2.0
 dev_dependencies:
   lints: ^2.0.1
   build_runner: ^2.3.2

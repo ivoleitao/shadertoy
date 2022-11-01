@@ -1,5 +1,5 @@
 name: shadertoy_alfred
-version: 2.1.2
+version: 2.2.0
 description: >-
   Shadertoy alfred support
 homepage: https://github.com/ivoleitao/shadertoy
@@ -17,9 +17,8 @@ dependencies:
   args: ^2.3.1
   stream_transform: ^2.0.1
   alfred_workflow: ^0.2.7
-  shadertoy: ^2.1.1
-  shadertoy_client: ^2.1.1
-
+  shadertoy: ^2.2.0
+  shadertoy_client: ^2.2.0
 dev_dependencies:
   lints: ^2.0.1
   build_runner: ^2.3.2
