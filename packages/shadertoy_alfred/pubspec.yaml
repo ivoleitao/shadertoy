@@ -24,4 +24,4 @@ dev_dependencies:
   pubspec_generator: ^3.0.0
 
 executables:
-  shadertoy_alfred: st
+  st: shadertoy_alfred
