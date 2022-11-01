@@ -8,8 +8,6 @@
 
 Search for shaders in [Shadertoy](https://www.shadertoy.com/) using [Alfred](https://www.alfredapp.com/).
 
-![demo](demo.gif)
-
 ## Getting Started
 
 1. [Download the latest version](https://github.com/ivoleitao/shadertoy-alfred/releases/latest)
