@@ -9,6 +9,6 @@ if [ -d "build/debug_info" ]; then
 fi
 
 mkdir -p build/dist build/debug_info
-cp -r info.plist assets/* LICENSE README.md demo.gif build/dist
+cp -r info.plist assets/* LICENSE README.md build/dist
 
 dart compile exe bin/shadertoy_alfred.dart -o build/dist/st -S build/debug_info/st
