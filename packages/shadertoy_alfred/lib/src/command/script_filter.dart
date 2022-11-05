@@ -5,18 +5,19 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:shadertoy/shadertoy_util.dart';
 import 'package:shadertoy_alfred/src/command/workflow.dart';
+import 'package:shadertoy_alfred/src/constants/config.dart';
 import 'package:shadertoy_client/shadertoy_client.dart';
 
 /// Base script filter command class
 abstract class ScriptFilterCommand extends WorkflowCommand {
   /// The auto-update item
-  static const _updateItem = AlfredItem(
+  static final _updateItem = AlfredItem(
     title: 'Auto-Update available!',
     subtitle: 'Press <enter> to auto-update to a new version of this workflow.',
     arg: 'workflow:update',
     match:
         'Auto-Update available! Press <enter> to auto-update to a new version of this workflow.',
-    icon: AlfredItemIcon(path: 'alfred.png'),
+    icon: AlfredItemIcon(path: Config.defaultUpdatePicture),
     valid: true,
   );
 
@@ -25,6 +26,18 @@ abstract class ScriptFilterCommand extends WorkflowCommand {
 
   /// Builds a [ScriptFilterCommand]
   ScriptFilterCommand({this.automaticUpdate = true});
+
+  @protected
+  String getShaderPicture(File? shaderPictureFile) {
+    return shaderPictureFile != null
+        ? shaderPictureFile.absolute.path
+        : Config.defaultShaderPicture;
+  }
+
+  @protected
+  AlfredItemIcon getShaderIcon(File? shaderPictureFile) {
+    return AlfredItemIcon(path: getShaderPicture(shaderPictureFile));
+  }
 
   @protected
   Future<File?> downloadShaderPicture(

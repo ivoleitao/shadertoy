@@ -80,14 +80,8 @@ class PlaylistCommand extends ScriptFilterCommand {
                         copy: shader.id,
                         largeType: shader.id,
                       ),
-                      icon: AlfredItemIcon(
-                        path: shaderPicture != null
-                            ? shaderPicture.absolute.path
-                            : 'question.png',
-                      ),
-                      quickLookUrl: shaderPicture != null
-                          ? shaderPicture.absolute.path
-                          : 'question.png',
+                      icon: getShaderIcon(shaderPicture),
+                      quickLookUrl: getShaderPicture(shaderPicture),
                       valid: true,
                     ));
           })).then((items) {
