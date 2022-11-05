@@ -1,14 +1,14 @@
 ## 2.4.0
 
- - **FEAT**: added logging.
+ - **FEAT**: added context getter.
 
 ## 2.3.0
 
- - **FEAT**: added support alfred.
+ - **FEAT**: added additional changes to support alfred.
 
 ## 2.2.0
 
- - **FEAT**: added support alfred.
+ - **FEAT**: added alfred support.
 
 # 2.1.2
 
