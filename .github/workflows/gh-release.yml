@@ -1,10 +1,8 @@
 name: Github Release
 on:
   push:
-    branches:
-      - master
     tags:
-      - shadertoy_alfred-v*.*.*
+      - 'shadertoy_alfred-v*'
 
 jobs:
   alfred_workflow:
@@ -48,5 +46,6 @@ jobs:
           prerelease: false
           fail_on_unmatched_files: true
           generate_release_notes: false
+          token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             packages/shadertoy_alfred/target/*/*.alfredworkflow
