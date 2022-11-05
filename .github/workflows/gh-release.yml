@@ -41,7 +41,7 @@ jobs:
         id: release
         uses: softprops/action-gh-release@v1
         with:
-          body_path: packages/shadertoy_alfred/CHANGELOG
+          body_path: packages/shadertoy_alfred/CHANGELOG.md
           draft: false
           prerelease: false
           fail_on_unmatched_files: true

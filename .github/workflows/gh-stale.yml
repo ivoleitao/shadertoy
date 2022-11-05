@@ -1,4 +1,4 @@
-name: Github Stale Issues and PRs
+name: Github Stale
 on:
   schedule:
     - cron: '*/30 8 * * *'
