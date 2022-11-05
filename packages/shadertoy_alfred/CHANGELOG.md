@@ -1,3 +1,7 @@
+## 2.3.1
+
+ - **DOCS**: fixed CHANGELOG.
+
 ## 2.3.0
 
  - **FIX**: Added logging, info.plist and pubspec parsing support.
