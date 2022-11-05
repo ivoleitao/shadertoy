@@ -1,3 +1,7 @@
+## 2.3.2
+
+ - **REFACTOR**: centralized image functions.
+
 ## 2.3.1
 
  - **DOCS**: fixed CHANGELOG.
