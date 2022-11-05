@@ -1,4 +1,4 @@
-name: Github Close stale issues and PRs
+name: Github Stale Issues and PRs
 on:
   schedule:
     - cron: '*/30 8 * * *'

@@ -1,8 +1,8 @@
 name: Github Release
 on:
   push:
-    branches:
-      - master
+    tags:
+      - "shadertoy_alfred-v*.*.*"
 
 jobs:
   alfred_workflow:
@@ -36,27 +36,14 @@ jobs:
         run: |
           melos build
 
-      - name: Package
-        uses: mperezi/build-alfred-workflow@v1
-        with:
-          workflow_dir: ./packages/shadertoy_alfred/build/dist
-
       - name: Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: release
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          body_path: packages/shadertoy_alfred/CHANGELOG
           draft: false
           prerelease: false
-
-      - name: Upload
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.alfred_builder.outputs.workflow_file }}
-          asset_name: ${{ steps.alfred_builder.outputs.workflow_file }}
-          asset_content_type: application/zip          
+          fail_on_unmatched_files: true
+          generate_release_notes: false
+          files: |
+            packages/shadertoy_alfred/target/*/*.alfredworkflow

@@ -116,7 +116,7 @@ scripts:
   build:
     run: |
       melos exec -c 1 --scope="shadertoy_alfred" -- \
-        "./build.sh"
+        "./tool/build.dart -n alfred-shadertoy"
     description: |
       Creates release distributions   
 
