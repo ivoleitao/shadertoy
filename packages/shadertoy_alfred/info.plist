@@ -8,10 +8,70 @@
 	<string>Tools</string>
 	<key>connections</key>
 	<dict>
+		<key>3190B80E-ABBD-46AE-802A-04E1D8A2A791</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>62A8E82F-2FD0-44B3-8EA7-62B00FF8383F</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>62A8E82F-2FD0-44B3-8EA7-62B00FF8383F</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>5A2A344E-F049-4183-A4DE-2AEF5D1E2614</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>sourceoutputuid</key>
+				<string>D850B7E1-B6F7-4A5E-8EF6-522CBF4E0A21</string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>destinationuid</key>
+				<string>68B4180F-9631-4D30-8825-F1C3D00F98C0</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 		<key>9D3D6B13-3143-4CF9-B404-0337A9D46453</key>
-		<array/>
-		<key>F733E77D-3B06-4145-BE94-ADC0E58CDBB1</key>
-		<array/>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>62A8E82F-2FD0-44B3-8EA7-62B00FF8383F</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>A58A4B27-22F7-4A46-B37D-E2AE155A098F</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>62A8E82F-2FD0-44B3-8EA7-62B00FF8383F</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
 	</dict>
 	<key>createdby</key>
 	<string>Ivo Leitão</string>
@@ -20,7 +80,7 @@
 	<key>disabled</key>
 	<false/>
 	<key>name</key>
-	<string>alfred_shadertoy</string>
+	<string>Shadertoy</string>
 	<key>objects</key>
 	<array>
 		<dict>
@@ -35,7 +95,7 @@
 				<key>argumenttrimmode</key>
 				<integer>0</integer>
 				<key>argumenttype</key>
-				<integer>0</integer>
+				<integer>1</integer>
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>keyword</key>
@@ -51,7 +111,14 @@
 				<key>runningsubtext</key>
 				<string>Fetching shaders ...</string>
 				<key>script</key>
-				<string>./st playlist -i {query}</string>
+				<string>if [ -z "{query}" ]; then
+	./st playlist -i week
+else
+	./st playlist -i {query}
+fi
+
+
+</string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
 				<key>scriptfile</key>
@@ -75,6 +142,29 @@
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>./st update</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>5A2A344E-F049-4183-A4DE-2AEF5D1E2614</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>alfredfiltersresults</key>
 				<false/>
 				<key>alfredfiltersresultsmatchmode</key>
@@ -84,7 +174,7 @@
 				<key>argumenttrimmode</key>
 				<integer>0</integer>
 				<key>argumenttype</key>
-				<integer>0</integer>
+				<integer>1</integer>
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>keyword</key>
@@ -100,7 +190,14 @@
 				<key>runningsubtext</key>
 				<string>Fetching shaders ...</string>
 				<key>script</key>
-				<string>./st search -s {query}</string>
+				<string>if [ -z "{query}" ]; then
+	./st search -s hot
+else
+	./st search -s "{query}"
+fi
+
+
+</string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
 				<key>scriptfile</key>
@@ -124,6 +221,38 @@
 		<dict>
 			<key>config</key>
 			<dict>
+				<key>conditions</key>
+				<array>
+					<dict>
+						<key>inputstring</key>
+						<string>{query}</string>
+						<key>matchcasesensitive</key>
+						<false/>
+						<key>matchmode</key>
+						<integer>0</integer>
+						<key>matchstring</key>
+						<string>workflow:update</string>
+						<key>outputlabel</key>
+						<string>Update Workflow</string>
+						<key>uid</key>
+						<string>D850B7E1-B6F7-4A5E-8EF6-522CBF4E0A21</string>
+					</dict>
+				</array>
+				<key>elselabel</key>
+				<string>Open Shadertoy View</string>
+				<key>hideelse</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.conditional</string>
+			<key>uid</key>
+			<string>62A8E82F-2FD0-44B3-8EA7-62B00FF8383F</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
 				<key>alfredfiltersresults</key>
 				<false/>
 				<key>alfredfiltersresultsmatchmode</key>
@@ -133,7 +262,7 @@
 				<key>argumenttrimmode</key>
 				<integer>0</integer>
 				<key>argumenttype</key>
-				<integer>0</integer>
+				<integer>1</integer>
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>keyword</key>
@@ -149,7 +278,12 @@
 				<key>runningsubtext</key>
 				<string>Fetching shaders ...</string>
 				<key>script</key>
-				<string>./st search -t "{query}"</string>
+				<string>if [ -z "{query}" ]; then
+	./st search
+else
+	./st search -t "{query}"
+fi
+</string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
 				<key>scriptfile</key>
@@ -173,51 +307,23 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>alfredfiltersresults</key>
-				<false/>
-				<key>alfredfiltersresultsmatchmode</key>
-				<integer>0</integer>
-				<key>argumenttreatemptyqueryasnil</key>
-				<true/>
-				<key>argumenttrimmode</key>
-				<integer>0</integer>
-				<key>argumenttype</key>
-				<integer>2</integer>
-				<key>escaping</key>
-				<integer>102</integer>
-				<key>keyword</key>
-				<string>stu</string>
-				<key>queuedelaycustom</key>
-				<integer>3</integer>
-				<key>queuedelayimmediatelyinitially</key>
-				<false/>
-				<key>queuedelaymode</key>
-				<integer>2</integer>
-				<key>queuemode</key>
-				<integer>1</integer>
-				<key>runningsubtext</key>
-				<string>Updating workflow....</string>
-				<key>script</key>
-				<string>./st update</string>
-				<key>scriptargtype</key>
-				<integer>0</integer>
-				<key>scriptfile</key>
+				<key>browser</key>
 				<string></string>
-				<key>subtext</key>
-				<string>Update workflow from Github</string>
-				<key>title</key>
-				<string>Update workflow</string>
-				<key>type</key>
-				<integer>0</integer>
-				<key>withspace</key>
+				<key>skipqueryencode</key>
 				<false/>
+				<key>skipvarencode</key>
+				<false/>
+				<key>spaces</key>
+				<string></string>
+				<key>url</key>
+				<string>{query}</string>
 			</dict>
 			<key>type</key>
-			<string>alfred.workflow.input.scriptfilter</string>
+			<string>alfred.workflow.action.openurl</string>
 			<key>uid</key>
-			<string>F733E77D-3B06-4145-BE94-ADC0E58CDBB1</string>
+			<string>68B4180F-9631-4D30-8825-F1C3D00F98C0</string>
 			<key>version</key>
-			<integer>3</integer>
+			<integer>1</integer>
 		</dict>
 	</array>
 	<key>readme</key>
@@ -230,6 +336,27 @@
 			<real>30</real>
 			<key>ypos</key>
 			<real>125</real>
+		</dict>
+		<key>5A2A344E-F049-4183-A4DE-2AEF5D1E2614</key>
+		<dict>
+			<key>xpos</key>
+			<real>585</real>
+			<key>ypos</key>
+			<real>110</real>
+		</dict>
+		<key>62A8E82F-2FD0-44B3-8EA7-62B00FF8383F</key>
+		<dict>
+			<key>xpos</key>
+			<real>290</real>
+			<key>ypos</key>
+			<real>145</real>
+		</dict>
+		<key>68B4180F-9631-4D30-8825-F1C3D00F98C0</key>
+		<dict>
+			<key>xpos</key>
+			<real>585</real>
+			<key>ypos</key>
+			<real>255</real>
 		</dict>
 		<key>9D3D6B13-3143-4CF9-B404-0337A9D46453</key>
 		<dict>
@@ -244,13 +371,6 @@
 			<real>30</real>
 			<key>ypos</key>
 			<real>15</real>
-		</dict>
-		<key>F733E77D-3B06-4145-BE94-ADC0E58CDBB1</key>
-		<dict>
-			<key>xpos</key>
-			<real>30</real>
-			<key>ypos</key>
-			<real>355</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>

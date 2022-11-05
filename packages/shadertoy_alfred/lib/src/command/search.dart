@@ -92,8 +92,10 @@ class SearchCommand extends ScriptFilterCommand {
     workflow.cacheKey = _getCacheKey(
         term: term, filters: filters, sort: sort, from: from, num: num);
 
+    logger.d('Setting cache key with:${workflow.cacheKey}');
     return workflow.getItems().then((items) {
       if (items == null) {
+        logger.i('Cache key not present fetching shaders');
         return client
             .findShaders(
                 term: term, filters: filters, sort: sort, from: from, num: num)
@@ -103,13 +105,15 @@ class SearchCommand extends ScriptFilterCommand {
                   .whereType<Info>()
                   .toList() ??
               [];
+          logger.d(
+              'Obtained ${shaders.length} shader(s): ${shaders.map((info) => info.id).join(',')}');
           return Future.wait(shaders.map((shader) {
             return downloadShaderPicture(client, shader.id)
                 .then((shaderPicture) => AlfredItem(
                       uid: shader.id,
                       title: shader.name,
                       subtitle: shader.description,
-                      arg: shader.id,
+                      arg: client.context.getShaderViewUrl(shader.id),
                       text: AlfredItemText(
                         copy: shader.id,
                         largeType: shader.id,
@@ -119,8 +123,9 @@ class SearchCommand extends ScriptFilterCommand {
                             ? shaderPicture.absolute.path
                             : 'question.png',
                       ),
-                      quickLookUrl:
-                          'https://www.shadertoy.com/embed/${shader.id}?gui=true&t=10&paused=true&muted=false',
+                      quickLookUrl: shaderPicture != null
+                          ? shaderPicture.absolute.path
+                          : 'question.png',
                       valid: true,
                     ));
           })).then((items) {
@@ -130,6 +135,7 @@ class SearchCommand extends ScriptFilterCommand {
           });
         });
       }
+      logger.i('Using cached response');
 
       return Future.value();
     });

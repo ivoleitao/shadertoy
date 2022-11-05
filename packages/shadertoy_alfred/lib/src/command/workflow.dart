@@ -6,7 +6,7 @@ import 'package:logger/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:shadertoy_alfred/src/constants/config.dart';
 
-class _ConsoleOutput extends LogOutput {
+class _StderrConsoleOutput extends LogOutput {
   @override
   void output(OutputEvent event) {
     for (var line in event.lines) {
@@ -17,7 +17,10 @@ class _ConsoleOutput extends LogOutput {
 
 /// Base workflow command class
 abstract class WorkflowCommand extends Command {
-  final logger = Logger(output: _ConsoleOutput());
+  final logger = Logger(
+      filter: ProductionFilter(),
+      printer: SimplePrinter(),
+      output: _StderrConsoleOutput());
 
   /// The updater instance
   final AlfredUpdater updater = AlfredUpdater(
@@ -30,7 +33,7 @@ abstract class WorkflowCommand extends Command {
     argParser
       ..addFlag('verbose',
           abbr: 'v', help: 'Verbose logging', defaultsTo: false)
-      ..addFlag('update', abbr: 'u', defaultsTo: false);
+      ..addFlag('update', abbr: 'u', defaultsTo: true);
   }
 
   /// Obtains the verbose flag out of the arguments
@@ -41,6 +44,11 @@ abstract class WorkflowCommand extends Command {
 
   @protected
   AlfredWorkflow init() {
+    Logger.level = verbose ? Level.debug : Level.info;
+    logger.d('Initializing workflow with:');
+    logger.d('\tCurrent Version:${Config.version}');
+    logger.d('\tUpdate repository:${Config.repository}');
+    logger.d('\tUpdate Interval:${Config.updateInterval}');
     return AlfredWorkflow();
   }
 
@@ -59,6 +67,7 @@ abstract class WorkflowCommand extends Command {
 
   @protected
   void fail(AlfredWorkflow workflow, int errorCode, String message) {
+    logger.e('Error ($errorCode): $message');
     exitCode = errorCode;
     workflow.addItem(AlfredItem(title: message));
   }

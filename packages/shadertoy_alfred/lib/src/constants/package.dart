@@ -19,14 +19,15 @@ dependencies:
   meta: ^1.8.0
   path: ^1.8.2
   # Other dependencies
+  logger: ^1.1.0
   args: ^2.3.1
+  pubspec_parse: ^1.2.1
   alfred_workflow: ^0.2.7
   shadertoy: ^2.3.0
   shadertoy_client: ^2.3.0
 dev_dependencies:
   lints: ^2.0.1
   build_runner: ^2.3.2
-  pubspec_parse: ^1.2.1
   pubspec_builder: ^1.0.0
   dcli: ^1.35.4
   archive: ^3.3.2

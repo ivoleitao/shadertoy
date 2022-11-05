@@ -3,11 +3,10 @@
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import 'package:collection/collection.dart';
 import 'package:dcli/dcli.dart';
 import 'package:plist_parser/plist_parser.dart';
 
-const releaseName = 'st';
-const debugName = 'std';
 const debugTarget = 'target/debug';
 const releaseTarget = 'target/release';
 
@@ -17,13 +16,15 @@ void main(List<String> args) async {
 
   // The dart project
   final project = DartProject.fromPath('.');
-  final projectName = project.pubSpec.name;
+  final packageName = project.pubSpec.name;
+  final exeName = project.pubSpec.executables.firstOrNull?.name ?? 'st';
+  final debugName = '$exeName-debug';
 
   // The plist parser
   final plist = PlistParser().parseFileSync('info.plist');
   final defaultName = plist['name'] as String;
 
-  final defaultSource = 'bin/$projectName.dart';
+  final defaultSource = 'bin/$packageName.dart';
 
   // create the parser and add a --verbose option
   final parser = ArgParser()
@@ -68,14 +69,14 @@ void main(List<String> args) async {
       'exe',
       source,
       '-o',
-      '$target/$releaseName',
+      '$target/$exeName',
       '-S',
       '$target/$debugName'
     ], workingDirectory: '.');
-    move('$target/$debugName', '$target/$releaseName', overwrite: true);
+    move('$target/$debugName', '$target/$exeName', overwrite: true);
   } else {
     sdk.run(
-        args: ['compile', 'exe', source, '-o', '$target/$releaseName'],
+        args: ['compile', 'exe', source, '-o', '$target/$exeName'],
         workingDirectory: '.');
   }
 

@@ -12,6 +12,9 @@ import 'package:shadertoy_client/src/site/site_parser.dart';
 
 /// The base Shadertoy Client API for WS and site access to Shadertoy
 abstract class ShadertoySite extends ShadertoyExtendedClient {
+  /// Obtains the [ShadertoyContext]
+  ShadertoyContext get context;
+
   /// Performs a login in shadertoy website
   ///
   /// Upon success error is null

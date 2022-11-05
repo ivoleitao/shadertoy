@@ -13,7 +13,7 @@ abstract class ScriptFilterCommand extends WorkflowCommand {
   static const _updateItem = AlfredItem(
     title: 'Auto-Update available!',
     subtitle: 'Press <enter> to auto-update to a new version of this workflow.',
-    arg: 'update',
+    arg: 'workflow:update',
     match:
         'Auto-Update available! Press <enter> to auto-update to a new version of this workflow.',
     icon: AlfredItemIcon(path: 'alfred.png'),
@@ -50,7 +50,7 @@ abstract class ScriptFilterCommand extends WorkflowCommand {
         });
       }
 
-      logger.i('Returning cached picture file: $file');
+      logger.i('Returning cached picture file: ${file.path}');
 
       return file;
     });

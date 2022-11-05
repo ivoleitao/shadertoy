@@ -57,7 +57,9 @@ class PlaylistCommand extends ScriptFilterCommand {
     final client = newShadertoySiteClient();
     workflow.cacheKey = _getCacheKey(playlistId, from: from, num: num);
 
+    logger.d('Setting cache key with: ${workflow.cacheKey}');
     return workflow.getItems().then((items) {
+      logger.i('Cache key not present fetching shaders');
       if (items == null) {
         return client
             .findShadersByPlaylistId(playlistId, from: from, num: num)
@@ -73,7 +75,7 @@ class PlaylistCommand extends ScriptFilterCommand {
                       uid: shader.id,
                       title: shader.name,
                       subtitle: shader.description,
-                      arg: shader.id,
+                      arg: client.context.getShaderViewUrl(shader.id),
                       text: AlfredItemText(
                         copy: shader.id,
                         largeType: shader.id,
@@ -83,8 +85,9 @@ class PlaylistCommand extends ScriptFilterCommand {
                             ? shaderPicture.absolute.path
                             : 'question.png',
                       ),
-                      quickLookUrl:
-                          'https://www.shadertoy.com/embed/${shader.id}?gui=true&t=10&paused=true&muted=false',
+                      quickLookUrl: shaderPicture != null
+                          ? shaderPicture.absolute.path
+                          : 'question.png',
                       valid: true,
                     ));
           })).then((items) {
@@ -94,6 +97,7 @@ class PlaylistCommand extends ScriptFilterCommand {
           });
         });
       }
+      logger.i('Using cached response');
 
       return Future.value();
     });

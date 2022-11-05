@@ -271,6 +271,17 @@
             ],
             "request": "launch",
             "type": "dart"
-        }
+        },
+        {
+            "name": "Workflow : Search",
+            "program": "packages/shadertoy_alfred/bin/shadertoy_alfred.dart",
+            "args": [
+                "search",
+                "-s",
+                "hot"
+            ],
+            "request": "launch",
+            "type": "dart"
+        },
     ]
 }
