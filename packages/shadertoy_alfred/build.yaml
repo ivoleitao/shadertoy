@@ -1,6 +1,6 @@
 targets:
   $default:
     builders:
-      pubspec_generator:
+      pubspec_builder:
         options:
-          output: lib/src/constant/pubspec.g.dart
+          output: 'lib/src/constants/package.dart'

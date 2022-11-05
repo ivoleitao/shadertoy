@@ -1,17 +1,28 @@
-import 'dart:io' show exitCode;
+import 'dart:io' show exitCode, stderr;
 
 import 'package:alfred_workflow/alfred_workflow.dart';
 import 'package:args/command_runner.dart';
+import 'package:logger/logger.dart';
 import 'package:meta/meta.dart';
-import 'package:shadertoy_alfred/src/constant/config.dart';
-import 'package:shadertoy_alfred/src/constant/constants.dart';
+import 'package:shadertoy_alfred/src/constants/config.dart';
+
+class _ConsoleOutput extends LogOutput {
+  @override
+  void output(OutputEvent event) {
+    for (var line in event.lines) {
+      stderr.writeln(line);
+    }
+  }
+}
 
 /// Base workflow command class
 abstract class WorkflowCommand extends Command {
+  final logger = Logger(output: _ConsoleOutput());
+
   /// The updater instance
   final AlfredUpdater updater = AlfredUpdater(
-      githubRepositoryUrl: Constants.repository,
-      currentVersion: Constants.version,
+      githubRepositoryUrl: Config.repository,
+      currentVersion: Config.version,
       updateInterval: Config.updateInterval);
 
   /// Builds a [WorkflowCommand]

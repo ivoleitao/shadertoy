@@ -13,7 +13,7 @@ abstract class ScriptFilterCommand extends WorkflowCommand {
   static const _updateItem = AlfredItem(
     title: 'Auto-Update available!',
     subtitle: 'Press <enter> to auto-update to a new version of this workflow.',
-    arg: 'update:workflow',
+    arg: 'update',
     match:
         'Auto-Update available! Press <enter> to auto-update to a new version of this workflow.',
     icon: AlfredItemIcon(path: 'alfred.png'),
@@ -39,6 +39,7 @@ abstract class ScriptFilterCommand extends WorkflowCommand {
 
     return file.exists().then((exists) {
       if (!exists) {
+        logger.i('Downloading shader $shaderId picture');
         return client.downloadShaderPicture(shaderId).then((response) {
           final bytes = response.bytes;
           return bytes != null
@@ -49,6 +50,8 @@ abstract class ScriptFilterCommand extends WorkflowCommand {
         });
       }
 
+      logger.i('Returning cached picture file: $file');
+
       return file;
     });
   }
@@ -56,8 +59,10 @@ abstract class ScriptFilterCommand extends WorkflowCommand {
   @protected
   Future<void> runWithUpdate(AlfredWorkflow workflow) async {
     if (automaticUpdate && await updater.updateAvailable()) {
+      logger.i('Update is available, adding update item');
       return workflow.run(addToBeginning: _updateItem);
     } else {
+      logger.i('No available update, skipping');
       return workflow.run();
     }
   }

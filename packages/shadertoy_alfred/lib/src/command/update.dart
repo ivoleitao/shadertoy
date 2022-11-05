@@ -14,6 +14,8 @@ class UpdateCommand extends WorkflowCommand {
 
   @override
   Future<void> prepareWorflow(AlfredWorkflow workflow) {
+    logger.i('Updating workflow');
+
     return updater.update();
   }
 }
