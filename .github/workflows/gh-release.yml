@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        host: ['ubuntu-latest']
+        host: ['macos-latest']
         sdk: ['stable']
 
     runs-on: ${{ matrix.host }}
