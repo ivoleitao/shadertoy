@@ -1,3 +1,7 @@
+## 2.4.0
+
+ - **FEAT**: added logging.
+
 ## 2.3.0
 
  - **FEAT**: added support alfred.

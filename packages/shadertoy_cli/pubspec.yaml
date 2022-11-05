@@ -19,7 +19,7 @@ dependencies:
   stash_sqlite: ^4.3.4
   drift: ^2.1.0
   shadertoy: ^2.3.0
-  shadertoy_client: ^2.3.0
+  shadertoy_client: ^2.4.0
   shadertoy_sqlite: ^2.1.4
 dev_dependencies:
   lints: ^2.0.1
