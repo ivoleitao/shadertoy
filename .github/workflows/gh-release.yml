@@ -1,8 +1,10 @@
 name: Github Release
 on:
   push:
+    branches:
+      - master
     tags:
-      - "shadertoy_alfred-v*.*.*"
+      - shadertoy_alfred-v*.*.*
 
 jobs:
   alfred_workflow:
