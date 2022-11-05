@@ -26,6 +26,7 @@ jobs:
       - name: Install packages
         run: |
           dart pub global activate melos
+          dart pub global activate dcli
 
       - name: Checkout sources
         uses: actions/checkout@v3
