@@ -1,3 +1,7 @@
+## 2.3.3
+
+ - **FIX**: solved problem with dart workflow updater not supporting custom tags and not being able to extract the version number.
+
 ## 2.3.2
 
  - **REFACTOR**: centralized image functions.
