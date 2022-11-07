@@ -19,7 +19,7 @@ dependencies:
   collection: ^1.17.0
   args: ^2.3.1
   pubspec_parse: ^1.2.1
-  alfred_workflow: ^0.2.7
+  alfred_workflow: ^0.2.10
   shadertoy: ^2.3.0
   shadertoy_client: ^2.4.0
 dev_dependencies:
