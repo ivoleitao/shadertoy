@@ -25,22 +25,24 @@ jobs:
 
     strategy:
       matrix:
-        host: ['ubuntu-latest']
-        sdk: ['stable']
+        os: ['ubuntu-latest']
+        channel: ['stable']        
+        flutter_version: ['3.7.0']
 
-    runs-on: ${{ matrix.host }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Install libraries
-        if: matrix.host == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install libsqlite3-dev -y
 
-      - name: Set up dart
-        uses: dart-lang/setup-dart@v1
+      - name: Set up flutter
+        uses: subosito/flutter-action@v2
         with:
-          sdk: ${{ matrix.sdk }}
+          channel: ${{ matrix.channel }}
+          flutter-version: ${{ matrix.flutter_version }}
 
       - name: Install packages
         run: |

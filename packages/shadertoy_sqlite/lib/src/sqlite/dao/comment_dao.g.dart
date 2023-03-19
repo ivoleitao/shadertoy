@@ -2,11 +2,9 @@
 
 part of 'comment_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$CommentDaoMixin on DatabaseAccessor<DriftStore> {
+  $ShaderTableTable get shaderTable => attachedDatabase.shaderTable;
   $CommentTableTable get commentTable => attachedDatabase.commentTable;
   $SyncTableTable get syncTable => attachedDatabase.syncTable;
   Selectable<String> commentId() {

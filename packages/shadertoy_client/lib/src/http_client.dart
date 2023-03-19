@@ -77,7 +77,7 @@ abstract class ShadertoyHttpClient<T extends ShadertoyHttpOptions>
         throw DioError(
             requestOptions: response.requestOptions,
             response: response,
-            error: 'Unexpected response: ${response.data}');
+            message: 'Unexpected response: ${response.data}');
       }
     }
 
@@ -102,7 +102,7 @@ abstract class ShadertoyHttpClient<T extends ShadertoyHttpOptions>
     throw DioError(
         requestOptions: response.requestOptions,
         response: response,
-        error: 'Unexpected response: ${response.data}');
+        message: 'Empty response body');
   }
 
   /// Helper function to test if an object is a [DioError]
@@ -117,28 +117,29 @@ abstract class ShadertoyHttpClient<T extends ShadertoyHttpOptions>
   /// Used to create a consistent response when there is a internal error in the [Dio] client
   ResponseError toResponseError(DioError de,
       {String? context, String? target}) {
-    if (de.type == DioErrorType.connectTimeout ||
+    final message = de.error?.toString() ?? de.message ?? '';
+    if (de.type == DioErrorType.connectionTimeout ||
         de.type == DioErrorType.sendTimeout ||
         de.type == DioErrorType.receiveTimeout) {
       return ResponseError.backendTimeout(
-          message: de.message, context: context, target: target);
-    } else if (de.type == DioErrorType.response) {
+          message: message, context: context, target: target);
+    } else if (de.type == DioErrorType.badResponse) {
       var statusCode = de.response?.statusCode;
 
       if (statusCode == 404 || de.error == 'Http status error [404]') {
         return ResponseError.notFound(
-            message: de.message, context: context, target: target);
+            message: message, context: context, target: target);
       } else {
         return ResponseError.backendStatus(
-            message: de.message, context: context, target: target);
+            message: message, context: context, target: target);
       }
     } else if (de.type == DioErrorType.cancel) {
       return ResponseError.aborted(
-          message: de.message, context: context, target: target);
+          message: message, context: context, target: target);
     }
 
     return ResponseError.unknown(
-        message: de.message, context: context, target: target);
+        message: message, context: context, target: target);
   }
 
   /// Makes a call using a [Pool]

@@ -2,10 +2,7 @@
 
 part of 'user_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$UserDaoMixin on DatabaseAccessor<DriftStore> {
   $UserTableTable get userTable => attachedDatabase.userTable;
   $SyncTableTable get syncTable => attachedDatabase.syncTable;

@@ -2,12 +2,10 @@
 
 part of 'playlist_dao.dart';
 
-// **************************************************************************
-// DaoGenerator
-// **************************************************************************
-
+// ignore_for_file: type=lint
 mixin _$PlaylistDaoMixin on DatabaseAccessor<DriftStore> {
   $PlaylistTableTable get playlistTable => attachedDatabase.playlistTable;
+  $ShaderTableTable get shaderTable => attachedDatabase.shaderTable;
   $PlaylistShaderTableTable get playlistShaderTable =>
       attachedDatabase.playlistShaderTable;
   $SyncTableTable get syncTable => attachedDatabase.syncTable;

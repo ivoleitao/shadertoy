@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:equatable/equatable.dart';
 
 class _FormField extends Equatable {
@@ -36,7 +36,7 @@ class _Route extends Equatable {
   List<Object> get props => [path, queryParameters, headers, formFields];
 }
 
-class MockAdapter extends HttpClientAdapter {
+class MockAdapter implements HttpClientAdapter {
   static const String mockHost = 'mockserver';
   static const String mockBase = 'http://$mockHost';
   static const List<String> _checkedHeaders = [HttpHeaders.refererHeader];
@@ -46,7 +46,7 @@ class MockAdapter extends HttpClientAdapter {
 
   MockAdapter({this.basePath});
 
-  final DefaultHttpClientAdapter _adapter = DefaultHttpClientAdapter();
+  final _adapter = IOHttpClientAdapter();
 
   _Route _newRoute(String path,
       {String? basePath,
@@ -106,7 +106,7 @@ class MockAdapter extends HttpClientAdapter {
       throw DioError(
           requestOptions: requestOptions,
           response: response,
-          type: type ?? DioErrorType.other,
+          type: type ?? DioErrorType.unknown,
           error: error);
     };
   }

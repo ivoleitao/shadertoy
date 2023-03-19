@@ -74,7 +74,7 @@ class Input extends Equatable {
   /// The input type with 'ctype' source
   final InputType? type2;
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
 
   /// Returns either the [type1] value or the [type2] value
   InputType? get type => type1 ?? type2;

@@ -58,7 +58,7 @@ void main() {
       expect(
           sr.error,
           ResponseError.unknown(
-              message: 'Unexpected response: ',
+              message: 'Empty response body',
               context: contextShader,
               target: shaderId));
     });

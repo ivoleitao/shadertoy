@@ -30,7 +30,7 @@ extension SiteMockAdaptater on MockAdapter {
     return errorRoute('/signin',
         headers: {HttpHeaders.refererHeader: '${options.baseUrl}/signin'},
         formData: formData,
-        type: DioErrorType.other,
+        type: DioErrorType.unknown,
         error: SocketException(message));
   }
 
@@ -46,7 +46,7 @@ extension SiteMockAdaptater on MockAdapter {
       ShadertoySiteOptions options, String message) {
     return errorRoute('/signout',
         headers: {HttpHeaders.refererHeader: options.baseUrl},
-        type: DioErrorType.other,
+        type: DioErrorType.unknown,
         error: SocketException(message));
   }
 
@@ -94,14 +94,14 @@ extension SiteMockAdaptater on MockAdapter {
     return errorRoute('/shadertoy',
         headers: {HttpHeaders.refererHeader: '${options.baseUrl}/browse'},
         formData: requestBody,
-        type: DioErrorType.other,
+        type: DioErrorType.unknown,
         error: SocketException(message));
   }
 
   MockAdapter addResponseErrorRoute(
       String requestPath, String error, ShadertoySiteOptions options) {
     return errorRoute('/$requestPath',
-        type: DioErrorType.response, error: error);
+        type: DioErrorType.badResponse, error: error);
   }
 
   Map<String, List<String>> _getResultsQueryParameters(
@@ -157,7 +157,7 @@ extension SiteMockAdaptater on MockAdapter {
             sort: sort,
             from: from ?? 0,
             num: num ?? options.shaderCount),
-        type: DioErrorType.other,
+        type: DioErrorType.unknown,
         error: SocketException(message));
   }
 
@@ -178,7 +178,7 @@ extension SiteMockAdaptater on MockAdapter {
   MockAdapter addUserSocketErrorRoute(
       String userId, ShadertoySiteOptions options, String message) {
     return errorRoute('/user/$userId',
-        type: DioErrorType.other, error: SocketException(message));
+        type: DioErrorType.unknown, error: SocketException(message));
   }
 
   Map<String, List<String>> _getUserQueryParameters(
@@ -234,7 +234,7 @@ extension SiteMockAdaptater on MockAdapter {
         num: num ?? options.pageUserShaderCount);
 
     return errorRoute(_getUserShadersUrl(userId, queryParameters),
-        type: DioErrorType.other, error: SocketException(message));
+        type: DioErrorType.unknown, error: SocketException(message));
   }
 
   MockAdapter addUserShadersRoute(
@@ -257,7 +257,7 @@ extension SiteMockAdaptater on MockAdapter {
   MockAdapter addPlaylistSocketErrorRoute(
       String playlistId, ShadertoySiteOptions options, String message) {
     return errorRoute('/playlist/$playlistId',
-        type: DioErrorType.other, error: SocketException(message));
+        type: DioErrorType.unknown, error: SocketException(message));
   }
 
   Map<String, List<String>> _getPlaylistQueryParameters(
@@ -285,7 +285,7 @@ extension SiteMockAdaptater on MockAdapter {
 
     return errorRoute('/playlist/$playlistId',
         queryParameters: queryParameters,
-        type: DioErrorType.other,
+        type: DioErrorType.unknown,
         error: SocketException(message));
   }
 
@@ -324,7 +324,7 @@ extension SiteMockAdaptater on MockAdapter {
           HttpHeaders.refererHeader: '${options.baseUrl}/view/$shaderId'
         },
         formData: formData,
-        type: DioErrorType.other,
+        type: DioErrorType.unknown,
         error: SocketException(message));
   }
 

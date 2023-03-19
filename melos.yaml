@@ -9,10 +9,11 @@ ide:
     false
 
 command:
-  bootstrap:
-    usePubspecOverrides: true
   version:
     branch: develop     
+  bootstrap:
+    hooks:
+      post: melos generate 
 
 scripts:
   get:
@@ -119,6 +120,3 @@ scripts:
         "./tool/build.dart -n alfred-shadertoy"
     description: |
       Creates release distributions   
-
-  postbootstrap: |
-      melos run generate 

@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import 'package:args/args.dart';
 import 'package:collection/collection.dart';
 import 'package:dcli/dcli.dart';
 import 'package:plist_parser/plist_parser.dart';
