@@ -100,13 +100,13 @@ class MockAdapter implements HttpClientAdapter {
   Function _errorResponse(
       {required RequestOptions requestOptions,
       Response<dynamic>? response,
-      DioErrorType? type,
+      DioExceptionType? type,
       dynamic error}) {
     return () {
-      throw DioError(
+      throw DioException(
           requestOptions: requestOptions,
           response: response,
-          type: type ?? DioErrorType.unknown,
+          type: type ?? DioExceptionType.unknown,
           error: error);
     };
   }
@@ -177,7 +177,7 @@ class MockAdapter implements HttpClientAdapter {
       Map<String, dynamic>? headers,
       FormData? formData,
       Response<dynamic>? response,
-      DioErrorType? type,
+      DioExceptionType? type,
       dynamic error}) {
     return responseRoute(
         path,

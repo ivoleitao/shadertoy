@@ -39,7 +39,7 @@ extension WSMockAdaptater on MockAdapter {
         queryParameters: {
           'key': [options.apiKey]
         },
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: SocketException(message));
   }
 
@@ -126,7 +126,7 @@ extension WSMockAdaptater on MockAdapter {
             sort: sort,
             from: from,
             num: num ?? options.shaderCount),
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: SocketException(message));
   }
 }

@@ -65,8 +65,7 @@ Future<QueryExecutor> localExecutor(ShadertoySqliteOptions options) async {
         .readAsBytes()
         .then((bytes) {
       return IndexedDbFileSystem.open(dbName: options.name)
-          .then((fs) => WasmSqlite3.load(
-              Uint8List.fromList(bytes), SqliteEnvironment(fileSystem: fs)))
+          .then((fs) => WasmSqlite3.load(Uint8List.fromList(bytes)))
           .then((sqlite) => WasmDatabase(
               sqlite3: sqlite,
               path: options.path,

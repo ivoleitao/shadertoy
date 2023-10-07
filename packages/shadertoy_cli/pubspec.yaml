@@ -7,23 +7,23 @@ repository: https://github.com/ivoleitao/shadertoy
 issue_tracker: https://github.com/ivoleitao/shadertoy/issues
 
 environment:
-  sdk: '>=2.19.0 <3.0.0'
+  sdk: '>=3.1.0 <4.0.0'
 
 dependencies:
   # Flutter shared dependencies
   path: ^1.8.3
   # Other dependencies  
-  args: ^2.3.1
+  args: ^2.4.2
   progress_bar: ^1.0.0
-  stash: ^4.5.2
-  stash_sqlite: ^4.6.1
-  drift: ^2.5.0
+  stash: ^5.0.2
+  stash_sqlite: ^5.0.2
+  drift: ^2.12.1
   shadertoy: ^2.3.0
   shadertoy_client: ^2.3.0
   shadertoy_sqlite: ^2.1.4
 dev_dependencies:
-  lints: ^2.0.1
-  test: ^1.21.4
+  lints: ^2.1.1
+  test: ^1.24.7
 
 executables:
   shadertoy: shadertoy_cli

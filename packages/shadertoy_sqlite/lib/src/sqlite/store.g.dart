@@ -51,9 +51,10 @@ class $UserTableTable extends UserTable
   List<GeneratedColumn> get $columns =>
       [id, picture, memberSince, following, followers, about];
   @override
-  String get aliasedName => _alias ?? 'User';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'User';
+  String get actualTableName => $name;
+  static const String $name = 'User';
   @override
   VerificationContext validateIntegrity(Insertable<UserEntry> instance,
       {bool isInserting = false}) {
@@ -248,6 +249,7 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
   final Value<int> following;
   final Value<int> followers;
   final Value<String?> about;
+  final Value<int> rowid;
   const UserTableCompanion({
     this.id = const Value.absent(),
     this.picture = const Value.absent(),
@@ -255,6 +257,7 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
     this.following = const Value.absent(),
     this.followers = const Value.absent(),
     this.about = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   UserTableCompanion.insert({
     required String id,
@@ -263,6 +266,7 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
     this.following = const Value.absent(),
     this.followers = const Value.absent(),
     this.about = const Value.absent(),
+    this.rowid = const Value.absent(),
   })  : id = Value(id),
         memberSince = Value(memberSince);
   static Insertable<UserEntry> custom({
@@ -272,6 +276,7 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
     Expression<int>? following,
     Expression<int>? followers,
     Expression<String>? about,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -280,6 +285,7 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
       if (following != null) 'following': following,
       if (followers != null) 'followers': followers,
       if (about != null) 'about': about,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -289,7 +295,8 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
       Value<DateTime>? memberSince,
       Value<int>? following,
       Value<int>? followers,
-      Value<String?>? about}) {
+      Value<String?>? about,
+      Value<int>? rowid}) {
     return UserTableCompanion(
       id: id ?? this.id,
       picture: picture ?? this.picture,
@@ -297,6 +304,7 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
       following: following ?? this.following,
       followers: followers ?? this.followers,
       about: about ?? this.about,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -321,6 +329,9 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
     if (about.present) {
       map['about'] = Variable<String>(about.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -332,7 +343,8 @@ class UserTableCompanion extends UpdateCompanion<UserEntry> {
           ..write('memberSince: $memberSince, ')
           ..write('following: $following, ')
           ..write('followers: $followers, ')
-          ..write('about: $about')
+          ..write('about: $about, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -433,9 +445,10 @@ class $ShaderTableTable extends ShaderTable
         renderPassesJson
       ];
   @override
-  String get aliasedName => _alias ?? 'Shader';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'Shader';
+  String get actualTableName => $name;
+  static const String $name = 'Shader';
   @override
   VerificationContext validateIntegrity(Insertable<ShaderEntry> instance,
       {bool isInserting = false}) {
@@ -753,6 +766,7 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
   final Value<int> flags;
   final Value<String> tagsJson;
   final Value<String> renderPassesJson;
+  final Value<int> rowid;
   const ShaderTableCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
@@ -766,6 +780,7 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
     this.flags = const Value.absent(),
     this.tagsJson = const Value.absent(),
     this.renderPassesJson = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   ShaderTableCompanion.insert({
     required String id,
@@ -780,6 +795,7 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
     this.flags = const Value.absent(),
     this.tagsJson = const Value.absent(),
     required String renderPassesJson,
+    this.rowid = const Value.absent(),
   })  : id = Value(id),
         userId = Value(userId),
         version = Value(version),
@@ -800,6 +816,7 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
     Expression<int>? flags,
     Expression<String>? tagsJson,
     Expression<String>? renderPassesJson,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -814,6 +831,7 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
       if (flags != null) 'flags': flags,
       if (tagsJson != null) 'tags_json': tagsJson,
       if (renderPassesJson != null) 'render_passes_json': renderPassesJson,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -829,7 +847,8 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
       Value<String>? privacy,
       Value<int>? flags,
       Value<String>? tagsJson,
-      Value<String>? renderPassesJson}) {
+      Value<String>? renderPassesJson,
+      Value<int>? rowid}) {
     return ShaderTableCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
@@ -843,6 +862,7 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
       flags: flags ?? this.flags,
       tagsJson: tagsJson ?? this.tagsJson,
       renderPassesJson: renderPassesJson ?? this.renderPassesJson,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -885,6 +905,9 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
     if (renderPassesJson.present) {
       map['render_passes_json'] = Variable<String>(renderPassesJson.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -902,7 +925,8 @@ class ShaderTableCompanion extends UpdateCompanion<ShaderEntry> {
           ..write('privacy: $privacy, ')
           ..write('flags: $flags, ')
           ..write('tagsJson: $tagsJson, ')
-          ..write('renderPassesJson: $renderPassesJson')
+          ..write('renderPassesJson: $renderPassesJson, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -952,23 +976,21 @@ class $CommentTableTable extends CommentTable
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _hiddenMeta = const VerificationMeta('hidden');
   @override
-  late final GeneratedColumn<bool> hidden =
-      GeneratedColumn<bool>('hidden', aliasedName, false,
-          type: DriftSqlType.bool,
-          requiredDuringInsert: false,
-          defaultConstraints: GeneratedColumn.constraintsDependsOnDialect({
-            SqlDialect.sqlite: 'CHECK ("hidden" IN (0, 1))',
-            SqlDialect.mysql: '',
-            SqlDialect.postgres: '',
-          }),
-          defaultValue: const Constant(false));
+  late final GeneratedColumn<bool> hidden = GeneratedColumn<bool>(
+      'hidden', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("hidden" IN (0, 1))'),
+      defaultValue: const Constant(false));
   @override
   List<GeneratedColumn> get $columns =>
       [id, shaderId, userId, picture, date, comment, hidden];
   @override
-  String get aliasedName => _alias ?? 'Comment';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'Comment';
+  String get actualTableName => $name;
+  static const String $name = 'Comment';
   @override
   VerificationContext validateIntegrity(Insertable<CommentEntry> instance,
       {bool isInserting = false}) {
@@ -1183,6 +1205,7 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
   final Value<DateTime> date;
   final Value<String> comment;
   final Value<bool> hidden;
+  final Value<int> rowid;
   const CommentTableCompanion({
     this.id = const Value.absent(),
     this.shaderId = const Value.absent(),
@@ -1191,6 +1214,7 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
     this.date = const Value.absent(),
     this.comment = const Value.absent(),
     this.hidden = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   CommentTableCompanion.insert({
     required String id,
@@ -1200,6 +1224,7 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
     required DateTime date,
     required String comment,
     this.hidden = const Value.absent(),
+    this.rowid = const Value.absent(),
   })  : id = Value(id),
         shaderId = Value(shaderId),
         userId = Value(userId),
@@ -1213,6 +1238,7 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
     Expression<DateTime>? date,
     Expression<String>? comment,
     Expression<bool>? hidden,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1222,6 +1248,7 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
       if (date != null) 'date': date,
       if (comment != null) 'comment': comment,
       if (hidden != null) 'hidden': hidden,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -1232,7 +1259,8 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
       Value<String?>? picture,
       Value<DateTime>? date,
       Value<String>? comment,
-      Value<bool>? hidden}) {
+      Value<bool>? hidden,
+      Value<int>? rowid}) {
     return CommentTableCompanion(
       id: id ?? this.id,
       shaderId: shaderId ?? this.shaderId,
@@ -1241,6 +1269,7 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
       date: date ?? this.date,
       comment: comment ?? this.comment,
       hidden: hidden ?? this.hidden,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1268,6 +1297,9 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
     if (hidden.present) {
       map['hidden'] = Variable<bool>(hidden.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -1280,7 +1312,8 @@ class CommentTableCompanion extends UpdateCompanion<CommentEntry> {
           ..write('picture: $picture, ')
           ..write('date: $date, ')
           ..write('comment: $comment, ')
-          ..write('hidden: $hidden')
+          ..write('hidden: $hidden, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1316,9 +1349,10 @@ class $PlaylistTableTable extends PlaylistTable
   @override
   List<GeneratedColumn> get $columns => [id, userId, name, description];
   @override
-  String get aliasedName => _alias ?? 'Playlist';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'Playlist';
+  String get actualTableName => $name;
+  static const String $name = 'Playlist';
   @override
   VerificationContext validateIntegrity(Insertable<PlaylistEntry> instance,
       {bool isInserting = false}) {
@@ -1468,17 +1502,20 @@ class PlaylistTableCompanion extends UpdateCompanion<PlaylistEntry> {
   final Value<String> userId;
   final Value<String> name;
   final Value<String> description;
+  final Value<int> rowid;
   const PlaylistTableCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   PlaylistTableCompanion.insert({
     required String id,
     required String userId,
     required String name,
     required String description,
+    this.rowid = const Value.absent(),
   })  : id = Value(id),
         userId = Value(userId),
         name = Value(name),
@@ -1488,12 +1525,14 @@ class PlaylistTableCompanion extends UpdateCompanion<PlaylistEntry> {
     Expression<String>? userId,
     Expression<String>? name,
     Expression<String>? description,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
       if (name != null) 'name': name,
       if (description != null) 'description': description,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -1501,12 +1540,14 @@ class PlaylistTableCompanion extends UpdateCompanion<PlaylistEntry> {
       {Value<String>? id,
       Value<String>? userId,
       Value<String>? name,
-      Value<String>? description}) {
+      Value<String>? description,
+      Value<int>? rowid}) {
     return PlaylistTableCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       name: name ?? this.name,
       description: description ?? this.description,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1525,6 +1566,9 @@ class PlaylistTableCompanion extends UpdateCompanion<PlaylistEntry> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -1534,7 +1578,8 @@ class PlaylistTableCompanion extends UpdateCompanion<PlaylistEntry> {
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('name: $name, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1572,9 +1617,10 @@ class $PlaylistShaderTableTable extends PlaylistShaderTable
   @override
   List<GeneratedColumn> get $columns => [playlistId, shaderId, order];
   @override
-  String get aliasedName => _alias ?? 'PlaylistShader';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'PlaylistShader';
+  String get actualTableName => $name;
+  static const String $name = 'PlaylistShader';
   @override
   VerificationContext validateIntegrity(
       Insertable<PlaylistShaderEntry> instance,
@@ -1706,15 +1752,18 @@ class PlaylistShaderTableCompanion
   final Value<String> playlistId;
   final Value<String> shaderId;
   final Value<int> order;
+  final Value<int> rowid;
   const PlaylistShaderTableCompanion({
     this.playlistId = const Value.absent(),
     this.shaderId = const Value.absent(),
     this.order = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   PlaylistShaderTableCompanion.insert({
     required String playlistId,
     required String shaderId,
     required int order,
+    this.rowid = const Value.absent(),
   })  : playlistId = Value(playlistId),
         shaderId = Value(shaderId),
         order = Value(order);
@@ -1722,20 +1771,26 @@ class PlaylistShaderTableCompanion
     Expression<String>? playlistId,
     Expression<String>? shaderId,
     Expression<int>? order,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (playlistId != null) 'playlist_id': playlistId,
       if (shaderId != null) 'shader_id': shaderId,
       if (order != null) 'order': order,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
   PlaylistShaderTableCompanion copyWith(
-      {Value<String>? playlistId, Value<String>? shaderId, Value<int>? order}) {
+      {Value<String>? playlistId,
+      Value<String>? shaderId,
+      Value<int>? order,
+      Value<int>? rowid}) {
     return PlaylistShaderTableCompanion(
       playlistId: playlistId ?? this.playlistId,
       shaderId: shaderId ?? this.shaderId,
       order: order ?? this.order,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1751,6 +1806,9 @@ class PlaylistShaderTableCompanion
     if (order.present) {
       map['order'] = Variable<int>(order.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -1759,7 +1817,8 @@ class PlaylistShaderTableCompanion
     return (StringBuffer('PlaylistShaderTableCompanion(')
           ..write('playlistId: $playlistId, ')
           ..write('shaderId: $shaderId, ')
-          ..write('order: $order')
+          ..write('order: $order, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1808,9 +1867,10 @@ class $SyncTableTable extends SyncTable
   List<GeneratedColumn> get $columns =>
       [type, target, status, message, creationTime, updateTime];
   @override
-  String get aliasedName => _alias ?? 'Sync';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'Sync';
+  String get actualTableName => $name;
+  static const String $name = 'Sync';
   @override
   VerificationContext validateIntegrity(Insertable<SyncEntry> instance,
       {bool isInserting = false}) {
@@ -2011,6 +2071,7 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
   final Value<String?> message;
   final Value<DateTime> creationTime;
   final Value<DateTime> updateTime;
+  final Value<int> rowid;
   const SyncTableCompanion({
     this.type = const Value.absent(),
     this.target = const Value.absent(),
@@ -2018,6 +2079,7 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
     this.message = const Value.absent(),
     this.creationTime = const Value.absent(),
     this.updateTime = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   SyncTableCompanion.insert({
     required String type,
@@ -2026,6 +2088,7 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
     this.message = const Value.absent(),
     required DateTime creationTime,
     required DateTime updateTime,
+    this.rowid = const Value.absent(),
   })  : type = Value(type),
         target = Value(target),
         status = Value(status),
@@ -2038,6 +2101,7 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
     Expression<String>? message,
     Expression<DateTime>? creationTime,
     Expression<DateTime>? updateTime,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (type != null) 'type': type,
@@ -2046,6 +2110,7 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
       if (message != null) 'message': message,
       if (creationTime != null) 'creation_time': creationTime,
       if (updateTime != null) 'update_time': updateTime,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -2055,7 +2120,8 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
       Value<String>? status,
       Value<String?>? message,
       Value<DateTime>? creationTime,
-      Value<DateTime>? updateTime}) {
+      Value<DateTime>? updateTime,
+      Value<int>? rowid}) {
     return SyncTableCompanion(
       type: type ?? this.type,
       target: target ?? this.target,
@@ -2063,6 +2129,7 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
       message: message ?? this.message,
       creationTime: creationTime ?? this.creationTime,
       updateTime: updateTime ?? this.updateTime,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -2087,6 +2154,9 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
     if (updateTime.present) {
       map['update_time'] = Variable<DateTime>(updateTime.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -2098,7 +2168,8 @@ class SyncTableCompanion extends UpdateCompanion<SyncEntry> {
           ..write('status: $status, ')
           ..write('message: $message, ')
           ..write('creationTime: $creationTime, ')
-          ..write('updateTime: $updateTime')
+          ..write('updateTime: $updateTime, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }

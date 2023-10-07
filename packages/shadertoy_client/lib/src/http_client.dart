@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
@@ -71,10 +70,17 @@ abstract class ShadertoyHttpClient<T extends ShadertoyHttpOptions>
     dynamic responseData = response.data;
 
     if (responseData is String) {
+      if (responseData.isEmpty) {
+        throw DioException(
+            requestOptions: response.requestOptions,
+            response: response,
+            message: 'Empty response body');
+      }
+
       try {
         responseData = jsonDecode(responseData);
       } on FormatException {
-        throw DioError(
+        throw DioException(
             requestOptions: response.requestOptions,
             response: response,
             message: 'Unexpected response: ${response.data}');
@@ -99,31 +105,31 @@ abstract class ShadertoyHttpClient<T extends ShadertoyHttpOptions>
       return data;
     }
 
-    throw DioError(
+    throw DioException(
         requestOptions: response.requestOptions,
         response: response,
-        message: 'Empty response body');
+        message: 'Unexpected response body');
   }
 
-  /// Helper function to test if an object is a [DioError]
-  bool isDioError(Object error) => error is DioError;
+  /// Helper function to test if an object is a [DioException]
+  bool isDioError(Object error) => error is DioException;
 
-  /// Converts a [DioError] to a [ResponseError]
+  /// Converts a [DioException] to a [ResponseError]
   ///
-  /// * [de]: The [DioError]
+  /// * [de]: The [DioException]
   /// * [context]: The optional context of the error
   /// * [target]: The optional target of the error
   ///
   /// Used to create a consistent response when there is a internal error in the [Dio] client
-  ResponseError toResponseError(DioError de,
+  ResponseError toResponseError(DioException de,
       {String? context, String? target}) {
     final message = de.error?.toString() ?? de.message ?? '';
-    if (de.type == DioErrorType.connectionTimeout ||
-        de.type == DioErrorType.sendTimeout ||
-        de.type == DioErrorType.receiveTimeout) {
+    if (de.type == DioExceptionType.connectionTimeout ||
+        de.type == DioExceptionType.sendTimeout ||
+        de.type == DioExceptionType.receiveTimeout) {
       return ResponseError.backendTimeout(
           message: message, context: context, target: target);
-    } else if (de.type == DioErrorType.badResponse) {
+    } else if (de.type == DioExceptionType.badResponse) {
       var statusCode = de.response?.statusCode;
 
       if (statusCode == 404 || de.error == 'Http status error [404]') {
@@ -133,7 +139,7 @@ abstract class ShadertoyHttpClient<T extends ShadertoyHttpOptions>
         return ResponseError.backendStatus(
             message: message, context: context, target: target);
       }
-    } else if (de.type == DioErrorType.cancel) {
+    } else if (de.type == DioExceptionType.cancel) {
       return ResponseError.aborted(
           message: message, context: context, target: target);
     }
@@ -168,12 +174,12 @@ abstract class ShadertoyHttpClient<T extends ShadertoyHttpOptions>
             .retry(fn, retryIf: (e) => isDioError(e)));
   }
 
-  /// Catches and handles a [DioError] error in a future
+  /// Catches and handles a [DioException] error in a future
   ///
   /// * [future]: The future
   /// * [handle]: The error handling function
   Future<R> catchDioError<R extends APIResponse>(
-      Future<R> future, R Function(DioError) handle) {
-    return catchError<R, DioError>(future, handle, options.errorHandling);
+      Future<R> future, R Function(DioException) handle) {
+    return catchError<R, DioException>(future, handle, options.errorHandling);
   }
 }
