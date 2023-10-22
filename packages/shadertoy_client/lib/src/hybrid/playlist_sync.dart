@@ -17,8 +17,7 @@ class PlaylistSyncTask extends SyncTask<FindPlaylistResponse> {
   ///
   /// * [response]: The [FindPlaylistResponse] associated with this task
   /// * [extraResponse]: The [FindShaderIdsResponse] associated with this task
-  PlaylistSyncTask(FindPlaylistResponse response, {this.extraResponse})
-      : super.one(response);
+  PlaylistSyncTask(super.response, {this.extraResponse}) : super.one();
 }
 
 /// The result of a playlist synchronization task
@@ -49,11 +48,7 @@ class PlaylistSyncResult extends SyncResult<PlaylistSyncTask> {
   /// * [current]: The current [PlaylistSyncTask]
   /// * [added]: The list of added [PlaylistSyncTask]s
   /// * [removed]: The list of removed [PlaylistSyncTask]s
-  PlaylistSyncResult(
-      {this.current = const [],
-      List<PlaylistSyncTask>? added,
-      List<PlaylistSyncTask>? removed})
-      : super(added: added, removed: removed);
+  PlaylistSyncResult({this.current = const [], super.added, super.removed});
 }
 
 /// The processor of playlist synchronization tasks
@@ -66,11 +61,8 @@ class PlaylistSyncProcessor extends SyncProcessor {
   /// * [runner]: The [SyncTaskRunner] that will be used in this processor
   /// * [concurrency]: The number of concurrent tasks
   /// * [timeout]: The maximum timeout waiting for a task completion
-  PlaylistSyncProcessor(ShadertoyHybridClient client,
-      ShadertoyStore metadataStore, VaultStore assetStore,
-      {SyncTaskRunner? runner, int? concurrency, int? timeout})
-      : super(client, metadataStore, assetStore,
-            runner: runner, concurrency: concurrency, timeout: timeout);
+  PlaylistSyncProcessor(super.client, super.metadataStore, super.assetStore,
+      {super.runner, super.concurrency, super.timeout});
 
   /// Creates a [FindPlaylistResponse] with a error
   ///

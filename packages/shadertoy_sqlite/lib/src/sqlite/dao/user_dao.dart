@@ -14,7 +14,7 @@ class UserDao extends DatabaseAccessor<DriftStore> with _$UserDaoMixin {
   /// Creates a [UserDao]
   ///
   /// * [store]: A pre-initialized [DriftStore] store
-  UserDao(DriftStore store) : super(store);
+  UserDao(super.store);
 
   /// Converts a [UserEntry] into a [User]
   ///

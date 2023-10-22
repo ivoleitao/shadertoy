@@ -5,7 +5,7 @@ import 'package:shadertoy/src/model/response/find_shaders.dart';
 import 'package:test/test.dart';
 
 class ShadertoyTestClient extends ShadertoyBaseClient {
-  ShadertoyTestClient(String baseUrl) : super(baseUrl);
+  ShadertoyTestClient(super.baseUrl);
 
   @override
   Future<FindShaderIdsResponse> findAllShaderIds() {

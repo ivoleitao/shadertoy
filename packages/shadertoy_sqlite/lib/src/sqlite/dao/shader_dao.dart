@@ -19,7 +19,7 @@ class ShaderDao extends DatabaseAccessor<DriftStore> with _$ShaderDaoMixin {
   /// Creates a [ShaderDao]
   ///
   /// * [store]: A pre-initialized [DriftStore] store
-  ShaderDao(DriftStore store) : super(store);
+  ShaderDao(super.store);
 
   /// Converts a [ShaderEntry] into a [Info]
   ///

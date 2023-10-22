@@ -15,7 +15,7 @@ class UserSyncTask extends SyncTask<FindUserResponse> {
   /// The [UserSyncTask] constructor
   ///
   /// * [response]: The [FindUserResponse] associated with this task
-  UserSyncTask(FindUserResponse response) : super.one(response);
+  UserSyncTask(super.response) : super.one();
 }
 
 /// The result of a user synchronization task
@@ -72,11 +72,7 @@ class UserSyncResult extends SyncResult<UserSyncTask> {
   /// * [current]: The current [UserSyncTask]
   /// * [added]: The list of added [UserSyncTask]s
   /// * [removed]: The list of removed [UserSyncTask]s
-  UserSyncResult(
-      {this.current = const [],
-      List<UserSyncTask>? added,
-      List<UserSyncTask>? removed})
-      : super(added: added, removed: removed);
+  UserSyncResult({this.current = const [], super.added, super.removed});
 }
 
 /// The processor of user synchronization tasks
@@ -96,11 +92,8 @@ class UserSyncProcessor extends SyncProcessor {
   /// * [runner]: The [SyncTaskRunner] that will be used in this processor
   /// * [concurrency]: The number of concurrent tasks
   /// * [timeout]: The maximum timeout waiting for a task completion
-  UserSyncProcessor(ShadertoyHybridClient client, ShadertoyStore metadataStore,
-      VaultStore assetStore,
-      {SyncTaskRunner? runner, int? concurrency, int? timeout})
-      : super(client, metadataStore, assetStore,
-            runner: runner, concurrency: concurrency, timeout: timeout);
+  UserSyncProcessor(super.client, super.metadataStore, super.assetStore,
+      {super.runner, super.concurrency, super.timeout});
 
   /// Creates a [FindUserResponse] with a error
   ///

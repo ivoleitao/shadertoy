@@ -63,10 +63,15 @@ class ShadertoySiteClient extends ShadertoyHttpClient<ShadertoySiteOptions>
     implements ShadertoySite {
   /// Creates a [ShadertoySiteClient]
   ///
+  /// * [client]: The client
+  /// * [options]: The options
+  ShadertoySiteClient.create(super.client, super.options) : super.create();
+
+  /// Creates a [ShadertoySiteClient]
+  ///
   /// * [options]: The [ShadertoySiteOptions] used to configure this client
-  /// * [client]: A pre-initialized [Dio] client
-  ShadertoySiteClient(ShadertoySiteOptions options, {Dio? client})
-      : super(options, client: client);
+  /// * [dio]: A pre-initialized [Dio] client
+  ShadertoySiteClient(super.options, {super.dio});
 
   @override
   Future<bool> get loggedIn => cookies.then(

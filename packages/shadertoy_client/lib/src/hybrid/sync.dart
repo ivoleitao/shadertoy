@@ -55,7 +55,7 @@ class DownloadSyncTask extends SyncTask<DownloadFileResponse> {
   /// The [DownloadSyncTask] constructor
   ///
   /// * [response]: The [DownloadFileResponse] associated with this task
-  DownloadSyncTask(DownloadFileResponse response) : super.one(response);
+  DownloadSyncTask(super.response) : super.one();
 }
 
 /// A base class defining the result of a synchronization task
@@ -81,9 +81,7 @@ class DownloadSyncResult extends SyncResult<DownloadSyncTask> {
   ///
   /// * [added]: The list of added [DownloadSyncTask]s
   /// * [removed]: The list of removed [DownloadSyncTask]s
-  DownloadSyncResult(
-      {List<DownloadSyncTask>? added, List<DownloadSyncTask>? removed})
-      : super(added: added, removed: removed);
+  DownloadSyncResult({super.added, super.removed});
 }
 
 /// The processor of synchronization tasks

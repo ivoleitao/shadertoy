@@ -58,14 +58,13 @@ abstract class ShadertoyHttpOptions extends ShadertoyClientOptions {
       int? poolTimeout,
       int? retryMaxAttempts,
       int? shaderCount,
-      ErrorMode? errorHandling})
+      super.errorHandling})
       : baseUrl = baseUrl ?? defaultBaseUrl,
         poolMaxAllocatedResources =
             poolMaxAllocatedResources ?? defaultPoolMaxAllocatedResources,
         poolTimeout = poolTimeout ?? defaultPoolTimeout,
         retryMaxAttempts = retryMaxAttempts ?? defaultRetryMaxAttempts,
-        shaderCount = shaderCount ?? defaultShaderCount,
-        super(errorHandling: errorHandling) {
+        shaderCount = shaderCount ?? defaultShaderCount {
     assert(this.baseUrl.isNotEmpty, 'baseUrl is empty');
     assert(this.poolMaxAllocatedResources >= 1,
         'poolMaxAllocatedResources is greater or equal to one');

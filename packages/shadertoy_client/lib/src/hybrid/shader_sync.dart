@@ -16,7 +16,7 @@ class ShaderSyncTask extends SyncTask<FindShaderResponse> {
   /// The [ShaderSyncTask] constructor
   ///
   /// * [response]: The [FindShaderResponse] associated with this task
-  ShaderSyncTask(FindShaderResponse response) : super.one(response);
+  ShaderSyncTask(super.response) : super.one();
 }
 
 /// The result of a shader synchronization task
@@ -103,11 +103,7 @@ class ShaderSyncResult extends SyncResult<ShaderSyncTask> {
   /// * [current]: The current [ShaderSyncTask]
   /// * [added]: The list of added [ShaderSyncTask]s
   /// * [removed]: The list of removed [ShaderSyncTask]s
-  ShaderSyncResult(
-      {this.current = const [],
-      List<ShaderSyncTask>? added,
-      List<ShaderSyncTask>? removed})
-      : super(added: added, removed: removed);
+  ShaderSyncResult({this.current = const [], super.added, super.removed});
 }
 
 /// A comment synchronization task
@@ -115,7 +111,7 @@ class CommentSyncTask extends SyncTask<FindCommentResponse> {
   /// The [CommentSyncTask] constructor
   ///
   /// * [response]: The [FindCommentResponse] associated with this task
-  CommentSyncTask(FindCommentResponse response) : super.one(response);
+  CommentSyncTask(super.response) : super.one();
 }
 
 /// A comments synchronization task
@@ -123,7 +119,7 @@ class CommentsSyncTask extends SyncTask<FindCommentsResponse> {
   /// The [CommentsSyncTask] constructor
   ///
   /// * [response]: The [FindCommentsResponse] associated with this task
-  CommentsSyncTask(FindCommentsResponse response) : super.one(response);
+  CommentsSyncTask(super.response) : super.one();
 }
 
 /// The result of a comment synchronization task
@@ -132,9 +128,7 @@ class CommentTaskResult extends SyncResult<CommentsSyncTask> {
   ///
   /// * [added]: The list of added [CommentSyncTasks]s
   /// * [removed]: The list of removed [CommentSyncTask]s
-  CommentTaskResult(
-      {List<CommentsSyncTask>? added, List<CommentsSyncTask>? removed})
-      : super(added: added, removed: removed);
+  CommentTaskResult({super.added, super.removed});
 }
 
 /// The processor of shader synchronization tasks
@@ -159,11 +153,8 @@ class ShaderSyncProcessor extends SyncProcessor {
   /// * [runner]: The [SyncTaskRunner] that will be used in this processor
   /// * [concurrency]: The number of concurrent tasks
   /// * [timeout]: The maximum timeout waiting for a task completion
-  ShaderSyncProcessor(ShadertoyHybridClient client,
-      ShadertoyStore metadataStore, VaultStore assetStore,
-      {SyncTaskRunner? runner, int? concurrency, int? timeout})
-      : super(client, metadataStore, assetStore,
-            runner: runner, concurrency: concurrency, timeout: timeout);
+  ShaderSyncProcessor(super.client, super.metadataStore, super.assetStore,
+      {super.runner, super.concurrency, super.timeout});
 
   /// Creates a [FindShaderResponse] with a error
   ///

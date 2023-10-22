@@ -12,7 +12,7 @@ class SyncDao extends DatabaseAccessor<DriftStore> with _$SyncDaoMixin {
   /// Creates a [SyncDao]
   ///
   /// * [store]: A pre-initialized [DriftStore] store
-  SyncDao(DriftStore store) : super(store);
+  SyncDao(super.store);
 
   /// Converts a [SyncEntry] into a [Sync]
   ///

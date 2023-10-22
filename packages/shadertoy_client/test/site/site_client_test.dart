@@ -9,6 +9,8 @@ import 'package:test/test.dart';
 
 import '../fixtures/fixtures.dart';
 import '../mock_adapter.dart';
+import '../native_test_client.dart'
+    if (dart.library.js) "../browser_test_client.dart";
 import 'site_mock_adapter.dart';
 
 void main() {
@@ -24,10 +26,11 @@ void main() {
 
   ShadertoySiteClient newClient(
       ShadertoySiteOptions options, HttpClientAdapter adapter) {
-    final client = Dio(BaseOptions(baseUrl: MockAdapter.mockBase))
+    final dio = Dio(BaseOptions(baseUrl: MockAdapter.mockBase))
       ..httpClientAdapter = adapter;
+    final client = TestClient(options, dio: dio);
 
-    return ShadertoySiteClient(options, client: client);
+    return ShadertoySiteClient.create(client, options);
   }
 
   group('Authentication', () {
@@ -37,13 +40,10 @@ void main() {
       final password = 'password';
       final options =
           newOptions(ShadertoySiteOptions(user: user, password: password));
-      final nowPlusOneDay = DateTime.now().add(Duration(days: 1));
-      final formatter = DateFormat('EEE, dd-MMM-yyyy HH:mm:ss');
-      final expires = formatter.format(nowPlusOneDay);
       final adapter = newAdapter(options)
         ..addLoginRoute(options, 302, {
           HttpHeaders.setCookieHeader: [
-            'sdtd=4e9dcd95663b58540ac7aa1dc3f0b914; expires=$expires GMT; Max-Age=1209600; path=/; secure; HttpOnly',
+            'sdtd=4e9dcd95663b58540ac7aa1dc3f0b914',
           ],
           HttpHeaders.locationHeader: ['/']
         });
@@ -134,7 +134,13 @@ void main() {
     test('Logout without login', () async {
       // prepare
       final options = newOptions(ShadertoySiteOptions());
-      final adapter = newAdapter(options);
+      final adapter = newAdapter(options)
+        ..addLogoutRoute(options, 302, {
+          HttpHeaders.setCookieHeader: [
+            'sdtd=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; secure; httponly',
+          ],
+          HttpHeaders.locationHeader: ['/']
+        });
       final api = newClient(options, adapter);
       // act
       final sr = await api.logout();

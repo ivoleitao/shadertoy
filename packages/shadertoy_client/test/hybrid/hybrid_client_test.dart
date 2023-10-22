@@ -12,6 +12,8 @@ import 'package:test/test.dart';
 
 import '../fixtures/fixtures.dart';
 import '../mock_adapter.dart';
+import '../native_test_client.dart'
+    if (dart.library.js) "../browser_test_client.dart";
 import '../site/site_mock_adapter.dart';
 import '../ws/ws_mock_adapter.dart';
 
@@ -34,11 +36,14 @@ void main() {
 
   ShadertoyHybrid newClient(HttpClientAdapter adapter,
       {ShadertoySiteOptions? siteOptions, ShadertoyWSOptions? wsOptions}) {
-    final client = Dio(BaseOptions(baseUrl: MockAdapter.mockBase))
+    final dio = Dio(BaseOptions(baseUrl: MockAdapter.mockBase))
       ..httpClientAdapter = adapter;
 
-    return ShadertoyHybridClient(siteOptions ?? ShadertoySiteOptions(),
-        wsOptions: wsOptions, client: client);
+    siteOptions ??= ShadertoySiteOptions();
+    final client = TestClient(siteOptions, dio: dio);
+
+    return ShadertoyHybridClient.create(client, siteOptions,
+        wsOptions: wsOptions);
   }
 
   group('Authentication', () {
@@ -48,13 +53,10 @@ void main() {
       final password = 'password';
       final siteOptions =
           newSiteOptions(ShadertoySiteOptions(user: user, password: password));
-      final nowPlusOneDay = DateTime.now().add(Duration(days: 1));
-      final formatter = DateFormat('EEE, dd-MMM-yyyy HH:mm:ss');
-      final expires = formatter.format(nowPlusOneDay);
       final adapter = newAdapter()
         ..addLoginRoute(siteOptions, 302, {
           HttpHeaders.setCookieHeader: [
-            'sdtd=4e9dcd95663b58540ac7aa1dc3f0b914; expires=$expires GMT; Max-Age=1209600; path=/; secure; HttpOnly',
+            'sdtd=4e9dcd95663b58540ac7aa1dc3f0b914',
           ],
           HttpHeaders.locationHeader: ['/']
         });
@@ -71,7 +73,14 @@ void main() {
     test('Logout without login', () async {
       // prepare
       final siteOptions = newSiteOptions();
-      final adapter = newAdapter();
+      final adapter = newAdapter()
+        ..addLogoutRoute(siteOptions, 302, {
+          HttpHeaders.setCookieHeader: [
+            'sdtd=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0; path=/; secure; httponly',
+          ],
+          HttpHeaders.locationHeader: ['/']
+        });
+
       final api = newClient(adapter, siteOptions: siteOptions);
       // act
       final sr = await api.logout();

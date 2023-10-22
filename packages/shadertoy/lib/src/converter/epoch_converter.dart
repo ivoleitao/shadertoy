@@ -60,8 +60,8 @@ abstract class IntEpochConverter extends EpochConverter
   ///
   /// * [unit]: the converter unit, defaults to [EpochUnit.miliseconds]
   /// * [isUtc]: the utc indicator, defaults to false
-  const IntEpochConverter({unit = EpochUnit.miliseconds, isUtc = false})
-      : super(unit: unit, isUtc: isUtc);
+  const IntEpochConverter(
+      {super.unit = EpochUnit.miliseconds, super.isUtc = false});
 
   @override
 
@@ -85,8 +85,8 @@ abstract class StringEpochConverter extends EpochConverter
   ///
   /// * [unit]: the converter unit, defaults to [EpochUnit.miliseconds]
   /// * [isUtc]: the utc indicator, defaults to false
-  const StringEpochConverter({unit = EpochUnit.miliseconds, isUtc = false})
-      : super(unit: unit, isUtc: isUtc);
+  const StringEpochConverter(
+      {super.unit = EpochUnit.miliseconds, super.isUtc = false});
 
   /// Converts [json] to a epoch using the configured [unit] and [isUtc] indicator
   ///

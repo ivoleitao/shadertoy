@@ -15,7 +15,7 @@ class CommentDao extends DatabaseAccessor<DriftStore> with _$CommentDaoMixin {
   /// Creates a [CommentDao]
   ///
   /// * [store]: A pre-initialized [DriftStore] store
-  CommentDao(DriftStore store) : super(store);
+  CommentDao(super.store);
 
   /// Checks if a shader has comments
   ///

@@ -76,12 +76,12 @@ class ShadertoySiteOptions extends ShadertoyHttpOptions {
       int? pageResultsShaderCount,
       int? pageUserShaderCount,
       int? pagePlaylistShaderCount,
-      String? baseUrl,
+      super.baseUrl,
       int? poolMaxAlocatedResources,
-      int? poolTimeout,
-      int? retryMaxAttempts,
-      int? shaderCount,
-      ErrorMode? errorHandling})
+      super.poolTimeout,
+      super.retryMaxAttempts,
+      super.shaderCount,
+      super.errorHandling})
       : assert(user == null || user.isNotEmpty, 'user is null or not empty'),
         assert(password == null || password.isNotEmpty,
             'password is null or not empty'),
@@ -95,13 +95,8 @@ class ShadertoySiteOptions extends ShadertoyHttpOptions {
         pagePlaylistShaderCount =
             pagePlaylistShaderCount ?? defaultPagePlaylistShaderCount,
         super(
-            baseUrl: baseUrl,
             supportsCookies: true,
-            poolMaxAllocatedResources: poolMaxAlocatedResources,
-            poolTimeout: poolTimeout,
-            retryMaxAttempts: retryMaxAttempts,
-            shaderCount: shaderCount,
-            errorHandling: errorHandling) {
+            poolMaxAllocatedResources: poolMaxAlocatedResources) {
     assert(this.cookieName.isNotEmpty, 'cookieName is not empty');
     assert(this.userShaderCount >= 1,
         'userShaderCount is greater or equal to one');

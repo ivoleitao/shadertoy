@@ -29,22 +29,15 @@ class ShadertoyWSOptions extends ShadertoyHttpOptions {
   ShadertoyWSOptions(
       {required this.apiKey,
       String? apiPath,
-      String? baseUrl,
-      int? poolMaxAllocatedResources,
-      int? poolTimeout,
-      int? retryMaxAttempts,
-      int? shaderCount,
-      ErrorMode? errorHandling})
+      super.baseUrl,
+      super.poolMaxAllocatedResources,
+      super.poolTimeout,
+      super.retryMaxAttempts,
+      super.shaderCount,
+      super.errorHandling})
       : assert(apiKey.isNotEmpty, 'apiKey not empty'),
         apiPath = apiPath ?? defaultApiPath,
-        super(
-            baseUrl: baseUrl,
-            supportsCookies: false,
-            poolMaxAllocatedResources: poolMaxAllocatedResources,
-            poolTimeout: poolTimeout,
-            retryMaxAttempts: retryMaxAttempts,
-            shaderCount: shaderCount,
-            errorHandling: errorHandling) {
+        super(supportsCookies: false) {
     assert(this.apiPath.isNotEmpty, 'apiPath is not empty');
   }
 

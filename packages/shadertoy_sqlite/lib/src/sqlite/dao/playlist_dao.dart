@@ -16,7 +16,7 @@ class PlaylistDao extends DatabaseAccessor<DriftStore> with _$PlaylistDaoMixin {
   /// Creates a [PlaylistDao]
   ///
   /// * [store]: A pre-initialized [DriftStore] store
-  PlaylistDao(DriftStore store) : super(store);
+  PlaylistDao(super.store);
 
   /// Converts a [PlaylistEntry] into a [Playlist]
   ///

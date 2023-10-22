@@ -5,6 +5,8 @@ import 'package:test/test.dart';
 
 import '../fixtures/fixtures.dart';
 import '../mock_adapter.dart';
+import '../native_test_client.dart'
+    if (dart.library.js) "../browser_test_client.dart";
 import 'ws_mock_adapter.dart';
 
 void main() {
@@ -16,10 +18,11 @@ void main() {
 
   ShadertoyWSClient newClient(
       ShadertoyWSOptions options, HttpClientAdapter adapter) {
-    final client = Dio(BaseOptions(baseUrl: MockAdapter.mockBase))
+    final dio = Dio(BaseOptions(baseUrl: MockAdapter.mockBase))
       ..httpClientAdapter = adapter;
+    final client = TestClient(options, dio: dio);
 
-    return ShadertoyWSClient(options, client: client);
+    return ShadertoyWSClient.create(client, options);
   }
 
   group('Shaders', () {

@@ -48,7 +48,7 @@ ShadertoyWS newShadertoyWSClient(String apiKey,
           retryMaxAttempts: retryMaxAttempts,
           shaderCount: shaderCount,
           errorHandling: errorHandling),
-      client: client);
+      dio: client);
 }
 
 /// Creates [ShadertoySite] backed by a [ShadertoySiteClient]
@@ -100,7 +100,7 @@ ShadertoySite newShadertoySiteClient(
           retryMaxAttempts: retryMaxAttempts,
           shaderCount: shaderCount,
           errorHandling: errorHandling),
-      client: client);
+      dio: client);
 }
 
 /// Creates [ShadertoyHybrid] backed by a [ShadertoyHybridClient]

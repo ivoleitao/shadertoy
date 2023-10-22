@@ -41,7 +41,7 @@ class DriftStore extends _$DriftStore {
   /// Creates a [DriftStore]
   ///
   /// * [executor]: The selected [QueryExecutor]
-  DriftStore(QueryExecutor executor, this.storeOptions) : super(executor);
+  DriftStore(super.executor, this.storeOptions);
 
   @override
   int get schemaVersion => _schemaVersion;

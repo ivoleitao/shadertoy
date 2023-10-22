@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:equatable/equatable.dart';
 
 class _FormField extends Equatable {
@@ -46,7 +45,7 @@ class MockAdapter implements HttpClientAdapter {
 
   MockAdapter({this.basePath});
 
-  final _adapter = IOHttpClientAdapter();
+  final _adapter = HttpClientAdapter();
 
   _Route _newRoute(String path,
       {String? basePath,

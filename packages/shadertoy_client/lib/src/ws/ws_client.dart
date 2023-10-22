@@ -18,10 +18,14 @@ class ShadertoyWSClient extends ShadertoyHttpClient<ShadertoyWSOptions>
     implements ShadertoyWS {
   /// Creates a [ShadertoyWSClient]
   ///
+  /// * [client]: The client
+  /// * [options]: The options
+  ShadertoyWSClient.create(super.client, super.options) : super.create();
+
+  /// Creates a [ShadertoyWSClient]
+  ///
   /// * [options]: The [ShadertoyWSOptions] used to configure this client
-  /// * [client]: A pre-initialized [Dio] client
-  ShadertoyWSClient(ShadertoyWSOptions options, {Dio? client})
-      : super(options, client: client);
+  ShadertoyWSClient(super.options, {super.dio});
 
   /// Finds a [Shader] by Id
   ///

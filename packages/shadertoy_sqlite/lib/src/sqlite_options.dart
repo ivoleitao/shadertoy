@@ -76,7 +76,7 @@ class ShadertoySqliteOptions extends ShadertoyClientOptions {
       int? shaderCount,
       int? userShaderCount,
       int? playlistShaderCount,
-      ErrorMode? errorHandling})
+      super.errorHandling})
       : path = path ?? defaultPath,
         foreignKeysEnabled = foreignKeysEnabled ?? defaultForeignKeysEnabled,
         logStatementsEnabled =
@@ -85,8 +85,8 @@ class ShadertoySqliteOptions extends ShadertoyClientOptions {
         sqliteWasmPath = sqliteWasmPath ?? defaultSqliteWasmPath,
         shaderCount = shaderCount ?? defaultShaderCount,
         userShaderCount = userShaderCount ?? defaultUserShaderCount,
-        playlistShaderCount = playlistShaderCount ?? defaultPlaylistShaderCount,
-        super(errorHandling: errorHandling) {
+        playlistShaderCount =
+            playlistShaderCount ?? defaultPlaylistShaderCount {
     assert(this.shaderCount >= 1);
     assert(this.userShaderCount >= 1);
     assert(this.playlistShaderCount >= 1);

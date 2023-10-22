@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:dio/dio.dart';
 import 'package:shadertoy/shadertoy_api.dart';
+import 'package:shadertoy_client/src/dio_client.dart';
 import 'package:shadertoy_client/src/http_options.dart';
 import 'package:shadertoy_client/src/hybrid/playlist_sync.dart';
 import 'package:shadertoy_client/src/hybrid/shader_sync.dart';
@@ -87,6 +88,25 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
   /// The hybrid client (either an instance of [ShadertoySite] or [ShadertoyWS] if provided)
   late final ShadertoyClient _hybridClient;
 
+  /// Creates a [ShadertoyHybridClient]
+  ///
+  /// * [client]: The client
+  /// * [siteOptions]: Options for the site client
+  /// * [wsOptions]: Options for the REST client
+  ShadertoyHybridClient.create(
+      DioHttpClient client, ShadertoySiteOptions siteOptions,
+      {ShadertoyWSOptions? wsOptions})
+      : super(siteOptions.baseUrl) {
+    _siteClient = ShadertoySiteClient.create(client, siteOptions);
+    if (wsOptions != null) {
+      _options = wsOptions;
+      _hybridClient = ShadertoyWSClient.create(client, wsOptions);
+    } else {
+      _options = siteOptions;
+      _hybridClient = _siteClient;
+    }
+  }
+
   /// Builds a [ShadertoyHybridClient]
   ///
   /// * [siteOptions]: Options for the site client
@@ -96,10 +116,10 @@ class ShadertoyHybridClient extends ShadertoyBaseClient
       {ShadertoyWSOptions? wsOptions, Dio? client})
       : super(siteOptions.baseUrl) {
     client ??= Dio(BaseOptions(baseUrl: siteOptions.baseUrl));
-    _siteClient = ShadertoySiteClient(siteOptions, client: client);
+    _siteClient = ShadertoySiteClient(siteOptions, dio: client);
     if (wsOptions != null) {
       _options = wsOptions;
-      _hybridClient = ShadertoyWSClient(wsOptions, client: client);
+      _hybridClient = ShadertoyWSClient(wsOptions, dio: client);
     } else {
       _options = siteOptions;
       _hybridClient = _siteClient;

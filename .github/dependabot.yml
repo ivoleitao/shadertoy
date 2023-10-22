@@ -1,11 +1,32 @@
 version: 2
+enable-beta-ecosystems: true
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
       
   - package-ecosystem: "pub"
-    directory: "/packages"
+    directory: "/packages/shadertoy"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+
+  - package-ecosystem: "pub"
+    directory: "/packages/shadertoy_client"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "pub"
+    directory: "/packages/shadertoy_sqlite"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "pub"
+    directory: "/packages/shadertoy_cli"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "pub"
+    directory: "/packages/shadertoy_alfred"
+    schedule:
+      interval: "daily"

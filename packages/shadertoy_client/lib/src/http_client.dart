@@ -3,12 +3,14 @@ import 'dart:convert';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:pool/pool.dart';
 import 'package:retry/retry.dart';
 import 'package:shadertoy/shadertoy_api.dart';
 import 'package:shadertoy/shadertoy_util.dart';
 import 'package:shadertoy_client/src/http_options.dart';
+
+import 'dio_client.dart';
+import 'native_client.dart' if (dart.library.js) "browser_client.dart";
 
 /// The base Shadertoy http client class
 ///
@@ -24,36 +26,34 @@ abstract class ShadertoyHttpClient<T extends ShadertoyHttpOptions>
   };
 
   /// Internal [Dio] http client instance
-  late final Dio _client;
+  late final DioHttpClient _client;
 
   /// A object inheriting from [ShadertoyHttpOptions]
   final T options;
 
-  /// Object implementing a cookie storage strategy
-  late final DefaultCookieJar _cookieJar;
+  /// Creates a [ShadertoyHttpClient]
+  ///
+  /// * [client]: The client
+  /// * [options]: The options
+  ShadertoyHttpClient.create(this._client, this.options)
+      : super(options.baseUrl);
 
   /// Builds a [ShadertoyHttpClient]
   ///
   /// * [options]: The client options
-  /// * [client]: An optional [Dio] instance
-  ShadertoyHttpClient(this.options, {Dio? client}) : super(options.baseUrl) {
-    _client = client ?? Dio(BaseOptions(baseUrl: options.baseUrl));
-    if (options.supportsCookies) {
-      _cookieJar = DefaultCookieJar();
-      _client.interceptors.add(CookieManager(_cookieJar));
-    }
-  }
+  /// * [dio]: An optional [Dio] instance
+  ShadertoyHttpClient(T options, {Dio? dio})
+      : this.create(DioClient(options, dio: dio), options);
 
   /// Provides the [Dio] client instance build as part of this Shadertoy client instance
-  Dio get client => _client;
+  Dio get client => _client.client;
 
   /// Provides the list of [Cookie] received
-  Future<List<Cookie>> get cookies =>
-      _cookieJar.loadForRequest(Uri.parse(context.baseUrl));
+  Future<List<Cookie>> get cookies => _client.cookies;
 
   /// Clears the cookies
   void clearCookies() {
-    _cookieJar.deleteAll();
+    _client.clearCookies();
   }
 
   /// Reads the response and returns the appropiate object.
