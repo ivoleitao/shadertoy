@@ -13,8 +13,8 @@ class SearchCommand extends ExtendedCommand {
   SearchCommand() {
     argParser
       ..addOption('term', abbr: 't', help: 'The search term', valueHelp: 'term')
-      ..addMultiOption('tag',
-          abbr: 'i', help: 'Search filter', valueHelp: 'filter')
+      ..addMultiOption('filter',
+          abbr: 'l', help: 'Search filter', valueHelp: 'filter')
       ..addOption('sort',
           abbr: 's',
           help: 'Search sort',

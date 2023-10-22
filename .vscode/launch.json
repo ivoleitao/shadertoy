@@ -186,6 +186,19 @@
             "console": "debugConsole"
         },
         {
+            "name": "CLI : Search",
+            "program": "packages/shadertoy_cli/bin/shadertoy_cli.dart",
+            "args": [
+                "search",
+                "-k",
+                "NtHt4H",
+                "-t",
+                "elevated"
+            ],
+            "request": "launch",
+            "type": "dart"
+        },
+        {
             "name": "CLI : User",
             "program": "packages/shadertoy_cli/bin/shadertoy_cli.dart",
             "args": [
@@ -213,7 +226,7 @@
             "args": [
                 "image",
                 "-k",
-                "BdHtWh",
+                "NtHt4H",
                 "-i",
                 "MddGzf"
             ],
@@ -248,9 +261,9 @@
             "args": [
                 "sqlite",
                 "-k",
-                "BdHtWh",
+                "NtHt4H",
                 "-f",
-                ".dart_tool/ws",
+                "target/ws",
                 "-m",
                 "full"
             ],
@@ -263,9 +276,9 @@
             "args": [
                 "sqlite",
                 "-k",
-                "BdHtWh",
+                "NtHt4H",
                 "-f",
-                ".dart_tool/ws",
+                "target/ws",
                 "-m",
                 "latest"
             ],
