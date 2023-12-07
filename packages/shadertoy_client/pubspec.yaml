@@ -22,7 +22,7 @@ dependencies:
   cookie_jar: ^4.0.8
   dio_cookie_manager: ^3.1.1
   html: ^0.15.4
-  intl: ^0.18.1
+  intl: ">=0.18.1 <0.20.0"
   glob: ^2.1.2
   stash: ^5.0.2
   shadertoy: ^2.3.0
